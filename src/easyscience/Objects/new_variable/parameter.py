@@ -418,7 +418,7 @@ class Parameter(DescriptorNumber):
         if self.fixed:
             super_str += ' (fixed)'
         s.append(super_str)
-        s.append('bounds=[%s:%s]' % (repr(self.min), repr(self.max)))
+        s.append('bounds=[%s:%s]' % (repr(float(self.min)), repr(float(self.max))))
         return '%s>' % ', '.join(s)
 
     # Seems redundant
