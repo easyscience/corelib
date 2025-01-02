@@ -81,7 +81,9 @@ class Parameter(DescriptorNumber):
         if not isinstance(min, numbers.Number):
             raise TypeError('`min` must be a number')
         if not isinstance(max, numbers.Number):
-            raise TypeError('`max` must be a number')
+            raise TypeError('`max` must be a number')        
+        if not isinstance(value, numbers.Number):
+            raise TypeError('`value` must be a number')
         if value < min:
             raise ValueError(f'{value=} can not be less than {min=}')
         if value > max:
