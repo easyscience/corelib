@@ -328,6 +328,7 @@ def test_group_encode2():
     assert isinstance(d["b"], dict)
 
 
+#TODO: do we need/want this test?
 #
 # @pytest.mark.parametrize(**dp_param_dict)
 # def test_custom_class_DictSerializer_decode(dp_kwargs: dict, dp_cls: Type[Descriptor]):
