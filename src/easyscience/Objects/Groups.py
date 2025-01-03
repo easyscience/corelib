@@ -69,7 +69,7 @@ class BaseCollection(BasedBase, MutableSequence):
                 _kwargs[key] = item
         kwargs = _kwargs
         for item in list(kwargs.values()) + _args:
-            if not issubclass(type(item), (Descriptor, DescriptorBase, BasedBase)):
+            if not issubclass(type(item), (DescriptorBase, BasedBase)):
                 raise AttributeError('A collection can only be formed from easyscience objects.')
         args = _args
         _kwargs = {}
@@ -102,12 +102,12 @@ class BaseCollection(BasedBase, MutableSequence):
         :param index: Index for EasyScience object to be inserted.
         :type index: int
         :param value: Object to be inserted.
-        :type value: Union[BasedBase, Descriptor]
+        :type value: Union[BasedBase, DescriptorBase]
         :return: None
         :rtype: None
         """
         t_ = type(value)
-        if issubclass(t_, (BasedBase, Descriptor, DescriptorBase)):
+        if issubclass(t_, (BasedBase, DescriptorBase)):
             update_key = list(self._kwargs.keys())
             values = list(self._kwargs.values())
             # Update the internal dict
@@ -124,7 +124,7 @@ class BaseCollection(BasedBase, MutableSequence):
 
     def __getitem__(self, idx: Union[int, slice]) -> Union[V, B]:
         """
-        Get an item in the collection based on it's index.
+        Get an item in the collection based on its index.
 
         :param idx: index or slice of the collection.
         :type idx: Union[int, slice]
@@ -168,7 +168,7 @@ class BaseCollection(BasedBase, MutableSequence):
         if isinstance(value, Number):  # noqa: S3827
             item = self.__getitem__(key)
             item.value = value
-        elif issubclass(type(value), (BasedBase, Descriptor, DescriptorBase)):
+        elif issubclass(type(value), (BasedBase, DescriptorBase)):
             update_key = list(self._kwargs.keys())
             values = list(self._kwargs.values())
             old_item = values[key]
