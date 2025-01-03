@@ -312,7 +312,7 @@ class BaseObj(BasedBase):
             test_class=BaseObj,
         )
 
-    ## TODO clean when full move to new_variable
+    ## TODO clean when full move to new_variable. Is fixed
     def __setattr__(self, key: str, value: BV) -> None:
         # Assume that the annotation is a ClassVar
         old_obj = None
@@ -325,12 +325,12 @@ class BaseObj(BasedBase):
                 self.__class__.__annotations__[key].__args__,
             )
         ):
-            if issubclass(type(getattr(self, key, None)), (BasedBase, Descriptor, DescriptorBase)):
+            if issubclass(type(getattr(self, key, None)), (BasedBase, DescriptorBase)):
                 old_obj = self.__getattribute__(key)
                 self._global_object.map.prune_vertex_from_edge(self, old_obj)
             self._add_component(key, value)
         else:
-            if hasattr(self, key) and issubclass(type(value), (BasedBase, Descriptor, DescriptorBase)):
+            if hasattr(self, key) and issubclass(type(value), (BasedBase, DescriptorBase)):
                 old_obj = self.__getattribute__(key)
                 self._global_object.map.prune_vertex_from_edge(self, old_obj)
                 self._global_object.map.add_edge(self, value)
