@@ -16,16 +16,16 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Union
+from typing import TypeVar
 
 from easyscience.global_object.undo_redo import NotarizedDict
 from easyscience.Objects.variable.descriptor_base import DescriptorBase
 from easyscience.Objects.ObjectClasses import BasedBase
-from easyscience.Objects.ObjectClasses import Descriptor
 
 if TYPE_CHECKING:
     from easyscience.Objects.Inferface import iF
     from easyscience.Objects.ObjectClasses import B
-    from easyscience.Objects.Variable import V
+    V = TypeVar('V', bound=DescriptorBase)
 
 
 class BaseCollection(BasedBase, MutableSequence):
