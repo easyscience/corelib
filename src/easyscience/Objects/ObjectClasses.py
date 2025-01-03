@@ -163,7 +163,7 @@ class BasedBase(ComponentSerializer):
         return constraints
 
     ## TODO clean when full move to new_variable
-    def get_parameters(self) -> Union[List[Parameter], List[NewParameter]]:
+    def get_parameters(self) -> List[Parameter]:
         """
         Get all parameter objects as a list.
 
@@ -173,7 +173,7 @@ class BasedBase(ComponentSerializer):
         for key, item in self._kwargs.items():
             if hasattr(item, 'get_parameters'):
                 par_list = [*par_list, *item.get_parameters()]
-            elif isinstance(item, Parameter) or isinstance(item, NewParameter):
+            elif isinstance(item, Parameter):
                 par_list.append(item)
         return par_list
 
@@ -354,8 +354,8 @@ class BaseObj(BasedBase):
     @staticmethod
     def __setter(key: str) -> Callable[[BV], None]:
         def setter(obj: BV, value: float) -> None:
-            if issubclass(obj._kwargs[key].__class__, (Descriptor, DescriptorBase)) and not issubclass(
-                value.__class__, (Descriptor, DescriptorBase)
+            if issubclass(obj._kwargs[key].__class__, (DescriptorBase)) and not issubclass(
+                value.__class__, (DescriptorBase)
             ):
                 obj._kwargs[key].value = value
             else:
