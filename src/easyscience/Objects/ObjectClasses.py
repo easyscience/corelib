@@ -22,8 +22,8 @@ from easyscience import global_object
 from easyscience.Utils.classTools import addLoggedProp
 
 from .core import ComponentSerializer
-from .new_variable import Parameter as NewParameter
-from .new_variable.descriptor_base import DescriptorBase
+from .variable import Parameter as NewParameter
+from .variable.descriptor_base import DescriptorBase
 from .Variable import Descriptor
 from .Variable import Parameter
 

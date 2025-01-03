@@ -18,7 +18,7 @@ from typing import Tuple
 from typing import Union
 
 from easyscience.global_object.undo_redo import NotarizedDict
-from easyscience.Objects.new_variable.descriptor_base import DescriptorBase
+from easyscience.Objects.variable.descriptor_base import DescriptorBase
 from easyscience.Objects.ObjectClasses import BasedBase
 from easyscience.Objects.ObjectClasses import Descriptor
 

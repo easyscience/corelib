@@ -12,9 +12,9 @@ import pytest
 import scipp as sc
 
 import easyscience
-from easyscience.Objects.new_variable import DescriptorBool
-from easyscience.Objects.new_variable import DescriptorNumber
-from easyscience.Objects.new_variable import DescriptorStr
+from easyscience.Objects.variable import DescriptorBool
+from easyscience.Objects.variable import DescriptorNumber
+from easyscience.Objects.variable import DescriptorStr
 
 
 @pytest.fixture

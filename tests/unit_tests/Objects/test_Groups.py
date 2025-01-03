@@ -12,8 +12,8 @@ import pytest
 import easyscience
 from easyscience.Objects.Groups import BaseCollection
 from easyscience.Objects.ObjectClasses import BaseObj
-from easyscience.Objects.new_variable import DescriptorNumber
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import DescriptorNumber
+from easyscience.Objects.variable import Parameter
 from easyscience import global_object
 
 test_dict = {

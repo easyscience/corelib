@@ -152,7 +152,7 @@ class InterfaceFactoryTemplate:
         :return: binding property
         :rtype: property
         """
-        import easyscience.Objects.new_variable.parameter
+        import easyscience.Objects.variable.parameter
 
         class_links = self.__interface_obj.create(model)
         props = model._get_linkable_attributes()
@@ -165,7 +165,7 @@ class InterfaceFactoryTemplate:
                 prop = props[idx]
 
                 ## TODO clean when full move to new_variable
-                if isinstance(prop, easyscience.Objects.new_variable.parameter.Parameter):
+                if isinstance(prop, easyscience.Objects.variable.parameter.Parameter):
                     # Should be fetched this way to ensure we don't get value from callback
                     prop_value = prop.value_no_call_back
                 else:

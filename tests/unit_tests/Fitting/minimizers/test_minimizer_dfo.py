@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import easyscience.fitting.minimizers.minimizer_dfo
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import Parameter
 
 from easyscience.fitting.minimizers.minimizer_dfo import DFO
 from easyscience.fitting.minimizers.utils import FitError

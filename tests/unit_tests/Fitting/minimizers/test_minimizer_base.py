@@ -8,7 +8,7 @@ from inspect import _empty
 
 from easyscience.fitting.minimizers.minimizer_base import MinimizerBase
 from easyscience.fitting.minimizers.utils import FitError
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import Parameter
 
 class TestMinimizerBase():
     @pytest.fixture

@@ -15,7 +15,7 @@ import scipp as sc
 import easyscience
 from easyscience.Objects.Variable import CoreSetException
 
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import Parameter
 from easyscience.Objects.Variable import global_object
 
 

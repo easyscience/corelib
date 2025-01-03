@@ -10,7 +10,7 @@ from importlib import metadata
 
 from easyscience.Utils.io.dict import DataDictSerializer
 from easyscience.Utils.io.dict import DictSerializer
-from easyscience.Objects.new_variable import DescriptorNumber
+from easyscience.Objects.variable import DescriptorNumber
 from easyscience.Objects.ObjectClasses import BaseObj
 
 from .test_core import A
