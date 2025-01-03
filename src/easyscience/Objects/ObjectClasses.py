@@ -22,15 +22,17 @@ from easyscience import global_object
 from easyscience.Utils.classTools import addLoggedProp
 
 from .core import ComponentSerializer
-from .variable import Parameter as NewParameter
+from .variable import Parameter 
 from .variable.descriptor_base import DescriptorBase
-from .Variable import Descriptor
-from .Variable import Parameter
+
+# from .Variable import Descriptor
+# from .Variable import Parameter
 
 if TYPE_CHECKING:
     from easyscience.Constraints import C
     from easyscience.Objects.Inferface import iF
-    from easyscience.Objects.Variable import V
+    V = TypeVar('V', bound=DescriptorBase)
+    # from easyscience.Objects.Variable import V
 
 
 class BasedBase(ComponentSerializer):
@@ -175,7 +177,7 @@ class BasedBase(ComponentSerializer):
                 par_list.append(item)
         return par_list
 
-    ## TODO clean when full move to new_variable
+    ## TODO clean when full move to new_variable. Should he fixed
     def _get_linkable_attributes(self) -> List[V]:
         """
         Get all objects which can be linked against as a list.
@@ -186,12 +188,12 @@ class BasedBase(ComponentSerializer):
         for key, item in self._kwargs.items():
             if hasattr(item, '_get_linkable_attributes'):
                 item_list = [*item_list, *item._get_linkable_attributes()]
-            elif issubclass(type(item), (Descriptor, DescriptorBase)):
+            elif issubclass(type(item), (DescriptorBase)):
                 item_list.append(item)
         return item_list
 
-    ## TODO clean when full move to new_variable
-    def get_fit_parameters(self) -> Union[List[Parameter], List[NewParameter]]:
+    ## TODO clean when full move to new_variable. Should be fixed
+    def get_fit_parameters(self) -> List[Parameter]:
         """
         Get all objects which can be fitted (and are not fixed) as a list.
 
@@ -201,7 +203,7 @@ class BasedBase(ComponentSerializer):
         for key, item in self._kwargs.items():
             if hasattr(item, 'get_fit_parameters'):
                 fit_list = [*fit_list, *item.get_fit_parameters()]
-            elif isinstance(item, Parameter) or isinstance(item, NewParameter):
+            elif isinstance(item, Parameter):
                 if item.enabled and not item.fixed:
                     fit_list.append(item)
         return fit_list
