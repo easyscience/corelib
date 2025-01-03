@@ -16,7 +16,6 @@ from typing import List
 from typing import Optional
 from typing import Set
 from typing import TypeVar
-from typing import Union
 
 from easyscience import global_object
 from easyscience.Utils.classTools import addLoggedProp
@@ -25,14 +24,11 @@ from .core import ComponentSerializer
 from .variable import Parameter 
 from .variable.descriptor_base import DescriptorBase
 
-# from .Variable import Descriptor
-# from .Variable import Parameter
 
 if TYPE_CHECKING:
     from easyscience.Constraints import C
     from easyscience.Objects.Inferface import iF
     V = TypeVar('V', bound=DescriptorBase)
-    # from easyscience.Objects.Variable import V
 
 
 class BasedBase(ComponentSerializer):
@@ -162,7 +158,7 @@ class BasedBase(ComponentSerializer):
                 constraints.append(con[key])
         return constraints
 
-    ## TODO clean when full move to new_variable
+    ## TODO clean when full move to new_variable. Is fixed
     def get_parameters(self) -> List[Parameter]:
         """
         Get all parameter objects as a list.
