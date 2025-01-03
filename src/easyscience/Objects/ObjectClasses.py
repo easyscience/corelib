@@ -177,7 +177,7 @@ class BasedBase(ComponentSerializer):
                 par_list.append(item)
         return par_list
 
-    ## TODO clean when full move to new_variable. Should he fixed
+    ## TODO clean when full move to new_variable. Is fixed
     def _get_linkable_attributes(self) -> List[V]:
         """
         Get all objects which can be linked against as a list.
@@ -192,7 +192,7 @@ class BasedBase(ComponentSerializer):
                 item_list.append(item)
         return item_list
 
-    ## TODO clean when full move to new_variable. Should be fixed
+    ## TODO clean when full move to new_variable. Is fixed
     def get_fit_parameters(self) -> List[Parameter]:
         """
         Get all objects which can be fitted (and are not fixed) as a list.
@@ -237,7 +237,7 @@ class BaseObj(BasedBase):
     cheat with `BaseObj(*[Descriptor(...), Parameter(...), ...])`.
     """
 
-    ## TODO clean when full move to new_variable
+    ## TODO clean when full move to new_variable. Is fixed
     def __init__(
         self,
         name: str,
@@ -255,7 +255,7 @@ class BaseObj(BasedBase):
         super(BaseObj, self).__init__(name=name, unique_name=unique_name)
         # If Parameter or Descriptor is given as arguments...
         for arg in args:
-            if issubclass(type(arg), (BaseObj, Descriptor, DescriptorBase)):
+            if issubclass(type(arg), (BaseObj, DescriptorBase)):
                 kwargs[getattr(arg, 'name')] = arg
         # Set kwargs, also useful for serialization
         known_keys = self.__dict__.keys()
@@ -263,7 +263,7 @@ class BaseObj(BasedBase):
         for key in kwargs.keys():
             if key in known_keys:
                 raise AttributeError('Kwargs cannot overwrite class attributes in BaseObj.')
-            if issubclass(type(kwargs[key]), (BasedBase, Descriptor, DescriptorBase)) or 'BaseCollection' in [
+            if issubclass(type(kwargs[key]), (BasedBase, DescriptorBase)) or 'BaseCollection' in [
                 c.__name__ for c in type(kwargs[key]).__bases__
             ]:
                 self._global_object.map.add_edge(self, kwargs[key])
