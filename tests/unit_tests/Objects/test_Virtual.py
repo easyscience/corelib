@@ -9,7 +9,7 @@ import pytest
 
 from easyscience.models.polynomial import Line
 from easyscience.Objects import virtual as Virtual
-from easyscience.Objects.Variable import Parameter
+from easyscience.Objects.variable.parameter import Parameter
 
 
 @pytest.mark.parametrize(

@@ -148,7 +148,7 @@ def virtualizer(obj: BV) -> BV:
         'relalize_component': component_realizer,
     }
 
-    import easyscience.Objects.Variable as ec_var
+    import easyscience.Objects.variable as ec_var
 
     if klass in ec_var.__dict__.values():  # is_variable check
         virtual_options['fixed'] = property(
