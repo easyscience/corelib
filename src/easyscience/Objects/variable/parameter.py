@@ -320,6 +320,31 @@ class Parameter(DescriptorNumber):
         """
         return self.min, self.max
 
+    # @bounds.setter
+    # def bounds(self, new_bound: Tuple[numbers.Number, numbers.Number]) -> None:
+    #     """
+    #     Set the bounds of the parameter. *This will also enable the parameter*.
+
+    #     :param new_bound: New bounds. This should be a tuple of (min, max).
+    #     """
+    #     old_min = self.min
+    #     old_max = self.max
+    #     new_min, new_max = new_bound
+
+    #     try:
+    #         self.min = new_min
+    #         self.max = new_max
+    #     except ValueError:
+    #         self.min = old_min
+    #         self.max = old_max
+    #         raise ValueError(f'Current paramter value: {self._scalar.value} must be within {new_bound=}')
+
+    #     # Enable the parameter if needed
+    #     if not self.enabled:
+    #         self.enabled = True
+    #     # Free parameter if needed
+    #     if self.fixed:
+    #         self.fixed = False
     @bounds.setter
     def bounds(self, new_bound: Tuple[numbers.Number, numbers.Number]) -> None:
         """
@@ -331,13 +356,23 @@ class Parameter(DescriptorNumber):
         old_max = self.max
         new_min, new_max = new_bound
 
+        # Begin macro operation for undo/redo
+        close_macro = False
+        if self._global_object.stack.enabled:
+            self._global_object.stack.beginMacro('Setting bounds')
+            close_macro = True
+
         try:
+            # Update bounds
             self.min = new_min
             self.max = new_max
         except ValueError:
+            # Rollback on failure
             self.min = old_min
             self.max = old_max
-            raise ValueError(f'Current paramter value: {self._scalar.value} must be within {new_bound=}')
+            if close_macro:
+                self._global_object.stack.endMacro()
+            raise ValueError(f'Current parameter value: {self._scalar.value} must be within {new_bound=}')
 
         # Enable the parameter if needed
         if not self.enabled:
@@ -346,6 +381,10 @@ class Parameter(DescriptorNumber):
         if self.fixed:
             self.fixed = False
 
+        # End macro operation
+        if close_macro:
+            self._global_object.stack.endMacro()
+            
     @property
     def builtin_constraints(self) -> Dict[str, SelfConstraint]:
         """

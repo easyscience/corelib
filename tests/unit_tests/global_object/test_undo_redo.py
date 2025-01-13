@@ -15,8 +15,8 @@ from easyscience.Objects.ObjectClasses import BaseObj
 # from easyscience.Objects.Variable import Descriptor
 # from easyscience.Objects.Variable import Parameter
 from easyscience.Objects.variable.parameter import Parameter
-from easyscience.Objects.variable.descripter_str import DescriptorStr
-# from easyscience.Objects.variable.descripter_number import DescriptorNumber
+from easyscience.Objects.variable.descriptor_str import DescriptorStr
+from easyscience.Objects.variable.descriptor_number import DescriptorNumber
 
 from easyscience.fitting import Fitter
 
@@ -28,7 +28,7 @@ def createSingleObjs(idx):
     if idx % 2:
         return Parameter(name, idx)
     else:
-        return Descriptor(name, idx)
+        return DescriptorNumber(name, idx)
 
 
 def createParam(option):
@@ -81,7 +81,7 @@ def doUndoRedo(obj, attr, future, additional=""):
     ],
 )
 @pytest.mark.parametrize(
-    "idx", [pytest.param(0, id="Descriptor"), pytest.param(1, id="Parameter")]
+    "idx", [pytest.param(0, id="DescriptorNumber"), pytest.param(1, id="Parameter")]
 )
 def test_SinglesUndoRedo(idx, test):
     obj = createSingleObjs(idx)
@@ -129,7 +129,7 @@ def test_BaseObjUndoRedo():
 
     # Test setting value
     for b_obj in objs.values():
-        e = doUndoRedo(obj, b_obj.name, b_obj.raw_value + 1, "raw_value")
+        e = doUndoRedo(obj, b_obj.name, b_obj.value + 1, "value")
         if e:
             raise e
 
@@ -213,25 +213,25 @@ def test_UndoRedoMacros():
 
     global_object.stack.enabled = True
     global_object.stack.beginMacro(undo_text)
-    values = [item.raw_value for item in items]
+    values = [item.value for item in items]
 
     for item, value in zip(items, values):
         item.value = value + offset
     global_object.stack.endMacro()
 
     for item, old_value in zip(items, values):
-        assert item.raw_value == old_value + offset
+        assert item.value == old_value + offset
     assert global_object.stack.undoText() == undo_text
 
     global_object.stack.undo()
 
     for item, old_value in zip(items, values):
-        assert item.raw_value == old_value
+        assert item.value == old_value
     assert global_object.stack.redoText() == undo_text
 
     global_object.stack.redo()
     for item, old_value in zip(items, values):
-        assert item.raw_value == old_value + offset
+        assert item.value == old_value + offset
 
 
 @pytest.mark.parametrize("fit_engine", ["LMFit", "Bumps", "DFO"])
@@ -258,7 +258,7 @@ def test_fittingUndoRedo(fit_engine):
             return cls(m=m, c=c)
 
         def __call__(self, x: np.ndarray) -> np.ndarray:
-            return self.m.raw_value * x + self.c.raw_value
+            return self.m.value * x + self.c.value
 
     l1 = Line.default()
     m_sp = 4
@@ -281,18 +281,18 @@ def test_fittingUndoRedo(fit_engine):
     global_object.stack.enabled = True
     res = f.fit(x, y)
 
-    # assert l1.c.raw_value == pytest.approx(l2.c.raw_value, rel=l2.c.error * 3)
-    # assert l1.m.raw_value == pytest.approx(l2.m.raw_value, rel=l2.m.error * 3)
+    # assert l1.c.value == pytest.approx(l2.c.value, rel=l2.c.error * 3)
+    # assert l1.m.value == pytest.approx(l2.m.value, rel=l2.m.error * 3)
     assert global_object.stack.undoText() == "Fitting routine"
 
     global_object.stack.undo()
-    assert l2.m.raw_value == m_sp
-    assert l2.c.raw_value == c_sp
+    assert l2.m.value == m_sp
+    assert l2.c.value == c_sp
     assert global_object.stack.redoText() == "Fitting routine"
 
     global_object.stack.redo()
-    assert l2.m.raw_value == res.p[f"p{l2.m.unique_name}"]
-    assert l2.c.raw_value == res.p[f"p{l2.c.unique_name}"]
+    assert l2.m.value == res.p[f"p{l2.m.unique_name}"]
+    assert l2.c.value == res.p[f"p{l2.c.unique_name}"]
 
 
 # @pytest.mark.parametrize('math_funcs', [pytest.param([Parameter.__iadd__, float.__add__], id='Addition'),
