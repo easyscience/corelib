@@ -15,7 +15,7 @@ from easyscience.Objects.ObjectClasses import BaseObj
 # from easyscience.Objects.Variable import Descriptor
 # from easyscience.Objects.Variable import Parameter
 from easyscience.Objects.variable.parameter import Parameter
-# from easyscience.Objects.variable.descripter_str import DescriptorStr
+from easyscience.Objects.variable.descripter_str import DescriptorStr
 # from easyscience.Objects.variable.descripter_number import DescriptorNumber
 
 from easyscience.fitting import Fitter
