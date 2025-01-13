@@ -21,9 +21,8 @@ from easyscience import global_object
 from easyscience.Utils.classTools import addLoggedProp
 
 from .core import ComponentSerializer
-from .variable import Parameter 
+from .variable import Parameter
 from .variable.descriptor_base import DescriptorBase
-
 
 if TYPE_CHECKING:
     from easyscience.Constraints import C
