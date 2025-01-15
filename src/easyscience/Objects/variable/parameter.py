@@ -319,7 +319,6 @@ class Parameter(DescriptorNumber):
         :return: Tuple of the parameters minimum and maximum values
         """
         return self.min, self.max
-
     @bounds.setter
     def bounds(self, new_bound: Tuple[numbers.Number, numbers.Number]) -> None:
         """

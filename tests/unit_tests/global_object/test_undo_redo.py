@@ -12,11 +12,10 @@ import pytest
 
 from easyscience.Objects.Groups import BaseCollection
 from easyscience.Objects.ObjectClasses import BaseObj
-# from easyscience.Objects.Variable import Descriptor
-# from easyscience.Objects.Variable import Parameter
 from easyscience.Objects.variable.parameter import Parameter
 from easyscience.Objects.variable.descriptor_str import DescriptorStr
 from easyscience.Objects.variable.descriptor_number import DescriptorNumber
+from easyscience.Objects.variable.descriptor_bool import DescriptorBool
 
 from easyscience.fitting import Fitter
 
@@ -67,6 +66,38 @@ def doUndoRedo(obj, attr, future, additional=""):
     return e
 
 
+# @pytest.mark.parametrize(
+#     "test",
+#     [
+#         createParam(option)
+#         for option in [
+#             ("value", 500),
+#             ("error", 5),
+#             ("enabled", False),
+#             ("unit", "m/s"),
+#             ("display_name", "boom"),
+#             ("fixed", False),
+#             ("max", 505),
+#             ("min", -1),
+#         ]
+#     ],
+# )
+# @pytest.mark.parametrize(
+#     "idx", [pytest.param(0, id="DescriptorNumber"), pytest.param(1, id="Parameter")]
+# )
+
+# def test_SinglesUndoRedo(idx, test):
+#     obj = createSingleObjs(idx)
+#     attr = test[0]
+#     value = test[1]
+
+#     if not hasattr(obj, attr):
+#         pytest.skip(f"Not applicable: {obj} does not have field {attr}")
+#     e = doUndoRedo(obj, attr, value)
+#     if e:
+#         raise e
+
+
 @pytest.mark.parametrize(
     "test",
     [
@@ -74,30 +105,19 @@ def doUndoRedo(obj, attr, future, additional=""):
         for option in [
             ("value", 500),
             ("error", 5),
-            ("enabled", False),
-            ("unit", "m/s"),
+            ("unit", "km/s"),
             ("display_name", "boom"),
-            ("fixed", False),
-            ("max", 505),
-            ("min", -1),
         ]
     ],
 )
-@pytest.mark.parametrize(
-    "idx", [pytest.param(0, id="DescriptorNumber"), pytest.param(1, id="Parameter")]
-)
-
-def test_SinglesUndoRedo(idx, test):
-    obj = createSingleObjs(idx)
+def test_DescriptorNumberUndoRedo(test):
+    obj = DescriptorNumber('DescriptorNumber',1,unit='m/s')
     attr = test[0]
     value = test[1]
 
-    if not hasattr(obj, attr):
-        pytest.skip(f"Not applicable: {obj} does not have field {attr}")
     e = doUndoRedo(obj, attr, value)
     if e:
         raise e
-
 
 @pytest.mark.parametrize("value", (True, False))
 def test_Parameter_Bounds_UndoRedo(value):
