@@ -320,31 +320,6 @@ class Parameter(DescriptorNumber):
         """
         return self.min, self.max
 
-    # @bounds.setter
-    # def bounds(self, new_bound: Tuple[numbers.Number, numbers.Number]) -> None:
-    #     """
-    #     Set the bounds of the parameter. *This will also enable the parameter*.
-
-    #     :param new_bound: New bounds. This should be a tuple of (min, max).
-    #     """
-    #     old_min = self.min
-    #     old_max = self.max
-    #     new_min, new_max = new_bound
-
-    #     try:
-    #         self.min = new_min
-    #         self.max = new_max
-    #     except ValueError:
-    #         self.min = old_min
-    #         self.max = old_max
-    #         raise ValueError(f'Current paramter value: {self._scalar.value} must be within {new_bound=}')
-
-    #     # Enable the parameter if needed
-    #     if not self.enabled:
-    #         self.enabled = True
-    #     # Free parameter if needed
-    #     if self.fixed:
-    #         self.fixed = False
     @bounds.setter
     def bounds(self, new_bound: Tuple[numbers.Number, numbers.Number]) -> None:
         """
