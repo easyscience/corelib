@@ -26,9 +26,9 @@ def createSingleObjs(idx):
     reps = math.floor(idx / len(alphabet)) + 1
     name = alphabet[idx % len(alphabet)] * reps
     if idx % 2:
-        return Parameter(name, idx)
+        return Parameter(name, idx,unit="m/s")
     else:
-        return DescriptorNumber(name, idx)
+        return DescriptorNumber(name, idx,unit="m/s")
 
 
 def createParam(option):
@@ -49,7 +49,10 @@ def doUndoRedo(obj, attr, future, additional=""):
 
     try:
         previous = getter(obj, attr)
-        setattr(obj, attr, future)
+        if attr == "unit" and hasattr(obj, "convert_unit"):
+            obj.convert_unit(future)
+        else:
+            setattr(obj, attr, future)
         assert getter(obj, attr) == future
         assert global_object.stack.canUndo()
         global_object.stack.undo()
@@ -72,7 +75,7 @@ def doUndoRedo(obj, attr, future, additional=""):
             ("value", 500),
             ("error", 5),
             ("enabled", False),
-            ("unit", "meter / second"),
+            ("unit", "m/s"),
             ("display_name", "boom"),
             ("fixed", False),
             ("max", 505),
