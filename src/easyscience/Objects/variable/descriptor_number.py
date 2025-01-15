@@ -176,6 +176,8 @@ class DescriptorNumber(DescriptorBase):
 
         :return: Error associated with parameter
         """
+        if self._scalar.variance is None:
+            return None
         return float(np.sqrt(self._scalar.variance))
 
     @error.setter
@@ -192,7 +194,9 @@ class DescriptorNumber(DescriptorBase):
             if value < 0:
                 raise ValueError(f'{value=} must be positive')
             value = float(value)
-        self._scalar.variance = value**2
+            self._scalar.variance = value**2
+        else:
+            self._scalar.variance = None
 
     def convert_unit(self, unit_str: str):
         """

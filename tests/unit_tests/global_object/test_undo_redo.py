@@ -83,6 +83,7 @@ def doUndoRedo(obj, attr, future, additional=""):
 @pytest.mark.parametrize(
     "idx", [pytest.param(0, id="DescriptorNumber"), pytest.param(1, id="Parameter")]
 )
+
 def test_SinglesUndoRedo(idx, test):
     obj = createSingleObjs(idx)
     attr = test[0]
