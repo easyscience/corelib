@@ -96,7 +96,10 @@ def doUndoRedo(obj, attr, future, additional=""):
 #     e = doUndoRedo(obj, attr, value)
 #     if e:
 #         raise e
-
+#             ("enabled", False),
+#             ("fixed", False),
+#             ("max", 505),
+#             ("min", -1),
 
 @pytest.mark.parametrize(
     "test",
@@ -110,8 +113,36 @@ def doUndoRedo(obj, attr, future, additional=""):
         ]
     ],
 )
+
 def test_DescriptorNumberUndoRedo(test):
     obj = DescriptorNumber('DescriptorNumber',1,unit='m/s')
+    attr = test[0]
+    value = test[1]
+
+    e = doUndoRedo(obj, attr, value)
+    if e:
+        raise e
+
+
+@pytest.mark.parametrize(
+    "test",
+    [
+        createParam(option)
+        for option in [
+            ("value", 500),
+            ("error", 5),
+            ("unit", "km/s"),
+            ("display_name", "boom"),
+            ("enabled", False),
+            ("fixed", False),
+            ("max", 505),
+            ("min", -1),
+        ]
+    ],
+)
+
+def test_ParameterUndoRedo(test):
+    obj = Parameter('Parameter',1,unit='m/s')
     attr = test[0]
     value = test[1]
 

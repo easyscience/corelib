@@ -45,8 +45,7 @@ class DescriptorNumber(DescriptorBase):
         param url: URL of the descriptor
         param display_name: Display name of the descriptor
         param parent: Parent of the descriptor
-
-        .. note:: Undo/Redo functionality is implemented for the attributes `variance` and `value`.
+        .. note:: Undo/Redo functionality is implemented for the attributes `variance`, `error`, `unit` and `value`.
         """
         if not isinstance(value, numbers.Number) or isinstance(value, bool):
             raise TypeError(f'{value=} must be a number')
@@ -215,13 +214,12 @@ class DescriptorNumber(DescriptorBase):
 
     def convert_unit(self, unit_str: str) -> None:
         """
-        Convert the value from one unit system to another with undo/redo functionality.
+        Convert the value from one unit system to another.
 
         :param unit_str: New unit in string form
         """
         if not isinstance(unit_str, str):
             raise TypeError(f'{unit_str=} must be a string representing a valid scipp unit')
-
         try:
             new_unit = sc.Unit(unit_str)
         except UnitError as message:

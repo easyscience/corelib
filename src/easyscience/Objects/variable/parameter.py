@@ -76,8 +76,8 @@ class Parameter(DescriptorNumber):
         :param parent: The object which is the parent to this one
 
         .. note::
-            Undo/Redo functionality is implemented for the attributes `value`, `error`, `min`, `max`, `fixed`
-        """
+            Undo/Redo functionality is implemented for the attributes `value`, `variance`, `error`, `min`, `max`, `bounds`, `fixed`, `unit`
+        """  # noqa: E501
         if not isinstance(min, numbers.Number):
             raise TypeError('`min` must be a number')
         if not isinstance(max, numbers.Number):
@@ -94,6 +94,7 @@ class Parameter(DescriptorNumber):
         if not isinstance(fixed, bool):
             raise TypeError('`fixed` must be either True or False')
 
+        self._fixed = fixed # For fitting, but must be initialized before super().__init__
         self._min = sc.scalar(float(min), unit=unit)
         self._max = sc.scalar(float(max), unit=unit)
 
@@ -114,7 +115,6 @@ class Parameter(DescriptorNumber):
             weakref.finalize(self, self._callback.fdel)
 
         # Create additional fitting elements
-        self._fixed = fixed
         self._enabled = enabled
         self._initial_scalar = copy.deepcopy(self._scalar)
         builtin_constraint = {
