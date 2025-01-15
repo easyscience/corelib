@@ -157,7 +157,6 @@ class BasedBase(ComponentSerializer):
                 constraints.append(con[key])
         return constraints
 
-    ## TODO clean when full move to new_variable. Is fixed
     def get_parameters(self) -> List[Parameter]:
         """
         Get all parameter objects as a list.
@@ -172,7 +171,6 @@ class BasedBase(ComponentSerializer):
                 par_list.append(item)
         return par_list
 
-    ## TODO clean when full move to new_variable. Is fixed
     def _get_linkable_attributes(self) -> List[V]:
         """
         Get all objects which can be linked against as a list.
@@ -187,7 +185,6 @@ class BasedBase(ComponentSerializer):
                 item_list.append(item)
         return item_list
 
-    ## TODO clean when full move to new_variable. Is fixed
     def get_fit_parameters(self) -> List[Parameter]:
         """
         Get all objects which can be fitted (and are not fixed) as a list.
@@ -232,7 +229,6 @@ class BaseObj(BasedBase):
     cheat with `BaseObj(*[Descriptor(...), Parameter(...), ...])`.
     """
 
-    ## TODO clean when full move to new_variable. Is fixed
     def __init__(
         self,
         name: str,
@@ -307,7 +303,6 @@ class BaseObj(BasedBase):
             test_class=BaseObj,
         )
 
-    ## TODO clean when full move to new_variable. Is fixed
     def __setattr__(self, key: str, value: BV) -> None:
         # Assume that the annotation is a ClassVar
         old_obj = None
