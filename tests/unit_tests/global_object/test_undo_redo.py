@@ -123,7 +123,23 @@ def test_DescriptorNumberUndoRedo(test):
     if e:
         raise e
 
+def test_DescriptorBoolUndoRedo():
+    obj = DescriptorBool('DescriptorBool',False)
+    attr = 'value'
+    value = True
 
+    e = doUndoRedo(obj, attr, value)
+    if e:
+        raise e
+
+    obj = DescriptorBool('DescriptorBool',True)
+    attr = 'value'
+    value = False
+
+    e = doUndoRedo(obj, attr, value)
+    if e:
+        raise e
+        
 @pytest.mark.parametrize(
     "test",
     [
