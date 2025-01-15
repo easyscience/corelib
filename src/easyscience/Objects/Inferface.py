@@ -169,7 +169,10 @@ class InterfaceFactoryTemplate:
                     # Should be fetched this way to ensure we don't get value from callback
                     prop_value = prop.value_no_call_back
                 else:
-                    prop_value = prop.raw_value
+                    if hasattr(prop, 'raw_value'):
+                        prop_value = prop.raw_value
+                    else:
+                        prop_value = prop.value
 
                 prop._callback = item.make_prop(item_key)
                 prop._callback.fset(prop_value)
