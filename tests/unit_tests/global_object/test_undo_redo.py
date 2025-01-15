@@ -65,42 +65,6 @@ def doUndoRedo(obj, attr, future, additional=""):
         global_object.stack.enabled = False
     return e
 
-
-# @pytest.mark.parametrize(
-#     "test",
-#     [
-#         createParam(option)
-#         for option in [
-#             ("value", 500),
-#             ("error", 5),
-#             ("enabled", False),
-#             ("unit", "m/s"),
-#             ("display_name", "boom"),
-#             ("fixed", False),
-#             ("max", 505),
-#             ("min", -1),
-#         ]
-#     ],
-# )
-# @pytest.mark.parametrize(
-#     "idx", [pytest.param(0, id="DescriptorNumber"), pytest.param(1, id="Parameter")]
-# )
-
-# def test_SinglesUndoRedo(idx, test):
-#     obj = createSingleObjs(idx)
-#     attr = test[0]
-#     value = test[1]
-
-#     if not hasattr(obj, attr):
-#         pytest.skip(f"Not applicable: {obj} does not have field {attr}")
-#     e = doUndoRedo(obj, attr, value)
-#     if e:
-#         raise e
-#             ("enabled", False),
-#             ("fixed", False),
-#             ("max", 505),
-#             ("min", -1),
-
 @pytest.mark.parametrize(
     "test",
     [
@@ -139,7 +103,16 @@ def test_DescriptorBoolUndoRedo():
     e = doUndoRedo(obj, attr, value)
     if e:
         raise e
-        
+
+def test_DescriptorStrUndoRedo():
+    obj = DescriptorStr('DescriptorStr','Foo')
+    attr = 'value'
+    value = 'Bar'
+
+    e = doUndoRedo(obj, attr, value)
+    if e:
+        raise e
+
 @pytest.mark.parametrize(
     "test",
     [
