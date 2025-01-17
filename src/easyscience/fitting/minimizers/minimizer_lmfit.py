@@ -180,11 +180,7 @@ class LMFit(MinimizerBase):  # noqa: S101
         :return: lmfit Parameter compatible object.
         :rtype: LMParameter
         """
-        ## TODO clean when full move to
-        if isinstance(parameter, Parameter):
-            value = parameter.value
-        else:
-            value = parameter.raw_value
+        value = parameter.value
 
         return LMParameter(
             MINIMIZER_PARAMETER_PREFIX + parameter.unique_name,
@@ -221,11 +217,7 @@ class LMFit(MinimizerBase):  # noqa: S101
             if isinstance(item, LMParameter):
                 value = item.value
             else:
-                ## TODO clean when full move to new_variable
-                if isinstance(item, Parameter):
-                    value = item.value
-                else:
-                    value = item.raw_value
+                value = item.value
 
             model.set_param_hint(MINIMIZER_PARAMETER_PREFIX + str(name), value=value, min=item.min, max=item.max)
 
