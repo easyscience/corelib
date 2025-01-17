@@ -242,7 +242,7 @@ class BaseCollection(BasedBase, MutableSequence):
         """
         Sort the collection according to the given mapping.
 
-        :param mapping: mapping function to sort the collection. i.e. lambda parameter: parameter.raw_value
+        :param mapping: mapping function to sort the collection. i.e. lambda parameter: parameter.value
         :type mapping: Callable
         :param reverse: Reverse the sorting.
         :type reverse: bool

@@ -350,7 +350,7 @@ def test_group_encode2():
 #
 #     def test_objs(reference_obj, test_obj, in_dict):
 #         if 'value' in in_dict.keys():
-#             in_dict['raw_value'] = in_dict.pop('value')
+#             in_dict['value'] = in_dict.pop('value')
 #         if 'units' in in_dict.keys():
 #             del in_dict['units']
 #         for k in in_dict.keys():

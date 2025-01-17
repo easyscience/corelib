@@ -410,11 +410,11 @@ def test_Base_GETSET():
     a = A.from_pars(a_start)
     graph = a._global_object.map
 
-    assert a.a.raw_value == a_start
+    assert a.a.value == a_start
     assert len(graph.get_edges(a)) == 1
 
     setattr(a, "a", a_end)
-    assert a.a.raw_value == a_end
+    assert a.a.value == a_end
     assert len(graph.get_edges(a)) == 1
 
 

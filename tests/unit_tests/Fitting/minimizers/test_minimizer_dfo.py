@@ -53,7 +53,7 @@ class TestDFOFit():
         minimizer._gen_fit_results = MagicMock(return_value='gen_fit_results')
 
         cached_par = MagicMock()
-        cached_par.raw_value = 1
+        cached_par.value = 1
         cached_pars = {'mock_parm_1': cached_par}
         minimizer._cached_pars = cached_pars
 
@@ -104,10 +104,10 @@ class TestDFOFit():
 
         mock_parm_1 = MagicMock()
         mock_parm_1.unique_name = 'mock_parm_1'
-        mock_parm_1.raw_value = 1000.0
+        mock_parm_1.value = 1000.0
         mock_parm_2 = MagicMock()
         mock_parm_2.unique_name = 'mock_parm_2'
-        mock_parm_2.raw_value = 2000.0
+        mock_parm_2.value = 2000.0
 
         # Then
         model = minimizer._make_model(parameters=[mock_parm_1, mock_parm_2])
@@ -160,9 +160,9 @@ class TestDFOFit():
         minimizer._cached_model = mock_cached_model
 
         mock_cached_par_1 = MagicMock()
-        mock_cached_par_1.raw_value = 'par_raw_value_1'
+        mock_cached_par_1.value = 'par_value_1'
         mock_cached_par_2 = MagicMock()
-        mock_cached_par_2.raw_value = 'par_raw_value_2'
+        mock_cached_par_2.value = 'par_value_2'
         minimizer._cached_pars = {'par_1': mock_cached_par_1, 'par_2': mock_cached_par_2}
 
         minimizer._p_0 = 'p_0' 
@@ -177,13 +177,13 @@ class TestDFOFit():
         assert domain_fit_results.success == True 
         assert domain_fit_results.y_obs == 'y'
         assert domain_fit_results.x == 'x'
-        assert domain_fit_results.p == {'ppar_1': 'par_raw_value_1', 'ppar_2': 'par_raw_value_2'}
+        assert domain_fit_results.p == {'ppar_1': 'par_value_1', 'ppar_2': 'par_value_2'}
         assert domain_fit_results.p0 == 'p_0'
         assert domain_fit_results.y_calc == 'evaluate'
         assert domain_fit_results.y_err == 'weights'
         assert str(domain_fit_results.minimizer_engine) == "<class 'easyscience.fitting.minimizers.minimizer_dfo.DFO'>"
         assert domain_fit_results.fit_args is None
-        minimizer.evaluate.assert_called_once_with('x', minimizer_parameters={'ppar_1': 'par_raw_value_1', 'ppar_2': 'par_raw_value_2'})
+        minimizer.evaluate.assert_called_once_with('x', minimizer_parameters={'ppar_1': 'par_value_1', 'ppar_2': 'par_value_2'})
 
     def test_dfo_fit(self, minimizer: DFO, monkeypatch):
         # When
