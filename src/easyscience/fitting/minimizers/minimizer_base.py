@@ -194,11 +194,7 @@ class MinimizerBase(metaclass=ABCMeta):
         for name, item in pars.items():
             parameter_name = MINIMIZER_PARAMETER_PREFIX + str(name)
             if parameter_name not in parameters.keys():
-                # TODO clean when full move to new_variable
-                if isinstance(item, Parameter):
-                    parameters[parameter_name] = item.value
-                else:
-                    parameters[parameter_name] = item.raw_value
+                parameters[parameter_name] = item.value
         return parameters
 
     def _generate_fit_function(self) -> Callable:
@@ -235,15 +231,9 @@ class MinimizerBase(metaclass=ABCMeta):
             for name, value in kwargs.items():
                 par_name = name[1:]
                 if par_name in self._cached_pars.keys():
-                    # TODO clean when full move to new_variable
-                    if isinstance(self._cached_pars[par_name], Parameter):
                         # This will take into account constraints
-                        if self._cached_pars[par_name].value != value:
-                            self._cached_pars[par_name].value = value
-                    else:
-                        # This will take into account constraints
-                        if self._cached_pars[par_name].raw_value != value:
-                            self._cached_pars[par_name].value = value
+                    if self._cached_pars[par_name].value != value:
+                        self._cached_pars[par_name].value = value
 
                     # Since we are calling the parameter fset will be called.
             # TODO Pre processing here
@@ -268,11 +258,7 @@ class MinimizerBase(metaclass=ABCMeta):
         wrapped_parameters.append(InspectParameter('x', InspectParameter.POSITIONAL_OR_KEYWORD, annotation=_empty))
 
         for name, parameter in parameters.items():
-            ## TODO clean when full move to new_variable
-            if isinstance(parameter, Parameter):
-                default_value = parameter.value
-            else:
-                default_value = parameter.raw_value
+            default_value = parameter.value
 
             wrapped_parameters.append(
                 InspectParameter(
