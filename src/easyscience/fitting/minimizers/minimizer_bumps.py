@@ -122,11 +122,7 @@ class Bumps(MinimizerBase):
             model = model_function(x, y, weights)
         self._cached_model = model
 
-        ## TODO clean when full move to new_variable
-        if isinstance(self._cached_pars[list(self._cached_pars.keys())[0]], Parameter):
-            self._p_0 = {f'p{key}': self._cached_pars[key].value for key in self._cached_pars.keys()}
-        else:
-            self._p_0 = {f'p{key}': self._cached_pars[key].raw_value for key in self._cached_pars.keys()}
+        self._p_0 = {f'p{key}': self._cached_pars[key].value for key in self._cached_pars.keys()}
 
         problem = FitProblem(model)
         # Why do we do this? Because a fitting template has to have global_object instantiated outside pre-runtime
@@ -170,11 +166,7 @@ class Bumps(MinimizerBase):
         :rtype: BumpsParameter
         """
 
-        ## TODO clean when full move to new_variable
-        if isinstance(obj, Parameter):
-            value = obj.value
-        else:
-            value = obj.raw_value
+        value = obj.value
 
         return BumpsParameter(
             name=MINIMIZER_PARAMETER_PREFIX + obj.unique_name,
@@ -253,11 +245,7 @@ class Bumps(MinimizerBase):
         for index, name in enumerate(self._cached_model._pnames):
             dict_name = name[len(MINIMIZER_PARAMETER_PREFIX) :]
 
-            ## TODO clean when full move to new_variable
-            if isinstance(pars[dict_name], Parameter):
-                item[name] = pars[dict_name].value
-            else:
-                item[name] = pars[dict_name].raw_value
+            item[name] = pars[dict_name].value
 
         results.p0 = self._p_0
         results.p = item
