@@ -194,7 +194,7 @@ class NumericConstraint(ConstraintBase):
         super(NumericConstraint, self).__init__(dependent_obj, operator=operator, value=value)
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
-        ## TODO clean when full move to new_variable
+        ## TODO Probably needs to be updated when DescriptorArray is implemented
 
         value = obj.value_no_call_back
 
@@ -254,7 +254,6 @@ class SelfConstraint(ConstraintBase):
         super(SelfConstraint, self).__init__(dependent_obj, operator=operator, value=value)
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
-        ## TODO clean when full move to new_variable
         value = obj.value_no_call_back
 
         self.aeval.symtable['value1'] = value
@@ -313,7 +312,6 @@ class ObjConstraint(ConstraintBase):
         self.external = True
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
-        ## TODO clean when full move to new_variable
         value = obj.value_no_call_back
 
         self.aeval.symtable['value1'] = value
@@ -407,7 +405,6 @@ class MultiObjConstraint(ConstraintBase):
         in_str = ''
         value = None
         for idx, obj in enumerate(independent_objs):
-            ## TODO clean when full move to new_variable
             self.aeval.symtable['p' + str(self.independent_obj_ids[idx])] = obj.value_no_call_back
 
             in_str += ' p' + str(self.independent_obj_ids[idx])
@@ -472,12 +469,10 @@ class FunctionalConstraint(ConstraintBase):
         value_str = f'r_value = f{id(self.function)}('
         if isinstance(obj, list):
             for o in obj:
-                ## TODO clean when full move to new_variable
                 value_str += f'{o.value_no_call_back},'
 
             value_str = value_str[:-1]
         else:
-            ## TODO clean when full move to new_variable
             value_str += f'{obj.value_no_call_back}'
 
         value_str += ')'
