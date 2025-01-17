@@ -110,9 +110,9 @@ class TestMinimizerBase():
             'b': MagicMock(),
             'c': MagicMock()
         }
-        minimizer._cached_pars['a'].raw_value = 3
-        minimizer._cached_pars['b'].raw_value = 4
-        minimizer._cached_pars['c'].raw_value = 5
+        minimizer._cached_pars['a'].value = 3
+        minimizer._cached_pars['b'].value = 4
+        minimizer._cached_pars['c'].value = 5
 
         # Then
         parameters = minimizer._prepare_parameters(parameters)
