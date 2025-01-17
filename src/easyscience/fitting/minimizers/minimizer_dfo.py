@@ -96,11 +96,7 @@ class DFO(MinimizerBase):
         self._cached_model.x = x
         self._cached_model.y = y
 
-        ## TODO clean when full move to new_variable
-        if isinstance(self._cached_pars[list(self._cached_pars.keys())[0]], Parameter):
-            self._p_0 = {f'p{key}': self._cached_pars[key].value for key in self._cached_pars.keys()}
-        else:
-            self._p_0 = {f'p{key}': self._cached_pars[key].raw_value for key in self._cached_pars.keys()}
+        self._p_0 = {f'p{key}': self._cached_pars[key].value for key in self._cached_pars.keys()}
 
         # Why do we do this? Because a fitting template has to have global_object instantiated outside pre-runtime
         from easyscience import global_object
@@ -145,22 +141,14 @@ class DFO(MinimizerBase):
 
         def _outer(obj: DFO):
             def _make_func(x, y, weights):
-                ## TODO clean when full move to new_variable
 
                 dfo_pars = {}
                 if not parameters:
                     for name, par in obj._cached_pars.items():
-                        if isinstance(par, Parameter):
-                            dfo_pars[MINIMIZER_PARAMETER_PREFIX + str(name)] = par.value
-                        else:
-                            dfo_pars[MINIMIZER_PARAMETER_PREFIX + str(name)] = par.raw_value
-
+                        dfo_pars[MINIMIZER_PARAMETER_PREFIX + str(name)] = par.value
                 else:
                     for par in parameters:
-                        if isinstance(par, Parameter):
-                            dfo_pars[MINIMIZER_PARAMETER_PREFIX + par.unique_name] = par.value
-                        else:
-                            dfo_pars[MINIMIZER_PARAMETER_PREFIX + par.unique_name] = par.raw_value
+                        dfo_pars[MINIMIZER_PARAMETER_PREFIX + par.unique_name] = par.value
 
                 def _residuals(pars_values: List[float]) -> np.ndarray:
                     for idx, par_name in enumerate(dfo_pars.keys()):
@@ -217,11 +205,7 @@ class DFO(MinimizerBase):
 
         pars = {}
         for p_name, par in self._cached_pars.items():
-            ## TODO clean when full move to new_variable
-            if isinstance(par, Parameter):
-                pars[f'p{p_name}'] = par.value
-            else:
-                pars[f'p{p_name}'] = par.raw_value
+            pars[f'p{p_name}'] = par.value
         results.p = pars
 
         results.p0 = self._p_0
@@ -254,11 +238,7 @@ class DFO(MinimizerBase):
         :return: dfols fit results container
         """
 
-        ## TODO clean when full move to new_variable
-        if isinstance(list(pars.values())[0], Parameter):
-            pars_values = np.array([par.value for par in pars.values()])
-        else:
-            pars_values = np.array([par.raw_value for par in pars.values()])
+        pars_values = np.array([par.value for par in pars.values()])
 
         bounds = (
             np.array([par.min for par in pars.values()]),
