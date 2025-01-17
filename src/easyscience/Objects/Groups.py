@@ -15,12 +15,12 @@ from typing import Callable
 from typing import List
 from typing import Optional
 from typing import Tuple
-from typing import Union
 from typing import TypeVar
+from typing import Union
 
 from easyscience.global_object.undo_redo import NotarizedDict
-from easyscience.Objects.variable.descriptor_base import DescriptorBase
 from easyscience.Objects.ObjectClasses import BasedBase
+from easyscience.Objects.variable.descriptor_base import DescriptorBase
 
 if TYPE_CHECKING:
     from easyscience.Objects.Inferface import iF
