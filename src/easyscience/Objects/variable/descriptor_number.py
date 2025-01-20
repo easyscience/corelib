@@ -198,20 +198,6 @@ class DescriptorNumber(DescriptorBase):
         else:
             self._scalar.variance = None
 
-    # def convert_unit(self, unit_str: str):
-    #     """
-    #     Convert the value from one unit system to another.
-
-    #     :param unit_str: New unit in string form
-    #     """
-    #     if not isinstance(unit_str, str):
-    #         raise TypeError(f'{unit_str=} must be a string representing a valid scipp unit')
-    #     try:
-    #         new_unit = sc.Unit(unit_str)
-    #     except UnitError as message:
-    #         raise UnitError(message) from None
-    #     self._scalar = self._scalar.to(unit=new_unit)
-
     def convert_unit(self, unit_str: str) -> None:
         """
         Convert the value from one unit system to another.
