@@ -84,8 +84,7 @@ def test_DescriptorNumberUndoRedo(test):
     value = test[1]
 
     e = doUndoRedo(obj, attr, value)
-    if e:
-        raise e
+    assert not e
 
 def test_DescriptorBoolUndoRedo():
     obj = DescriptorBool('DescriptorBool',False)
@@ -93,16 +92,14 @@ def test_DescriptorBoolUndoRedo():
     value = True
 
     e = doUndoRedo(obj, attr, value)
-    if e:
-        raise e
+    assert not e
 
     obj = DescriptorBool('DescriptorBool',True)
     attr = 'value'
     value = False
 
     e = doUndoRedo(obj, attr, value)
-    if e:
-        raise e
+    assert not e
 
 def test_DescriptorStrUndoRedo():
     obj = DescriptorStr('DescriptorStr','Foo')
@@ -110,8 +107,7 @@ def test_DescriptorStrUndoRedo():
     value = 'Bar'
 
     e = doUndoRedo(obj, attr, value)
-    if e:
-        raise e
+    assert not e
 
 @pytest.mark.parametrize(
     "test",
@@ -136,8 +132,7 @@ def test_ParameterUndoRedo(test):
     value = test[1]
 
     e = doUndoRedo(obj, attr, value)
-    if e:
-        raise e
+    assert not e
 
 @pytest.mark.parametrize("value", (True, False))
 def test_Parameter_Bounds_UndoRedo(value):
@@ -174,8 +169,7 @@ def test_BaseObjUndoRedo():
     # Test setting value
     for b_obj in objs.values():
         e = doUndoRedo(obj, b_obj.name, b_obj.value + 1, "value")
-        if e:
-            raise e
+        assert not e
 
 
 def test_BaseCollectionUndoRedo():
