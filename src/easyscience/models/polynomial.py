@@ -23,7 +23,7 @@ def designate_calc_fn(func):
     @functools.wraps(func)
     def wrapper(obj, *args, **kwargs):
         for name in list(obj.__annotations__.keys()):
-            func.__globals__['_' + name] = getattr(obj, name).raw_value
+            func.__globals__['_' + name] = getattr(obj, name).value
         return func(obj, *args, **kwargs)
 
     return wrapper
@@ -64,16 +64,16 @@ class Polynomial(BaseObj):
                 raise TypeError('coefficients must be a list or a BaseCollection')
 
     def __call__(self, x: np.ndarray, *args, **kwargs) -> np.ndarray:
-        return np.polyval([c.raw_value for c in self.coefficients], x)
+        return np.polyval([c.value for c in self.coefficients], x)
 
     def __repr__(self):
         s = []
         if len(self.coefficients) >= 1:
-            s += [f'{self.coefficients[0].raw_value}']
+            s += [f'{self.coefficients[0].value}']
             if len(self.coefficients) >= 2:
-                s += [f'{self.coefficients[1].raw_value}x']
+                s += [f'{self.coefficients[1].value}x']
                 if len(self.coefficients) >= 3:
-                    s += [f'{c.raw_value}x^{i+2}' for i, c in enumerate(self.coefficients[2:]) if c.raw_value != 0]
+                    s += [f'{c.value}x^{i+2}' for i, c in enumerate(self.coefficients[2:]) if c.value != 0]
         s.reverse()
         s = ' + '.join(s)
         return 'Polynomial({}, {})'.format(self.name, s)
@@ -94,9 +94,9 @@ class Line(BaseObj):
         if c is not None:
             self.c = c
 
-    # @designate_calc_fn can be used to inject parameters into the calculation function. i.e. _m = m.raw_value
+    # @designate_calc_fn can be used to inject parameters into the calculation function. i.e. _m = m.value
     def __call__(self, x: np.ndarray, *args, **kwargs) -> np.ndarray:
-        return self.m.raw_value * x + self.c.raw_value
+        return self.m.value * x + self.c.value
 
     def __repr__(self):
         return '{}({}, {})'.format(self.__class__.__name__, self.m, self.c)

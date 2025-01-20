@@ -1,7 +1,7 @@
 import pytest
 
 from easyscience import global_object
-from easyscience.Objects.new_variable.descriptor_base import DescriptorBase
+from easyscience.Objects.variable.descriptor_base import DescriptorBase
 
 
 class TestDesciptorBase:

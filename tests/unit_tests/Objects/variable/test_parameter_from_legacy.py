@@ -13,10 +13,10 @@ import pytest
 
 import scipp as sc
 import easyscience
-from easyscience.Objects.Variable import CoreSetException
+from easyscience.Utils.Exceptions import CoreSetException
 
-from easyscience.Objects.new_variable import Parameter
-from easyscience.Objects.Variable import global_object
+from easyscience.Objects.variable import Parameter
+from easyscience import global_object
 
 
 def _generate_inputs():

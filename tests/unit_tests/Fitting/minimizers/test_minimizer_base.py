@@ -8,7 +8,7 @@ from inspect import _empty
 
 from easyscience.fitting.minimizers.minimizer_base import MinimizerBase
 from easyscience.fitting.minimizers.utils import FitError
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import Parameter
 
 class TestMinimizerBase():
     @pytest.fixture
@@ -110,9 +110,9 @@ class TestMinimizerBase():
             'b': MagicMock(),
             'c': MagicMock()
         }
-        minimizer._cached_pars['a'].raw_value = 3
-        minimizer._cached_pars['b'].raw_value = 4
-        minimizer._cached_pars['c'].raw_value = 5
+        minimizer._cached_pars['a'].value = 3
+        minimizer._cached_pars['b'].value = 4
+        minimizer._cached_pars['c'].value = 5
 
         # Then
         parameters = minimizer._prepare_parameters(parameters)

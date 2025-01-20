@@ -9,7 +9,7 @@ import pytest
 
 from easyscience.models.polynomial import Line
 from easyscience.Objects import virtual as Virtual
-from easyscience.Objects.Variable import Parameter
+from easyscience.Objects.variable.parameter import Parameter
 
 
 @pytest.mark.parametrize(
@@ -33,7 +33,7 @@ def test_virtual_variable(cls):
         assert hasattr(v_obj, attr)
 
     assert obj.name == v_obj.name
-    assert obj.raw_value == v_obj.raw_value
+    assert obj.value == v_obj.value
 
 
 @pytest.mark.parametrize(
@@ -43,35 +43,37 @@ def test_virtual_variable(cls):
     ],
 )
 def test_virtual_variable_modify(cls):
+    import gc
     obj = cls(name="test", value=1)
     v_obj = Virtual.virtualizer(obj)
     assert obj.name == v_obj.name
-    assert obj.raw_value == v_obj.raw_value
+    assert obj.value == v_obj.value
 
     new_value = 2.0
     obj.value = new_value
-    assert obj.raw_value == v_obj.raw_value
+    assert obj.value == v_obj.value
 
     id_vobj = v_obj.unique_name
-    assert id_vobj in list(obj._constraints["virtual"].keys())
+    assert id_vobj in list(obj._constraints.virtual.keys())
 
     del v_obj
-    # assert id_vobj not in list(obj._constraints["virtual"].keys())
+    gc.collect()  # Force garbage collection
+    assert id_vobj not in list(obj._constraints.virtual.keys())
 
 
 def test_Base_obj():
     l = Line(2, 1)
     v_l = Virtual.virtualizer(l)
     assert l.name == v_l.name
-    assert l.m.raw_value == v_l.m.raw_value
-    assert l.c.raw_value == v_l.c.raw_value
+    assert l.m.value == v_l.m.value
+    assert l.c.value == v_l.c.value
 
     m = 4.0
 
     l.m = m
-    assert l.m.raw_value == m
-    assert l.m.raw_value == v_l.m.raw_value
-    assert l.c.raw_value == v_l.c.raw_value
+    assert l.m.value == m
+    assert l.m.value == v_l.m.value
+    assert l.c.value == v_l.c.value
 
 
 def test_Base_obj():
@@ -79,19 +81,19 @@ def test_Base_obj():
     l = Line(old_m, 1)
     v_l = Virtual.virtualizer(l)
     assert l.name == v_l.name
-    assert l.m.raw_value == v_l.m.raw_value
-    assert l.c.raw_value == v_l.c.raw_value
+    assert l.m.value == v_l.m.value
+    assert l.c.value == v_l.c.value
 
     Virtual.component_realizer(v_l, "m")
 
     m = 4.0
     l.m = m
-    assert l.m.raw_value == m
-    assert v_l.m.raw_value == old_m
-    assert l.c.raw_value == v_l.c.raw_value
+    assert l.m.value == m
+    assert v_l.m.value == old_m
+    assert l.c.value == v_l.c.value
 
     m_other = 5.0
     v_l.m = m_other
-    assert l.m.raw_value == m
-    assert v_l.m.raw_value == m_other
-    assert l.c.raw_value == v_l.c.raw_value
+    assert l.m.value == m
+    assert v_l.m.value == m_other
+    assert l.c.value == v_l.c.value

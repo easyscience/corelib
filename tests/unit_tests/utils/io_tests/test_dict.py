@@ -10,7 +10,7 @@ from importlib import metadata
 
 from easyscience.Utils.io.dict import DataDictSerializer
 from easyscience.Utils.io.dict import DictSerializer
-from easyscience.Objects.new_variable import DescriptorNumber
+from easyscience.Objects.variable import DescriptorNumber
 from easyscience.Objects.ObjectClasses import BaseObj
 
 from .test_core import A
@@ -230,7 +230,7 @@ def test_custom_class_full_encode_with_numpy():
             "data": [1.0, 2.0, 3.0],
         },
         "a": {
-            "@module": "easyscience.Objects.new_variable.descriptor_number",
+            "@module": "easyscience.Objects.variable.descriptor_number",
             "@class": "DescriptorNumber",
             "@version": version,
             "description": "",
@@ -328,6 +328,7 @@ def test_group_encode2():
     assert isinstance(d["b"], dict)
 
 
+#TODO: do we need/want this test?
 #
 # @pytest.mark.parametrize(**dp_param_dict)
 # def test_custom_class_DictSerializer_decode(dp_kwargs: dict, dp_cls: Type[Descriptor]):
@@ -349,7 +350,7 @@ def test_group_encode2():
 #
 #     def test_objs(reference_obj, test_obj, in_dict):
 #         if 'value' in in_dict.keys():
-#             in_dict['raw_value'] = in_dict.pop('value')
+#             in_dict['value'] = in_dict.pop('value')
 #         if 'units' in in_dict.keys():
 #             del in_dict['units']
 #         for k in in_dict.keys():

@@ -5,8 +5,8 @@ import numpy as np
 
 from scipp import UnitError
 
-from easyscience.Objects.new_variable.parameter import Parameter
-from easyscience.Objects.new_variable.descriptor_number import DescriptorNumber
+from easyscience.Objects.variable.parameter import Parameter
+from easyscience.Objects.variable.descriptor_number import DescriptorNumber
 from easyscience import global_object
 
 class TestParameter:

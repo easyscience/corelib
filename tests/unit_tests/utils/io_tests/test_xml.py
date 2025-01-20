@@ -9,7 +9,7 @@ from typing import Type
 import pytest
 
 from easyscience.Utils.io.xml import XMLSerializer
-from easyscience.Objects.new_variable import DescriptorNumber
+from easyscience.Objects.variable import DescriptorNumber
 
 from .test_core import A
 from .test_core import dp_param_dict

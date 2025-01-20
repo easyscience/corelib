@@ -194,13 +194,9 @@ class NumericConstraint(ConstraintBase):
         super(NumericConstraint, self).__init__(dependent_obj, operator=operator, value=value)
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
-        ## TODO clean when full move to new_variable
-        import easyscience.Objects.new_variable.parameter
+        ## TODO Probably needs to be updated when DescriptorArray is implemented
 
-        if isinstance(obj, easyscience.Objects.new_variable.parameter.Parameter):
-            value = obj.value_no_call_back
-        else:
-            value = obj.raw_value
+        value = obj.value_no_call_back
 
         if isinstance(value, list):
             value = np.array(value)
@@ -258,13 +254,7 @@ class SelfConstraint(ConstraintBase):
         super(SelfConstraint, self).__init__(dependent_obj, operator=operator, value=value)
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
-        ## TODO clean when full move to new_variable
-        import easyscience.Objects.new_variable.parameter
-
-        if isinstance(obj, easyscience.Objects.new_variable.parameter.Parameter):
-            value = obj.value_no_call_back
-        else:
-            value = obj.raw_value
+        value = obj.value_no_call_back
 
         self.aeval.symtable['value1'] = value
         self.aeval.symtable['value2'] = getattr(obj, self.value)
@@ -322,13 +312,7 @@ class ObjConstraint(ConstraintBase):
         self.external = True
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
-        ## TODO clean when full move to new_variable
-        import easyscience.Objects.new_variable.parameter
-
-        if isinstance(obj, easyscience.Objects.new_variable.parameter.Parameter):
-            value = obj.value_no_call_back
-        else:
-            value = obj.raw_value
+        value = obj.value_no_call_back
 
         self.aeval.symtable['value1'] = value
         try:
@@ -417,16 +401,11 @@ class MultiObjConstraint(ConstraintBase):
         self.external = True
 
     def _parse_operator(self, independent_objs: List[V], *args, **kwargs) -> Number:
-        import easyscience.Objects.new_variable.parameter
 
         in_str = ''
         value = None
         for idx, obj in enumerate(independent_objs):
-            ## TODO clean when full move to new_variable
-            if isinstance(obj, easyscience.Objects.new_variable.parameter.Parameter):
-                self.aeval.symtable['p' + str(self.independent_obj_ids[idx])] = obj.value_no_call_back
-            else:
-                self.aeval.symtable['p' + str(self.independent_obj_ids[idx])] = obj.raw_value
+            self.aeval.symtable['p' + str(self.independent_obj_ids[idx])] = obj.value_no_call_back
 
             in_str += ' p' + str(self.independent_obj_ids[idx])
             if idx < len(self.operator):
@@ -485,25 +464,16 @@ class FunctionalConstraint(ConstraintBase):
             self.external = True
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
-        import easyscience.Objects.new_variable.parameter
 
         self.aeval.symtable[f'f{id(self.function)}'] = self.function
         value_str = f'r_value = f{id(self.function)}('
         if isinstance(obj, list):
             for o in obj:
-                ## TODO clean when full move to new_variable
-                if isinstance(o, easyscience.Objects.new_variable.parameter.Parameter):
-                    value_str += f'{o.value_no_call_back},'
-                else:
-                    value_str += f'{o.raw_value},'
+                value_str += f'{o.value_no_call_back},'
 
             value_str = value_str[:-1]
         else:
-            ## TODO clean when full move to new_variable
-            if isinstance(obj, easyscience.Objects.new_variable.parameter.Parameter):
-                value_str += f'{obj.value_no_call_back}'
-            else:
-                value_str += f'{obj.raw_value}'
+            value_str += f'{obj.value_no_call_back}'
 
         value_str += ')'
         try:
