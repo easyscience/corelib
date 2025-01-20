@@ -12,8 +12,11 @@ import pytest
 
 from easyscience.Objects.Groups import BaseCollection
 from easyscience.Objects.ObjectClasses import BaseObj
-from easyscience.Objects.Variable import Descriptor
-from easyscience.Objects.Variable import Parameter
+from easyscience.Objects.variable.parameter import Parameter
+from easyscience.Objects.variable.descriptor_str import DescriptorStr
+from easyscience.Objects.variable.descriptor_number import DescriptorNumber
+from easyscience.Objects.variable.descriptor_bool import DescriptorBool
+
 from easyscience.fitting import Fitter
 
 
@@ -22,9 +25,9 @@ def createSingleObjs(idx):
     reps = math.floor(idx / len(alphabet)) + 1
     name = alphabet[idx % len(alphabet)] * reps
     if idx % 2:
-        return Parameter(name, idx)
+        return Parameter(name, idx,unit="m/s")
     else:
-        return Descriptor(name, idx)
+        return DescriptorNumber(name, idx,unit="m/s")
 
 
 def createParam(option):
@@ -45,7 +48,10 @@ def doUndoRedo(obj, attr, future, additional=""):
 
     try:
         previous = getter(obj, attr)
-        setattr(obj, attr, future)
+        if attr == "unit" and hasattr(obj, "convert_unit"):
+            obj.convert_unit(future)
+        else:
+            setattr(obj, attr, future)
         assert getter(obj, attr) == future
         assert global_object.stack.canUndo()
         global_object.stack.undo()
@@ -59,6 +65,49 @@ def doUndoRedo(obj, attr, future, additional=""):
         global_object.stack.enabled = False
     return e
 
+@pytest.mark.parametrize(
+    "test",
+    [
+        createParam(option)
+        for option in [
+            ("value", 500),
+            ("error", 5),
+            ("unit", "km/s"),
+            ("display_name", "boom"),
+        ]
+    ],
+)
+
+def test_DescriptorNumberUndoRedo(test):
+    obj = DescriptorNumber('DescriptorNumber',1,unit='m/s')
+    attr = test[0]
+    value = test[1]
+
+    e = doUndoRedo(obj, attr, value)
+    assert not e
+
+def test_DescriptorBoolUndoRedo():
+    obj = DescriptorBool('DescriptorBool',False)
+    attr = 'value'
+    value = True
+
+    e = doUndoRedo(obj, attr, value)
+    assert not e
+
+    obj = DescriptorBool('DescriptorBool',True)
+    attr = 'value'
+    value = False
+
+    e = doUndoRedo(obj, attr, value)
+    assert not e
+
+def test_DescriptorStrUndoRedo():
+    obj = DescriptorStr('DescriptorStr','Foo')
+    attr = 'value'
+    value = 'Bar'
+
+    e = doUndoRedo(obj, attr, value)
+    assert not e
 
 @pytest.mark.parametrize(
     "test",
@@ -67,29 +116,23 @@ def doUndoRedo(obj, attr, future, additional=""):
         for option in [
             ("value", 500),
             ("error", 5),
-            ("enabled", False),
-            ("unit", "meter / second"),
+            ("unit", "km/s"),
             ("display_name", "boom"),
+            ("enabled", False),
             ("fixed", False),
             ("max", 505),
             ("min", -1),
         ]
     ],
 )
-@pytest.mark.parametrize(
-    "idx", [pytest.param(0, id="Descriptor"), pytest.param(1, id="Parameter")]
-)
-def test_SinglesUndoRedo(idx, test):
-    obj = createSingleObjs(idx)
+
+def test_ParameterUndoRedo(test):
+    obj = Parameter('Parameter',1,unit='m/s')
     attr = test[0]
     value = test[1]
 
-    if not hasattr(obj, attr):
-        pytest.skip(f"Not applicable: {obj} does not have field {attr}")
     e = doUndoRedo(obj, attr, value)
-    if e:
-        raise e
-
+    assert not e
 
 @pytest.mark.parametrize("value", (True, False))
 def test_Parameter_Bounds_UndoRedo(value):
@@ -125,9 +168,8 @@ def test_BaseObjUndoRedo():
 
     # Test setting value
     for b_obj in objs.values():
-        e = doUndoRedo(obj, b_obj.name, b_obj.raw_value + 1, "raw_value")
-        if e:
-            raise e
+        e = doUndoRedo(obj, b_obj.name, b_obj.value + 1, "value")
+        assert not e
 
 
 def test_BaseCollectionUndoRedo():
@@ -209,25 +251,25 @@ def test_UndoRedoMacros():
 
     global_object.stack.enabled = True
     global_object.stack.beginMacro(undo_text)
-    values = [item.raw_value for item in items]
+    values = [item.value for item in items]
 
     for item, value in zip(items, values):
         item.value = value + offset
     global_object.stack.endMacro()
 
     for item, old_value in zip(items, values):
-        assert item.raw_value == old_value + offset
+        assert item.value == old_value + offset
     assert global_object.stack.undoText() == undo_text
 
     global_object.stack.undo()
 
     for item, old_value in zip(items, values):
-        assert item.raw_value == old_value
+        assert item.value == old_value
     assert global_object.stack.redoText() == undo_text
 
     global_object.stack.redo()
     for item, old_value in zip(items, values):
-        assert item.raw_value == old_value + offset
+        assert item.value == old_value + offset
 
 
 @pytest.mark.parametrize("fit_engine", ["LMFit", "Bumps", "DFO"])
@@ -254,7 +296,7 @@ def test_fittingUndoRedo(fit_engine):
             return cls(m=m, c=c)
 
         def __call__(self, x: np.ndarray) -> np.ndarray:
-            return self.m.raw_value * x + self.c.raw_value
+            return self.m.value * x + self.c.value
 
     l1 = Line.default()
     m_sp = 4
@@ -277,78 +319,79 @@ def test_fittingUndoRedo(fit_engine):
     global_object.stack.enabled = True
     res = f.fit(x, y)
 
-    # assert l1.c.raw_value == pytest.approx(l2.c.raw_value, rel=l2.c.error * 3)
-    # assert l1.m.raw_value == pytest.approx(l2.m.raw_value, rel=l2.m.error * 3)
+    # assert l1.c.value == pytest.approx(l2.c.value, rel=l2.c.error * 3)
+    # assert l1.m.value == pytest.approx(l2.m.value, rel=l2.m.error * 3)
     assert global_object.stack.undoText() == "Fitting routine"
 
     global_object.stack.undo()
-    assert l2.m.raw_value == m_sp
-    assert l2.c.raw_value == c_sp
+    assert l2.m.value == m_sp
+    assert l2.c.value == c_sp
     assert global_object.stack.redoText() == "Fitting routine"
 
     global_object.stack.redo()
-    assert l2.m.raw_value == res.p[f"p{l2.m.unique_name}"]
-    assert l2.c.raw_value == res.p[f"p{l2.c.unique_name}"]
+    assert l2.m.value == res.p[f"p{l2.m.unique_name}"]
+    assert l2.c.value == res.p[f"p{l2.c.unique_name}"]
 
-
-# @pytest.mark.parametrize('math_funcs', [pytest.param([Parameter.__iadd__, float.__add__], id='Addition'),
-#                                         pytest.param([Parameter.__isub__, float.__sub__], id='Subtraction')])
+# TODO: Check if this test is needed
+# @pytest.mark.parametrize('math_funcs', [pytest.param([Parameter.__add__, float.__add__], id='Addition'),
+#                                         pytest.param([Parameter.__sub__, float.__sub__], id='Subtraction')])
 # def test_parameter_maths_basic(math_funcs):
 #     a = 1.0
 #     b = 2.0
 #     sa = 0.1
 #     sb = 0.2
-#
+
 #     p_fun = math_funcs[0]
 #     f_fun = math_funcs[1]
-#
+
 #     result_value = f_fun(a, b)
 #     result_error = (sa ** 2 + sb ** 2) ** 0.5
-#
+
 #     from easyscience import global_object
 #     global_object.stack.enabled = True
-#
+
 #     # Perform basic test
 #     p1 = Parameter('a', a)
 #     p2 = Parameter('b', b)
-#
+
 #     p1 = p_fun(p1, p2)
-#     assert float(p1) == result_value
+    
+#     assert p1.value == result_value
 #     global_object.stack.undo()
-#     assert float(p1) == a
+#     assert p1.value == a
 #     global_object.stack.redo()
-#     assert float(p1) == result_value
-#
-#     # Perform basic + error
-#     p1 = Parameter('a', a, error=sa)
-#     p2 = Parameter('b', b, error=sb)
-#     p1 = p_fun(p1, p2)
-#     assert float(p1) == result_value
-#     assert p1.error == result_error
-#     global_object.stack.undo()
-#     assert float(p1) == a
-#     assert p1.error == sa
-#     global_object.stack.redo()
-#     assert float(p1) == result_value
-#     assert p1.error == result_error
-#
-#     # Perform basic + units
-#     p1 = Parameter('a', a, error=sa, units='m/s')
-#     p2 = Parameter('b', b, error=sb, units='m/s')
-#     p1 = p_fun(p1, p2)
-#     assert float(p1) == result_value
-#     assert p1.error == result_error
-#     assert str(p1.unit) == 'meter / second'
-#     global_object.stack.undo()
-#     assert float(p1) == a
-#     assert p1.error == sa
-#     assert str(p1.unit) == 'meter / second'
-#     global_object.stack.redo()
-#     assert float(p1) == result_value
-#     assert p1.error == result_error
-#     assert str(p1.unit) == 'meter / second'
-#
-#
+#     assert p1.value == result_value
+
+    # # Perform basic + error
+    # p1 = Parameter('a', a, error=sa)
+    # p2 = Parameter('b', b, error=sb)
+    # p1 = p_fun(p1, p2)
+    # assert p1.value == result_value
+    # assert p1.error == result_error
+    # global_object.stack.undo()
+    # assert p1.value == a
+    # assert p1.error == sa
+    # global_object.stack.redo()
+    # assert p1.value == result_value
+    # assert p1.error == result_error
+
+    # # Perform basic + units
+    # p1 = Parameter('a', a, error=sa, units='m/s')
+    # p2 = Parameter('b', b, error=sb, units='m/s')
+    # p1 = p_fun(p1, p2)
+    # assert p1.value == result_value
+    # assert p1.error == result_error
+    # assert str(p1.unit) == 'meter / second'
+    # global_object.stack.undo()
+    # assert p1.value == a
+    # assert p1.error == sa
+    # assert str(p1.unit) == 'meter / second'
+    # global_object.stack.redo()
+    # assert p1.value == result_value
+    # assert p1.error == result_error
+    # assert str(p1.unit) == 'meter / second'
+
+
 # @pytest.mark.parametrize('math_funcs', [pytest.param([Parameter.__imul__, float.__mul__,
 #                                                       'meter ** 2 / second ** 2'], id='Multiplication'),
 #                                         pytest.param([Parameter.__itruediv__, float.__truediv__,
@@ -359,53 +402,53 @@ def test_fittingUndoRedo(fit_engine):
 #     sa = 0.1
 #     sb = 0.2
 #     unit = 'meter / second'
-#
+
 #     p_fun = math_funcs[0]
 #     f_fun = math_funcs[1]
 #     u_str = math_funcs[2]
-#
+
 #     result_value = f_fun(a, b)
 #     result_error = ((sa / a) ** 2 + (sb / b) ** 2) ** 0.5 * result_value
-#
+
 #     from easyscience import global_object
 #     global_object.stack.enabled = True
-#
+
 #     # Perform basic test
 #     p1 = Parameter('a', a)
 #     p2 = Parameter('b', b)
-#
+
 #     p1 = p_fun(p1, p2)
-#     assert float(p1) == result_value
+#     assert p1.value == result_value
 #     global_object.stack.undo()
-#     assert float(p1) == a
+#     assert p1.value == a
 #     global_object.stack.redo()
-#     assert float(p1) == result_value
-#
+#     assert p1.value == result_value
+
 #     # Perform basic + error
 #     p1 = Parameter('a', a, error=sa)
 #     p2 = Parameter('b', b, error=sb)
 #     p1 = p_fun(p1, p2)
-#     assert float(p1) == result_value
+#     assert p1.value == result_value
 #     assert p1.error == result_error
 #     global_object.stack.undo()
-#     assert float(p1) == a
+#     assert p1.value == a
 #     assert p1.error == sa
 #     global_object.stack.redo()
-#     assert float(p1) == result_value
+#     assert p1.value == result_value
 #     assert p1.error == result_error
-#
+
 #     # Perform basic + units
 #     p1 = Parameter('a', a, error=sa, units=unit)
 #     p2 = Parameter('b', b, error=sb, units=unit)
 #     p1 = p_fun(p1, p2)
-#     assert float(p1) == result_value
+#     assert p1.value == result_value
 #     assert p1.error == result_error
 #     assert str(p1.unit) == u_str
 #     global_object.stack.undo()
-#     assert float(p1) == a
+#     assert p1.value == a
 #     assert p1.error == sa
 #     assert str(p1.unit) == unit
 #     global_object.stack.redo()
-#     assert float(p1) == result_value
+#     assert p1.value == result_value
 #     assert p1.error == result_error
 #     assert str(p1.unit) == u_str

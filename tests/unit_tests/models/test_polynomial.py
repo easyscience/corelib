@@ -10,7 +10,7 @@ import pytest
 
 from easyscience.models.polynomial import Line
 from easyscience.models.polynomial import Polynomial
-from easyscience.Objects.Variable import Parameter
+from easyscience.Objects.variable.parameter import Parameter
 
 line_test_cases = ((1, 2), (-1, -2), (0.72, 6.48))
 poly_test_cases = (
@@ -29,11 +29,11 @@ poly_test_cases = (
 def test_Line_pars(m, c):
     line = Line(m, c)
 
-    assert line.m.raw_value == m
-    assert line.c.raw_value == c
+    assert line.m.value == m
+    assert line.c.value == c
 
     x = np.linspace(0, 10, 100)
-    y = line.m.raw_value * x + line.c.raw_value
+    y = line.m.value * x + line.c.value
     assert np.allclose(line(x), y)
 
 
@@ -43,11 +43,11 @@ def test_Line_constructor(m, c):
     c_ = Parameter("c", c)
     line = Line(m_, c_)
 
-    assert line.m.raw_value == m
-    assert line.c.raw_value == c
+    assert line.m.value == m
+    assert line.c.value == c
 
     x = np.linspace(0, 10, 100)
-    y = line.m.raw_value * x + line.c.raw_value
+    y = line.m.value * x + line.c.value
     assert np.allclose(line(x), y)
 
 
@@ -55,7 +55,7 @@ def test_Line_constructor(m, c):
 def test_Polynomial_pars(coo):
     poly = Polynomial(coefficients=coo)
 
-    vals = {coo.raw_value for coo in poly.coefficients}
+    vals = {coo.value for coo in poly.coefficients}
     assert len(vals.difference(set(coo))) == 0
 
     x = np.linspace(0, 10, 100)

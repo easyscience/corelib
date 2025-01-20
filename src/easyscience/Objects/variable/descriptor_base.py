@@ -23,7 +23,7 @@ class DescriptorBase(ComponentSerializer, metaclass=abc.ABCMeta):
     A `Descriptor` is typically something which describes part of a model and is non-fittable and generally changes the
     state of an object.
     """
-
+    _global_object = global_object
     # Used by serializer
     _REDIRECT = {'parent': None}
 

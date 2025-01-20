@@ -16,6 +16,12 @@ from typing import MutableSequence
 
 from easyscience import global_object
 from easyscience.Constraints import ObjConstraint
+from easyscience.Objects.variable.descriptor_base import DescriptorBase
+from easyscience.Objects.variable.descriptor_bool import DescriptorBool
+from easyscience.Objects.variable.descriptor_number import DescriptorNumber
+from easyscience.Objects.variable.descriptor_str import DescriptorStr
+from easyscience.Objects.variable.parameter import Constraints
+from easyscience.Objects.variable.parameter import Parameter
 
 if TYPE_CHECKING:
     from easyscience.Objects.ObjectClasses import BV
@@ -31,8 +37,8 @@ def _remover(a_obj_id: str, v_obj_id: str):
         a_obj = global_object.map.get_item_by_key(a_obj_id)
     except ValueError:
         return
-    if a_obj._constraints['virtual'].get(v_obj_id, False):
-        del a_obj._constraints['virtual'][v_obj_id]
+    if a_obj._constraints.virtual.get(v_obj_id, False):
+        del a_obj._constraints.virtual[v_obj_id]
 
 
 def realizer(obj: BV):
@@ -43,10 +49,9 @@ def realizer(obj: BV):
     """
     if getattr(obj, '_is_virtual', False):
         klass = getattr(obj, '__non_virtual_class__')
-        import easyscience.Objects.Variable as ec_var
 
         args = []
-        if klass in ec_var.__dict__.values():  # is_variable check
+        if klass in [DescriptorBool, DescriptorNumber, DescriptorStr, Parameter]:  # is_variable check
             kwargs = obj.encode_data()
             kwargs['unique_name'] = None
             return klass(**kwargs)
@@ -73,8 +78,6 @@ def component_realizer(obj: BV, component: str, recursive: bool = True):
     :param recursive: Should we realize all sub-components of the component
     """
 
-    import easyscience.Objects.Variable as ec_var
-
     done_mapping = True
     if not isinstance(obj, Iterable) or not issubclass(obj.__class__, MutableSequence):
         old_component = obj._kwargs[component]
@@ -95,7 +98,7 @@ def component_realizer(obj: BV, component: str, recursive: bool = True):
             else:
                 value = key
                 key = value.unique_name
-            if getattr(value, '__old_class__', value.__class__) in ec_var.__dict__.values():
+            if getattr(value, '__old_class__', value.__class__) in [DescriptorBool, DescriptorNumber, DescriptorStr, Parameter]:  # noqa: E501
                 continue
             component._global_object.map.prune_vertex_from_edge(component, component._kwargs[key])
             component._global_object.map.add_edge(component, old_component._kwargs[key])
@@ -148,9 +151,7 @@ def virtualizer(obj: BV) -> BV:
         'relalize_component': component_realizer,
     }
 
-    import easyscience.Objects.Variable as ec_var
-
-    if klass in ec_var.__dict__.values():  # is_variable check
+    if klass in [DescriptorBool, DescriptorNumber, DescriptorStr, Parameter]:  # is_variable check
         virtual_options['fixed'] = property(
             fget=lambda self: self._fixed,
             fset=lambda self, value: raise_(AttributeError('Virtual parameters cannot be fixed')),
@@ -160,7 +161,8 @@ def virtualizer(obj: BV) -> BV:
     # Determine what to do next.
     args = []
     # If `obj` is a parameter or descriptor etc, then simple mods.
-    if hasattr(obj, '_constructor'):
+    # if hasattr(obj, '_constructor'):
+    if isinstance(obj, DescriptorBase):
         # All Variables are based on the Descriptor.
         d = obj.encode_data()
         if hasattr(d, 'fixed'):
@@ -170,8 +172,12 @@ def virtualizer(obj: BV) -> BV:
         v_p._enabled = False
         constraint = ObjConstraint(v_p, '', obj)
         constraint.external = True
-        obj._constraints['virtual'][v_p.unique_name] = constraint
-        v_p._constraints['builtin'] = dict()
+        obj._constraints.virtual[v_p.unique_name] = constraint
+        v_p._constraints = Constraints(
+        user=v_p._constraints.user,
+        builtin=dict(),  # Set the new value for 'builtin'
+        virtual=v_p._constraints.virtual
+    )
         setattr(v_p, '__previous_set', getattr(obj, '__previous_set', None))
         weakref.finalize(
             v_p,

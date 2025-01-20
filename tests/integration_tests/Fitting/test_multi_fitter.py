@@ -12,7 +12,7 @@ from easyscience.Constraints import ObjConstraint
 from easyscience.fitting.multi_fitter import MultiFitter
 from easyscience.fitting.minimizers import FitError
 from easyscience.Objects.ObjectClasses import BaseObj
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import Parameter
 
 
 class Line(BaseObj):

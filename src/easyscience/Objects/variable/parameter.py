@@ -76,12 +76,14 @@ class Parameter(DescriptorNumber):
         :param parent: The object which is the parent to this one
 
         .. note::
-            Undo/Redo functionality is implemented for the attributes `value`, `error`, `min`, `max`, `fixed`
-        """
+            Undo/Redo functionality is implemented for the attributes `value`, `variance`, `error`, `min`, `max`, `bounds`, `fixed`, `unit`
+        """  # noqa: E501
         if not isinstance(min, numbers.Number):
             raise TypeError('`min` must be a number')
         if not isinstance(max, numbers.Number):
-            raise TypeError('`max` must be a number')
+            raise TypeError('`max` must be a number')        
+        if not isinstance(value, numbers.Number):
+            raise TypeError('`value` must be a number')
         if value < min:
             raise ValueError(f'{value=} can not be less than {min=}')
         if value > max:
@@ -92,6 +94,7 @@ class Parameter(DescriptorNumber):
         if not isinstance(fixed, bool):
             raise TypeError('`fixed` must be either True or False')
 
+        self._fixed = fixed # For fitting, but must be initialized before super().__init__
         self._min = sc.scalar(float(min), unit=unit)
         self._max = sc.scalar(float(max), unit=unit)
 
@@ -112,7 +115,6 @@ class Parameter(DescriptorNumber):
             weakref.finalize(self, self._callback.fdel)
 
         # Create additional fitting elements
-        self._fixed = fixed
         self._enabled = enabled
         self._initial_scalar = copy.deepcopy(self._scalar)
         builtin_constraint = {
@@ -317,7 +319,6 @@ class Parameter(DescriptorNumber):
         :return: Tuple of the parameters minimum and maximum values
         """
         return self.min, self.max
-
     @bounds.setter
     def bounds(self, new_bound: Tuple[numbers.Number, numbers.Number]) -> None:
         """
@@ -329,13 +330,23 @@ class Parameter(DescriptorNumber):
         old_max = self.max
         new_min, new_max = new_bound
 
+        # Begin macro operation for undo/redo
+        close_macro = False
+        if self._global_object.stack.enabled:
+            self._global_object.stack.beginMacro('Setting bounds')
+            close_macro = True
+
         try:
+            # Update bounds
             self.min = new_min
             self.max = new_max
         except ValueError:
+            # Rollback on failure
             self.min = old_min
             self.max = old_max
-            raise ValueError(f'Current paramter value: {self._scalar.value} must be within {new_bound=}')
+            if close_macro:
+                self._global_object.stack.endMacro()
+            raise ValueError(f'Current parameter value: {self._scalar.value} must be within {new_bound=}')
 
         # Enable the parameter if needed
         if not self.enabled:
@@ -344,6 +355,10 @@ class Parameter(DescriptorNumber):
         if self.fixed:
             self.fixed = False
 
+        # End macro operation
+        if close_macro:
+            self._global_object.stack.endMacro()
+            
     @property
     def builtin_constraints(self) -> Dict[str, SelfConstraint]:
         """

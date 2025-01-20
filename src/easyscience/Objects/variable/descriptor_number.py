@@ -12,6 +12,7 @@ import scipp as sc
 from scipp import UnitError
 from scipp import Variable
 
+from easyscience.global_object.undo_redo import PropertyStack
 from easyscience.global_object.undo_redo import property_stack_deco
 
 from .descriptor_base import DescriptorBase
@@ -44,8 +45,7 @@ class DescriptorNumber(DescriptorBase):
         param url: URL of the descriptor
         param display_name: Display name of the descriptor
         param parent: Parent of the descriptor
-
-        .. note:: Undo/Redo functionality is implemented for the attributes `variance` and `value`.
+        .. note:: Undo/Redo functionality is implemented for the attributes `variance`, `error`, `unit` and `value`.
         """
         if not isinstance(value, numbers.Number) or isinstance(value, bool):
             raise TypeError(f'{value=} must be a number')
@@ -176,6 +176,8 @@ class DescriptorNumber(DescriptorBase):
 
         :return: Error associated with parameter
         """
+        if self._scalar.variance is None:
+            return None
         return float(np.sqrt(self._scalar.variance))
 
     @error.setter
@@ -192,9 +194,11 @@ class DescriptorNumber(DescriptorBase):
             if value < 0:
                 raise ValueError(f'{value=} must be positive')
             value = float(value)
-        self._scalar.variance = value**2
+            self._scalar.variance = value**2
+        else:
+            self._scalar.variance = None
 
-    def convert_unit(self, unit_str: str):
+    def convert_unit(self, unit_str: str) -> None:
         """
         Convert the value from one unit system to another.
 
@@ -206,7 +210,28 @@ class DescriptorNumber(DescriptorBase):
             new_unit = sc.Unit(unit_str)
         except UnitError as message:
             raise UnitError(message) from None
-        self._scalar = self._scalar.to(unit=new_unit)
+
+        # Save the current state for undo/redo
+        old_scalar = self._scalar
+
+        # Perform the unit conversion
+        try:
+            new_scalar = self._scalar.to(unit=new_unit)
+        except Exception as e:
+            raise UnitError(f"Failed to convert unit: {e}") from e
+
+        # Define the setter function for the undo stack
+        def set_scalar(obj, scalar):
+            obj._scalar = scalar
+
+        # Push to undo stack
+        self._global_object.stack.push(
+            PropertyStack(self, set_scalar, old_scalar, new_scalar, text=f"Convert unit to {unit_str}")
+        )
+
+        # Update the scalar
+        self._scalar = new_scalar
+
 
     # Just to get return type right
     def __copy__(self) -> DescriptorNumber:
