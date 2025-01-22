@@ -270,23 +270,40 @@ class DescriptorArray(DescriptorBase):
     def __copy__(self) -> DescriptorArray:
         return super().__copy__()
 
-    def __repr__(self) -> str: #TODO: update __repr__ to give the content of the array, inspired by this code
-        """Return printable representation."""
-        string = '<'
-        string += self.__class__.__name__ + ' '
-        string += f"'{self._name}': "
-        # string += f'{self._array.values:.4f}'
-        # if self.variance:
-        #     string += f' \u00b1 {self.error:.4f}'
-        obj_unit = self._array.unit
-        if obj_unit == 'dimensionless':
-            obj_unit = ''
-        else:
-            obj_unit = f' {obj_unit}'
-        string += obj_unit
-        string += '>'
-        return string
-        # return f"<{class_name} '{obj_name}': {obj_value:0.04f}{obj_unit}>"
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the DescriptorArray, showing its name, value, variance, and unit.
+        Large arrays are summarized for brevity.
+        """
+        # Base string with name
+        string = f"<{self.__class__.__name__} '{self._name}': "
+
+        # Summarize array values
+        values_summary = np.array2string(
+            self._array.values, 
+            precision=4, 
+            threshold=10,  # Show full array if <=10 elements, else summarize
+            edgeitems=3,   # Show first and last 3 elements for large arrays
+        )
+        string += f"values={values_summary}"
+
+        # Add errors if they exists
+        if self._array.variances is not None:
+            errors_summary = np.array2string(
+                self.error, 
+                precision=4, 
+                threshold=10, 
+                edgeitems=3,
+            )
+            string += f", errors={errors_summary}"
+
+        # Add unit
+        obj_unit = str(self._array.unit)
+        if obj_unit and obj_unit != "dimensionless":
+            string += f", unit={obj_unit}"
+
+        string += ">"
+        return string    
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
         raw_dict = super().as_dict(skip=skip)
@@ -295,8 +312,13 @@ class DescriptorArray(DescriptorBase):
         raw_dict['variance'] = self._array.variances
         return raw_dict
 
-    # TODO: add matrix multiplication and division using numpy.
-    # def __add__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray: TODO: update all of these
+# TODO: add arithmetic operations
+# They should be allowed between DescriptorArray and numbers, and between DescriptorArray and DescriptorArray.
+# The result should be a new DescriptorArray with the same unit as the first argument.
+
+        
+
+    # def __add__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray: 
     #     if isinstance(other, numbers.Number):
     #         if self.unit != 'dimensionless':
     #             raise UnitError('Numbers can only be added to dimensionless values')
@@ -460,3 +482,7 @@ class DescriptorArray(DescriptorBase):
             elif letter not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '+', '-']:
                 return string[i:]
         return ''
+
+
+
+    # TODO: add matrix multiplication and division using numpy.
