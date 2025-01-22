@@ -312,6 +312,77 @@ class DescriptorArray(DescriptorBase):
         raw_dict['variance'] = self._array.variances
         return raw_dict
 
+
+    def __add__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise addition with another DescriptorArray, numpy array, list, or number.
+
+        :param other: The object to add. Must be a DescriptorArray with compatible units,
+                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
+        if isinstance(other, numbers.Number):
+            if self.unit not in [None, "dimensionless"]:
+                raise UnitError("Numbers can only be added to dimensionless values")
+            new_full_value = self.full_value + other # scipp can handle addition with numbers
+
+        elif isinstance(other, (list, np.ndarray)):
+            if self.unit not in [None, "dimensionless"]:
+                raise UnitError("Addition with numpy arrays or lists is only allowed for dimensionless values")
+            
+            # Convert `other` to numpy array if it's a list
+            if isinstance(other, list):
+                other = np.array(other)
+
+            # Ensure dimensions match
+            if other.shape != self._array.values.shape:
+                raise ValueError(f"Shape of {other=} must match the shape of DescriptorArray values")
+
+            new_value = self._array.values + other
+            new_full_value=sc.array(dims=['row','column'],values=new_value,unit=self.unit,variances=self._array.variances)
+
+        elif isinstance(other, DescriptorArray):
+            original_unit = other.unit
+            try:
+                other.convert_unit(self.unit)
+            except UnitError:
+                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
+
+            # Ensure dimensions match
+            if self.full_value.dims != other.full_value.dims:
+                raise ValueError(f"Dimensions of the DescriptorArrays do not match: "
+                                f"{self.full_value.dims} vs {other.full_value.dims}")
+
+            new_full_value = self.full_value + other.full_value
+
+            # Revert `other` to its original unit
+            other.convert_unit(original_unit)
+        else:
+            return NotImplemented
+        
+        descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_full_value)
+        descriptor_array.name = descriptor_array.unique_name
+        return descriptor_array
+
+
+    def __radd__(self, other: Union[list, np.ndarray, numbers.Number]) -> DescriptorArray:
+        """
+        Handle reverse addition for numbers, numpy arrays, and lists. Element-wise operation.
+        Converts the unit of `self` to match `other` if `other` is a DescriptorArray.
+
+        :param other: The object to add. Must be a DescriptorArray, numpy array, list, or number.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
+        if isinstance(other, DescriptorArray):
+            # Ensure the reverse operation respects unit compatibility
+            return other.__add__(self)
+        else:
+            # Delegate to `__add__` for other types
+            return self.__add__(other)
+
+
+
+
 # TODO: add arithmetic operations
 # They should be allowed between DescriptorArray and numbers, and between DescriptorArray and DescriptorArray.
 # The result should be a new DescriptorArray with the same unit as the first argument.
