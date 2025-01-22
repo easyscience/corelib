@@ -58,7 +58,7 @@ class DescriptorArray(DescriptorBase):
         # if not isinstance(unit, sc.Unit) and not isinstance(unit, str):
         #     raise TypeError(f'{unit=} must be a scipp unit or a string representing a valid scipp unit')
         # try:
-        #     self._scalar = sc.scalar(float(value), unit=unit, variance=variance)
+        #     self._array = sc.scalar(float(value), unit=unit, variance=variance)
         # except Exception as message:
         #     raise UnitError(message)
         
@@ -127,7 +127,7 @@ class DescriptorArray(DescriptorBase):
         """
         # if not isinstance(value, numbers.Number) or isinstance(value, bool): #TODO: add check if it's an array, possibly a numpy array
         #     raise TypeError(f'{value=} must be a number')
-        self._scalar.values = float(value)
+        self._array.values = float(value)
 
     @property
     def unit(self) -> str:
@@ -136,7 +136,7 @@ class DescriptorArray(DescriptorBase):
 
         :return: Unit as a string.
         """
-        return str(self._scalar.unit)
+        return str(self._array.unit)
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
@@ -154,7 +154,7 @@ class DescriptorArray(DescriptorBase):
 
         :return: variance.
         """
-        return self._scalar.variance
+        return self._array.variance
 
     @variance.setter
     @property_stack_deco
@@ -170,7 +170,7 @@ class DescriptorArray(DescriptorBase):
             if variance_float < 0:
                 raise ValueError(f'{variance_float=} must be positive')
             variance_float = float(variance_float)
-        self._scalar.variance = variance_float
+        self._array.variance = variance_float
 
     @property
     def error(self) -> float:
@@ -179,9 +179,9 @@ class DescriptorArray(DescriptorBase):
 
         :return: Error associated with parameter
         """
-        if self._scalar.variance is None:
+        if self._array.variance is None:
             return None
-        return float(np.sqrt(self._scalar.variance))
+        return float(np.sqrt(self._array.variance))
 
     @error.setter
     @property_stack_deco
@@ -197,9 +197,9 @@ class DescriptorArray(DescriptorBase):
             if value < 0:
                 raise ValueError(f'{value=} must be positive')
             value = float(value)
-            self._scalar.variance = value**2
+            self._array.variance = value**2
         else:
-            self._scalar.variance = None
+            self._array.variance = None
 
     def convert_unit(self, unit_str: str) -> None:
         """
@@ -215,25 +215,25 @@ class DescriptorArray(DescriptorBase):
             raise UnitError(message) from None
 
         # Save the current state for undo/redo
-        old_scalar = self._scalar
+        old_array = self._array
 
         # Perform the unit conversion
         try:
-            new_scalar = self._scalar.to(unit=new_unit)
+            new_array = self._array.to(unit=new_unit)
         except Exception as e:
             raise UnitError(f"Failed to convert unit: {e}") from e
 
         # Define the setter function for the undo stack
-        def set_scalar(obj, scalar):
-            obj._scalar = scalar
+        def set_array(obj, scalar):
+            obj._array = scalar
 
         # Push to undo stack
         self._global_object.stack.push(
-            PropertyStack(self, set_scalar, old_scalar, new_scalar, text=f"Convert unit to {unit_str}")
+            PropertyStack(self, set_array, old_array, new_array, text=f"Convert unit to {unit_str}")
         )
 
         # Update the scalar
-        self._scalar = new_scalar
+        self._array = new_array
 
 
     # Just to get return type right
@@ -245,10 +245,10 @@ class DescriptorArray(DescriptorBase):
         string = '<'
         string += self.__class__.__name__ + ' '
         string += f"'{self._name}': "
-        string += f'{self._scalar.value:.4f}'
+        string += f'{self._array.value:.4f}'
         if self.variance:
             string += f' \u00b1 {self.error:.4f}'
-        obj_unit = self._scalar.unit
+        obj_unit = self._array.unit
         if obj_unit == 'dimensionless':
             obj_unit = ''
         else:
@@ -260,9 +260,9 @@ class DescriptorArray(DescriptorBase):
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
         raw_dict = super().as_dict(skip=skip)
-        raw_dict['value'] = self._scalar.value
-        raw_dict['unit'] = str(self._scalar.unit)
-        raw_dict['variance'] = self._scalar.variance
+        raw_dict['value'] = self._array.value
+        raw_dict['unit'] = str(self._array.unit)
+        raw_dict['variance'] = self._array.variance
         return raw_dict
 
     def __add__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
@@ -421,7 +421,7 @@ class DescriptorArray(DescriptorBase):
         return descriptor_number
 
     def _base_unit(self) -> str:
-        string = str(self._scalar.unit)
+        string = str(self._array.unit)
         for i, letter in enumerate(string):
             if letter == 'e':
                 if string[i : i + 2] not in ['e+', 'e-']:
