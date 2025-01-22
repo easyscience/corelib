@@ -55,14 +55,16 @@ class DescriptorArray(DescriptorBase):
         #     if variance < 0:
         #         raise ValueError(f'{variance=} must be positive')
         #     variance = float(variance)
-        # if not isinstance(unit, sc.Unit) and not isinstance(unit, str):
-        #     raise TypeError(f'{unit=} must be a scipp unit or a string representing a valid scipp unit')
+        if not isinstance(unit, sc.Unit) and not isinstance(unit, str):
+            raise TypeError(f'{unit=} must be a scipp unit or a string representing a valid scipp unit')
         # try:
         #     self._array = sc.scalar(float(value), unit=unit, variance=variance)
         # except Exception as message:
         #     raise UnitError(message)
         
-        self._array = sc.array(dims=['row','column'],values=float(value), unit=unit, variance=variance)
+
+        #TODO:do check needed like in the above outcommented code, but update for arrays as in the following line
+        self._array = sc.array(dims=['row','column'],values=value, unit=unit, variances=variance)
         
         super().__init__(
             name=name,
@@ -164,7 +166,7 @@ class DescriptorArray(DescriptorBase):
 
         :param variance_float: Variance as a float
         """
-        #TODO:update chekcs of variance
+        #TODO:update chekcs of variance to check for an array
         if variance_float is not None:
             if not isinstance(variance_float, numbers.Number):
                 raise TypeError(f'{variance_float=} must be a number or None')
@@ -173,7 +175,7 @@ class DescriptorArray(DescriptorBase):
             variance_float = float(variance_float)
         self._array.variances = variance_float
 
-    # @property #TODO: do we even want errors on arrays?
+    # @property #TODO: update to handle arrays
     # def error(self) -> float:
     #     """
     #     The standard deviation for the parameter.
@@ -241,23 +243,23 @@ class DescriptorArray(DescriptorBase):
     def __copy__(self) -> DescriptorArray:
         return super().__copy__()
 
-    # def __repr__(self) -> str: #TODO: update __repr__
-    #     """Return printable representation."""
-    #     string = '<'
-    #     string += self.__class__.__name__ + ' '
-    #     string += f"'{self._name}': "
-    #     string += f'{self._array.values:.4f}'
-    #     if self.variance:
-    #         string += f' \u00b1 {self.error:.4f}'
-    #     obj_unit = self._array.unit
-    #     if obj_unit == 'dimensionless':
-    #         obj_unit = ''
-    #     else:
-    #         obj_unit = f' {obj_unit}'
-    #     string += obj_unit
-    #     string += '>'
-    #     return string
-    #     # return f"<{class_name} '{obj_name}': {obj_value:0.04f}{obj_unit}>"
+    def __repr__(self) -> str: #TODO: update __repr__ to give the content of the array, inspired by this code
+        """Return printable representation."""
+        string = '<'
+        string += self.__class__.__name__ + ' '
+        string += f"'{self._name}': "
+        # string += f'{self._array.values:.4f}'
+        # if self.variance:
+        #     string += f' \u00b1 {self.error:.4f}'
+        obj_unit = self._array.unit
+        if obj_unit == 'dimensionless':
+            obj_unit = ''
+        else:
+            obj_unit = f' {obj_unit}'
+        string += obj_unit
+        string += '>'
+        return string
+        # return f"<{class_name} '{obj_name}': {obj_value:0.04f}{obj_unit}>"
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
         raw_dict = super().as_dict(skip=skip)
@@ -266,6 +268,7 @@ class DescriptorArray(DescriptorBase):
         raw_dict['variance'] = self._array.variances
         return raw_dict
 
+    # TODO: add matrix multiplication and division using numpy.
     # def __add__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray: TODO: update all of these
     #     if isinstance(other, numbers.Number):
     #         if self.unit != 'dimensionless':
