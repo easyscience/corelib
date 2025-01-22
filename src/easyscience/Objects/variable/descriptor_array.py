@@ -128,15 +128,22 @@ class DescriptorArray(DescriptorBase):
 
     @value.setter
     @property_stack_deco
-    def value(self, value: numbers.Number) -> None: #TODO: Update typing 
+    def value(self, value: Union[list, np.ndarray]) -> None:
         """
-        Set the value of self. This should be usable for most cases. The full value can be obtained from `obj.full_value`.
+        Set the value of self. Ensures the input is an array and matches the shape of the existing array.
+        The full value can be obtained from `obj.full_value`.
 
-        :param value: New value of self
+        :param value: New value for the DescriptorArray, must be a list or numpy array.
         """
-        # if not isinstance(value, numbers.Number) or isinstance(value, bool): #TODO: add check if it's an array, possibly a numpy array
-        #     raise TypeError(f'{value=} must be a number')
-        self._array.values = float(value)
+        if not isinstance(value, (list, np.ndarray)):
+            raise TypeError(f"{value=} must be a list or numpy array.")
+        if isinstance(value, list):
+            value = np.array(value)  # Convert lists to numpy arrays for consistent handling.
+
+        if value.shape != self._array.values.shape:
+            raise ValueError(f"{value=} must have the same shape as the existing array values.")
+
+        self._array.values = value
 
     @property
     def unit(self) -> str:
@@ -167,20 +174,26 @@ class DescriptorArray(DescriptorBase):
 
     @variance.setter
     @property_stack_deco
-    def variance(self, variance_float: float) -> None:
+    def variance(self, variance: Union[list, np.ndarray]) -> None:
         """
-        Set the variance.
+        Set the variance of self. Ensures the input is an array and matches the shape of the existing values.
 
-        :param variance_float: Variance as a float
+        :param variance: New variance for the DescriptorArray, must be a list or numpy array.
         """
-        #TODO:update chekcs of variance to check for an array
-        if variance_float is not None:
-            if not isinstance(variance_float, numbers.Number):
-                raise TypeError(f'{variance_float=} must be a number or None')
-            if variance_float < 0:
-                raise ValueError(f'{variance_float=} must be positive')
-            variance_float = float(variance_float)
-        self._array.variances = variance_float
+        if variance is not None:
+            if not isinstance(variance, (list, np.ndarray)):
+                raise TypeError(f"{variance=} must be a list or numpy array.")
+            if isinstance(variance, list):
+                variance = np.array(variance)  # Convert lists to numpy arrays for consistent handling.
+
+            if variance.shape != self._array.values.shape:
+                raise ValueError(f"{variance=} must have the same shape as the array values.")
+
+            if not np.all(variance >= 0):
+                raise ValueError(f"{variance=} must only contain non-negative values.")
+
+        self._array.variances = variance
+        
 
     # @property #TODO: update to handle arrays
     # def error(self) -> float:
