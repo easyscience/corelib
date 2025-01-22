@@ -194,35 +194,42 @@ class DescriptorArray(DescriptorBase):
 
         self._array.variances = variance
         
+    @property
+    def error(self) -> Optional[np.ndarray]:
+        """
+        The standard deviations , calculated as the square root of variances.
 
-    # @property #TODO: update to handle arrays
-    # def error(self) -> float:
-    #     """
-    #     The standard deviation for the parameter.
+        :return: A numpy array of standard deviations, or None if variances are not set.
+        """
+        if self._array.variances is None:
+            return None
+        return np.sqrt(self._array.variances)
 
-    #     :return: Error associated with parameter
-    #     """
-    #     if self._array.variances is None:
-    #         return None
-    #     return float(np.sqrt(self._array.variances))
+    @error.setter
+    @property_stack_deco
+    def error(self, error: Union[list, np.ndarray]) -> None:
+        """
+        Set the standard deviation for the parameter, which updates the variances.
 
-    # @error.setter
-    # @property_stack_deco
-    # def error(self, value: float) -> None:
-    #     """
-    #     Set the standard deviation for the parameter.
+        :param error: A list or numpy array of standard deviations.
+        """
+        if error is not None:
+            if not isinstance(error, (list, np.ndarray)):
+                raise TypeError(f"{error=} must be a list or numpy array.")
+            if isinstance(error, list):
+                error = np.array(error)  # Convert lists to numpy arrays for consistent handling.
 
-    #     :param value: New error value
-    #     """
-    #     if value is not None:
-    #         if not isinstance(value, numbers.Number):
-    #             raise TypeError(f'{value=} must be a number or None')
-    #         if value < 0:
-    #             raise ValueError(f'{value=} must be positive')
-    #         value = float(value)
-    #         self._array.variances = value**2 #TODO: check if this works for lists
-    #     else:
-    #         self._array.variance = None
+            if error.shape != self._array.values.shape:
+                raise ValueError(f"{error=} must have the same shape as the array values.")
+
+            if not np.all(error >= 0):
+                raise ValueError(f"{error=} must only contain non-negative values.")
+
+            # Update variances as the square of the errors
+            self._array.variances = error**2
+        else:
+            self._array.variances = None
+            
 
     def convert_unit(self, unit_str: str) -> None:
         """
