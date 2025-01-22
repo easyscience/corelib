@@ -164,42 +164,43 @@ class DescriptorArray(DescriptorBase):
 
         :param variance_float: Variance as a float
         """
+        #TODO:update chekcs of variance
         if variance_float is not None:
             if not isinstance(variance_float, numbers.Number):
                 raise TypeError(f'{variance_float=} must be a number or None')
             if variance_float < 0:
                 raise ValueError(f'{variance_float=} must be positive')
             variance_float = float(variance_float)
-        self._array.variance = variance_float
+        self._array.variances = variance_float
 
-    @property
-    def error(self) -> float:
-        """
-        The standard deviation for the parameter.
+    # @property #TODO: do we even want errors on arrays?
+    # def error(self) -> float:
+    #     """
+    #     The standard deviation for the parameter.
 
-        :return: Error associated with parameter
-        """
-        if self._array.variance is None:
-            return None
-        return float(np.sqrt(self._array.variance))
+    #     :return: Error associated with parameter
+    #     """
+    #     if self._array.variances is None:
+    #         return None
+    #     return float(np.sqrt(self._array.variances))
 
-    @error.setter
-    @property_stack_deco
-    def error(self, value: float) -> None:
-        """
-        Set the standard deviation for the parameter.
+    # @error.setter
+    # @property_stack_deco
+    # def error(self, value: float) -> None:
+    #     """
+    #     Set the standard deviation for the parameter.
 
-        :param value: New error value
-        """
-        if value is not None:
-            if not isinstance(value, numbers.Number):
-                raise TypeError(f'{value=} must be a number or None')
-            if value < 0:
-                raise ValueError(f'{value=} must be positive')
-            value = float(value)
-            self._array.variance = value**2
-        else:
-            self._array.variance = None
+    #     :param value: New error value
+    #     """
+    #     if value is not None:
+    #         if not isinstance(value, numbers.Number):
+    #             raise TypeError(f'{value=} must be a number or None')
+    #         if value < 0:
+    #             raise ValueError(f'{value=} must be positive')
+    #         value = float(value)
+    #         self._array.variances = value**2 #TODO: check if this works for lists
+    #     else:
+    #         self._array.variance = None
 
     def convert_unit(self, unit_str: str) -> None:
         """
