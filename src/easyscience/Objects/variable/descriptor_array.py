@@ -47,23 +47,30 @@ class DescriptorArray(DescriptorBase):
         param parent: Parent of the descriptor
         .. note:: Undo/Redo functionality is implemented for the attributes `variance`, `error`, `unit` and `value`.
         """
-        # if not isinstance(value, numbers.Number) or isinstance(value, bool):
-        #     raise TypeError(f'{value=} must be a number')
-        # if variance is not None:
-        #     if not isinstance(variance, numbers.Number) or isinstance(variance, bool):
-        #         raise TypeError(f'{variance=} must be a number or None')
-        #     if variance < 0:
-        #         raise ValueError(f'{variance=} must be positive')
-        #     variance = float(variance)
+
+        if not isinstance(value, (list, np.ndarray)):
+            raise TypeError(f"{value=} must be a list or numpy array.")
+        if isinstance(value, list):
+            value = np.array(value)  # Convert to numpy array for consistent handling.
+
+        if variance is not None:
+            if not isinstance(variance, (list, np.ndarray)):
+                raise TypeError(f"{variance=} must be a list or numpy array if provided.")
+            if isinstance(variance, list):
+                variance = np.array(variance)  # Convert to numpy array for consistent handling.
+            if variance.shape != value.shape:
+                raise ValueError(f"{variance=} must have the same shape as {value=}.")
+            if not np.all(variance >= 0):
+                raise ValueError(f"{variance=} must only contain non-negative values.")
+            
         if not isinstance(unit, sc.Unit) and not isinstance(unit, str):
             raise TypeError(f'{unit=} must be a scipp unit or a string representing a valid scipp unit')
-        # try:
-        #     self._array = sc.scalar(float(value), unit=unit, variance=variance)
-        # except Exception as message:
-        #     raise UnitError(message)
-        
 
-        #TODO:do check needed like in the above outcommented code, but update for arrays as in the following line
+        try:
+            self._array = sc.array(dims=['row', 'column'], values=value, unit=unit, variances=variance)
+        except Exception as message:
+            raise UnitError(message)
+                
         self._array = sc.array(dims=['row','column'],values=value, unit=unit, variances=variance)
         
         super().__init__(
