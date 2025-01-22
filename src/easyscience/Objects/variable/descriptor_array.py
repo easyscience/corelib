@@ -96,11 +96,11 @@ class DescriptorArray(DescriptorBase):
     @property
     def full_value(self) -> Variable:
         """
-        Get the value of self as a scipp scalar. This is should be usable for most cases.
+        Get the value of self as a scipp array. This is should be usable for most cases.
 
         :return: Value of self with unit.
         """
-        return self._scalar
+        return self._array
 
     @full_value.setter
     def full_value(self, full_value: Variable) -> None:
@@ -115,19 +115,19 @@ class DescriptorArray(DescriptorBase):
 
         :return: Value of self with unit.
         """
-        return self._scalar.value
+        return self._array.values
 
     @value.setter
     @property_stack_deco
-    def value(self, value: numbers.Number) -> None:
+    def value(self, value: numbers.Number) -> None: #TODO: Update typing 
         """
         Set the value of self. This should be usable for most cases. The full value can be obtained from `obj.full_value`.
 
         :param value: New value of self
         """
-        if not isinstance(value, numbers.Number) or isinstance(value, bool):
-            raise TypeError(f'{value=} must be a number')
-        self._scalar.value = float(value)
+        # if not isinstance(value, numbers.Number) or isinstance(value, bool): #TODO: add check if it's an array, possibly a numpy array
+        #     raise TypeError(f'{value=} must be a number')
+        self._scalar.values = float(value)
 
     @property
     def unit(self) -> str:
