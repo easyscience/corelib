@@ -122,30 +122,31 @@ class TestDescriptorArray:
     #     with pytest.raises(TypeError):
     #         DescriptorArray.from_scipp(name="name", full_value=full_value)
 
-    # def test_full_value(self, descriptor: DescriptorArray):
-    #     # When Then Expect
-    #     assert descriptor.full_value == sc.scalar(1, unit='m')
+    def test_full_value(self, descriptor: DescriptorArray):
+        # When Then Expect
+        assert descriptor.full_value == sc.array(dims=['row','column'],values=[[1,2],[3,4]], unit='m')
         
-    # def test_set_full_value(self, descriptor: DescriptorArray):
-    #     with pytest.raises(AttributeError):
-    #         descriptor.full_value = sc.scalar(2, unit='s')
+    def test_set_full_value(self, descriptor: DescriptorArray):
+        with pytest.raises(AttributeError):
+            descriptor.full_value = sc.array(dims=['row','column'],values=[[1,2],[3,4]], unit='s')
 
-    # def test_unit(self, descriptor: DescriptorArray):
-    #     # When Then Expect
-    #     assert descriptor.unit == 'm'
+    def test_unit(self, descriptor: DescriptorArray):
+        # When Then Expect
+        assert descriptor.unit == 'm'
         
-    # def test_set_unit(self, descriptor: DescriptorArray):
-    #     with pytest.raises(AttributeError):
-    #         descriptor.unit = 's'
+    def test_set_unit(self, descriptor: DescriptorArray):
+        with pytest.raises(AttributeError):
+            descriptor.unit = 's'
 
-    # def test_convert_unit(self, descriptor: DescriptorArray):
-    #     # When  Then
-    #     descriptor.convert_unit('mm')
+    def test_convert_unit(self, descriptor: DescriptorArray):
+        # When  Then
+        descriptor.convert_unit('mm')
 
-    #     # Expect
-    #     assert descriptor._array.unit == 'mm'
-    #     assert descriptor._array.value == 1000
-    #     assert descriptor._array.variance == 100000
+        # Expect
+        assert descriptor._array.unit == 'mm'
+        print(descriptor._array.variances)
+        assert np.array_equal(descriptor._array.values,[[1000,2000],[3000,4000]])
+        assert np.array_equal(descriptor._array.variances,[[100000,200000],[300000,400000]])
 
     # def test_variance(self, descriptor: DescriptorArray):
     #     # When Then Expect
