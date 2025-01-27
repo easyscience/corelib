@@ -302,7 +302,9 @@ class DescriptorArray(DescriptorBase):
             string += f", unit={obj_unit}"
 
         string += ">"
+        string=string.replace('\n', ',')
         return string    
+
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
         raw_dict = super().as_dict(skip=skip)

@@ -148,57 +148,62 @@ class TestDescriptorArray:
         assert np.array_equal(descriptor._array.values,[[1000,2000],[3000,4000]])
         assert np.array_equal(descriptor._array.variances,[[100000,200000],[300000,400000]])
 
-    # def test_variance(self, descriptor: DescriptorArray):
-    #     # When Then Expect
-    #     assert descriptor.variance == 0.1
+    def test_variance(self, descriptor: DescriptorArray):
+        # When Then Expect
+        assert np.array_equal(descriptor._array.variances, np.array([[0.1, 0.2], [0.3, 0.4]]))
+
         
-    # def test_set_variance(self, descriptor: DescriptorArray):
-    #     # When Then
-    #     descriptor.variance = 0.2
+    def test_set_variance(self, descriptor: DescriptorArray):
+        # When Then
+        descriptor.variance = [[0.2, 0.3], [0.4, 0.5]]
 
-    #     # Expect
-    #     assert descriptor._array.variance == 0.2
-    #     assert descriptor.error == 0.4472135954999579
+        # Expect
+        assert np.array_equal(descriptor.variance, np.array([[0.2, 0.3], [0.4, 0.5]]))
 
-    # def test_error(self, descriptor: DescriptorArray):
-    #     # When Then Expect
-    #     assert descriptor.error == 0.31622776601683794
+        assert np.array_equal(descriptor.error, np.sqrt(np.array([[0.2, 0.3], [0.4, 0.5]])))
+
+    def test_error(self, descriptor: DescriptorArray):
+        # When Then Expect
+        assert np.array_equal(descriptor.error, np.sqrt(np.array([[0.1, 0.2], [0.3, 0.4]])))
+
         
-    # def test_set_error(self, descriptor: DescriptorArray):
-    #     # When Then
-    #     descriptor.error = 0.31622776601683794
+    def test_set_error(self, descriptor: DescriptorArray):
+        # When Then
+        descriptor.error = np.sqrt(np.array([[0.2, 0.3], [0.4, 0.5]]))
+        print(descriptor.variance)
+        print(descriptor.error)
+        # Expect
+        assert np.allclose(descriptor.error, np.sqrt(np.array([[0.2, 0.3], [0.4, 0.5]])))
+        assert np.allclose(descriptor.variance, np.array([[0.2, 0.3], [0.4, 0.5]]))
 
-    #     # Expect
-    #     assert descriptor.error == 0.31622776601683794
-    #     assert descriptor.variance == 0.1
 
+    def test_value(self, descriptor: DescriptorArray):
+        # When Then Expect
+        print(descriptor.value)
+        
+        assert np.array_equal(descriptor.value, np.array([[1, 2], [3, 4]]))
 
-    # def test_value(self, descriptor: DescriptorArray):
-    #     # When Then Expect
-    #     assert descriptor.value == 1
+    def test_set_value(self, descriptor: DescriptorArray):
+        # When Then
+        descriptor.value = ([[0.2, 0.3], [0.4, 0.5]])
+        # Expect
+        assert np.array_equal(descriptor._array.values, np.array([[0.2, 0.3], [0.4, 0.5]]))
 
-    # def test_set_value(self, descriptor: DescriptorArray):
-    #     # When Then
-    #     descriptor.value = 2
+    def test_repr(self, descriptor: DescriptorArray):
+        # When Then
+        repr_str = str(descriptor)
 
-    #     # Expect
-    #     assert descriptor._array.value == 2
+        # Expect
+        assert repr_str ==  "<DescriptorArray 'name': values=[[1. 2.], [3. 4.]], errors=[[0.3162 0.4472], [0.5477 0.6325]], unit=m>"
 
-    # def test_repr(self, descriptor: DescriptorArray):
-    #     # When Then
-    #     repr_str = str(descriptor)
+    def test_copy(self, descriptor: DescriptorArray):
+        # When Then
+        descriptor_copy = descriptor.__copy__()
 
-    #     # Expect
-    #     assert repr_str ==  "<DescriptorArray 'name': 1.0000 ± 0.3162 m>"
-
-    # def test_copy(self, descriptor: DescriptorArray):
-    #     # When Then
-    #     descriptor_copy = descriptor.__copy__()
-
-    #     # Expect
-    #     assert type(descriptor_copy) == DescriptorArray
-    #     assert descriptor_copy._array.value == descriptor._array.value
-    #     assert descriptor_copy._array.unit == descriptor._array.unit
+        # Expect
+        assert type(descriptor_copy) == DescriptorArray
+        assert descriptor_copy._array.values == descriptor._array.values
+        assert descriptor_copy._array.unit == descriptor._array.unit
 
     # def test_as_data_dict(self, clear, descriptor: DescriptorArray):
     #     # When Then
