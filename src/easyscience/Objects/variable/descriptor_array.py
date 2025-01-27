@@ -314,7 +314,7 @@ class DescriptorArray(DescriptorBase):
         return raw_dict
     
 
-    
+
 
 
     def __add__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
@@ -396,7 +396,17 @@ class DescriptorArray(DescriptorBase):
             # Delegate to `__add__` for other types
             return self.__add__(other)
 
+    def __neg__(self) -> DescriptorNumber:
+        new_value = -self.full_value
+        descriptor_array = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
+        descriptor_array.name = descriptor_array.unique_name
+        return descriptor_array
 
+    def __abs__(self) -> DescriptorNumber:
+        new_value = abs(self.full_value)
+        descriptor_array = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
+        descriptor_array.name = descriptor_array.unique_name
+        return descriptor_array
 
 
 # TODO: add arithmetic operations
