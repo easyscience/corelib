@@ -169,7 +169,7 @@ class DescriptorArray(DescriptorBase):
 
         :return: variance.
         """
-        return self._array.variance
+        return self._array.variances
 
     @variance.setter
     @property_stack_deco
@@ -344,7 +344,7 @@ class DescriptorArray(DescriptorBase):
 
         elif isinstance(other, DescriptorNumber):
             try:
-                other_converted = other.copy()
+                other_converted = other.__copy__()
                 other_converted.convert_unit(self.unit)
             except UnitError:
                 raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
@@ -353,7 +353,7 @@ class DescriptorArray(DescriptorBase):
 
         elif isinstance(other, DescriptorArray):
             try:
-                other_converted = other.copy()
+                other_converted = other.__copy__()
                 other_converted.convert_unit(self.unit)
             except UnitError:
                 raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
