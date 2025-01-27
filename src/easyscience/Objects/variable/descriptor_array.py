@@ -319,9 +319,9 @@ class DescriptorArray(DescriptorBase):
 
     def __add__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
-        Perform element-wise addition with another DescriptorArray, numpy array, list, or number.
+        Perform element-wise addition with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
 
-        :param other: The object to add. Must be a DescriptorArray with compatible units,
+        :param other: The object to add. Must be a DescriptorArray or DescriptorNumber with compatible units,
                     or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
         :return: A new DescriptorArray representing the result of the addition.
         """
@@ -381,20 +381,48 @@ class DescriptorArray(DescriptorBase):
         return descriptor_array
 
 
-    def __radd__(self, other: Union[list, np.ndarray, numbers.Number]) -> DescriptorArray:
+    def __radd__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
-        Handle reverse addition for numbers, numpy arrays, and lists. Element-wise operation.
-        Converts the unit of `self` to match `other` if `other` is a DescriptorArray.
-
-        :param other: The object to add. Must be a DescriptorArray, numpy array, list, or number.
-        :return: A new DescriptorArray representing the result of the addition.
+        Handle reverse addition for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
+        Ensures unit compatibility when `other` is a DescriptorNumber.
         """
-        if isinstance(other, DescriptorArray,DescriptorNumber):
-            # Ensure the reverse operation respects unit compatibility
+        if isinstance(other, DescriptorArray):
+            # Delegate reverse addition to `other`, respecting unit compatibility
             return other.__add__(self)
+
+        elif isinstance(other, DescriptorNumber):
+            # Ensure unit compatibility for DescriptorNumber
+            original_unit = self.unit
+            try:
+                self.convert_unit(other.unit)  # Convert `self` to `other`'s unit
+            except UnitError:
+                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
+
+            result = self.__add__(other)
+
+            # Revert `self` to its original unit
+            self.convert_unit(original_unit)
+            return result
+
         else:
-            # Delegate to `__add__` for other types
+            # Delegate to `__add__` for other types (e.g., list, np.ndarray, scalar)
             return self.__add__(other)
+
+        
+    def __sub__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise subtraction with another DescriptorArray, numpy array, list, or number.
+
+        :param other: The object to subtract. Must be a DescriptorArray with compatible units,
+                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+        :return: A new DescriptorArray representing the result of the subtraction.
+        """
+        if isinstance(other, (DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number)):
+            # Leverage __neg__ and __add__ for subtraction
+            return self.__add__(-other)
+        else:
+            return NotImplemented
+
 
     def __neg__(self) -> DescriptorNumber:
         new_value = -self.full_value
