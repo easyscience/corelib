@@ -314,7 +314,6 @@ class DescriptorArray(DescriptorBase):
 
 
 
-
     def __add__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
         Perform element-wise addition with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
@@ -326,7 +325,7 @@ class DescriptorArray(DescriptorBase):
         if isinstance(other, numbers.Number):
             if self.unit not in [None, "dimensionless"]:
                 raise UnitError("Numbers can only be added to dimensionless values")
-            new_full_value = self.full_value + other # scipp can handle addition with numbers
+            new_full_value = self.full_value + other  # scipp can handle addition with numbers
 
         elif isinstance(other, (list, np.ndarray)):
             if self.unit not in [None, "dimensionless"]:
@@ -341,42 +340,38 @@ class DescriptorArray(DescriptorBase):
                 raise ValueError(f"Shape of {other=} must match the shape of DescriptorArray values")
 
             new_value = self._array.values + other
-            new_full_value=sc.array(dims=['row','column'],values=new_value,unit=self.unit,variances=self._array.variances)
+            new_full_value = sc.array(dims=['row', 'column'], values=new_value, unit=self.unit, variances=self._array.variances)
 
         elif isinstance(other, DescriptorNumber):
-            original_unit = other.unit
             try:
-                other.convert_unit(self.unit)
+                other_converted = other.copy()
+                other_converted.convert_unit(self.unit)
             except UnitError:
                 raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
 
-            new_full_value = self.full_value + other.full_value
-
-            # Revert `other` to its original unit
-            other.convert_unit(original_unit)
+            new_full_value = self.full_value + other_converted.full_value
 
         elif isinstance(other, DescriptorArray):
-            original_unit = other.unit
             try:
-                other.convert_unit(self.unit)
+                other_converted = other.copy()
+                other_converted.convert_unit(self.unit)
             except UnitError:
                 raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
 
             # Ensure dimensions match
-            if self.full_value.dims != other.full_value.dims:
+            if self.full_value.dims != other_converted.full_value.dims:
                 raise ValueError(f"Dimensions of the DescriptorArrays do not match: "
-                                f"{self.full_value.dims} vs {other.full_value.dims}")
+                                f"{self.full_value.dims} vs {other_converted.full_value.dims}")
 
-            new_full_value = self.full_value + other.full_value
+            new_full_value = self.full_value + other_converted.full_value
 
-            # Revert `other` to its original unit
-            other.convert_unit(original_unit)
         else:
             return NotImplemented
-        
+
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_full_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
+
 
 
     def __radd__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
@@ -420,7 +415,20 @@ class DescriptorArray(DescriptorBase):
             return self.__add__(-other)
         else:
             return NotImplemented
+        
+    def __rsub__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise subtraction with another DescriptorArray, numpy array, list, or number.
 
+        :param other: The object to subtract. Must be a DescriptorArray with compatible units,
+                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+        :return: A new DescriptorArray representing the result of the subtraction.
+        """
+        if isinstance(other, (DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number)):
+            # Leverage __neg__ and __add__ for subtraction
+            return -(self.__radd__(-other))
+        else:
+            return NotImplemented
 
     def __neg__(self) -> DescriptorNumber:
         new_value = -self.full_value
