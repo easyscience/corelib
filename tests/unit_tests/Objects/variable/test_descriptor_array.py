@@ -202,56 +202,72 @@ class TestDescriptorArray:
 
         # Expect
         assert type(descriptor_copy) == DescriptorArray
-        assert descriptor_copy._array.values == descriptor._array.values
+        assert np.array_equal(descriptor_copy._array.values, descriptor._array.values)
         assert descriptor_copy._array.unit == descriptor._array.unit
 
-    # def test_as_data_dict(self, clear, descriptor: DescriptorArray):
-    #     # When Then
-    #     descriptor_dict = descriptor.as_data_dict()
+    def test_as_data_dict(self, clear, descriptor: DescriptorArray):
+        # When
+        descriptor_dict = descriptor.as_data_dict()
 
-    #     # Expect
-    #     assert descriptor_dict == {
-    #         "name": "name",
-    #         "value": 1.0,
-    #         "unit": "m",
-    #         "variance": 0.1,
-    #         "description": "description",
-    #         "url": "url",
-    #         "display_name": "display_name",
-    #         "unique_name": "DescriptorArray_0",
-    #     }
+        # Expected dictionary
+        expected_dict = {
+            "name": "name",
+            "value": np.array([[1.0, 2.0], [3.0, 4.0]]),  # Use numpy array for comparison
+            "unit": "m",
+            "variance": np.array([[0.1, 0.2], [0.3, 0.4]]),  # Use numpy array for comparison
+            "description": "description",
+            "url": "url",
+            "display_name": "display_name",
+            "unique_name": "DescriptorArray_0",
+        }
 
-    # @pytest.mark.parametrize("unit_string, expected", [
-    #     ("1e+9", "dimensionless"),
-    #     ("1000", "dimensionless"),
-    #     ("10dm^2", "m^2")],
-    #     ids=["scientific_notation", "numbers", "unit_prefix"])
-    # def test_base_unit(self, unit_string, expected):
-    #     # When
-    #     descriptor = DescriptorArray(name="name", value=1, unit=unit_string)
+        # Then: Compare dictionaries key by key
+        for key, expected_value in expected_dict.items():
+            if isinstance(expected_value, np.ndarray):
+                # Compare numpy arrays
+                assert np.array_equal(descriptor_dict[key], expected_value), f"Mismatch for key: {key}"
+            else:
+                # Compare other values directly
+                assert descriptor_dict[key] == expected_value, f"Mismatch for key: {key}"
 
-    #     # Then
-    #     base_unit = descriptor._base_unit()
 
-    #     # Expect
-    #     assert base_unit == expected
+ 
+    @pytest.mark.parametrize("unit_string, expected", [
+        ("1e+9", "dimensionless"),
+        ("1000", "dimensionless"),
+        ("10dm^2", "m^2")],
+        ids=["scientific_notation", "numbers", "unit_prefix"])
+    def test_base_unit(self, unit_string, expected):
+        # When
+        descriptor = DescriptorArray(name="name", value=[[1.0, 2.0], [3.0, 4.0]], unit=unit_string)
 
-    # @pytest.mark.parametrize("test, expected", [
-    #     (DescriptorArray("test", 2, "m", 0.01,),   DescriptorArray("test + name", 3, "m", 0.11)),
-    #     (DescriptorArray("test", 2, "cm", 0.01),   DescriptorArray("test + name", 102, "cm", 1000.01))],
-    #     ids=["regular", "unit_conversion"])
-    # def test_addition(self, descriptor: DescriptorArray, test, expected):
-    #     # When Then
-    #     result = test + descriptor
+        # Then
+        base_unit = descriptor._base_unit()
 
-    #     # Expect
-    #     assert type(result) == DescriptorArray
-    #     assert result.name == result.unique_name
-    #     assert result.value == expected.value
-    #     assert result.unit == expected.unit
-    #     assert result.variance == expected.variance
+        # Expect
+        assert base_unit == expected
+
+    @pytest.mark.parametrize("test, expected", [
+        (DescriptorArray("test", 2, "m", 0.01,),   DescriptorArray("test + name", 3, "m", 0.11)),
+        (DescriptorArray("test", 2, "cm", 0.01),   DescriptorArray("test + name", 102, "cm", 1000.01))],
+        ids=["regular", "unit_conversion"])
+    def test_addition(self, descriptor: DescriptorArray, test, expected):
+        # When Then
+        result = test + descriptor
+# [[2.0, 3.0], [3.0, 4.0]]
+        # Expect
+        assert type(result) == DescriptorArray
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
+        assert np.array_equal(result.variance, expected.variance)
         
-    #     assert descriptor.unit == 'm'
+        assert descriptor.unit == 'm'
+
+            # value=[[1., 2.], [3., 4.]],
+            # unit="m",
+            # variance=[[0.1, 0.2], [0.3, 0.4]],
+
 
     # def test_addition_with_array(self):
     #     # When 
