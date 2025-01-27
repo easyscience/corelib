@@ -14,9 +14,9 @@ from scipp import Variable
 
 from easyscience.global_object.undo_redo import PropertyStack
 from easyscience.global_object.undo_redo import property_stack_deco
-from easyscience.Objects.variable import DescriptorNumber
 
 from .descriptor_base import DescriptorBase
+from .descriptor_number import DescriptorNumber
 
 
 class DescriptorArray(DescriptorBase):
@@ -98,8 +98,6 @@ class DescriptorArray(DescriptorBase):
         :return: DescriptorArray
         """
         if not isinstance(full_value, Variable):
-            raise TypeError(f'{full_value=} must be a scipp array')
-        if len(full_value.dims) != 0:
             raise TypeError(f'{full_value=} must be a scipp array')
         return cls(name=name, value=full_value.values, unit=full_value.unit, variance=full_value.variances, **kwargs)
 
