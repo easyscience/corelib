@@ -14,6 +14,7 @@ from scipp import Variable
 
 from easyscience.global_object.undo_redo import PropertyStack
 from easyscience.global_object.undo_redo import property_stack_deco
+from easyscience.Objects.variable import DescriptorNumber
 
 from .descriptor_base import DescriptorBase
 
@@ -311,6 +312,9 @@ class DescriptorArray(DescriptorBase):
         raw_dict['unit'] = str(self._array.unit)
         raw_dict['variance'] = self._array.variances
         return raw_dict
+    
+
+    
 
 
     def __add__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
@@ -340,6 +344,18 @@ class DescriptorArray(DescriptorBase):
 
             new_value = self._array.values + other
             new_full_value=sc.array(dims=['row','column'],values=new_value,unit=self.unit,variances=self._array.variances)
+
+        elif isinstance(other, DescriptorNumber):
+            original_unit = other.unit
+            try:
+                other.convert_unit(self.unit)
+            except UnitError:
+                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
+
+            new_full_value = self.full_value + other.full_value
+
+            # Revert `other` to its original unit
+            other.convert_unit(original_unit)
 
         elif isinstance(other, DescriptorArray):
             original_unit = other.unit
@@ -373,7 +389,7 @@ class DescriptorArray(DescriptorBase):
         :param other: The object to add. Must be a DescriptorArray, numpy array, list, or number.
         :return: A new DescriptorArray representing the result of the addition.
         """
-        if isinstance(other, DescriptorArray):
+        if isinstance(other, DescriptorArray,DescriptorNumber):
             # Ensure the reverse operation respects unit compatibility
             return other.__add__(self)
         else:
