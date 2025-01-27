@@ -71,7 +71,7 @@ class DescriptorArray(DescriptorBase):
             self._array = sc.array(dims=['row', 'column'], values=value, unit=unit, variances=variance)
         except Exception as message:
             raise UnitError(message)
-                
+                # TODO: handle 1xn and nx1 arrays
         self._array = sc.array(dims=['row','column'],values=value, unit=unit, variances=variance)
         
         super().__init__(
