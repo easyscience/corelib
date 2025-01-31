@@ -16,7 +16,8 @@ from .descriptor_base import DescriptorBase
 
 class DescriptorAnyType(DescriptorBase):
     """
-    A `Descriptor` for any type that does not fit the other Descriptors. Should be avoided when possible.
+    A `Descriptor` for any type that does not fit the other Descriptors. Should be avoided when possible. 
+    It was created to hold the symmetry operations used in the SpaceGroup class of EasyCrystallography.
     """
 
     def __init__(
