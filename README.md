@@ -1,40 +1,51 @@
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
-[![PyPI badge](http://img.shields.io/pypi/v/EasyScience.svg)](https://pypi.python.org/pypi/EasyScience)
-[![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
+<p>
+  <picture>
+    <!-- light mode logo -->
+    <source media='(prefers-color-scheme: light)' srcset='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easyscience/logos/light.svg'>
+    <!-- dark mode logo -->
+    <source media='(prefers-color-scheme: dark)' srcset='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easyscience/logos/dark.svg'>
+    <!-- default logo == light mode logo -->
+    <img src='https://raw.githubusercontent.com/easyscience/assets-branding/refs/heads/master/easyscience/logos/light.svg' alt='EasyDiffraction'>
+  </picture>
+</p>
 
-# Easyscience
+The **EasyScience** core package serves as the foundation of the 
+[EasyScience] family of projects, providing essential building blocks 
+for libraries and applications designed to simplify scientific data 
+simulation and analysis.
 
-## About
+## Useful Links
 
-EasyScience package is the foundation of the EasyScience family of projects, providing the building blocks for libraries and applications
-which aim to make scientific data simulation and analysis easier.
-
-## Install
-
-**EasyScience** can be downloaded using pip:
-
-```pip install easyscience```
-
-Or direct from the repository:
-
-```pip install https://github.com/easyScience/EasyScience```
-
-## Test
-
-After installation, launch the test suite:
-
-```python -m pytest```
-
-## Documentation
-
-Documentation can be found at:
-
-[https://easyScience.github.io/EasyScience](https://easyScience.github.io/EasyScience)
+- [Main Website] - Learn more about EasyScience package.
+- [Documentation] - Access the full documentation.
+- [Discussions] - Ask questions or share ideas.
+- [Issue Tracker] - Report bugs or request new features.
+- [Source Code] - Explore the source code repository.
 
 ## Contributing
-We absolutely welcome contributions. **EasyScience** is maintained by the ESS and on a volunteer basis and thus we need to foster a community that can support user questions and develop new features to make this software a useful tool for all users while encouraging every member of the community to share their ideas.
+
+We welcome contributions! Our vision is for **EasyScience** to be a
+community-driven, open-source project supported by a diverse group of
+contributors.
+
+The project is currently maintained by the [European Spallation Source (ESS)].
+
+If you'd like to contribute, please refer to our [Contributing Guidelines] for
+information about our code of conduct and instructions on submitting pull
+requests.
 
 ## License
-While **EasyScience** is under the BSD-3 license, DFO-LS is subject to the GPL license.
 
+**EasyScience** is licensed under the [BSD 3-Clause License].
 
+<!-- prettier-ignore-start -->
+[BSD 3-Clause License]: https://github.com/easyscience/corelib/blob/master/LICENSE
+[Contributing Guidelines]: https://github.com/easyscience/corelib/blob/master/CONTRIBUTING.md
+[EasyScience]: https://easyscience.software
+[European Spallation Source (ESS)]: https://ess.eu
+[Main Website]: https://core.easyscience.software
+[Documentation]: https://easyscience.github.io/corelib
+[Discussions]: https://github.com/easyscience/corelib/discussions
+[Issue Tracker]: https://github.com/easyscience/corelib/issues
+[Source Code]: https://github.com/easyscience/corelib
+<!-- prettier-ignore-end -->
