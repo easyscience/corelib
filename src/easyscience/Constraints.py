@@ -162,39 +162,69 @@ C = TypeVar('C', bound=ConstraintBase)
 
 class NumericConstraint(ConstraintBase):
     """
-    A `NumericConstraint` is a constraint whereby a dependent parameters value is something of an independent parameters
-    value. I.e. a < 1, a > 5
+    A numeric constraint that restricts a parameter based on a numerical comparison.
+
+    This constraint ensures that a parameter (`dependent_obj`) adheres to a specified condition,
+    such as being less than, greater than, or equal to a given value.
+
+    Example constraints:
+    - `a < 1`
+    - `a > 5`
+    - `b == 10`
+
+    Attributes:
+        operator (str): The comparison operator used (`=`, `<`, `>`, `<=`, `>=`).
+        value (Number): The numerical value to compare the parameter against.
     """
 
     def __init__(self, dependent_obj: V, operator: str, value: Number):
         """
-        A `NumericConstraint` is a constraint whereby a dependent parameters value is something of an independent
-        parameters value. I.e. a < 1, a > 5
+        Initializes a `NumericConstraint` to enforce a numerical restriction on a parameter.
 
-        :param dependent_obj: Dependent Parameter
-        :param operator: Relation to between the parameter and the values. e.g. ``=``, ``<``, ``>``
-        :param value: What the parameters value should be compared against.
+        Args:
+            dependent_obj (V): The parameter whose value is being constrained.
+            operator (str): The relational operator defining the constraint (`=`, `<`, `>`, `<=`, `>=`).
+            value (Number): The numerical threshold for comparison.
 
-        :example:
-
-        .. code-block:: python
-
+        Example:
+            ```python
             from easyscience.fitting.Constraints import NumericConstraint
             from easyscience.Objects.Base import Parameter
-            # Create an `a < 1` constraint
+
+            # Define a parameter with an upper limit of 1
             a = Parameter('a', 0.2)
+
+            # Apply a constraint: a ≤ 1
             constraint = NumericConstraint(a, '<=', 1)
             a.user_constraints['LEQ_1'] = constraint
-            # This works
-            a.value = 0.85
-            # This triggers the constraint
-            a.value = 2.0
-            # `a` is set to the maximum of the constraint (`a = 1`)
+
+            # Assign valid values
+            a.value = 0.85  # Allowed, remains 0.85
+
+            # Assign an invalid value
+            a.value = 2.0  # Exceeds the constraint; `a` is reset to 1
+            ```
         """
         super(NumericConstraint, self).__init__(dependent_obj, operator=operator, value=value)
 
     def _parse_operator(self, obj: V, *args, **kwargs) -> Number:
         ## TODO Probably needs to be updated when DescriptorArray is implemented
+        """
+        Evaluates the constraint by comparing the parameter's value with the defined threshold.
+
+        Args:
+            obj (V): The parameter whose value is being validated.
+
+        Returns:
+            Number: The corrected value, ensuring it adheres to the constraint.
+
+        Raises:
+            Exception: If an error occurs during evaluation.
+
+        Note:
+            - If the parameter's value exceeds the constraint, it is reset to the constraint limit.
+            - This method will be updated when `DescriptorArray` is implemented.
+        """
 
         value = obj.value_no_call_back
 
@@ -217,6 +247,12 @@ class NumericConstraint(ConstraintBase):
         return value
 
     def __repr__(self) -> str:
+        """
+        Returns a string representation of the constraint.
+
+        Returns:
+            str: A descriptive string including the operator and threshold value.
+        """
         return f'{self.__class__.__name__} with `value` {self.operator} {self.value}'
 
 
@@ -330,8 +366,16 @@ class ObjConstraint(ConstraintBase):
 
 class MultiObjConstraint(ConstraintBase):
     """
-    A `MultiObjConstraint` is similar to :class:`EasyScience.fitting.Constraints.ObjConstraint` except that it relates to
-    multiple independent objects.
+    A constraint that relates a dependent parameter to multiple independent parameters.
+
+    This constraint extends `ObjConstraint` by allowing multiple independent parameters
+    with different operators, enabling expressions such as:
+
+    - `a + b = 1`
+    - `a + b - 2*c = 0`
+
+    Attributes:
+        external (bool): Indicates that this constraint operates on external parameters.
     """
 
     def __init__(
@@ -342,55 +386,39 @@ class MultiObjConstraint(ConstraintBase):
         value: Number,
     ):
         """
-        A `MultiObjConstraint` is similar to :class:`EasyScience.fitting.Constraints.ObjConstraint` except that it relates
-        to one or more independent objects.
+        Initializes a `MultiObjConstraint` to relate multiple independent parameters to a dependent one.
 
-        E.g.
-        * a (Dependent Parameter) + b (Independent Parameter) = 1
-        * a (Dependent Parameter) + b (Independent Parameter) - 2*c (Independent Parameter) = 0
+        Args:
+            independent_objs (List[V]): List of independent parameters.
+            operator (List[str]): List of operators applied to independent parameters.
+            dependent_obj (V): The dependent parameter.
+            value (Number): The result of the constraint expression.
 
-        :param independent_objs: List of Independent Parameters
-        :param operator: List of operators operating on the Independent Parameters
-        :param dependent_obj: Dependent Parameter
-        :param value: Value of the expression
-
-        :example:
-
-        **a + b = 1**
-
-        .. code-block:: python
-
+        Example:
+            ```python
             from easyscience.fitting.Constraints import MultiObjConstraint
             from easyscience.Objects.Base import Parameter
-            # Create an `a + b = 1` constraint
+
+            # Define parameters
             a = Parameter('a', 0.2)
-            b = Parameter('b', 0.3)
-
-            constraint = MultiObjConstraint([b], ['+'], a, 1)
-            b.user_constraints['SET_A'] = constraint
-            b.value = 0.4
-            # This triggers the constraint
-            a.value # Should equal 0.6
-
-        **a + b - 2c = 0**
-
-        .. code-block:: python
-
-            from easyscience.fitting.Constraints import MultiObjConstraint
-            from easyscience.Objects.Base import Parameter
-            # Create an `a + b - 2c = 0` constraint
-            a = Parameter('a', 0.5)
             b = Parameter('b', 0.3)
             c = Parameter('c', 0.1)
 
+            # Create a constraint: a + b - 2*c = 0
             constraint = MultiObjConstraint([b, c], ['+', '-2*'], a, 0)
             b.user_constraints['SET_A'] = constraint
             c.user_constraints['SET_A'] = constraint
-            b.value = 0.4
-            # This triggers the constraint. Or it could be triggered by changing the value of c
-            a.value # Should equal 0.2
 
-        .. note:: This constraint is evaluated as ``dependent`` = ``value`` - SUM(``operator_i`` ``independent_i``)
+            # Update values and trigger the constraint
+            b.value = 0.4
+            print(a.value)  # Should be 0.2
+            ```
+
+        Note:
+            This constraint is evaluated as:
+            ```
+            dependent = value - SUM(operator[i] * independent[i])
+            ```
         """
         super(MultiObjConstraint, self).__init__(
             dependent_obj,
@@ -425,7 +453,15 @@ class MultiObjConstraint(ConstraintBase):
 
 class FunctionalConstraint(ConstraintBase):
     """
-    Functional constraints do not depend on other parameters and as such can be more complex.
+    A functional constraint that applies a mathematical function to a parameter.
+
+    Unlike traditional constraints, functional constraints do not depend on other
+    parameters directly but instead use a function to transform the parameter value.
+    Example functions include `abs()`, `log()`, and custom mathematical operations.
+
+    Attributes:
+        function (Callable): The function applied to the parameter.
+        external (bool): Indicates whether the constraint operates externally.
     """
 
     def __init__(
@@ -435,28 +471,31 @@ class FunctionalConstraint(ConstraintBase):
         independent_objs: Optional[List[V]] = None,
     ):
         """
-        Functional constraints do not depend on other parameters and as such can be more complex.
+        Initializes a `FunctionalConstraint` that applies a function to a parameter.
 
-        :param dependent_obj: Dependent Parameter
-        :param func: Function to be evaluated in the form ``f(value, *args, **kwargs)``
+        Args:
+            dependent_obj (V): The parameter to which the function is applied.
+            func (Callable): A function that takes the parameter value and optional arguments,
+                in the form `f(value, *args, **kwargs)`.
+            independent_objs (Optional[List[V]], optional): A list of independent parameters,
+                if applicable. Defaults to None.
 
-        :example:
-
-        .. code-block:: python
-
+        Example:
+            ```python
             import numpy as np
             from easyscience.fitting.Constraints import FunctionalConstraint
             from easyscience.Objects.Base import Parameter
 
+            # Define a parameter
             a = Parameter('a', 0.2, max=1)
-            constraint = FunctionalConstraint(a, np.abs)
 
+            # Apply an absolute value constraint
+            constraint = FunctionalConstraint(a, np.abs)
             a.user_constraints['abs'] = constraint
 
-            # This triggers the constraint
-            a.value = 0.85 # `a` is set to 0.85
-            # This triggers the constraint
-            a.value = -0.5 # `a` is set to 0.5
+            # Update values and trigger the constraint
+            a.value = -0.5  # `a` is set to 0.5 due to np.abs
+            ```
         """
         super(FunctionalConstraint, self).__init__(dependent_obj, independent_obj=independent_objs)
         self.function = func
@@ -490,6 +529,21 @@ class FunctionalConstraint(ConstraintBase):
 
 
 def cleanup_constraint(obj_id: str, enabled: bool):
+    """
+    Enables or disables a constraint based on the given object ID.
+
+    Args:
+        obj_id (str): The unique identifier of the object.
+        enabled (bool): Whether to enable or disable the constraint.
+
+    Raises:
+        ValueError: If the object ID does not exist in the global object map.
+
+    Example:
+        ```python
+        cleanup_constraint("param_123", False)  # Disables the constraint for object with ID "param_123"
+        ```
+    """
     try:
         obj = global_object.map.get_item_by_key(obj_id)
         obj.enabled = enabled
