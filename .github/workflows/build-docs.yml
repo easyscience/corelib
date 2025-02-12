@@ -36,12 +36,12 @@ jobs:
       # Save the latest release version of easyscience/diffraction-lib to RELEASE_VERSION
       # RELEASE_VERSION is used in the mkdocs.yml file to set release_version.
       # The release_version is then needed to display the latest release version in the index.md file
-      - name: Get the latest release version of EasyDiffraction Library
+      - name: Get the latest release version of EasyScience Library
         # This method is not working in CI with the following error: "API rate limit exceeded..."
         #run: echo "RELEASE_VERSION=$(curl https://api.github.com/repos/easyscience/diffraction-lib/releases/latest | grep -i 'tag_name' | awk -F '"' '{print $4}')" >> $GITHUB_ENV
         # This method is not optimal and takes some more time to run, but it works and it is reliable
         run: |
-          git clone --depth 1 https://github.com/easyscience/EasyDiffractionLib .
+          git clone --depth 1 https://github.com/easyscience/corelib .
           git fetch --tags
           echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
@@ -77,28 +77,34 @@ jobs:
 
       # Install EasyDiffraction Library to run Jupyter notebooks
       # Install with the 'charts' and 'docs' extras
-      - name: Install EasyDiffraction Library and its dependencies
-        run: pip install 'easydiffraction[charts]'
+      - name: Install EasyScience Library and its dependencies
+        run: pip install easyscience
 
-      # Download and add the extra files from the easyscience/assets-docs repository
-      - name: Get easyscience/assets-docs files
+      # Download extra from the easyscience/assets-docs repository
+      # Download extra from the easyscience/assets-branding repository
+      - name: Clone easyscience/assets-docs and easyscience/assets-branding
         run: |
+          cd ..
           git clone https://github.com/easyscience/assets-docs.git
-          cp -R assets-docs/docs/assets/ docs/assets/
-          cp -R assets-docs/includes/ includes/
-          cp -R assets-docs/overrides/ overrides/
-
-      # Download and add the extra files from the easyscience/assets-branding repository
-      - name: Get easyscience/assets-branding files
-        run: |
           git clone https://github.com/easyscience/assets-branding.git
+
+      # Add the extra files from the easyscience/assets-docs repository
+      - name: Add files from easyscience/assets-docs files
+        run: |
+          cp -R ../assets-docs/docs/assets/ docs/assets/
+          cp -R ../assets-docs/includes/ includes/
+          cp -R ../assets-docs/overrides/ overrides/
+
+      # Add the extra files from the easyscience/assets-branding repository
+      - name: Add files from easyscience/assets-branding files
+        run: |
           mkdir -p docs/assets/images/
-          cp assets-branding/easyscience/logos/dark.svg docs/assets/images/logo_dark.svg
-          cp assets-branding/easyscience/logos/light.svg docs/assets/images/logo_light.svg
-          cp assets-branding/easydiffraction/icons/ed-icon_256x256.png docs/assets/images/favicon.png
+          cp ../assets-branding/easyscience/logos/dark.svg docs/assets/images/logo_dark.svg
+          cp ../assets-branding/easyscience/logos/light.svg docs/assets/images/logo_light.svg
+          cp ../assets-branding/easydiffraction/icons/ed-icon_256x256.png docs/assets/images/favicon.png
           mkdir -p overrides/.icons/
-          cp assets-branding/easydiffraction/icons/ed-icon_bw.svg overrides/.icons/easydiffraction.svg
-          cp assets-branding/easyscience-org/icons/eso-icon_bw.svg overrides/.icons/easyscience.svg
+          cp ../assets-branding/easydiffraction/icons/ed-icon_bw.svg overrides/.icons/easydiffraction.svg
+          cp ../assets-branding/easyscience-org/icons/eso-icon_bw.svg overrides/.icons/easyscience.svg
 
       # Create the mkdocs.yml configuration file
       # The file is created by merging two files:
