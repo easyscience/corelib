@@ -1,0 +1,40 @@
+###########################
+# Override default settings
+###########################
+
+# Project information
+site_name: EasyScience Library
+site_url: https://easyscience.github.io/corelib
+repo_url: https://github.com/easyscience/corelib
+
+# Extra icons in the bottom right corner
+extra:
+  social:
+    - icon: easydiffraction  # File: overrides/.icons/easydiffraction.svg
+      link: https://easydiffraction.org
+    - icon: fontawesome/brands/github  # Name as in Font Awesome
+      link: https://github.com/EasyScience/EasyDiffractionLib
+
+# Jupyter notebooks
+plugins:
+  - mkdocs-jupyter:
+      execute_ignore:
+        - '*emcee*.ipynb' # Ignore notebooks with 'emcee' in the name from execution
+
+##################
+# Add new settings
+##################
+
+# Format and layout of the global navigation for the site
+nav:
+  - Introduction: index.md
+  - EasyScience: easyscience.md
+  - Getting started: getting-started.md
+  - API reference:
+      - constraints: modules/constraints.md
+      - datasets: modules/datasets.md
+      - fitting: modules/fitting.md
+      - global_object: modules/global_object.md
+      - models: modules/models.md
+      - objects: modules/objects.md
+      - utils: modules/utils.md
