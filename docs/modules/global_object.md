@@ -1,0 +1,1 @@
+# ::: easyscience.global_object
