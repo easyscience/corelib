@@ -4,7 +4,7 @@ on:
   # Trigger the workflow on push
   push:
     # To the develop and master branches
-    branches: [develop, master]
+    branches: [develop, master, new-docs]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
