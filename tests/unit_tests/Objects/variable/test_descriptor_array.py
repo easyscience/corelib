@@ -6,6 +6,7 @@ from scipp import UnitError
 import numpy as np
 
 from easyscience.Objects.variable.descriptor_array import DescriptorArray
+from easyscience.Objects.variable.descriptor_number import DescriptorNumber
 from easyscience import global_object
 
 class TestDescriptorArray:
@@ -248,9 +249,25 @@ class TestDescriptorArray:
         assert base_unit == expected
 
     @pytest.mark.parametrize("test, expected", [
-        (DescriptorArray("test", 2, "m", 0.01,),   DescriptorArray("test + name", 3, "m", 0.11)),
-        (DescriptorArray("test", 2, "cm", 0.01),   DescriptorArray("test + name", 102, "cm", 1000.01))],
-        ids=["regular", "unit_conversion"])
+        (DescriptorNumber("test", 2, "m", 0.01),
+         DescriptorArray("test + name", 
+                         [[3.0, 4.0], [5.0, 6.0]], 
+                         "m", 
+                         [[0.11, 0.11], [0.11, 0.11]])),
+        (DescriptorNumber("test", 1, "cm", 10),
+         DescriptorArray("test + name", 
+                         [[102.0, 103.0], [104.0, 95.0]], 
+                         "m", 
+                         [[0.11, 0.11], [0.11, 0.11]])),
+        (DescriptorArray("test", 
+                         [[2.0, 3.0], [4.0, -5.0]], 
+                         "cm", 
+                         [[0.02, 0.02], [0.02, 0.02]]),
+         DescriptorArray("test + name", 
+                         [[102.0, 203.0], [304.0, 395.0]], 
+                         "m", 
+                         [[0.12, 0.12], [0.12, 0.12]]))],
+        ids=["number_regular", "number_unit_conversion", "array_conversion"])
     def test_addition(self, descriptor: DescriptorArray, test, expected):
         # When Then
         result = test + descriptor

@@ -317,7 +317,7 @@ class DescriptorArray(DescriptorBase):
 
 
 
-    def __add__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+    def __add__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
         Perform element-wise addition with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
 
