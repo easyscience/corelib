@@ -196,7 +196,7 @@ class DescriptorArray(DescriptorBase):
     @property
     def error(self) -> Optional[np.ndarray]:
         """
-        The standard deviations , calculated as the square root of variances.
+        The standard deviations, calculated as the square root of variances.
 
         :return: A numpy array of standard deviations, or None if variances are not set.
         """
@@ -268,6 +268,7 @@ class DescriptorArray(DescriptorBase):
     # Just to get return type right
     def __copy__(self) -> DescriptorArray:
         return super().__copy__()
+
 
     def __repr__(self) -> str:
         """
