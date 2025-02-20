@@ -1,4 +1,5 @@
 from __future__ import annotations
+from warnings import warn 
 
 import numbers
 from typing import Any
@@ -351,8 +352,21 @@ class DescriptorArray(DescriptorBase):
                 other_converted.convert_unit(self.unit)
             except UnitError:
                 raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
-
-            new_full_value = self.full_value + other_converted.full_value
+            # Addition with a DescriptorNumber that has a variance WILL introduce
+            # correlations between the elements of the DescriptorArray.
+            # See, https://content.iospress.com/articles/journal-of-neutron-research/jnr220049
+            # However, DescriptorArray does not consider the covariance between
+            # elements of the array. Hence, the broadcasting is "manually"
+            # performed to work around `scipp` and a warning raised to the end user.
+            if (self._array.variances is not None or other.variance is not None):
+                warn(
+                        'Correlations introduced by this operation will not be considered.\
+                See https://content.iospress.com/articles/journal-of-neutron-research/jnr220049 for further detailes', UserWarning)
+            
+            broadcasted = sc.broadcast(other_converted.full_value, 
+                                             dims=self.full_value.dims,
+                                             shape=self.full_value.shape).copy()  # Ceky copy() to force scipp to perform the broadcast here
+            new_full_value = self.full_value + broadcasted
 
         elif isinstance(other, DescriptorArray):
             try:

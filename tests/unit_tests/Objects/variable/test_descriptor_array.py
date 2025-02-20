@@ -248,37 +248,49 @@ class TestDescriptorArray:
         # Expect
         assert base_unit == expected
 
-    @pytest.mark.parametrize("test, expected", [
+    @pytest.mark.parametrize("test, expected, raises_warning", [
         (DescriptorNumber("test", 2, "m", 0.01),
          DescriptorArray("test + name", 
                          [[3.0, 4.0], [5.0, 6.0]], 
                          "m", 
-                         [[0.11, 0.11], [0.11, 0.11]])),
+                         [[0.11, 0.21], [0.31, 0.41]]),
+         True),
         (DescriptorNumber("test", 1, "cm", 10),
          DescriptorArray("test + name", 
-                         [[102.0, 103.0], [104.0, 95.0]], 
-                         "m", 
-                         [[0.11, 0.11], [0.11, 0.11]])),
+                         [[101.0, 201.0], [301.0, 401.0]], 
+                         "cm", 
+                         [[1010.0, 2010.0], [3010.0, 4010.0]]),
+         True),
         (DescriptorArray("test", 
                          [[2.0, 3.0], [4.0, -5.0]], 
                          "cm", 
-                         [[0.02, 0.02], [0.02, 0.02]]),
+                         [[1.0, 2.0], [3.0, 4.0]]),
          DescriptorArray("test + name", 
                          [[102.0, 203.0], [304.0, 395.0]], 
-                         "m", 
-                         [[0.12, 0.12], [0.12, 0.12]]))],
+                         "cm", 
+                         [[1001.0, 2002.0], [3003.0, 4004.0]]),
+         False)],
         ids=["number_regular", "number_unit_conversion", "array_conversion"])
-    def test_addition(self, descriptor: DescriptorArray, test, expected):
+    def test_addition(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
-        result = test + descriptor
+
+        if raises_warning:
+            with pytest.warns(UserWarning) as record:
+                result = test + descriptor
+            assert len(record) == 1
+            assert 'Correlations introduced' in record[0].message.args[0]
+        else:
+            result = test + descriptor
+
+
+
 # [[2.0, 3.0], [3.0, 4.0]]
         # Expect
         assert type(result) == DescriptorArray
         assert result.name == result.unique_name
         assert np.array_equal(result.value, expected.value)
         assert result.unit == expected.unit
-        assert np.array_equal(result.variance, expected.variance)
-        
+        assert np.allclose(result.variance, expected.variance)
         assert descriptor.unit == 'm'
 
             # value=[[1., 2.], [3., 4.]],
