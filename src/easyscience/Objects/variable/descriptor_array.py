@@ -88,6 +88,8 @@ class DescriptorArray(DescriptorBase):
         if self.unit is not None:
             self.convert_unit(self._base_unit())
 
+        self.__array_ufunc__ = None
+
     @classmethod
     def from_scipp(cls, name: str, full_value: Variable, **kwargs) -> DescriptorArray:
         """
@@ -345,6 +347,7 @@ class DescriptorArray(DescriptorBase):
 
             new_value = self._array.values + other
             new_full_value = sc.array(dims=['row', 'column'], values=new_value, unit=self.unit, variances=self._array.variances)
+            print(new_full_value)
 
         elif isinstance(other, DescriptorNumber):
             try:
@@ -362,7 +365,6 @@ class DescriptorArray(DescriptorBase):
                 warn(
                         'Correlations introduced by this operation will not be considered.\
                 See https://content.iospress.com/articles/journal-of-neutron-research/jnr220049 for further detailes', UserWarning)
-            
             broadcasted = sc.broadcast(other_converted.full_value, 
                                              dims=self.full_value.dims,
                                              shape=self.full_value.shape).copy()  # Ceky copy() to force scipp to perform the broadcast here
@@ -388,9 +390,9 @@ class DescriptorArray(DescriptorBase):
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_full_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
-
-
-
+    
+    
+    
     def __radd__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
         Handle reverse addition for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
@@ -416,6 +418,7 @@ class DescriptorArray(DescriptorBase):
 
         else:
             # Delegate to `__add__` for other types (e.g., list, np.ndarray, scalar)
+            print("reverse adding")
             return self.__add__(other)
 
         
@@ -447,15 +450,15 @@ class DescriptorArray(DescriptorBase):
         else:
             return NotImplemented
 
-    def __neg__(self) -> DescriptorNumber:
+    def __neg__(self) -> DescriptorArray:
         new_value = -self.full_value
-        descriptor_array = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
+        descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
-    def __abs__(self) -> DescriptorNumber:
+    def __abs__(self) -> DescriptorArray:
         new_value = abs(self.full_value)
-        descriptor_array = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
+        descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
