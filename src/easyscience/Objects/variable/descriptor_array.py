@@ -1,4 +1,5 @@
 from __future__ import annotations
+import operator
 from warnings import warn 
 
 import numbers
@@ -315,25 +316,22 @@ class DescriptorArray(DescriptorBase):
         raw_dict['variance'] = self._array.variances
         return raw_dict
     
-
-
-
-    def __add__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+    def _smooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number], operator: str) -> DescriptorArray:
         """
-        Perform element-wise addition with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
+        Perform element-wise operations with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
 
-        :param other: The object to add. Must be a DescriptorArray or DescriptorNumber with compatible units,
+        :param other: The object to operate on. Must be a DescriptorArray or DescriptorNumber with compatible units,
                     or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
-        :return: A new DescriptorArray representing the result of the addition.
+        :return: A new DescriptorArray representing the result of the operation.
         """
         if isinstance(other, numbers.Number):
             if self.unit not in [None, "dimensionless"]:
-                raise UnitError("Numbers can only be added to dimensionless values")
-            new_full_value = self.full_value + other  # scipp can handle addition with numbers
+                raise UnitError("Numbers can only be used together with dimensionless values")
+            new_full_value = operator(self.full_value, other)
 
         elif isinstance(other, (list, np.ndarray)):
             if self.unit not in [None, "dimensionless"]:
-                raise UnitError("Addition with numpy arrays or lists is only allowed for dimensionless values")
+                raise UnitError("Operations with numpy arrays or lists are only allowed for dimensionless values")
             
             # Convert `other` to numpy array if it's a list
             if isinstance(other, list):
@@ -343,52 +341,73 @@ class DescriptorArray(DescriptorBase):
             if other.shape != self._array.values.shape:
                 raise ValueError(f"Shape of {other=} must match the shape of DescriptorArray values")
 
-            new_value = self._array.values + other
+            new_value = operator(self._array.values, other)
             new_full_value = sc.array(dims=['row', 'column'], values=new_value, unit=self.unit, variances=self._array.variances)
-            print(new_full_value)
 
         elif isinstance(other, DescriptorNumber):
             try:
                 other_converted = other.__copy__()
                 other_converted.convert_unit(self.unit)
             except UnitError:
-                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
-            # Addition with a DescriptorNumber that has a variance WILL introduce
+                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be multiplied") from None
+            # Operations with a DescriptorNumber that has a variance WILL introduce
             # correlations between the elements of the DescriptorArray.
             # See, https://content.iospress.com/articles/journal-of-neutron-research/jnr220049
             # However, DescriptorArray does not consider the covariance between
             # elements of the array. Hence, the broadcasting is "manually"
             # performed to work around `scipp` and a warning raised to the end user.
             if (self._array.variances is not None or other.variance is not None):
-                warn(
-                        'Correlations introduced by this operation will not be considered.\
-                See https://content.iospress.com/articles/journal-of-neutron-research/jnr220049 for further detailes', UserWarning)
+                warn('Correlations introduced by this operation will not be considered.\
+                        See https://content.iospress.com/articles/journal-of-neutron-research/jnr220049 for further detailes', UserWarning)
             broadcasted = sc.broadcast(other_converted.full_value, 
                                              dims=self.full_value.dims,
-                                             shape=self.full_value.shape).copy()  # Ceky copy() to force scipp to perform the broadcast here
-            new_full_value = self.full_value + broadcasted
+                                             shape=self.full_value.shape).copy()  # Cheeky copy() to force scipp to perform the broadcast here
+            new_full_value = operator(self.full_value, broadcasted)
 
         elif isinstance(other, DescriptorArray):
             try:
                 other_converted = other.__copy__()
                 other_converted.convert_unit(self.unit)
             except UnitError:
-                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
+                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be multiplied") from None
 
             # Ensure dimensions match
             if self.full_value.dims != other_converted.full_value.dims:
                 raise ValueError(f"Dimensions of the DescriptorArrays do not match: "
                                 f"{self.full_value.dims} vs {other_converted.full_value.dims}")
 
-            new_full_value = self.full_value + other_converted.full_value
+            new_full_value = operator(self.full_value, other_converted.full_value)
 
         else:
             return NotImplemented
-
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_full_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
+    def _rsmooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number], operator: str) -> DescriptorArray:
+        """
+        Handle reverse operations for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
+        Ensures unit compatibility when `other` is a DescriptorNumber.
+        """
+        if isinstance(other, DescriptorArray):
+            # Delegate reverse multiplication to `other`, respecting unit compatibility
+            return operator(other, self)
+        elif isinstance(other, DescriptorNumber):
+            # Ensure unit compatibility for DescriptorNumber
+            original_unit = self.unit
+            try:
+                self.convert_unit(other.unit)  # Convert `self` to `other`'s unit
+            except UnitError:
+                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
+
+            result = operator(self, other)
+            # Revert `self` to its original unit
+            self.convert_unit(original_unit)
+            return result
+        else:
+            # Delegate to operation to __self__ for other types (e.g., list, np.ndarray, scalar)
+            return operator(self, other)
+    
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
         Override a subset of the array_ufuncs in Numpy to prioritize our custom
@@ -401,49 +420,42 @@ class DescriptorArray(DescriptorBase):
         Hence, we manually check and refer to the corresponding function.
         """
         if method == '__call__':
-            print(ufunc.__name__)
             if ufunc.__name__ == 'add':
                 assert len(inputs) == 2, "`add` takes two inputs"
                 in0, in1 = inputs
                 other = in1 if isinstance(in0, DescriptorArray) else in0
                 return self.__add__(other)
+            elif ufunc.__name__ == 'multiply':
+                assert len(inputs) == 2, "`multiply` takes two inputs"
+                in0, in1 = inputs
+                other = in1 if isinstance(in0, DescriptorArray) else in0
+                return self.__mul__(other)
         return NotImplemented
 
     def __array_function__(self, func, types, args, kwargs):
         """
         DescriptorArray does not generally support Numpy array functions.
-        For example, `np.sin(descriptorArray: DescriptorArray)` should fail.
+        For example, `np.argwhere(descriptorArray: DescriptorArray)` should fail.
         Modify this function if you want to add such functionality.
         """
         return NotImplemented
+    
+    def __add__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise addition with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
+
+        :param other: The object to add. Must be a DescriptorArray or DescriptorNumber with compatible units,
+                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
+        return self._smooth_operator(other, operator.add)
 
     def __radd__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
         Handle reverse addition for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
         Ensures unit compatibility when `other` is a DescriptorNumber.
         """
-        if isinstance(other, DescriptorArray):
-            # Delegate reverse addition to `other`, respecting unit compatibility
-            return other.__add__(self)
-
-        elif isinstance(other, DescriptorNumber):
-            # Ensure unit compatibility for DescriptorNumber
-            original_unit = self.unit
-            try:
-                self.convert_unit(other.unit)  # Convert `self` to `other`'s unit
-            except UnitError:
-                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
-
-            result = self.__add__(other)
-
-            # Revert `self` to its original unit
-            self.convert_unit(original_unit)
-            return result
-
-        else:
-            # Delegate to `__add__` for other types (e.g., list, np.ndarray, scalar)
-            return self.__add__(other)
-
+        return self._rsmooth_operator(other, operator.add)
         
     def __sub__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
@@ -484,6 +496,24 @@ class DescriptorArray(DescriptorBase):
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
+
+    
+    def __mul__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise multiplication with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
+
+        :param other: The object to multiply. Must be a DescriptorArray or DescriptorNumber with compatible units,
+                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
+        return self._smooth_operator(other, operator.mul)
+    
+    def __rmul__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+        """
+        Handle reverse multiplication for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
+        Ensures unit compatibility when `other` is a DescriptorNumber.
+        """
+        return self._rsmooth_operator(other, operator.mul)
 
     # def __mul__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
     #     if isinstance(other, numbers.Number):

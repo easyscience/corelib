@@ -343,6 +343,89 @@ class TestDescriptorArray:
         with pytest.raises(UnitError):
             result_reverse = test + descriptor
     
+    @pytest.mark.parametrize("test, expected, raises_warning", [
+        (DescriptorNumber("test", 2, "m", 0.01),
+         DescriptorArray("test * name", 
+                         [[2.0, 4.0], [6.0, 8.0]], 
+                         "m^2", 
+                         [[0.41, 0.84], [1.29, 1.76]]),
+         True),
+        (DescriptorNumber("test", 1, "cm", 10),
+         DescriptorArray("test * name", 
+                         [[100.0, 200.0], [300.0, 400.0]], 
+                         "cm^2", 
+                         [[101000.0, 402000.0], [903000.0, 1604000.0]]),
+         True),
+        (DescriptorArray("test", 
+                         [[2.0, 3.0], [4.0, -5.0]], 
+                         "cm", 
+                         [[1.0, 2.0], [3.0, 4.0]]),
+         DescriptorArray("test * name", 
+                         [[200.0, 600.0], [1200.0, -2000.0]], 
+                         "cm^2", 
+                         [[14000.0, 98000.0], [318000.0, 740000.0]]),
+         False)],
+        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion"])
+    def test_multiplication(self, descriptor: DescriptorArray, test, expected, raises_warning):
+        # When Then
+        if raises_warning:
+            with pytest.warns(UserWarning) as record:
+                result = test * descriptor
+                result_reverse = descriptor * test
+            assert len(record) == 2
+            assert 'Correlations introduced' in record[0].message.args[0]
+        else:
+            result = test * descriptor
+            result_reverse = descriptor * test
+        # Expect
+        assert type(result) == DescriptorArray
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
+        assert np.allclose(result.variance, expected.variance)
+        assert result_reverse.unit == 'm^2'
+        assert descriptor.unit == 'm'
+
+
+    @pytest.mark.parametrize("test, expected", [
+        (np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]]), 
+         DescriptorArray("test", 
+                         [[2.0, 6.0], [12.0, -20.0], [11.0, -2.0]], 
+                         "dimensionless", 
+                         [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])),
+        ([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]], 
+         DescriptorArray("test", 
+                         [[2.0, 6.0], [12.0, -20.0], [30.0, -48.0]], 
+                         "dimensionless", 
+                         [[0.4, 1.8], [0.3, 0.4], [0.5, 0.6]])),
+        (1.5,
+         DescriptorArray("test", 
+                         [[1.5, 3.0], [4.5, 6.0], [7.5, 9.0]], 
+                         "dimensionless", 
+                         [[0.225, 0.45], [0.675, 0.9], [1.125, 1.35]]))
+        ],
+        ids=["numpy_array", "list", "number"])
+    def test_multiplication_dimensionless(self, descriptor_dimensionless: DescriptorArray, test, expected):
+        # When Then
+        result_reverse = test * descriptor_dimensionless
+        result = descriptor_dimensionless * test
+        # Expect
+        assert type(result) == DescriptorArray
+        assert type(result_reverse) == DescriptorArray
+        assert np.array_equal(result.value, expected.value)
+        assert np.allclose(result.variance, expected.variance)
+        assert descriptor_dimensionless.unit == 'dimensionless'
+        
+    @pytest.mark.parametrize("test", [
+        DescriptorNumber("test", 2, "s"),
+        DescriptorArray("test", [[1, 2], [3, 4]], "s")], ids=["add_array_to_unit", "incompatible_units"])
+    def test_addition_exception(self, descriptor: DescriptorArray, test):
+        # When Then Expect
+        with pytest.raises(UnitError):
+            result = descriptor * test
+        with pytest.raises(UnitError):
+            result_reverse = test * descriptor
+    
     @pytest.mark.parametrize("function,test", [
         (np.add, np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]])),
         (np.add, 1)
