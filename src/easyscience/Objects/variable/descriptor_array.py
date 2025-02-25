@@ -333,15 +333,14 @@ class DescriptorArray(DescriptorBase):
             if self.unit not in [None, "dimensionless"]:
                 raise UnitError("Operations with numpy arrays or lists are only allowed for dimensionless values")
             
-            # Convert `other` to numpy array if it's a list
-            other = np.array(other)
 
             # Ensure dimensions match
-            if other.shape != self._array.values.shape:
+            if np.shape(other) != self._array.values.shape:
                 raise ValueError(f"Shape of {other=} must match the shape of DescriptorArray values")
-
-            new_value = operator(self._array.values, other)
-            new_full_value = sc.array(dims=self._array.dims, values=new_value, unit=self.unit, variances=self._array.variances)
+            
+            other = sc.array(dims=self._array.dims, values=other)
+            new_full_value = operator(self._array, other)
+            # new_full_value = sc.array(dims=self._array.dims, values=new_value.values, unit=self.unit, variances=new_value.variances)
 
         elif isinstance(other, DescriptorNumber):
             try:
