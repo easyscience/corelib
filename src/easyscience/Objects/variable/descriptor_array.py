@@ -329,20 +329,19 @@ class DescriptorArray(DescriptorBase):
                 raise UnitError("Numbers can only be used together with dimensionless values")
             new_full_value = operator(self.full_value, other)
 
-        elif isinstance(other, (list, np.ndarray)):
+        elif isinstance(other, list):
             if self.unit not in [None, "dimensionless"]:
                 raise UnitError("Operations with numpy arrays or lists are only allowed for dimensionless values")
             
             # Convert `other` to numpy array if it's a list
-            if isinstance(other, list):
-                other = np.array(other)
+            other = np.array(other)
 
             # Ensure dimensions match
             if other.shape != self._array.values.shape:
                 raise ValueError(f"Shape of {other=} must match the shape of DescriptorArray values")
 
             new_value = operator(self._array.values, other)
-            new_full_value = sc.array(dims=['row', 'column'], values=new_value, unit=self.unit, variances=self._array.variances)
+            new_full_value = sc.array(dims=self._array.dims, values=new_value, unit=self.unit, variances=self._array.variances)
 
         elif isinstance(other, DescriptorNumber):
             try:
@@ -360,8 +359,8 @@ class DescriptorArray(DescriptorBase):
                 warn('Correlations introduced by this operation will not be considered.\
                         See https://content.iospress.com/articles/journal-of-neutron-research/jnr220049 for further detailes', UserWarning)
             broadcasted = sc.broadcast(other_converted.full_value, 
-                                             dims=self.full_value.dims,
-                                             shape=self.full_value.shape).copy()  # Cheeky copy() to force scipp to perform the broadcast here
+                                             dims=self._array.dims,
+                                             shape=self._array.shape).copy()  # Cheeky copy() to force scipp to perform the broadcast here
             new_full_value = operator(self.full_value, broadcasted)
 
         elif isinstance(other, DescriptorArray):
@@ -380,6 +379,7 @@ class DescriptorArray(DescriptorBase):
 
         else:
             return NotImplemented
+
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_full_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
@@ -408,28 +408,12 @@ class DescriptorArray(DescriptorBase):
             # Delegate to operation to __self__ for other types (e.g., list, np.ndarray, scalar)
             return operator(self, other)
     
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs): 
         """
-        Override a subset of the array_ufuncs in Numpy to prioritize our custom
-        implementations. For example, `ufunc add` will be replaced by our own 
-        `__add__` method to ensure a DescriptorArray is _always_ returned.
-
-        The Numpy ufuncs are only called when performing reverse addition of a
-        Numpy array with a DescriptorArray, e.g.,
-            `np.array([1, 2, 3]) + DescriptorArray(...)`
-        Hence, we manually check and refer to the corresponding function.
+        DescriptorArray does not generally support Numpy array functions.
+        For example, `np.argwhere(descriptorArray: DescriptorArray)` should fail.
+        Modify this function if you want to add such functionality.
         """
-        if method == '__call__':
-            if ufunc.__name__ == 'add':
-                assert len(inputs) == 2, "`add` takes two inputs"
-                in0, in1 = inputs
-                other = in1 if isinstance(in0, DescriptorArray) else in0
-                return self.__add__(other)
-            elif ufunc.__name__ == 'multiply':
-                assert len(inputs) == 2, "`multiply` takes two inputs"
-                in0, in1 = inputs
-                other = in1 if isinstance(in0, DescriptorArray) else in0
-                return self.__mul__(other)
         return NotImplemented
 
     def __array_function__(self, func, types, args, kwargs):

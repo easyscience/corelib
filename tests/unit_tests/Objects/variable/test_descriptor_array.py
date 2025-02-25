@@ -305,11 +305,6 @@ class TestDescriptorArray:
 
 
     @pytest.mark.parametrize("test, expected", [
-        (np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]]), 
-         DescriptorArray("test", 
-                         [[3.0, 5.0], [7.0, -1.0], [11.0, -2.0]], 
-                         "dimensionless", 
-                         [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])),
         ([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]], 
          DescriptorArray("test", 
                          [[3.0, 5.0], [7.0, -1.0], [11.0, -2.0]], 
@@ -321,7 +316,7 @@ class TestDescriptorArray:
                          "dimensionless", 
                          [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]]))
         ],
-        ids=["numpy_array", "list", "number"])
+        ids=["list", "number"])
     def test_addition_dimensionless(self, descriptor_dimensionless: DescriptorArray, test, expected):
         # When Then
         result_reverse = test + descriptor_dimensionless
@@ -388,11 +383,6 @@ class TestDescriptorArray:
 
 
     @pytest.mark.parametrize("test, expected", [
-        (np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]]), 
-         DescriptorArray("test", 
-                         [[2.0, 6.0], [12.0, -20.0], [11.0, -2.0]], 
-                         "dimensionless", 
-                         [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])),
         ([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]], 
          DescriptorArray("test", 
                          [[2.0, 6.0], [12.0, -20.0], [30.0, -48.0]], 
@@ -404,7 +394,7 @@ class TestDescriptorArray:
                          "dimensionless", 
                          [[0.225, 0.45], [0.675, 0.9], [1.125, 1.35]]))
         ],
-        ids=["numpy_array", "list", "number"])
+        ids=["list", "number"])
     def test_multiplication_dimensionless(self, descriptor_dimensionless: DescriptorArray, test, expected):
         # When Then
         result_reverse = test * descriptor_dimensionless
@@ -419,35 +409,26 @@ class TestDescriptorArray:
     @pytest.mark.parametrize("test", [
         DescriptorNumber("test", 2, "s"),
         DescriptorArray("test", [[1, 2], [3, 4]], "s")], ids=["add_array_to_unit", "incompatible_units"])
-    def test_addition_exception(self, descriptor: DescriptorArray, test):
+    def test_operation_exception(self, descriptor: DescriptorArray, test):
         # When Then Expect
-        with pytest.raises(UnitError):
-            result = descriptor * test
-        with pytest.raises(UnitError):
-            result_reverse = test * descriptor
-    
-    @pytest.mark.parametrize("function,test", [
-        (np.add, np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]])),
-        (np.add, 1)
-        ],
-        ids=["numpy_array", "integer"])
-    def test_numpy_ufuncs(self, descriptor_dimensionless, function, test):
-        """
-        The Numpy ufunc versions of add, sub, mul, div, abs and neg
-        needs to work in order ensure compatibility with 
-        Numpy functions, like `np.sin`, should not work on a
-        DescriptorArray.
-        """
-        result = function(descriptor_dimensionless, test)
-        result_reverse = function(test, descriptor_dimensionless)
-        assert type(result) == DescriptorArray
+        import operator
+        operators = [operator.add,
+                      operator.mul]
+
+        for operator in operators:  # This can probably be done better w. fixture
+            with pytest.raises(UnitError):
+                result = operator(descriptor, test)
+            with pytest.raises(UnitError):
+                result_reverse = operator(test, descriptor)
     
     @pytest.mark.parametrize("function", [
             np.sin,
             np.cos,
-            np.exp
+            np.exp,
+            np.add,
+            np.multiply
         ],
-        ids=["sin", "cos", "exp"])
+        ids=["sin", "cos", "exp", "add", "multiply"])
     def test_numpy_ufuncs_exception(self, descriptor_dimensionless, function):
         (np.add,np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]])),
         """
