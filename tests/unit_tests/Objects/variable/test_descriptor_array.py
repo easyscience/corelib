@@ -139,7 +139,13 @@ class TestDescriptorArray:
 
     def test_full_value(self, descriptor: DescriptorArray):
         # When Then Expect
-        assert descriptor.full_value == sc.array(dims=['row','column'], values=[[1.0, 2.0], [3.0, 4.0]], unit='m')
+        other = sc.array(dims=('row','column'), 
+                         values=[[1.0, 2.0], [3.0, 4.0]], 
+                         unit='m', 
+                         variances=[[0.1, 0.2], [0.3, 0.4]])
+        print(other.shape, descriptor.full_value.shape)
+        print(descriptor.full_value.dims, other.dims)
+        assert descriptor.full_value == other
         
     def test_set_full_value(self, descriptor: DescriptorArray):
         with pytest.raises(AttributeError):
@@ -159,7 +165,6 @@ class TestDescriptorArray:
 
         # Expect
         assert descriptor._array.unit == 'mm'
-        print(descriptor._array.variances)
         assert np.array_equal(descriptor._array.values,[[1000,2000],[3000,4000]])
         assert np.array_equal(descriptor._array.variances,[[100000,200000],[300000,400000]])
 
@@ -174,7 +179,6 @@ class TestDescriptorArray:
 
         # Expect
         assert np.array_equal(descriptor.variance, np.array([[0.2, 0.3], [0.4, 0.5]]))
-
         assert np.array_equal(descriptor.error, np.sqrt(np.array([[0.2, 0.3], [0.4, 0.5]])))
 
     def test_error(self, descriptor: DescriptorArray):
@@ -185,8 +189,6 @@ class TestDescriptorArray:
     def test_set_error(self, descriptor: DescriptorArray):
         # When Then
         descriptor.error = np.sqrt(np.array([[0.2, 0.3], [0.4, 0.5]]))
-        print(descriptor.variance)
-        print(descriptor.error)
         # Expect
         assert np.allclose(descriptor.error, np.sqrt(np.array([[0.2, 0.3], [0.4, 0.5]])))
         assert np.allclose(descriptor.variance, np.array([[0.2, 0.3], [0.4, 0.5]]))
@@ -194,8 +196,6 @@ class TestDescriptorArray:
 
     def test_value(self, descriptor: DescriptorArray):
         # When Then Expect
-        print(descriptor.value)
-        
         assert np.array_equal(descriptor.value, np.array([[1, 2], [3, 4]]))
 
     def test_set_value(self, descriptor: DescriptorArray):
@@ -244,8 +244,6 @@ class TestDescriptorArray:
             else:
                 # Compare other values directly
                 assert descriptor_dict[key] == expected_value, f"Mismatch for key: {key}"
-
-
  
     @pytest.mark.parametrize("unit_string, expected", [
         ("1e+9", "dimensionless"),
@@ -301,24 +299,24 @@ class TestDescriptorArray:
         assert result.name == result.unique_name
         assert np.array_equal(result.value, expected.value)
         assert result.unit == expected.unit
-        assert result_reverse.unit == test.unit
+        assert result_reverse.unit == descriptor.unit
         assert np.allclose(result.variance, expected.variance)
         assert descriptor.unit == 'm'
 
 
     @pytest.mark.parametrize("test, expected", [
         (np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]]), 
-         DescriptorArray("test + name", 
+         DescriptorArray("test", 
                          [[3.0, 5.0], [7.0, -1.0], [11.0, -2.0]], 
                          "dimensionless", 
                          [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])),
         ([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]], 
-         DescriptorArray("test + name", 
+         DescriptorArray("test", 
                          [[3.0, 5.0], [7.0, -1.0], [11.0, -2.0]], 
                          "dimensionless", 
                          [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])),
         (1,
-         DescriptorArray("test + name", 
+         DescriptorArray("test", 
                          [[2.0, 3.0], [4.0, 5.0], [6.0, 7.0]], 
                          "dimensionless", 
                          [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]]))
@@ -326,19 +324,57 @@ class TestDescriptorArray:
         ids=["numpy_array", "list", "number"])
     def test_addition_dimensionless(self, descriptor_dimensionless: DescriptorArray, test, expected):
         # When Then
-        print(type(test))
-        print(test)
         result_reverse = test + descriptor_dimensionless
-        #result = descriptor_dimensionless + test
+        result = descriptor_dimensionless + test
         # Expect
-        #assert type(result) == DescriptorArray
-        print(result_reverse)
+        assert type(result) == DescriptorArray
         assert type(result_reverse) == DescriptorArray
-        return
         assert np.array_equal(result.value, expected.value)
         assert np.allclose(result.variance, expected.variance)
         assert descriptor_dimensionless.unit == 'dimensionless'
-
+        
+    @pytest.mark.parametrize("test", [
+        DescriptorNumber("test", 2, "s"),
+        DescriptorArray("test", [[1, 2], [3, 4]], "s")], ids=["add_array_to_unit", "incompatible_units"])
+    def test_addition_exception(self, descriptor: DescriptorArray, test):
+        # When Then Expect
+        with pytest.raises(UnitError):
+            result = descriptor + test
+        with pytest.raises(UnitError):
+            result_reverse = test + descriptor
+    
+    @pytest.mark.parametrize("function,test", [
+        (np.add, np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]])),
+        (np.add, 1)
+        ],
+        ids=["numpy_array", "integer"])
+    def test_numpy_ufuncs(self, descriptor_dimensionless, function, test):
+        """
+        The Numpy ufunc versions of add, sub, mul, div, abs and neg
+        needs to work in order ensure compatibility with 
+        Numpy functions, like `np.sin`, should not work on a
+        DescriptorArray.
+        """
+        result = function(descriptor_dimensionless, test)
+        result_reverse = function(test, descriptor_dimensionless)
+        assert type(result) == DescriptorArray
+    
+    @pytest.mark.parametrize("function", [
+            np.sin,
+            np.cos,
+            np.exp
+        ],
+        ids=["sin", "cos", "exp"])
+    def test_numpy_ufuncs_exception(self, descriptor_dimensionless, function):
+        (np.add,np.array([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]])),
+        """
+        Not implemented ufuncs should return NotImplemented.
+        """
+        test = np.array([[1, 2], [3, 4]])
+        with pytest.raises(TypeError) as e:
+            function(descriptor_dimensionless, test)
+        assert 'returned NotImplemented from' in str(e)
+    
     # def test_addition_with_array(self):
     #     # When 
     #     descriptor = DescriptorArray(name="name", value=1, variance=0.1)
@@ -359,16 +395,6 @@ class TestDescriptorArray:
     #     assert result_reverse.value == 2.0
     #     assert result_reverse.unit == "dimensionless"
     #     assert result_reverse.variance == 0.1
-
-    @pytest.mark.parametrize("test", [
-        DescriptorNumber("test", 2, "s"),
-        DescriptorArray("test", [[1, 2], [3, 4]], "s")], ids=["add_array_to_unit", "incompatible_units"])
-    def test_addition_exception(self, descriptor: DescriptorArray, test):
-        # When Then Expect
-        with pytest.raises(UnitError):
-            result = descriptor + test
-        with pytest.raises(UnitError):
-            result_reverse = test + descriptor
         
     # @pytest.mark.parametrize("test, expected", [
     #     (DescriptorArray("test", 2, "m", 0.01,),   DescriptorArray("test - name", 1, "m", 0.11)),

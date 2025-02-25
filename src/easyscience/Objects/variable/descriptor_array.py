@@ -88,8 +88,6 @@ class DescriptorArray(DescriptorBase):
         if self.unit is not None:
             self.convert_unit(self._base_unit())
 
-        self.__array_ufunc__ = None
-
     @classmethod
     def from_scipp(cls, name: str, full_value: Variable, **kwargs) -> DescriptorArray:
         """
@@ -390,9 +388,35 @@ class DescriptorArray(DescriptorBase):
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_full_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
-    
-    
-    
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+        Override a subset of the array_ufuncs in Numpy to prioritize our custom
+        implementations. For example, `ufunc add` will be replaced by our own 
+        `__add__` method to ensure a DescriptorArray is _always_ returned.
+
+        The Numpy ufuncs are only called when performing reverse addition of a
+        Numpy array with a DescriptorArray, e.g.,
+            `np.array([1, 2, 3]) + DescriptorArray(...)`
+        Hence, we manually check and refer to the corresponding function.
+        """
+        if method == '__call__':
+            print(ufunc.__name__)
+            if ufunc.__name__ == 'add':
+                assert len(inputs) == 2, "`add` takes two inputs"
+                in0, in1 = inputs
+                other = in1 if isinstance(in0, DescriptorArray) else in0
+                return self.__add__(other)
+        return NotImplemented
+
+    def __array_function__(self, func, types, args, kwargs):
+        """
+        DescriptorArray does not generally support Numpy array functions.
+        For example, `np.sin(descriptorArray: DescriptorArray)` should fail.
+        Modify this function if you want to add such functionality.
+        """
+        return NotImplemented
+
     def __radd__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
         Handle reverse addition for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
@@ -418,7 +442,6 @@ class DescriptorArray(DescriptorBase):
 
         else:
             # Delegate to `__add__` for other types (e.g., list, np.ndarray, scalar)
-            print("reverse adding")
             return self.__add__(other)
 
         
@@ -461,6 +484,27 @@ class DescriptorArray(DescriptorBase):
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
+
+    # def __mul__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
+    #     if isinstance(other, numbers.Number):
+    #         new_value = self.full_value * other
+    #     elif type(other) is DescriptorArray:
+    #         new_value = self.full_value * other.full_value
+    #     else:
+    #         return NotImplemented
+    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
+    #     descriptor_number.convert_unit(descriptor_number._base_unit())
+    #     descriptor_number.name = descriptor_number.unique_name
+    #     return descriptor_number
+
+    # def __rmul__(self, other: numbers.Number) -> DescriptorArray:
+    #     if isinstance(other, numbers.Number):
+    #         new_value = other * self.full_value
+    #     else:
+    #         return NotImplemented
+    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
+    #     descriptor_number.name = descriptor_number.unique_name
+    #     return descriptor_number
 
 
 # TODO: add arithmetic operations
