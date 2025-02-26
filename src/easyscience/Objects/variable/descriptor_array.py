@@ -1,5 +1,5 @@
 from __future__ import annotations
-import operator
+import operator as op
 from warnings import warn 
 
 import numbers
@@ -316,12 +316,13 @@ class DescriptorArray(DescriptorBase):
         raw_dict['variance'] = self._array.variances
         return raw_dict
     
-    def _smooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number], operator: str) -> DescriptorArray:
+    def _smooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number], operator: str, units_must_match: bool = True) -> DescriptorArray:
         """
-        Perform element-wise operations with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
+        Perform element-wise operations with another DescriptorNumber, DescriptorArray, list, or number.
 
         :param other: The object to operate on. Must be a DescriptorArray or DescriptorNumber with compatible units,
-                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+                    or a list with the same shape if the DescriptorArray is dimensionless.
+        :param operator: The operation to perform
         :return: A new DescriptorArray representing the result of the operation.
         """
         if isinstance(other, numbers.Number):
@@ -333,21 +334,20 @@ class DescriptorArray(DescriptorBase):
             if self.unit not in [None, "dimensionless"]:
                 raise UnitError("Operations with numpy arrays or lists are only allowed for dimensionless values")
             
-
             # Ensure dimensions match
             if np.shape(other) != self._array.values.shape:
                 raise ValueError(f"Shape of {other=} must match the shape of DescriptorArray values")
             
             other = sc.array(dims=self._array.dims, values=other)
-            new_full_value = operator(self._array, other)
-            # new_full_value = sc.array(dims=self._array.dims, values=new_value.values, unit=self.unit, variances=new_value.variances)
-
+            new_full_value = operator(self._array, other)  # Let scipp handle operation for uncertainty propagation
+        
         elif isinstance(other, DescriptorNumber):
             try:
                 other_converted = other.__copy__()
                 other_converted.convert_unit(self.unit)
             except UnitError:
-                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be multiplied") from None
+                if units_must_match:
+                    raise UnitError(f"Values with units {self.unit} and {other.unit} are not compatible") from None
             # Operations with a DescriptorNumber that has a variance WILL introduce
             # correlations between the elements of the DescriptorArray.
             # See, https://content.iospress.com/articles/journal-of-neutron-research/jnr220049
@@ -367,7 +367,8 @@ class DescriptorArray(DescriptorBase):
                 other_converted = other.__copy__()
                 other_converted.convert_unit(self.unit)
             except UnitError:
-                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be multiplied") from None
+                if units_must_match:
+                    raise UnitError(f"Values with units {self.unit} and {other.unit} are incompatible") from None
 
             # Ensure dimensions match
             if self.full_value.dims != other_converted.full_value.dims:
@@ -383,13 +384,14 @@ class DescriptorArray(DescriptorBase):
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
-    def _rsmooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number], operator: str) -> DescriptorArray:
+    def _rsmooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number], operator: str, units_must_match: bool = True) -> DescriptorArray:
         """
-        Handle reverse operations for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
+        Handle reverse operations for DescriptorArrays, DescriptorNumbers, lists, and scalars.
         Ensures unit compatibility when `other` is a DescriptorNumber.
         """
+        reversed_operator = lambda a, b : operator(b, a)
         if isinstance(other, DescriptorArray):
-            # Delegate reverse multiplication to `other`, respecting unit compatibility
+            # This is probably never called
             return operator(other, self)
         elif isinstance(other, DescriptorNumber):
             # Ensure unit compatibility for DescriptorNumber
@@ -397,15 +399,19 @@ class DescriptorArray(DescriptorBase):
             try:
                 self.convert_unit(other.unit)  # Convert `self` to `other`'s unit
             except UnitError:
-                raise UnitError(f"Values with units {self.unit} and {other.unit} cannot be added") from None
-
-            result = operator(self, other)
+                # Only allowed operations with different units are
+                # multiplication and division. We try to convert
+                # the units for mul/div, but if the conversion
+                # fails it's no big deal.
+                if units_must_match:
+                    raise UnitError(f"Values with units {self.unit} and {other.unit} are incompatible") from None
+            result = self._smooth_operator(other, reversed_operator, units_must_match)
             # Revert `self` to its original unit
             self.convert_unit(original_unit)
             return result
         else:
-            # Delegate to operation to __self__ for other types (e.g., list, np.ndarray, scalar)
-            return operator(self, other)
+            # Delegate to operation to __self__ for other types (e.g., list, scalar)
+            return self._smooth_operator(other, reversed_operator, units_must_match)
     
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs): 
         """
@@ -423,50 +429,120 @@ class DescriptorArray(DescriptorBase):
         """
         return NotImplemented
     
-    def __add__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+    def __add__(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number]) -> DescriptorArray:
         """
-        Perform element-wise addition with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
+        Perform element-wise addition with another DescriptorNumber, DescriptorArray, list, or number.
 
         :param other: The object to add. Must be a DescriptorArray or DescriptorNumber with compatible units,
-                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+                    or a list with the same shape if the DescriptorArray is dimensionless.
         :return: A new DescriptorArray representing the result of the addition.
         """
-        return self._smooth_operator(other, operator.add)
+        return self._smooth_operator(other, op.add)
 
-    def __radd__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+    def __radd__(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number]) -> DescriptorArray:
         """
-        Handle reverse addition for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
+        Handle reverse addition for DescriptorArrays, DescriptorNumbers, lists, and scalars.
         Ensures unit compatibility when `other` is a DescriptorNumber.
         """
-        return self._rsmooth_operator(other, operator.add)
+        return self._rsmooth_operator(other, op.add)
         
     def __sub__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
         """
-        Perform element-wise subtraction with another DescriptorArray, numpy array, list, or number.
+        Perform element-wise subtraction with another DescriptorArray, list, or number.
 
         :param other: The object to subtract. Must be a DescriptorArray with compatible units,
-                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+                    or a list with the same shape if the DescriptorArray is dimensionless.
         :return: A new DescriptorArray representing the result of the subtraction.
         """
-        if isinstance(other, (DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number)):
+        if isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
             # Leverage __neg__ and __add__ for subtraction
-            return self.__add__(-other)
+            if isinstance(other, list):
+                # Use numpy to negate all elements of the list
+                value = (-np.array(other)).tolist()
+            else:
+                value = -other
+            return self.__add__(value)
         else:
             return NotImplemented
         
-    def __rsub__(self, other: Union[DescriptorArray, list, np.ndarray, numbers.Number]) -> DescriptorArray:
+    def __rsub__(self, other: Union[DescriptorArray, list, numbers.Number]) -> DescriptorArray:
         """
-        Perform element-wise subtraction with another DescriptorArray, numpy array, list, or number.
+        Perform element-wise subtraction with another DescriptorArray, list, or number.
 
         :param other: The object to subtract. Must be a DescriptorArray with compatible units,
-                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
+                    or a list with the same shape if the DescriptorArray is dimensionless.
         :return: A new DescriptorArray representing the result of the subtraction.
         """
-        if isinstance(other, (DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number)):
-            # Leverage __neg__ and __add__ for subtraction
-            return -(self.__radd__(-other))
+        if isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
+            if isinstance(other, list):
+                # Use numpy to negate all elements of the list
+                value = (-np.array(other)).tolist()
+            else:
+                value = -other
+            return -(self.__radd__(value))
         else:
             return NotImplemented
+    
+    def __mul__(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise multiplication with another DescriptorNumber, DescriptorArray, list, or number.
+
+        :param other: The object to multiply. Must be a DescriptorArray or DescriptorNumber with compatible units,
+                    or a list with the same shape if the DescriptorArray is dimensionless.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
+        if not isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
+            return NotImplemented
+        return self._smooth_operator(other, op.mul, units_must_match=False)
+    
+    def __rmul__(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number]) -> DescriptorArray:
+        """
+        Handle reverse multiplication for DescriptorArrays, DescriptorNumbers, lists, and scalars.
+        Ensures unit compatibility when `other` is a DescriptorNumber.
+        """
+        if not isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
+            return NotImplemented
+        return self._rsmooth_operator(other, op.mul, units_must_match=False)
+    
+    def __truediv__(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise division with another DescriptorNumber, DescriptorArray, list, or number.
+
+        :param other: The object to use as a denominator. Must be a DescriptorArray or DescriptorNumber with compatible units,
+                    or a list with the same shape if the DescriptorArray is dimensionless.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
+        if not isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
+            return NotImplemented
+
+        if isinstance(other, numbers.Number):
+            original_other = other
+        elif isinstance(other, (numbers.Number, list)):
+            original_other = np.array(other)
+        elif isinstance(other, DescriptorNumber):
+            original_other = other.value
+        elif isinstance(other, DescriptorArray):
+            original_other = other.full_value.values
+
+        if np.any(original_other == 0):
+            raise ZeroDivisionError('Cannot divide by zero')
+        return self._smooth_operator(other, op.truediv, units_must_match=False)
+    
+    def __rtruediv__(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number]) -> DescriptorArray:
+        """
+        Handle reverse division for DescriptorArrays, DescriptorNumbers, lists, and scalars.
+        Ensures unit compatibility when `other` is a DescriptorNumber.
+        """
+        if not isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
+            return NotImplemented
+
+        if np.any(self.full_value.values == 0):
+            raise ZeroDivisionError('Cannot divide by zero')
+        
+        # First use __div__ to compute `self / other`
+        # but first converting to the units of other
+        inverse_result = self._rsmooth_operator(other, op.truediv, units_must_match=False)
+        return inverse_result
 
     def __neg__(self) -> DescriptorArray:
         new_value = -self.full_value
@@ -480,23 +556,6 @@ class DescriptorArray(DescriptorBase):
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
-    
-    def __mul__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
-        """
-        Perform element-wise multiplication with another DescriptorNumber, DescriptorArray, numpy array, list, or number.
-
-        :param other: The object to multiply. Must be a DescriptorArray or DescriptorNumber with compatible units,
-                    or a numpy array/list with the same shape if the DescriptorArray is dimensionless.
-        :return: A new DescriptorArray representing the result of the addition.
-        """
-        return self._smooth_operator(other, operator.mul)
-    
-    def __rmul__(self, other: Union[DescriptorArray, DescriptorNumber, list, np.ndarray, numbers.Number]) -> DescriptorArray:
-        """
-        Handle reverse multiplication for DescriptorArrays, DescriptorNumbers, numpy arrays, lists, and scalars.
-        Ensures unit compatibility when `other` is a DescriptorNumber.
-        """
-        return self._rsmooth_operator(other, operator.mul)
 
     # def __mul__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
     #     if isinstance(other, numbers.Number):
