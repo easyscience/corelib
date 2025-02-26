@@ -164,7 +164,12 @@ class InterfaceFactoryTemplate:
                 prop = props[idx]
 
                 # Should be fetched this way to ensure we don't get value from callback
-                prop_value = prop.value_no_call_back
+                if hasattr(prop, 'value_no_call_back'):
+                    # Property object
+                    prop_value = prop.value_no_call_back
+                else:
+                    # Descriptor object
+                    prop_value = prop.value
 
                 prop._callback = item.make_prop(item_key)
                 prop._callback.fset(prop_value)
