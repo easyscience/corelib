@@ -1,13 +1,13 @@
 from __future__ import annotations
-import operator as op
-from warnings import warn 
 
 import numbers
+import operator as op
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
+from warnings import warn
 
 import numpy as np
 import scipp as sc
@@ -316,7 +316,10 @@ class DescriptorArray(DescriptorBase):
         raw_dict['variance'] = self._array.variances
         return raw_dict
     
-    def _smooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number], operator: str, units_must_match: bool = True) -> DescriptorArray:
+    def _smooth_operator(self,
+                         other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number],
+                         operator: str,
+                         units_must_match: bool = True) -> DescriptorArray:
         """
         Perform element-wise operations with another DescriptorNumber, DescriptorArray, list, or number.
 
@@ -356,10 +359,12 @@ class DescriptorArray(DescriptorBase):
             # performed to work around `scipp` and a warning raised to the end user.
             if (self._array.variances is not None or other.variance is not None):
                 warn('Correlations introduced by this operation will not be considered.\
-                        See https://content.iospress.com/articles/journal-of-neutron-research/jnr220049 for further detailes', UserWarning)
+                      See https://content.iospress.com/articles/journal-of-neutron-research/jnr220049\
+                      for further detailes', UserWarning)
+            # Cheeky copy() of broadcasted scipp array to force scipp to perform the broadcast here
             broadcasted = sc.broadcast(other_converted.full_value, 
                                              dims=self._array.dims,
-                                             shape=self._array.shape).copy()  # Cheeky copy() to force scipp to perform the broadcast here
+                                             shape=self._array.shape).copy()  
             new_full_value = operator(self.full_value, broadcasted)
 
         elif isinstance(other, DescriptorArray):
@@ -384,12 +389,16 @@ class DescriptorArray(DescriptorBase):
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
-    def _rsmooth_operator(self, other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number], operator: str, units_must_match: bool = True) -> DescriptorArray:
+    def _rsmooth_operator(self,
+                          other: Union[DescriptorArray, DescriptorNumber, list, numbers.Number],
+                          operator: str,
+                          units_must_match: bool = True) -> DescriptorArray:
         """
         Handle reverse operations for DescriptorArrays, DescriptorNumbers, lists, and scalars.
         Ensures unit compatibility when `other` is a DescriptorNumber.
         """
-        reversed_operator = lambda a, b : operator(b, a)
+        def reversed_operator(a, b):
+            return operator(b, a)
         if isinstance(other, DescriptorArray):
             # This is probably never called
             return operator(other, self)
@@ -545,6 +554,13 @@ class DescriptorArray(DescriptorBase):
         return inverse_result
     
     def __pow__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorArray:
+        """
+        Perform element-wise exponentiation with another DescriptorNumber or number.
+
+        :param other: The object to use as a denominator. Must be a number or DescriptorNumber with
+                    no unit or variance.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
         if not isinstance(other, (numbers.Number, DescriptorNumber)):
             return NotImplemented
 
@@ -596,189 +612,16 @@ class DescriptorArray(DescriptorBase):
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
+    def __matmul__(self, other: [DescriptorArray, list]) -> DescriptorArray:
+        """
+        Perform matrix multiplication with with another DesciptorArray or list.
 
-    # def __mul__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         new_value = self.full_value * other
-    #     elif type(other) is DescriptorArray:
-    #         new_value = self.full_value * other.full_value
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.convert_unit(descriptor_number._base_unit())
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __rmul__(self, other: numbers.Number) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         new_value = other * self.full_value
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-
-# TODO: add arithmetic operations
-# They should be allowed between DescriptorArray and numbers, and between DescriptorArray and DescriptorArray.
-# The result should be a new DescriptorArray with the same unit as the first argument.
-
-        
-
-    # def __add__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray: 
-    #     if isinstance(other, numbers.Number):
-    #         if self.unit != 'dimensionless':
-    #             raise UnitError('Numbers can only be added to dimensionless values')
-    #         new_value = self.full_value + other
-    #     elif type(other) is DescriptorArray:
-    #         original_unit = other.unit
-    #         try:
-    #             other.convert_unit(self.unit)
-    #         except UnitError:
-    #             raise UnitError(f'Values with units {self.unit} and {other.unit} cannot be added') from None
-    #         new_value = self.full_value + other.full_value
-    #         other.convert_unit(original_unit)
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __radd__(self, other: numbers.Number) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         if self.unit != 'dimensionless':
-    #             raise UnitError('Numbers can only be added to dimensionless values')
-    #         new_value = other + self.full_value
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __sub__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         if self.unit != 'dimensionless':
-    #             raise UnitError('Numbers can only be subtracted from dimensionless values')
-    #         new_value = self.full_value - other
-    #     elif type(other) is DescriptorArray:
-    #         original_unit = other.unit
-    #         try:
-    #             other.convert_unit(self.unit)
-    #         except UnitError:
-    #             raise UnitError(f'Values with units {self.unit} and {other.unit} cannot be subtracted') from None
-    #         new_value = self.full_value - other.full_value
-    #         other.convert_unit(original_unit)
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __rsub__(self, other: numbers.Number) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         if self.unit != 'dimensionless':
-    #             raise UnitError('Numbers can only be subtracted from dimensionless values')
-    #         new_value = other - self.full_value
-    #     else:
-    #         return NotImplemented
-    #     descriptor = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor.name = descriptor.unique_name
-    #     return descriptor
-
-    # def __mul__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         new_value = self.full_value * other
-    #     elif type(other) is DescriptorArray:
-    #         new_value = self.full_value * other.full_value
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.convert_unit(descriptor_number._base_unit())
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __rmul__(self, other: numbers.Number) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         new_value = other * self.full_value
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __truediv__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         original_other = other
-    #         if other == 0:
-    #             raise ZeroDivisionError('Cannot divide by zero')
-    #         new_value = self.full_value / other
-    #     elif type(other) is DescriptorArray:
-    #         original_other = other.value
-    #         if original_other == 0:
-    #             raise ZeroDivisionError('Cannot divide by zero')
-    #         new_value = self.full_value / other.full_value
-    #         other.value = original_other
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.convert_unit(descriptor_number._base_unit())
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __rtruediv__(self, other: numbers.Number) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         if self.value == 0:
-    #             raise ZeroDivisionError('Cannot divide by zero')
-    #         new_value = other / self.full_value
-    #     else:
-    #         return NotImplemented
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __pow__(self, other: Union[DescriptorArray, numbers.Number]) -> DescriptorArray:
-    #     if isinstance(other, numbers.Number):
-    #         exponent = other
-    #     elif type(other) is DescriptorArray:
-    #         if other.unit != 'dimensionless':
-    #             raise UnitError('Exponents must be dimensionless')
-    #         if other.variance is not None:
-    #             raise ValueError('Exponents must not have variance')
-    #         exponent = other.value
-    #     else:
-    #         return NotImplemented
-    #     try:
-    #         new_value = self.full_value**exponent
-    #     except Exception as message:
-    #         raise message from None
-    #     if np.isnan(new_value.value):
-    #         raise ValueError('The result of the exponentiation is not a number')
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __rpow__(self, other: numbers.Number) -> numbers.Number:
-    #     if isinstance(other, numbers.Number):
-    #         if self.unit != 'dimensionless':
-    #             raise UnitError('Exponents must be dimensionless')
-    #         if self.variance is not None:
-    #             raise ValueError('Exponents must not have variance')
-    #         new_value = other**self.value
-    #     else:
-    #         return NotImplemented
-    #     return new_value
-
-    # def __neg__(self) -> DescriptorArray:
-    #     new_value = -self.full_value
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
-
-    # def __abs__(self) -> DescriptorArray:
-    #     new_value = abs(self.full_value)
-    #     descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
-    #     descriptor_number.name = descriptor_number.unique_name
-    #     return descriptor_number
+        :param other: The object to use as a denominator. Must be a DescriptorArray
+                    or a list, of compatible shape.
+        :return: A new DescriptorArray representing the result of the addition.
+        """
+        if not isinstance(other, (DescriptorArray, list)):
+            return NotImplemented
 
     def _base_unit(self) -> str:
         string = str(self._array.unit)
