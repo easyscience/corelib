@@ -526,7 +526,6 @@ class TestDescriptorArray:
             result = test / descriptor
             result_reverse = descriptor / test
         # Expect
-        print(result)
         assert type(result) == DescriptorArray
         assert result.name == result.unique_name
         assert np.allclose(result.value, expected.value)
@@ -586,7 +585,94 @@ class TestDescriptorArray:
         with pytest.raises(ZeroDivisionError):
             test / zero_descriptor
         
+    @pytest.mark.parametrize("test, expected", [
+        (DescriptorNumber("test", 2, "dimensionless"),
+         DescriptorArray("test ** name", 
+                         [[1.0, 4.0], [9.0, 16.0]], 
+                         "m^2", 
+                         [[4 * 0.1 * 1, 4 * 0.2 * 2**2],
+                          [4 * 0.3 * 3**2, 4 * 0.4 * 4**2]])),
+        (DescriptorNumber("test", 3, "dimensionless"),
+         DescriptorArray("test ** name", 
+                         [[1.0, 8.0], [27, 64.0]], 
+                         "m^3", 
+                         [[9 * 0.1, 9 * 0.2 * 2**4],
+                          [9 * 0.3 * 3**4, 9 * 0.4 * 4**4]])),
+        (DescriptorNumber("test", 0.0, "dimensionless"),
+         DescriptorArray("test ** name", 
+                         [[1.0, 1.0], [1.0, 1.0]], 
+                         "dimensionless", 
+                         [[0.0, 0.0], [0.0, 0.0]])),
+        (0.0,
+         DescriptorArray("test ** name", 
+                         [[1.0, 1.0], [1.0, 1.0]], 
+                         "dimensionless", 
+                         [[0.0, 0.0], [0.0, 0.0]]))
+         ],
+        ids=["descriptor_number_squared",
+             "descriptor_number_cubed",
+             "descriptor_number_zero",
+             "number_zero"])
+    def test_power(self, descriptor: DescriptorArray, test, expected):
+        # When Then
+        result = descriptor ** test
+        # Expect
+        assert type(result) == DescriptorArray
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
+        assert np.allclose(result.variance, expected.variance)
+        assert descriptor.unit == 'm'
 
+    @pytest.mark.parametrize("test, expected", [
+        (DescriptorNumber("test", 0.1, "dimensionless"),
+         DescriptorArray("test ** name", 
+                         [[1, 2**0.1], [3**0.1, 4**0.1], [5**0.1, 6**0.1]], 
+                         "dimensionless", 
+                         [[0.1**2 * 0.1 * 1, 0.1**2 * 0.2 * 2**(-1.8)],
+                          [0.1**2 * 0.3 * 3**(-1.8), 0.1**2 * 0.4 * 4**(-1.8)],
+                          [0.1**2 * 0.5 * 5**(-1.8), 0.1**2 * 0.6 * 6**(-1.8)]])),
+        (DescriptorNumber("test", 2.0, "dimensionless"),
+         DescriptorArray("test ** name", 
+                         [[1.0, 4.0], [9.0, 16.0], [25.0, 36.0]], 
+                         "dimensionless", 
+                         [[0.4, 3.2], [10.8, 25.6], [50., 86.4]])),
+        ],
+        ids=["descriptor_number_fractional", "descriptor_number_integer"])
+    def test_power_dimensionless(self, descriptor_dimensionless: DescriptorArray, test, expected):
+        # When Then
+        result = descriptor_dimensionless ** test
+        # Expect
+        assert type(result) == DescriptorArray
+        assert result.name == result.unique_name
+        assert np.allclose(result.value, expected.value)
+        assert result.unit == expected.unit
+        assert np.allclose(result.variance, expected.variance)
+        assert descriptor_dimensionless.unit == 'dimensionless'
+
+    
+    @pytest.mark.parametrize("test, exception", [
+        (DescriptorNumber("test", 2, "m"), UnitError),
+        (DescriptorNumber("test", 2, "dimensionless", 10), ValueError),
+        (DescriptorNumber("test", np.nan, "dimensionless"), UnitError),
+        (DescriptorNumber("test", np.nan, "dimensionless"), UnitError),
+        (DescriptorNumber("test", 1.5, "dimensionless"), UnitError),
+        (DescriptorNumber("test", 0.5, "dimensionless"), UnitError)  # Square roots are not legal
+        ],
+        ids=["units",
+             "variance",
+             "scipp_nan",
+             "nan_result",
+             "non_integer_exponent_on_units",
+             "square_root_on_units"
+             ])
+    def test_power_exception(self, descriptor: DescriptorArray, test, exception):
+        # When Then
+        with pytest.raises(exception):
+            result = descriptor ** 2 ** test
+        with pytest.raises(TypeError):
+            # Exponentiation with an array does not make sense
+            test ** descriptor  
 
     @pytest.mark.parametrize("test", [
         DescriptorNumber("test", 2, "s"),

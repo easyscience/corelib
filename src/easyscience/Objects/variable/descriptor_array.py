@@ -543,14 +543,54 @@ class DescriptorArray(DescriptorBase):
         # but first converting to the units of other
         inverse_result = self._rsmooth_operator(other, op.truediv, units_must_match=False)
         return inverse_result
+    
+    def __pow__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorArray:
+        if not isinstance(other, (numbers.Number, DescriptorNumber)):
+            return NotImplemented
+
+        if isinstance(other, numbers.Number):
+            exponent = other
+        elif type(other) is DescriptorNumber:
+            if other.unit != 'dimensionless':
+                raise UnitError('Exponents must be dimensionless')
+            if other.variance is not None:
+                raise ValueError('Exponents must not have variance')
+            exponent = other.value
+        else:
+            return NotImplemented
+        try:
+            new_value = self.full_value**exponent
+        except Exception as message:
+            raise message from None
+        if np.any(np.isnan(new_value.values)):
+            raise ValueError('The result of the exponentiation is not a number')
+        descriptor_number = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
+        descriptor_number.name = descriptor_number.unique_name
+        return descriptor_number
+
+    def __rpow__(self, other: numbers.Number) -> numbers.Number:
+        """
+        Defers reverse pow with a descriptor array, `a ** array`.
+        Exponentiation with regards to an array does not make sense,
+        and is not implemented.
+        """
+        return NotImplemented
 
     def __neg__(self) -> DescriptorArray:
+        """
+        Negate all values in the DescriptorArray.
+        """
         new_value = -self.full_value
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
     def __abs__(self) -> DescriptorArray:
+        """
+        Replace all elements in the DescriptorArray with their
+        absolute values. Note that this is different from the
+        norm of the DescriptorArray.
+        """
         new_value = abs(self.full_value)
         descriptor_array = DescriptorArray.from_scipp(name=self.name, full_value=new_value)
         descriptor_array.name = descriptor_array.unique_name
