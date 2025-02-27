@@ -427,11 +427,29 @@ class TestDescriptorArray:
                          [[200.0, 600.0], [1200.0, -2000.0]], 
                          "cm^2", 
                          [[14000.0, 98000.0], [318000.0, 740000.0]]),
-         False)],
+         False),
+        ([[2.0, 3.0], [4.0, -5.0]], 
+         DescriptorArray("test * name", 
+                         [[2.0, 6.0], [12.0, -20.0]], 
+                         "m", 
+                         [[0.1 * 2**2, 0.2 * 3**2],
+                          [0.3 * 4**2, 0.4 * 5**2]]),
+         False),
+        (2.0, 
+         DescriptorArray("test * name", 
+                         [[2.0, 4.0], [6.0, 8.0]], 
+                         "m", 
+                         [[0.1 * 2**2, 0.2 * 2**2],
+                          [0.3 * 2**2, 0.4 * 2**2]]),
+         False)
+
+        ],
         ids=["descriptor_number_regular",
              "descriptor_number_unit_conversion",
              "descriptor_number_different_units",
-             "array_conversion"])
+             "array_conversion",
+             "list",
+             "number"])
     def test_multiplication(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
         if raises_warning:
@@ -509,11 +527,28 @@ class TestDescriptorArray:
                          [[1.4e-8, 6.125e-9], 
                           [( 3.0e-8 + 0.3 * (0.0004)**2 / 3**2 ) / 3**2, 
                            ( 4.0e-8 + 0.4 * (0.0005)**2 / 4**2 ) / 4**2]]),
-         False)],
+         False),
+        ([[2.0, 3.0], [4.0, -5.0]],
+         DescriptorArray("test / name", 
+                         [[2, 1.5], [4.0/3.0, -1.25]], 
+                         "1/m", 
+                         [[0.1 * 2**2 / 1**4, 0.2 * 3.0**2 / 2.0**4], 
+                          [0.3 * 4**2 / 3**4, 0.4 * 5.0**2 / 4**4]]),
+         False),
+        (2.0,
+         DescriptorArray("test / name", 
+                         [[2, 1.0], [2.0/3.0, 0.5]], 
+                         "1/m", 
+                         [[0.1 * 2**2 / 1**4, 0.2 * 2.0**2 / 2.0**4], 
+                          [0.3 * 2**2 / 3**4, 0.4 * 2.0**2 / 4.0**4]]),
+         False)
+        ],
         ids=["descriptor_number_regular",
              "descriptor_number_unit_conversion",
              "descriptor_number_different_units",
-             "array_conversion"])
+             "array_conversion",
+             "list",
+             "number"])
     def test_division(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
         if raises_warning:

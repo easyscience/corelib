@@ -329,13 +329,14 @@ class DescriptorArray(DescriptorBase):
         :return: A new DescriptorArray representing the result of the operation.
         """
         if isinstance(other, numbers.Number):
-            if self.unit not in [None, "dimensionless"]:
+            # Does not need to be dimensionless for multiplication and division
+            if self.unit not in [None, "dimensionless"] and units_must_match:
                 raise UnitError("Numbers can only be used together with dimensionless values")
             new_full_value = operator(self.full_value, other)
 
         elif isinstance(other, list):
-            if self.unit not in [None, "dimensionless"]:
-                raise UnitError("Operations with numpy arrays or lists are only allowed for dimensionless values")
+            if self.unit not in [None, "dimensionless"] and units_must_match:
+                raise UnitError("Operations with lists are only allowed for dimensionless values")
             
             # Ensure dimensions match
             if np.shape(other) != self._array.values.shape:
@@ -622,6 +623,7 @@ class DescriptorArray(DescriptorBase):
         """
         if not isinstance(other, (DescriptorArray, list)):
             return NotImplemented
+        # Dimensions must match along 
 
     def _base_unit(self) -> str:
         string = str(self._array.unit)
