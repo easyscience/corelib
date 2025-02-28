@@ -647,7 +647,6 @@ class DescriptorArray(DescriptorBase):
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
-
     def __getitem__(self, a):
         """Defer slicing to scipp"""
         return self.full_value.__getitem__(a)
@@ -664,26 +663,30 @@ class DescriptorArray(DescriptorBase):
     def trace(self) -> DescriptorNumber:
         """
         Computes the trace over the descriptor array.
-        Only works for matrices where all dimensions
-        are equal.
+        Only works for matrices where all dimensions are equal.
         """
         shape = np.array(self.full_value.shape)
         if not np.all(shape == shape[0]):
-            raise ValueError('Trace can only be taken over arrays where all dimensions are of equal length')
-
-        trace = DescriptorNumber("trace", 0.0, unit=self.unit)
+            raise ValueError('\
+                    Trace can only be taken over arrays where all dimensions are of equal length')
+        print(shape)
+        trace = sc.scalar(0.0, unit=self.unit, variance=None)
         for i in range(self.full_value.shape[0]):
             dim = self.full_value.dims[i]
-            print(trace.full_value)
-            trace.full_value += self.full_value[dim, i]
-        return sumn
+            # TODO how do I do [i, i]?
+            # [i, i, i]? etc
+            diagonal = self.full_value[i, i]
+            trace = trace + diagonal
+
+        descriptor = DescriptorNumber.from_scipp(name=self.name, full_value=trace)
+        descriptor.name = descriptor.unique_name
+        return descriptor
 
     def sum(self, dim: Optional[Union[str, list]] = None) -> DescriptorNumber:
         """
         Uses scipp to sum over the requested dims.
         :param dim: The dim(s) in the scipp array to sum over. If `None`, will sum over all dims.
         """
-
         new_full_value = self.full_value.sum(dim=dim)
         
         # If fully reduced the result will be a DescriptorNumber,

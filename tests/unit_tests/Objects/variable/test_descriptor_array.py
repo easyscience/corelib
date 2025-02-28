@@ -787,17 +787,33 @@ class TestDescriptorArray:
         assert np.allclose(result.variance, descriptor.variance)
         assert descriptor.unit == 'm'
 
-    def test_trace(self, descriptor: DescriptorArray):
-        shape = np.array(descriptor.full_value.shape)
-        print(shape, shape[0], shape == shape[0])
-        result = descriptor.trace()
-        expected = 1
-        assert type(result) == DescriptorArray
+    @pytest.mark.parametrize("test, expected", [
+        (DescriptorArray("test + name", 
+                         [[3.0, 4.0], [5.0, 6.0]], 
+                         "m", 
+                         [[0.11, 0.21], [0.31, 0.41]]),
+         DescriptorNumber("test", 18, "m", 1.04)),
+        (DescriptorArray("test + name", 
+                         [[101.0, 201.0], [301.0, 401.0]], 
+                         "dimensionless", 
+                         [[1010.0, 2010.0], [3010.0, 4010.0]]),
+         DescriptorNumber("test", 1004.0, "dimensionless", 10040.)),
+        (DescriptorArray("test", np.ones((9, 9)), "dimensionless", np.ones((9, 9))),
+         DescriptorNumber("test", 9.0, "dimensionless", 3.0)),
+        (DescriptorArray("test", np.ones((3, 3, 3)), "dimensionless", np.ones((3, 3, 3))),
+         DescriptorNumber("test", 3.0, "dimensionless", 3.0)),
+        (DescriptorArray("test", [[2.0]], "dimensionless"),
+         DescriptorNumber("test", 2.0, "dimensionless"))
+         ],
+        ids=["2d_unit", "2d_dimensionless", "2d_large", "3d_dimensionless", "1d_dimensionless"])
+    def test_trace(self, test: DescriptorArray, expected: DescriptorNumber):
+        result = test.trace()
+        assert type(result) == DescriptorNumber
         assert result.name == result.unique_name
         assert np.array_equal(result.value, expected.value)
         assert result.unit == expected.unit
-        assert np.allclose(result.variance, expected.variance)
-        assert descriptor.unit == 'm'
+        if test.variance is not None:
+            assert np.allclose(result.variance, expected.variance)
     
     # def test_trace_fail(self, descriptor: DescriptorArray):
     #     """Should fail for non-square matrices"""
