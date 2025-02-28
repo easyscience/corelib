@@ -138,9 +138,9 @@ class TestDescriptorArray:
     #     with pytest.raises(TypeError):
     #         DescriptorArray.from_scipp(name="name", full_value=full_value)
 
-    def test_full_value(self, descriptor: DescriptorArray):
+    def tvigateDownest_full_value(self, descriptor: DescriptorArray):
         # When Then Expect
-        other = sc.array(dims=('row','column'), 
+        other = sc.array(dims=('dim0','dim1'), 
                          values=[[1.0, 2.0], [3.0, 4.0]], 
                          unit='m', 
                          variances=[[0.1, 0.2], [0.3, 0.4]])
@@ -763,7 +763,6 @@ class TestDescriptorArray:
         assert np.allclose(result.variance, expected.variance)
         assert descriptor.unit == 'm'
 
-
     def test_abs(self, descriptor):
         # When 
         negated = DescriptorArray(
@@ -788,3 +787,96 @@ class TestDescriptorArray:
         assert np.allclose(result.variance, descriptor.variance)
         assert descriptor.unit == 'm'
 
+    def test_trace(self, descriptor: DescriptorArray):
+        shape = np.array(descriptor.full_value.shape)
+        print(shape, shape[0], shape == shape[0])
+        result = descriptor.trace()
+        expected = 1
+        assert type(result) == DescriptorArray
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
+        assert np.allclose(result.variance, expected.variance)
+        assert descriptor.unit == 'm'
+    
+    # def test_trace_fail(self, descriptor: DescriptorArray):
+    #     """Should fail for non-square matrices"""
+    #     result = descriptor.trace()
+    #     expected = 1
+    #     assert type(result) == DescriptorArray
+    #     assert result.name == result.unique_name
+    #     assert np.array_equal(result.value, expected.value)
+    #     assert result.unit == expected.unit
+    #     assert np.allclose(result.variance, expected.variance)
+    #     assert descriptor.unit == 'm'
+
+    @pytest.mark.parametrize("test, expected", [
+        (DescriptorArray("test + name", 
+                         [[3.0, 4.0], [5.0, 6.0]], 
+                         "m", 
+                         [[0.11, 0.21], [0.31, 0.41]]),
+         DescriptorNumber("test", 18, "m", 1.04)),
+        (DescriptorArray("test + name", 
+                         [[101.0, 201.0], [301.0, 401.0]], 
+                         "cm", 
+                         [[1010.0, 2010.0], [3010.0, 4010.0]]),
+         DescriptorNumber("test", 1004.0, "cm", 10040.)),
+        (DescriptorArray("test", 
+                         [[2.0, 3.0]], 
+                         "dimensionless", 
+                         [[1.0, 2.0]]),
+         DescriptorNumber("test", 5.0, "dimensionless", 3.0)),
+        (DescriptorArray("test", 
+                         [[2.0, 3.0]], 
+                         "dimensionless"),
+         DescriptorNumber("test", 5.0, "dimensionless")),
+         ],
+        ids=["descriptor_array_m", "d=descriptor_array_cm", "descriptor_array_dimensionless", "descriptor_array_dim_varless"])
+    def test_sum(self, test, expected):
+        result = test.sum()
+        assert type(result) == DescriptorNumber
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
+        if test.variance is not None:
+            assert np.allclose(result.variance, expected.variance)
+
+    @pytest.mark.parametrize("expected, dim", [
+        (DescriptorArray("test", 
+                         [4.0, 6.0], 
+                         "m", 
+                         [0.4, 0.6]),
+         'dim0'),
+        (DescriptorArray("test", 
+                         [3.0, 7.0], 
+                         "m", 
+                         [0.3, 0.7]),
+         'dim1'),
+         ],
+        ids=["descriptor_array_dim0", "descriptor_array_dim1"])
+    def test_sum_over_subset(self, descriptor, expected, dim):
+        result = descriptor.sum(dim)
+        assert type(result) == type(expected)
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
+        assert np.allclose(result.variance, expected.variance)
+
+    @pytest.mark.parametrize("test, dims", [
+         (DescriptorArray("test", [1.], "dimensionless", [1.]), ['dim0']),
+         (DescriptorArray("test", [[1., 1.]], "dimensionless", [[1., 1.]]), ['dim0', 'dim1']),
+         (DescriptorArray("test", [[1.], [1.]], "dimensionless", [[1.], [1.]]), ['dim0', 'dim1']),
+         (DescriptorArray("test", [[[1., 1., 1.]]], "dimensionless", [[[1., 1., 1.]]]), ['dim0', 'dim1', 'dim2']),
+         (DescriptorArray("test", [[[1.]], [[1.]], [[1.]]], "dimensionless", [[[1.]], [[1.]], [[1.]]]), ['dim0', 'dim1', 'dim2']),
+        ],
+        ids=["1x1", "1x2", "2x1", "1x3", "3x1"])
+    def test_array_generate_dims(self, test, dims):
+        assert test.dims == dims
+
+    def test_array_set_dims_exception(self, descriptor):
+        with pytest.raises(ValueError) as e:
+            descriptor.dims = ['too_few']
+        assert "must have the same shape"
+        with pytest.raises(ValueError) as e:
+            DescriptorArray("test", [[1.]], "m", [[1.]], dims=['dim'])
+        assert "Length of dims" in str(e)
