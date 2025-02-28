@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 import scipp as sc
 from scipp import UnitError
+from scipp.testing import assert_identical
 
 import numpy as np
 
@@ -143,9 +144,7 @@ class TestDescriptorArray:
                          values=[[1.0, 2.0], [3.0, 4.0]], 
                          unit='m', 
                          variances=[[0.1, 0.2], [0.3, 0.4]])
-        print(other.shape, descriptor.full_value.shape)
-        print(descriptor.full_value.dims, other.dims)
-        assert descriptor.full_value == other
+        assert_identical(descriptor.full_value, other)
         
     def test_set_full_value(self, descriptor: DescriptorArray):
         with pytest.raises(AttributeError):

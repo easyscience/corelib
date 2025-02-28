@@ -74,7 +74,7 @@ class DescriptorArray(DescriptorBase):
         except Exception as message:
             raise UnitError(message)
                 # TODO: handle 1xn and nx1 arrays
-        self._array = sc.array(dims=['row','column'],values=value, unit=unit, variances=variance)
+        self._array = sc.array(dims=['row','column'], values=value, unit=unit, variances=variance)
         
         super().__init__(
             name=name,
@@ -623,7 +623,19 @@ class DescriptorArray(DescriptorBase):
         """
         if not isinstance(other, (DescriptorArray, list)):
             return NotImplemented
-        # Dimensions must match along 
+
+        if isinstance(other, DescriptorArray):
+            shape = other.full_value.shape
+        elif isinstance(other, list):
+            shape = np.shape(other)
+
+        # Dimensions must match for matrix multiplication
+        if shape[0] != self._array.values.shape[-1]:
+            raise ValueError(f"Last dimension of {other=} must match the first dimension of DescriptorArray values")
+        
+        other = sc.array(dims=self._array.dims, values=other)
+        new_full_value = operator(self._array, other)  # Let scipp handle operation for uncertainty propagation
+
 
     def _base_unit(self) -> str:
         string = str(self._array.unit)
