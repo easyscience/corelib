@@ -815,6 +815,23 @@ class TestDescriptorArray:
         if test.variance is not None:
             assert np.allclose(result.variance, expected.variance)
     
+    @pytest.mark.parametrize("test", [
+         DescriptorArray("test + name", 
+                         [[3.0, 4.0]], 
+                         "m", 
+                         [[0.11, 0.21]]),
+
+         DescriptorArray("test + name", 
+                         [[3.0, 4.0], [1.0, 1.0], [1.0, 1.0]], 
+                         "dimensionless", 
+                         [[0.11, 0.21], [1., 1.], [1., 1.]])
+         ],
+        ids=["2x1_unit", "3x2_dimensionless"])
+    def test_trace_exception(self, test: DescriptorArray):
+        with pytest.raises(ValueError) as e:
+            test.trace()
+        assert "Trace can only be taken" in str(e)
+    
     # def test_trace_fail(self, descriptor: DescriptorArray):
     #     """Should fail for non-square matrices"""
     #     result = descriptor.trace()
