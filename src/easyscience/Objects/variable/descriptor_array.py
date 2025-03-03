@@ -173,7 +173,7 @@ class DescriptorArray(DescriptorBase):
         :param value: list of dims.
         """
         if not isinstance(dims, (list, np.ndarray)):
-            raise TypeError(f"{value=} must be a list or numpy array.")
+            raise TypeError(f"{dims=} must be a list or numpy array.")
 
         if len(dims) != len(self._dims):
             raise ValueError(f"{dims=} must have the same shape as the existing dims")
@@ -655,7 +655,7 @@ class DescriptorArray(DescriptorBase):
         """Defer slicing to scipp"""
         return self.full_value.__delitem__(a)
     
-    def __setitem__(self, a, b: Union[number, DescriptorNumber]):
+    def __setitem__(self, a, b: Union[numbers.Number, DescriptorNumber]):
         """Defer slicing to scipp"""
         # TODO handle variances and units...
         return self.full_value.__setitem__(a, b) 
@@ -666,17 +666,19 @@ class DescriptorArray(DescriptorBase):
         Only works for matrices where all dimensions are equal.
         """
         shape = np.array(self.full_value.shape)
-        if not np.all(shape == shape[0]):
+        N = shape[0]
+        if not np.all(shape == N):
             raise ValueError('\
                     Trace can only be taken over arrays where all dimensions are of equal length')
-        print(shape)
+
         trace = sc.scalar(0.0, unit=self.unit, variance=None)
-        for i in range(self.full_value.shape[0]):
-            dim = self.full_value.dims[i]
-            # TODO how do I do [i, i]?
-            # [i, i, i]? etc
-            diagonal = self.full_value[i, i]
-            trace = trace + diagonal
+        for i in range(N):
+            # Index through all the dims to get
+            # the value i on the diagonal
+            diagonal_element = self.full_value
+            for dim in self.full_value.dims:
+                diagonal_element = diagonal_element[dim, i]
+            trace = trace + diagonal_element
 
         descriptor = DescriptorNumber.from_scipp(name=self.name, full_value=trace)
         descriptor.name = descriptor.unique_name
