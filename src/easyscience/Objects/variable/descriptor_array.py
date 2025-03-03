@@ -264,7 +264,6 @@ class DescriptorArray(DescriptorBase):
             self._array.variances = error**2
         else:
             self._array.variances = None
-            
 
     def convert_unit(self, unit_str: str) -> None:
         """
@@ -300,11 +299,11 @@ class DescriptorArray(DescriptorBase):
         # Update the array
         self._array = new_array
 
-
-    # Just to get return type right
     def __copy__(self) -> DescriptorArray:
+        """
+        Return a copy of the current DescriptorArray.
+        """
         return super().__copy__()
-
 
     def __repr__(self) -> str:
         """
@@ -344,6 +343,11 @@ class DescriptorArray(DescriptorBase):
 
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Dict representation of the current DescriptorArray.
+        The dict contains the value, unit and variances, in addition
+        to the properties of DescriptorBase.
+        """
         raw_dict = super().as_dict(skip=skip)
         raw_dict['value'] = self._array.values
         raw_dict['unit'] = str(self._array.unit)
@@ -742,6 +746,10 @@ class DescriptorArray(DescriptorBase):
 
 
     def _base_unit(self) -> str:
+        """
+        Returns the base unit of the current array.
+        For example, if the unit is `100m`, returns `m`.
+        """
         string = str(self._array.unit)
         for i, letter in enumerate(string):
             if letter == 'e':
