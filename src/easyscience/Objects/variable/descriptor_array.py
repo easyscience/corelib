@@ -647,18 +647,59 @@ class DescriptorArray(DescriptorBase):
         descriptor_array.name = descriptor_array.unique_name
         return descriptor_array
 
-    def __getitem__(self, a):
-        """Defer slicing to scipp"""
-        return self.full_value.__getitem__(a)
+    def __getitem__(self, a) -> Union[DescriptorArray]:
+        """
+        Slice using scipp syntax.
+        Defer slicing to scipp.
+        """
+        descriptor = DescriptorArray.from_scipp(name=self.name, full_value=self.full_value.__getitem__(a))
+        descriptor.name = descriptor.unique_name
+        return descriptor
 
     def __delitem__(self, a):
-        """Defer slicing to scipp"""
+        """
+        Defer slicing to scipp.
+        This should fail, since scipp does not support __delitem__.
+        """
         return self.full_value.__delitem__(a)
     
-    def __setitem__(self, a, b: Union[numbers.Number, DescriptorNumber]):
+    def __setitem__(self, a, b: Union[numbers.Number, list, DescriptorNumber, DescriptorArray]):
         """Defer slicing to scipp"""
         # TODO handle variances and units...
-        return self.full_value.__setitem__(a, b) 
+        if not isinstance(b, (numbers.Number, list, DescriptorNumber, DescriptorArray)):
+            return NotImplemented
+
+        if isinstance(b, (numbers.Number, list)):
+            if self.unit not in [None, "dimensionless"]:
+                raise UnitError(
+                    "Unitless values can only be assigned to dimensionless arrays")
+            if self.full_value.variances is not None:
+                raise ValueError(
+                    "Values without variances can only be assigned to arrays without variances")
+        
+        if isinstance(b, numbers.Number):
+            other = b
+        elif isinstance(b, list):
+            other = np.array(b)
+        elif isinstance(b, (DescriptorNumber, DescriptorArray)):
+            original_unit = b.unit
+            try:
+                b.convert_unit(self.unit)  # Convert item to be set to current unit
+            except UnitError:
+                raise UnitError(f"Values with units {self.unit} and {other.unit} are incompatible") from None
+            other = b.full_value.copy()
+            # Restore b
+            b.convert_unit(original_unit)
+        
+        # Set data
+        #new_full_value = self.full_value.copy()
+        new_full_value = self.full_value
+        new_full_value.__setitem__(a, other)
+        
+        self._array = sc.array(dims=self.dims,
+                               values=new_full_value.values,
+                               unit=self.unit,
+                               variances=new_full_value.variances)
 
     def trace(self) -> DescriptorNumber:
         """
@@ -736,7 +777,3 @@ class DescriptorArray(DescriptorBase):
             elif letter not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '+', '-']:
                 return string[i:]
         return ''
-
-
-
-    # TODO: add matrix multiplication and division using numpy.
