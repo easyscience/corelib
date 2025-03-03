@@ -865,107 +865,15 @@ class TestDescriptorArray:
         assert 'has no attribute' in str(e)
     
     @pytest.mark.parametrize("test", [
-        DescriptorNumber("test", 9, "m", 0.52),
-        DescriptorNumber("test", 10., "cm", 9.),
-         ],
-        ids=["DescriptorNumber", "convert_unit"])
-    def test_slice_assignment(self, descriptor: DescriptorArray, test):
-        # When
-        original_unit = test.unit
-        descriptor_copy = descriptor.full_value.copy()
-        descriptor['dim0', 0][0] = test
-
-        # Then
-        assert descriptor.unit == 'm'
-        assert test.unit == original_unit
-        test.convert_unit(descriptor.unit)
-        assert descriptor.full_value['dim0', 0] == test.full_value.value
-        assert descriptor.variances[0, 0] == test.full_value.variance
-        assert np.allclose(descriptor_copy.values[:, 1], descriptor.full_value.values[:, 1])
-        assert np.allclose(descriptor_copy.variances[:, 1], descriptor.full_value.variances[:, 1])
-    
-    @pytest.mark.parametrize("test", [0.1],
-        ids=["numbers.Number"])
-    def test_slice_assignment_dimensionless(self, test):
-        # When
-        descriptor = DescriptorArray(
-            name="name",
-            value=[[1., 2.], [3., 4.], [5., 6.]],
-            unit="dimensionless",
-            variance=None,
-            description="description",
-            url="url",
-            display_name="display_name",
-            parent=None,
-        )
-        descriptor['dim0', 0][0] = test
-        print(descriptor['dim0', 0])
-        print(descriptor['dim0', 0][0])
-        print(descriptor)
-
-        # Then
-        assert descriptor.unit == 'dimensionless'
-        assert descriptor.full_value.values[0, 0] == test
-        assert np.allclose(descriptor_copy.values[:, 1], descriptor.full_value.values[:, 1])
-
-    @pytest.mark.parametrize("test", [
-        DescriptorArray("test + name", 
-                        [3.0, 4.0], 
-                        "m", 
-                        [0.1, 0.2]),
-        DescriptorArray("test + name", 
-                        [3.0, 4.0], 
-                        "cm", 
-                        [0.1, 0.2])
-         ],
-        ids=["DescriptorArray", "convert_unit"])
-    def test_slice_assignment_array(self, descriptor: DescriptorArray, test):
-        # When
-        original_unit = test.unit
-        descriptor_copy = descriptor.full_value.copy()
-        descriptor['dim1', 0] = test
-        # Then
-        assert descriptor.unit == 'm'
-        assert test.unit == original_unit
-        test.convert_unit(descriptor.unit)
-        assert np.allclose(descriptor.full_value.values[:, 0], test.full_value.values)
-        assert np.allclose(descriptor.full_value.variances[:, 0], test.full_value.variances)
-        assert np.allclose(descriptor_copy.values[:, 1], descriptor.full_value.values[:, 1])
-        assert np.allclose(descriptor_copy.variances[:, 1], descriptor.full_value.variances[:, 1])
-    
-    @pytest.mark.parametrize("test", [
-            [3.0, 4.0, 5.0] 
-         ],
-        ids=["list"])
-    def test_slice_assignment_array_dimensionless(self, test):
-        # When
-        descriptor = DescriptorArray(
-            name="name",
-            value=[[1., 2.], [3., 4.], [5., 6.]],
-            unit="dimensionless",
-            variance=None,
-            description="description",
-            url="url",
-            display_name="display_name",
-            parent=None,
-        )
-        descriptor['dim1', 0] = test
-
-        # Then
-        assert descriptor.unit == 'dimensionless'
-        assert np.allclose(descriptor.full_value.values[:, 0], np.array(test))
-    
-    @pytest.mark.parametrize("test", [
             1.0,
             [3.0, 4.0, 5.0] 
          ],
         ids=["number", "list"])
     def test_slice_assignment_exception(self, descriptor_dimensionless: DescriptorArray, test):
         # When
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(AttributeError) as e:
             descriptor_dimensionless['dim0', :] = test
-        assert "Values without variances" in str(e)
-
+        assert "cannot be edited via slicing" in str(e)
 
     @pytest.mark.parametrize("test, expected", [
         (DescriptorArray("test + name", 
