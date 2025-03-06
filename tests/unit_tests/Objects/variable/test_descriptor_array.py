@@ -282,23 +282,83 @@ class TestDescriptorArray:
                          [[1001.0, 2002.0], [3003.0, 4004.0]]),
          False)],
         ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion"])
-    def test_addition(self, descriptor: DescriptorArray, test, expected, raises_warning):
+    def test_reverse_addition(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
         if raises_warning:
             with pytest.warns(UserWarning) as record:
                 result = test + descriptor
-                result_reverse = descriptor + test
-            assert len(record) == 2
+            assert len(record) == 1
             assert 'Correlations introduced' in record[0].message.args[0]
         else:
             result = test + descriptor
-            result_reverse = descriptor + test
         # Expect
         assert type(result) == DescriptorArray
         assert result.name == result.unique_name
         assert np.array_equal(result.value, expected.value)
         assert result.unit == expected.unit
-        assert result_reverse.unit == descriptor.unit
+        assert np.allclose(result.variance, expected.variance)
+        assert descriptor.unit == 'm'
+
+
+    @pytest.mark.parametrize("test, expected", [
+        ([[2.0, 3.0], [4.0, -5.0], [6.0, -8.0]], 
+         DescriptorArray("test", 
+                         [[3.0, 5.0], [7.0, -1.0], [11.0, -2.0]], 
+                         "dimensionless", 
+                         [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])),
+        (1,
+         DescriptorArray("test", 
+                         [[2.0, 3.0], [4.0, 5.0], [6.0, 7.0]], 
+                         "dimensionless", 
+                         [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]]))
+        ],
+        ids=["list", "number"])
+    def test_reverse_addition_dimensionless(self, descriptor_dimensionless: DescriptorArray, test, expected):
+        # When Then
+        result = test + descriptor_dimensionless
+        # Expect
+        assert type(result) == DescriptorArray
+        assert np.array_equal(result.value, expected.value)
+        assert np.allclose(result.variance, expected.variance)
+        assert descriptor_dimensionless.unit == 'dimensionless'
+
+    @pytest.mark.parametrize("test, expected, raises_warning", [
+        (DescriptorNumber("test", 2, "m", 0.01),
+         DescriptorArray("test + name", 
+                         [[3.0, 4.0], [5.0, 6.0]], 
+                         "m", 
+                         [[0.11, 0.21], [0.31, 0.41]]),
+         True),
+        (DescriptorNumber("test", 1, "cm", 10),
+         DescriptorArray("test + name", 
+                         [[1.01, 2.01], [3.01, 4.01]], 
+                         "m", 
+                         [[0.1010, 0.2010], [0.3010, 0.4010]]),
+         True),
+        (DescriptorArray("test", 
+                         [[2.0, 3.0], [4.0, -5.0]], 
+                         "cm", 
+                         [[1.0, 2.0], [3.0, 4.0]]),
+         DescriptorArray("test + name", 
+                         [[1.02, 2.03], [3.04, 3.95]], 
+                         "m", 
+                         [[0.1001, 0.2002], [0.3003, 0.4004]]),
+         False)],
+        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion"])
+    def test_addition(self, descriptor: DescriptorArray, test, expected, raises_warning):
+        # When Then
+        if raises_warning:
+            with pytest.warns(UserWarning) as record:
+                result = descriptor + test
+            assert len(record) == 1
+            assert 'Correlations introduced' in record[0].message.args[0]
+        else:
+            result = descriptor + test
+        # Expect
+        assert type(result) == DescriptorArray
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
         assert np.allclose(result.variance, expected.variance)
         assert descriptor.unit == 'm'
 
@@ -318,11 +378,9 @@ class TestDescriptorArray:
         ids=["list", "number"])
     def test_addition_dimensionless(self, descriptor_dimensionless: DescriptorArray, test, expected):
         # When Then
-        result = test + descriptor_dimensionless
-        result_reverse = descriptor_dimensionless + test
+        result = descriptor_dimensionless + test
         # Expect
         assert type(result) == DescriptorArray
-        assert type(result_reverse) == DescriptorArray
         assert np.array_equal(result.value, expected.value)
         assert np.allclose(result.variance, expected.variance)
         assert descriptor_dimensionless.unit == 'dimensionless'
