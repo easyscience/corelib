@@ -703,7 +703,6 @@ class DescriptorArray(DescriptorBase):
         # The trace reduces a rank k tensor to a k-2.
         # Pick out the remaining dims
         remaining_dimensions = self.dimensions[2:]
-        print(remaining_dimensions)
         if remaining_dimensions == []:
             # No remaining dimensions; the trace is a scalar
             trace = sc.scalar(value=trace_value, unit=self.unit, variance=trace_variance)
@@ -711,7 +710,6 @@ class DescriptorArray(DescriptorBase):
         else:
             # Else, the result is some array
             trace = sc.array(dims=remaining_dimensions, values=trace_value, unit=self.unit, variances=trace_variance)
-            print(trace.dims)
             constructor = DescriptorArray.from_scipp
 
         descriptor = constructor(name=self.name, full_value=trace)
