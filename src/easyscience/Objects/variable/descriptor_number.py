@@ -206,10 +206,7 @@ class DescriptorNumber(DescriptorBase):
         """
         if not isinstance(unit_str, str):
             raise TypeError(f'{unit_str=} must be a string representing a valid scipp unit')
-        try:
-            new_unit = sc.Unit(unit_str)
-        except UnitError as message:
-            raise UnitError(message) from None
+        new_unit = sc.Unit(unit_str)
 
         # Save the current state for undo/redo
         old_scalar = self._scalar
