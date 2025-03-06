@@ -233,6 +233,7 @@ class TestDescriptorArray:
             "url": "url",
             "display_name": "display_name",
             "unique_name": "DescriptorArray_0",
+            "dimensions": np.array(['dim0', 'dim1']),  # Use numpy array for comparison
         }
 
         # Then: Compare dictionaries key by key
@@ -1341,3 +1342,12 @@ class TestDescriptorArray:
         descriptor.variance = [[1, 2], [3, 4]]
         # Then Expect
         assert isinstance(descriptor.variance[0][0], float)
+    
+    def test_array_set_dims(self, descriptor):
+        # When
+        descriptor.dimensions = ['x', 'y']
+        # Then Expect
+        assert descriptor.dimensions[0] == 'x'
+        assert descriptor.dimensions[1] == 'y'
+        assert descriptor.full_value.dims[0] == 'x'
+        assert descriptor.full_value.dims[1] == 'y'

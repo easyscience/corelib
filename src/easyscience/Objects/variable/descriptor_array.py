@@ -32,7 +32,7 @@ class DescriptorArray(DescriptorBase):
         name: str,
         value: Union[list, np.ndarray],
         unit: Optional[Union[str, sc.Unit]] = '',
-        variance: Optional[numbers.Number] = None,
+        variance: Optional[Union[list, np.ndarray]] = None,
         unique_name: Optional[str] = None,
         description: Optional[str] = None,
         url: Optional[str] = None,
@@ -133,9 +133,9 @@ class DescriptorArray(DescriptorBase):
     @property
     def value(self) -> numbers.Number:
         """
-        Get the value. This should be usable for most cases. The full value can be obtained from `obj.full_value`.
+        Get the value without units. The Scipp array can be obtained from `obj.full_value`.
 
-        :return: Value of self with unit.
+        :return: Value of self without unit.
         """
         return self._array.values
 
@@ -169,7 +169,7 @@ class DescriptorArray(DescriptorBase):
         return self._dimensions
 
     @dimensions.setter
-    def dimensions(self, dimensions: Union[list, np.ndarray]) -> None:
+    def dimensions(self, dimensions: Union[list]) -> None:
         """
         Set the dimensions of self. Ensures that the input has a shape compatible with self.full_value.
 
@@ -182,6 +182,10 @@ class DescriptorArray(DescriptorBase):
             raise ValueError(f"{dimensions=} must have the same shape as the existing dims")
 
         self._dimensions = dimensions
+        # Also rename the dims of the scipp array
+        rename_dict = { old_dim: new_dim for (old_dim, new_dim) in zip(self.full_value.dims, dimensions) }
+        renamed_array = self._array.rename_dims(rename_dict)
+        self._array = renamed_array
 
     @property
     def unit(self) -> str:
@@ -202,9 +206,9 @@ class DescriptorArray(DescriptorBase):
         )  # noqa: E501
 
     @property
-    def variance(self) -> float:
+    def variance(self) -> np.ndarray:
         """
-        Get the variance.
+        Get the variance as a Numpy ndarray.
 
         :return: variance.
         """
@@ -352,6 +356,7 @@ class DescriptorArray(DescriptorBase):
         raw_dict['value'] = self._array.values
         raw_dict['unit'] = str(self._array.unit)
         raw_dict['variance'] = self._array.variances
+        raw_dict['dimensions'] = self._array.dims
         return raw_dict
     
     def _apply_operation(self,
