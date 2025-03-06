@@ -1183,19 +1183,21 @@ class TestDescriptorArray:
         (DescriptorArray("test", np.ones((9, 9)), "dimensionless", np.ones((9, 9))),
          DescriptorNumber("test", 9.0, "dimensionless", 9.0)),
         (DescriptorArray("test", np.ones((3, 3, 3)), "dimensionless", np.ones((3, 3, 3))),
-         DescriptorNumber("test", 3.0, "dimensionless", 3.0)),
+         DescriptorArray("test", [3., 3., 3.], "dimensionless", [3., 3., 3.,], dimensions=['dim2'])),
         (DescriptorArray("test", [[2.0]], "dimensionless"),
          DescriptorNumber("test", 2.0, "dimensionless"))
          ],
         ids=["2d_unit", "2d_dimensionless", "2d_large", "3d_dimensionless", "1d_dimensionless"])
     def test_trace(self, test: DescriptorArray, expected: DescriptorNumber):
         result = test.trace()
-        assert type(result) == DescriptorNumber
+        assert type(result) == type(expected)
         assert result.name == result.unique_name
         assert np.array_equal(result.value, expected.value)
         assert result.unit == expected.unit
         if test.variance is not None:
             assert np.allclose(result.variance, expected.variance)
+        if isinstance(expected, DescriptorArray):
+            assert np.all(result.full_value.dims == expected.full_value.dims)
     
     @pytest.mark.parametrize("test", [
          DescriptorArray("test + name", 

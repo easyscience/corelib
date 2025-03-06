@@ -113,7 +113,12 @@ class DescriptorArray(DescriptorBase):
         """
         if not isinstance(full_value, Variable):
             raise TypeError(f'{full_value=} must be a scipp array')
-        return cls(name=name, value=full_value.values, unit=full_value.unit, variance=full_value.variances, **kwargs)
+        return cls(name=name,
+                   value=full_value.values,
+                   unit=full_value.unit,
+                   variance=full_value.variances,
+                   dimensions=full_value.dims,
+                   **kwargs)
 
     @property
     def full_value(self) -> Variable:
@@ -679,10 +684,12 @@ class DescriptorArray(DescriptorBase):
                     new {self.__class__.__name__}.'
         )
 
-    def trace(self) -> DescriptorNumber:
+    def trace(self) -> Union[DescriptorArray, DescriptorNumber]:
         """
         Computes the trace over the descriptor array.
         Only works for matrices where all dimensions are equal.
+        For a rank `k` tensor, the trace will run over the firs two dimensions,
+        resulting in a rank `k-2` tensor.
         """
         shape = np.array(self.full_value.shape)
         N = shape[0]
@@ -690,18 +697,26 @@ class DescriptorArray(DescriptorBase):
             raise ValueError('\
                     Trace can only be taken over arrays where all dimensions are of equal length')
 
-        trace = sc.scalar(0.0, unit=self.unit, variance=None)
-        for i in range(N):
-            # Index through all the dims to get
-            # the value i on the diagonal
-            diagonal_element = self.full_value
-            for dim in self.full_value.dims:
-                diagonal_element = diagonal_element[dim, i]
-            trace = trace + diagonal_element
+        trace_value = np.trace(self.value)
+        trace_variance = np.trace(self.variance) if self.variance is not None else None
 
-        descriptor_number = DescriptorNumber.from_scipp(name=self.name, full_value=trace)
-        descriptor_number.name = descriptor_number.unique_name
-        return descriptor_number
+        # The trace reduces a rank k tensor to a k-2.
+        # Pick out the remaining dims
+        remaining_dimensions = self.dimensions[2:]
+        print(remaining_dimensions)
+        if remaining_dimensions == []:
+            # No remaining dimensions; the trace is a scalar
+            trace = sc.scalar(value=trace_value, unit=self.unit, variance=trace_variance)
+            constructor = DescriptorNumber.from_scipp
+        else:
+            # Else, the result is some array
+            trace = sc.array(dims=remaining_dimensions, values=trace_value, unit=self.unit, variances=trace_variance)
+            print(trace.dims)
+            constructor = DescriptorArray.from_scipp
+
+        descriptor = constructor(name=self.name, full_value=trace)
+        descriptor.name = descriptor.unique_name
+        return descriptor
 
     def sum(self, dim: Optional[Union[str, list]] = None) -> Union[DescriptorArray, DescriptorNumber]:
         """
