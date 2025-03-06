@@ -280,8 +280,17 @@ class TestDescriptorArray:
                          [[1.02, 2.03], [3.04, 3.95]], 
                          "m", 
                          [[0.1001, 0.2002], [0.3003, 0.4004]]),
-         False)],
-        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion"])
+         False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm"),
+         DescriptorArray("test + name", 
+                         [[1.02, 2.03], [3.04, 3.95]], 
+                         "m", 
+                         [[0.1, 0.2], [0.3, 0.4]]),
+         False),
+        ],
+        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion", "array_conversion_integer"])
     def test_addition(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
         if raises_warning:
@@ -342,8 +351,17 @@ class TestDescriptorArray:
                          [[102.0, 203.0], [304.0, 395.0]], 
                          "cm", 
                          [[1001.0, 2002.0], [3003.0, 4004.0]]),
-         False)],
-        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion"])
+         False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm"), 
+         DescriptorArray("test + name", 
+                         [[102.0, 203.0], [304.0, 395.0]], 
+                         "cm", 
+                         [[1000.0, 2000.0], [3000.0, 4000.0]]),
+         False),
+        ],
+        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion", "array_conversion_integer"])
     def test_reverse_addition(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
         if raises_warning:
@@ -404,8 +422,17 @@ class TestDescriptorArray:
                          [[0.98, 1.97], [2.96, 4.05]], 
                          "m", 
                          [[0.1001, 0.2002], [0.3003, 0.4004]]),
-         False)],
-        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion"])
+         False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm"),
+         DescriptorArray("test + name", 
+                         [[0.98, 1.97], [2.96, 4.05]], 
+                         "m", 
+                         [[0.100, 0.200], [0.300, 0.400]]),
+         False)
+        ],
+        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion", "array_conversion_integer"])
     def test_subtraction(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
         if raises_warning:
@@ -466,8 +493,17 @@ class TestDescriptorArray:
                          [[-98.0, -197.0], [-296.0, -405.0]], 
                          "cm", 
                          [[1001.0, 2002.0], [3003.0, 4004.0]]),
-         False)],
-        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion"])
+         False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm"),
+         DescriptorArray("test + name", 
+                         [[-98.0, -197.0], [-296.0, -405.0]], 
+                         "cm", 
+                         [[1000.0, 2000.0], [3000.0, 4000.0]]),
+         False)
+        ],
+        ids=["descriptor_number_regular", "descriptor_number_unit_conversion", "array_conversion", "array_conversion_integer"])
     def test_reverse_subtraction(self, descriptor: DescriptorArray, test, expected, raises_warning):
         # When Then
         if raises_warning:
@@ -535,6 +571,15 @@ class TestDescriptorArray:
                          "m^2", 
                          [[0.00014, 0.00098], [0.00318, 0.0074]]),
          False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm"),
+         DescriptorArray("test * name", 
+                         [[0.02, 0.06], [0.12, -0.2]], 
+                         "m^2", 
+                         [[0.1 * 2**2 * 1e-4, 0.2 * 3**2 * 1e-4],
+                          [0.3 * 4**2 * 1e-4, 0.4 * 5**2 * 1e-4]]),
+         False),
         ([[2.0, 3.0], [4.0, -5.0]], 
          DescriptorArray("test * name", 
                          [[2.0, 6.0], [12.0, -20.0]], 
@@ -555,6 +600,7 @@ class TestDescriptorArray:
              "descriptor_number_unit_conversion",
              "descriptor_number_different_units",
              "array_conversion",
+             "array_conversion_integer",
              "list",
              "number"])
     def test_multiplication(self, descriptor: DescriptorArray, test, expected, raises_warning):
@@ -624,6 +670,15 @@ class TestDescriptorArray:
                          "cm^2", 
                          [[14000.0, 98000.0], [318000.0, 740000.0]]),
          False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm"),
+         DescriptorArray("test * name", 
+                         [[200.0, 600.0], [1200.0, -2000.0]], 
+                         "cm^2", 
+                         [[0.1 * 2**2 * 1e4, 0.2 * 3**2 * 1e4],
+                          [0.3 * 4**2 * 1e4, 0.4 * 5**2 * 1e4]]),
+         False),
         ([[2.0, 3.0], [4.0, -5.0]], 
          DescriptorArray("test * name", 
                          [[2.0, 6.0], [12.0, -20.0]], 
@@ -644,6 +699,7 @@ class TestDescriptorArray:
              "descriptor_number_unit_conversion",
              "descriptor_number_different_units",
              "array_conversion",
+             "array_conversion_integer",
              "list",
              "number"])
     def test_reverse_multiplication(self, descriptor: DescriptorArray, test, expected, raises_warning):
@@ -725,6 +781,17 @@ class TestDescriptorArray:
                           [(0.3 + 3.0 * 3.0**2 / 4.0**2) / 4.0**2 * 1e8,
                            (0.4 + 4.0 * 4.0**2 / 5.0**2) / 5.0**2 * 1e8]]),
          False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm^2"),
+         DescriptorArray("name / test", 
+                         [[1/2 * 1e4, 2/3 * 1e4], [3.0/4.0*1e4, -4.0/5.0 * 1e4]], 
+                         "1/m", 
+                         [[(0.1) / 2.0**2 * 1e8, 
+                           (0.2) / 3.0**2 * 1e8], 
+                          [(0.3) / 4.0**2 * 1e8,
+                           (0.4) / 5.0**2 * 1e8]]),
+         False),
         ([[2.0, 3.0], [4.0, -5.0]],
          DescriptorArray("name / name", 
                          [[0.5, 2.0/3.0], [3.0/4.0, -4/5]], 
@@ -744,6 +811,7 @@ class TestDescriptorArray:
              "descriptor_number_unit_conversion",
              "descriptor_number_different_units",
              "array_conversion",
+             "array_conversion_integer",
              "list",
              "number"])
     def test_division(self, descriptor: DescriptorArray, test, expected, raises_warning):
@@ -829,12 +897,23 @@ class TestDescriptorArray:
                           [( 3.0e-8 + 0.3 * (0.0004)**2 / 3**2 ) / 3**2, 
                            ( 4.0e-8 + 0.4 * (0.0005)**2 / 4**2 ) / 4**2]]),
          False),
+        (DescriptorArray("test", 
+                         [[2, 3], [4, -5]], 
+                         "cm^2"), 
+         DescriptorArray("test / name", 
+                         [[2e-4, 1.5e-4], [4.0/3.0*1e-4, -1.25e-4]], 
+                         "m", 
+                         [[(0.1 * 2.0**2 / 1.0**2) / 1.0**2 * 1e-8, 
+                           (0.2 * 3.0**2 / 2.0**2) / 2.0**2 * 1e-8], 
+                          [(0.3 * 4.0**2 / 3.0**2) / 3.0**2 * 1e-8,
+                           (0.4 * 5.0**2 / 4.0**2) / 4.0**2 * 1e-8]]),
+         False),
         ([[2.0, 3.0], [4.0, -5.0]],
          DescriptorArray("test / name", 
                          [[2, 1.5], [4.0/3.0, -1.25]], 
                          "1/m", 
                          [[0.1 * 2**2 / 1**4, 0.2 * 3.0**2 / 2.0**4], 
-                          [0.3 * 4**2 / 3**4, 0.4 * 5.0**2 / 4**4]]),
+                          [0.3 * 4**2 / 3**4, 0.4 * 5.0**2 / 4.0**4]]),
          False),
         (2.0,
          DescriptorArray("test / name", 
@@ -848,6 +927,7 @@ class TestDescriptorArray:
              "descriptor_number_unit_conversion",
              "descriptor_number_different_units",
              "array_conversion",
+             "array_conversion_integer",
              "list",
              "number"])
     def test_reverse_division(self, descriptor: DescriptorArray, test, expected, raises_warning):
@@ -1246,3 +1326,18 @@ class TestDescriptorArray:
         with pytest.raises(ValueError) as e:
             DescriptorArray("test", [[1.]], "m", [[1.]], dimensions=['dim'])
         assert "Length of dimensions" in str(e)
+
+    def test_array_set_integer_value(self, descriptor):
+        """
+        Scipp does not convert ints to floats, but values need to be floats for optimization.
+        """
+        # When
+        descriptor.value = [[1, 2], [3, 4]]
+        # Then Expect
+        assert isinstance(descriptor.value[0][0], float)
+
+    def test_array_set_integer_variance(self, descriptor):
+        # When
+        descriptor.variance = [[1, 2], [3, 4]]
+        # Then Expect
+        assert isinstance(descriptor.variance[0][0], float)

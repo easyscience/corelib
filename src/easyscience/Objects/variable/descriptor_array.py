@@ -68,7 +68,7 @@ class DescriptorArray(DescriptorBase):
                 raise ValueError(f"{variance=} must have the same shape as {value=}.")
             if not np.all(variance >= 0):
                 raise ValueError(f"{variance=} must only contain non-negative values.")
-            
+           
         if not isinstance(unit, sc.Unit) and not isinstance(unit, str):
             raise TypeError(f'{unit=} must be a scipp unit or a string representing a valid scipp unit')
 
@@ -79,8 +79,11 @@ class DescriptorArray(DescriptorBase):
             raise ValueError(f"Length of dimensions ({dimensions=}) does not match length of value {value=}.")
         self._dimensions = dimensions
 
+
         try:
-            self._array = sc.array(dims=dimensions, values=value, unit=unit, variances=variance)
+            # Convert value and variance to floats
+            # for optimization everything must be floats
+            self._array = sc.array(dims=dimensions, values=value, unit=unit, variances=variance).astype('float')
         except Exception as message:
             raise UnitError(message)
                 # TODO: handle 1xn and nx1 arrays
@@ -152,8 +155,9 @@ class DescriptorArray(DescriptorBase):
 
         if value.shape != self._array.values.shape:
             raise ValueError(f"{value=} must have the same shape as the existing array values.")
-
-        self._array.values = value
+        
+        # Values must be floats for optimization
+        self._array.values = value.astype('float')
     
     @property
     def dimensions(self) -> list:
@@ -220,13 +224,14 @@ class DescriptorArray(DescriptorBase):
             if isinstance(variance, list):
                 variance = np.array(variance)  # Convert lists to numpy arrays for consistent handling.
 
-            if variance.shape != self._array.values.shape:
+            if variance.shape != self._array.shape:
                 raise ValueError(f"{variance=} must have the same shape as the array values.")
 
             if not np.all(variance >= 0):
                 raise ValueError(f"{variance=} must only contain non-negative values.")
 
-        self._array.variances = variance
+        # Values must be floats for optimization
+        self._array.variances = variance.astype('float')
         
     @property
     def error(self) -> Optional[np.ndarray]:
