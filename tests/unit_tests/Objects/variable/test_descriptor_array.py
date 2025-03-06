@@ -132,13 +132,13 @@ class TestDescriptorArray:
         assert descriptor._array.unit == "m"
         assert descriptor._array.variances == None
 
-    # @pytest.mark.parametrize("full_value", [sc.array(values=[1,2], dims=["x"]), sc.array(values=[[1], [2]], dims=["x","y"]), object(), 1, "string"], ids=["1D", "2D", "object", "int", "string"])
+    # @pytest.mark.parametrize("full_value", [sc.array(values=[1,2], dimensions=["x"]), sc.array(values=[[1], [2]], dims=["x","y"]), object(), 1, "string"], ids=["1D", "2D", "object", "int", "string"])
     # def test_from_scipp_type_exception(self, full_value):
     #     # When Then Expect
     #     with pytest.raises(TypeError):
     #         DescriptorArray.from_scipp(name="name", full_value=full_value)
 
-    def tvigateDownest_full_value(self, descriptor: DescriptorArray):
+    def test_get_full_value(self, descriptor: DescriptorArray):
         # When Then Expect
         other = sc.array(dims=('dim0','dim1'), 
                          values=[[1.0, 2.0], [3.0, 4.0]], 
@@ -704,23 +704,29 @@ class TestDescriptorArray:
         # When Then
         with pytest.raises(exception):
             result = descriptor ** 2 ** test
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             # Exponentiation with an array does not make sense
             test ** descriptor  
 
     @pytest.mark.parametrize("test", [
         DescriptorNumber("test", 2, "s"),
         DescriptorArray("test", [[1, 2], [3, 4]], "s")], ids=["add_array_to_unit", "incompatible_units"])
-    def test_operation_exception(self, descriptor: DescriptorArray, test):
+    def test_addition_exception(self, descriptor: DescriptorArray, test):
         # When Then Expect
-        import operator
-        operators = [operator.add,
-                     operator.sub]
-        for operator in operators:  # This can probably be done better w. fixture
-            with pytest.raises(UnitError):
-                result = operator(descriptor, test)
-            with pytest.raises(UnitError):
-                result_reverse = operator(test, descriptor)
+        with pytest.raises(UnitError):
+            result = descriptor + test
+        with pytest.raises(UnitError):
+            result_reverse = test + descriptor
+    
+    @pytest.mark.parametrize("test", [
+        DescriptorNumber("test", 2, "s"),
+        DescriptorArray("test", [[1, 2], [3, 4]], "s")], ids=["add_array_to_unit", "incompatible_units"])
+    def test_sub_exception(self, descriptor: DescriptorArray, test):
+        # When Then Expect
+        with pytest.raises(UnitError):
+            result = descriptor - test
+        with pytest.raises(UnitError):
+            result_reverse = test - descriptor
     
     @pytest.mark.parametrize("function", [
             np.sin,
@@ -927,7 +933,7 @@ class TestDescriptorArray:
         assert result.unit == expected.unit
         assert np.allclose(result.variance, expected.variance)
 
-    @pytest.mark.parametrize("test, dims", [
+    @pytest.mark.parametrize("test, dimensions", [
          (DescriptorArray("test", [1.], "dimensionless", [1.]), ['dim0']),
          (DescriptorArray("test", [[1., 1.]], "dimensionless", [[1., 1.]]), ['dim0', 'dim1']),
          (DescriptorArray("test", [[1.], [1.]], "dimensionless", [[1.], [1.]]), ['dim0', 'dim1']),
@@ -935,13 +941,13 @@ class TestDescriptorArray:
          (DescriptorArray("test", [[[1.]], [[1.]], [[1.]]], "dimensionless", [[[1.]], [[1.]], [[1.]]]), ['dim0', 'dim1', 'dim2']),
         ],
         ids=["1x1", "1x2", "2x1", "1x3", "3x1"])
-    def test_array_generate_dims(self, test, dims):
-        assert test.dims == dims
+    def test_array_generate_dimensions(self, test, dimensions):
+        assert test.dimensions == dimensions
 
-    def test_array_set_dims_exception(self, descriptor):
+    def test_array_set_dimensions_exception(self, descriptor):
         with pytest.raises(ValueError) as e:
-            descriptor.dims = ['too_few']
+            descriptor.dimensions = ['too_few']
         assert "must have the same shape"
         with pytest.raises(ValueError) as e:
-            DescriptorArray("test", [[1.]], "m", [[1.]], dims=['dim'])
-        assert "Length of dims" in str(e)
+            DescriptorArray("test", [[1.]], "m", [[1.]], dimensions=['dim'])
+        assert "Length of dimensions" in str(e)
