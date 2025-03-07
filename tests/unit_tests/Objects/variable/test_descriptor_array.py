@@ -1345,6 +1345,15 @@ class TestDescriptorArray:
         # Then Expect
         assert isinstance(descriptor.variance[0][0], float)
     
+    def test_array_create_with_mixed_integers_and_floats(self):
+        # When
+        value = [[1, 2], [3, 4]]
+        variance = [[0.1, 0.2], [0.3, 0.4]]
+        # Then Expect
+        descriptor = DescriptorArray('test', value, 'dimensionless', variance)  # Should not raise
+        assert isinstance(descriptor.value[0][0], float)
+        assert isinstance(descriptor.variance[0][0], float)
+    
     def test_array_set_dims(self, descriptor):
         # When
         descriptor.dimensions = ['x', 'y']

@@ -58,6 +58,7 @@ class DescriptorArray(DescriptorBase):
             raise TypeError(f"{value=} must be a list or numpy array.")
         if isinstance(value, list):
             value = np.array(value)  # Convert to numpy array for consistent handling.
+        value = np.astype(value, 'float')
 
         if variance is not None:
             if not isinstance(variance, (list, np.ndarray)):
@@ -68,6 +69,7 @@ class DescriptorArray(DescriptorBase):
                 raise ValueError(f"{variance=} must have the same shape as {value=}.")
             if not np.all(variance >= 0):
                 raise ValueError(f"{variance=} must only contain non-negative values.")
+            variance = np.astype(variance, 'float')
            
         if not isinstance(unit, sc.Unit) and not isinstance(unit, str):
             raise TypeError(f'{unit=} must be a scipp unit or a string representing a valid scipp unit')
@@ -83,7 +85,10 @@ class DescriptorArray(DescriptorBase):
         try:
             # Convert value and variance to floats
             # for optimization everything must be floats
-            self._array = sc.array(dims=dimensions, values=value, unit=unit, variances=variance).astype('float')
+            self._array = sc.array(dims=dimensions,
+                                   values=value,
+                                   unit=unit,
+                                   variances=variance)
         except Exception as message:
             raise UnitError(message)
                 # TODO: handle 1xn and nx1 arrays
