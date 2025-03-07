@@ -689,25 +689,39 @@ class DescriptorArray(DescriptorBase):
                     new {self.__class__.__name__}.'
         )
 
-    def trace(self) -> Union[DescriptorArray, DescriptorNumber]:
+    def trace(self,
+              dimension1: Optional[str] = None,
+              dimension2: Optional[str]= None) -> Union[DescriptorArray, DescriptorNumber]:
         """
-        Computes the trace over the descriptor array.
-        Only works for matrices where all dimensions are equal.
-        For a rank `k` tensor, the trace will run over the firs two dimensions,
-        resulting in a rank `k-2` tensor.
+        Computes the trace over the descriptor array. The submatrix defined `dimension1` and `dimension2` must be square.
+        For a rank `k` tensor, the trace will run over the firs two dimensions, resulting in a rank `k-2` tensor.
+
+        :param dimension1, dimension2: First and second dimension to perform trace over. Must be in `self.dimensions`.
+            If not defined, the trace will be taken over the first two dimensions.
         """
-        shape = np.array(self.full_value.shape)
-        N = shape[0]
-        if not np.all(shape == N):
-            raise ValueError('\
-                    Trace can only be taken over arrays where all dimensions are of equal length')
+        if (dimension1 is not None and dimension2 is None) or (dimension1 is None and dimension2 is not None):
+            raise ValueError('Either both or none of `dimension1` and `dimension2` must be set.')
+        
+        if dimension1 is not None and dimension2 is not None:
+            if dimension1 == dimension2:
+                raise ValueError(f'`{dimension1=}` and `{dimension2=}` must be different.')
+            
+            axes = []
+            for dim in (dimension1, dimension2):
+                if dim not in self.dimensions:
+                    raise ValueError(f'Dimension {dim=} does not exist in the ')
+                index = self.dimensions.index(dim)
+                axes.append(index)
+            remaining_dimensions = [dim for dim in self.dimensions if dim not in (dimension1, dimension2)]
+        else:
+            # Take the first two dimensions
+            axes = (0, 1)
+            # Pick out the remaining dims
+            remaining_dimensions = self.dimensions[2:]
 
-        trace_value = np.trace(self.value)
-        trace_variance = np.trace(self.variance) if self.variance is not None else None
-
+        trace_value = np.trace(self.value, axis1=axes[0], axis2=axes[1])
+        trace_variance = np.trace(self.variance, axis1=axes[0], axis2=axes[1]) if self.variance is not None else None
         # The trace reduces a rank k tensor to a k-2.
-        # Pick out the remaining dims
-        remaining_dimensions = self.dimensions[2:]
         if remaining_dimensions == []:
             # No remaining dimensions; the trace is a scalar
             trace = sc.scalar(value=trace_value, unit=self.unit, variance=trace_variance)

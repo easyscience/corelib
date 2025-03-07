@@ -1199,22 +1199,40 @@ class TestDescriptorArray:
         if isinstance(expected, DescriptorArray):
             assert np.all(result.full_value.dims == expected.full_value.dims)
     
-    @pytest.mark.parametrize("test", [
-         DescriptorArray("test + name", 
-                         [[3.0, 4.0]], 
-                         "m", 
-                         [[0.11, 0.21]]),
-
-         DescriptorArray("test + name", 
-                         [[3.0, 4.0], [1.0, 1.0], [1.0, 1.0]], 
-                         "dimensionless", 
-                         [[0.11, 0.21], [1., 1.], [1., 1.]])
+    @pytest.mark.parametrize("test, expected, dimensions", [
+        (DescriptorArray("test", np.ones((3, 3, 4, 5)), "dimensionless", np.ones((3, 3, 4, 5))),
+         DescriptorArray("test", 3*np.ones((3, 4)), "dimensionless", 3*np.ones((3, 4)), dimensions=['dim0', 'dim2']),
+         ('dim1', 'dim3'))
          ],
-        ids=["2x1_unit", "3x2_dimensionless"])
-    def test_trace_exception(self, test: DescriptorArray):
+        ids=["4d"])
+    def test_trace_select_dimensions(self, test: DescriptorArray, expected: DescriptorNumber, dimensions):
+        result = test.trace(dimension1=dimensions[0], dimension2=dimensions[1])
+        assert type(result) == type(expected)
+        assert result.name == result.unique_name
+        assert np.array_equal(result.value.shape, expected.value.shape)
+        assert np.array_equal(result.value, expected.value)
+        assert result.unit == expected.unit
+        assert np.all(result.full_value.dims == expected.full_value.dims)
+    
+    @pytest.mark.parametrize("test,dimensions,message", [
+        (DescriptorArray("test", np.ones((3, 3, 3)), "dimensionless", np.ones((3, 3, 3))),
+         ('dim0', None),
+         "Either both or none"
+         ),
+        (DescriptorArray("test", np.ones((3, 3, 3)), "dimensionless", np.ones((3, 3, 3))),
+         ('dim0', 'dim0'),
+         "must be different"
+         ),
+        (DescriptorArray("test", np.ones((3, 3, 3)), "dimensionless", np.ones((3, 3, 3))),
+         ('dim0', 'dim1337'),
+         "does not exist"
+         ),
+         ],
+        ids=["one_defined_dimension", "same_dimension", "invalid_dimension"])
+    def test_trace_exception(self, test: DescriptorArray, dimensions, message):
         with pytest.raises(ValueError) as e:
-            test.trace()
-        assert "Trace can only be taken" in str(e)
+            test.trace(dimension1=dimensions[0], dimension2=dimensions[1])
+        assert message in str(e)
     
     def test_slicing(self, descriptor: DescriptorArray):
         # When
