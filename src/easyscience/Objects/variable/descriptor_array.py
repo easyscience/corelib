@@ -709,7 +709,7 @@ class DescriptorArray(DescriptorBase):
             axes = []
             for dim in (dimension1, dimension2):
                 if dim not in self.dimensions:
-                    raise ValueError(f'Dimension {dim=} does not exist in the ')
+                    raise ValueError(f'Dimension {dim=} does not exist in `self.dimensions`.')
                 index = self.dimensions.index(dim)
                 axes.append(index)
             remaining_dimensions = [dim for dim in self.dimensions if dim not in (dimension1, dimension2)]
