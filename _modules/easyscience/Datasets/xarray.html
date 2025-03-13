@@ -15,35 +15,32 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
-    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/easyscience/Datasets/xarray';</script>
@@ -52,7 +49,6 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.2.1" />
   </head>
   
   
@@ -68,8 +64,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -77,6 +84,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search..."
          aria-label="Search..."
          autocomplete="off"
@@ -84,8 +92,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -103,8 +111,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -134,17 +141,21 @@
     
     
     <img src="../../../_static/ec_sidebar_w.png" class="logo__image only-light" alt="EasyScience  documentation - Home"/>
-    <img src="../../../_static/ec_sidebar_w.png" class="logo__image only-dark pst-js-only" alt="EasyScience  documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/ec_sidebar_w.png" class="logo__image only-dark" alt="EasyScience  documentation - Home"/>`);</script>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
@@ -232,16 +243,24 @@
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 
 </div></div>
       
@@ -275,22 +294,22 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;github.com/wardsimon&#39;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.0&#39;</span>
 
-<span class="kn">import</span> <span class="nn">weakref</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="c1"># import pint_xarray</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 
-<span class="kn">from</span> <span class="nn">easyscience</span> <span class="kn">import</span> <span class="n">ureg</span>
-<span class="kn">from</span> <span class="nn">easyscience.fitting</span> <span class="kn">import</span> <span class="n">FitResults</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">easyscience.fitting</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitResults</span>
 
 <span class="n">T_</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T_&#39;</span><span class="p">)</span>
 
@@ -298,7 +317,7 @@
 <div class="viewcode-block" id="EasyScienceDatasetAccessor">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor">[docs]</a>
 <span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataset_accessor</span><span class="p">(</span><span class="s1">&#39;easyscience&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">EasyScienceDatasetAccessor</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EasyScienceDatasetAccessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Accessor to extend an xarray DataSet to EasyScience. These functions can be accessed by `obj.EasyScience.func`.</span>
 <span class="sd">        The objective for this class accessor is to facilitate:</span>
@@ -309,7 +328,7 @@
 <span class="sd">    - To facilitate dask computation if required.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is called whenever you access obj.EasyScience, hence the attributes in the obj should only be written if they</span>
 <span class="sd">        have not been previously instantiated.</span>
@@ -332,7 +351,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the common name of the DataSet.</span>
 
@@ -342,7 +361,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the common name of the DataSet i.e could be experiment name...</span>
 
@@ -354,7 +373,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_name</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a description of the DataSet</span>
 
@@ -364,7 +383,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span>
 
     <span class="nd">@description</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_description</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_description</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the description of the DataSet</span>
 
@@ -376,7 +395,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_description</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the url of the DataSet</span>
 
@@ -386,7 +405,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
 
     <span class="nd">@url</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the URL of the DataSet. This may be a DOI.</span>
 
@@ -398,7 +417,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_url</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the core object associated to a DataSet. Note that this is called from a weakref. If the EasyScience obj is</span>
 <span class="sd">        garbage collected, None will be returned.</span>
@@ -411,7 +430,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core_object</span><span class="p">()</span>
 
     <span class="nd">@core_object</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_core_object</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_core_object</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Associate an EasyScience object to a DataSet.</span>
 
@@ -424,7 +443,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.add_coordinate">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.add_coordinate">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_coordinate</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_coordinate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coordinate_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">coordinate_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">T_</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
@@ -448,7 +467,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.remove_coordinate">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.remove_coordinate">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove a coordinate from the DataSet. Note that this will not remove the coordinate from DataArrays which have</span>
 <span class="sd">        already used the it!</span>
@@ -464,7 +483,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.add_variable">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.add_variable">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_variable</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_variable</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variable_name</span><span class="p">,</span>
         <span class="n">variable_coordinates</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
@@ -542,7 +561,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.remove_variable">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.remove_variable">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove a DataArray from the DataSet by supplied name.</span>
 
@@ -556,7 +575,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.sigma_generator">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.sigma_generator">[docs]</a>
-    <span class="k">def</span> <span class="nf">sigma_generator</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_generator</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variable_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">sigma_func</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
@@ -580,7 +599,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.sigma_attach">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.sigma_attach">[docs]</a>
-    <span class="k">def</span> <span class="nf">sigma_attach</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_attach</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variable_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">sigma_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">T_</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
@@ -619,7 +638,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.generate_points">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.generate_points">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">                Generate an expanded DataArray of points which corresponds to broadcasted dimensions (`all_x`) which have been</span>
 <span class="sd">                concatenated along the second axis (`fit_dim`).</span>
@@ -653,7 +672,7 @@
 
 <div class="viewcode-block" id="EasyScienceDatasetAccessor.fit">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDatasetAccessor.fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fitter</span><span class="p">,</span>
         <span class="n">data_arrays</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
@@ -732,7 +751,7 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                     <span class="n">dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dims</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-                <span class="k">def</span> <span class="nf">local_fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">local_fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;vectorize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vectorized</span>
                     <span class="n">res</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
                         <span class="n">fs</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
@@ -749,7 +768,7 @@
                 <span class="n">y_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">[</span><span class="n">data_arrays</span><span class="p">[</span><span class="n">_idx</span><span class="p">]]</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">all_x</span><span class="o">=</span><span class="n">dims</span><span class="p">))</span>
                 <span class="n">fn_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">local_fit_func</span><span class="p">)</span>
 
-            <span class="k">def</span> <span class="nf">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fn_array</span><span class="p">)):</span>
                     <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn_array</span><span class="p">[</span><span class="n">idx</span><span class="p">](</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
@@ -773,13 +792,13 @@
 <div class="viewcode-block" id="EasyScienceDataarrayAccessor">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDataarrayAccessor">[docs]</a>
 <span class="nd">@xr</span><span class="o">.</span><span class="n">register_dataarray_accessor</span><span class="p">(</span><span class="s1">&#39;EasyScience&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">EasyScienceDataarrayAccessor</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EasyScienceDataarrayAccessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Accessor to extend an xarray DataArray to EasyScience. These functions can be accessed by `obj.EasyScience.func`.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xarray_obj</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">xarray_obj</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_core_object</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma_label_prefix</span> <span class="o">=</span> <span class="s1">&#39;s_&#39;</span>
@@ -790,26 +809,26 @@
                 <span class="s1">&#39;postcompute_func&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__empty_functional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">outer</span><span class="p">():</span>
-            <span class="k">def</span> <span class="nf">empty_fn</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__empty_functional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">outer</span><span class="p">():</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">empty_fn</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="k">return</span> <span class="nb">input</span>
 
             <span class="k">return</span> <span class="n">empty_fn</span>
 
-        <span class="k">class</span> <span class="nc">wrapper</span><span class="p">:</span>
-            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">wrapper</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">fn</span> <span class="o">=</span> <span class="n">outer</span><span class="p">()</span>
 
-            <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">wrapper</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the core object associated to a DataArray. Note that this is called from a weakref. If the EasyScience obj is</span>
 <span class="sd">        garbage collected, None will be returned.</span>
@@ -822,7 +841,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core_object</span><span class="p">()</span>
 
     <span class="nd">@core_object</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_core_object</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">core_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_core_object</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the core object associated to a dataset</span>
 
@@ -834,7 +853,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_core_object</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">new_core_object</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">compute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the computational function which will be executed during a fit</span>
 
@@ -847,7 +866,7 @@
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@compute_func</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">compute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_computational_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_computational_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the computational function which is called during a fit</span>
 
@@ -859,7 +878,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;computation&#39;</span><span class="p">][</span><span class="s1">&#39;compute_func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_computational_fn</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">precompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">precompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the pre-computational function which will be executed before a fit</span>
 
@@ -872,7 +891,7 @@
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@precompute_func</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">precompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_computational_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">precompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_computational_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the computational function which is called before a fit</span>
 
@@ -884,7 +903,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;computation&#39;</span><span class="p">][</span><span class="s1">&#39;precompute_func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_computational_fn</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">postcompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">postcompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the post-computational function which will be executed after a fit</span>
 
@@ -897,7 +916,7 @@
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@postcompute_func</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">postcompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_computational_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">postcompute_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_computational_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the computational function which is called after a fit</span>
 
@@ -910,7 +929,7 @@
 
 <div class="viewcode-block" id="EasyScienceDataarrayAccessor.fit_prep">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDataarrayAccessor.fit_prep">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit_prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_in</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">bdims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dask_chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_in</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">bdims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dask_chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate broadcasted coordinates for fitting and reform the fitting function into one which can handle xarrays.</span>
 
@@ -929,7 +948,7 @@
             <span class="n">bdims</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;computation&#39;</span><span class="p">][</span><span class="s1">&#39;compute_func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_in</span>
 
-        <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">vectorize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">vectorize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">old_shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">vectorize</span><span class="p">:</span>
                 <span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x_new</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">for</span> <span class="n">x_new</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x_new</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)]</span>
@@ -953,7 +972,7 @@
 
 <div class="viewcode-block" id="EasyScienceDataarrayAccessor.generate_points">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDataarrayAccessor.generate_points">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate an expanded DataArray of points which corresponds to broadcasted dimensions (`all_x`) which have been</span>
 <span class="sd">        concatenated along the second axis (`fit_dim`).</span>
@@ -976,7 +995,7 @@
 
 <div class="viewcode-block" id="EasyScienceDataarrayAccessor.fit">
 <a class="viewcode-back" href="../../../reference/base.html#easyscience.Datasets.xarray.EasyScienceDataarrayAccessor.fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fitter</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -1026,7 +1045,7 @@
             <span class="n">dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dims</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
         <span class="c1"># Wrap the wrap in a callable</span>
-        <span class="k">def</span> <span class="nf">local_fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">local_fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Function which will be called by the fitter. This will deal with sending the function the correct data.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -1060,7 +1079,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">check_sanity_single</span><span class="p">(</span><span class="n">fit_results</span><span class="p">:</span> <span class="n">FitResults</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_sanity_single</span><span class="p">(</span><span class="n">fit_results</span><span class="p">:</span> <span class="n">FitResults</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the FitResults from a fitter compatible state to a recognizable DataArray state.</span>
 
@@ -1093,7 +1112,7 @@
     <span class="k">return</span> <span class="n">fit_results</span>
 
 
-<span class="k">def</span> <span class="nf">check_sanity_multiple</span><span class="p">(</span><span class="n">fit_results</span><span class="p">:</span> <span class="n">FitResults</span><span class="p">,</span> <span class="n">originals</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FitResults</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_sanity_multiple</span><span class="p">(</span><span class="n">fit_results</span><span class="p">:</span> <span class="n">FitResults</span><span class="p">,</span> <span class="n">originals</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FitResults</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the multifit FitResults from a fitter compatible state to a list of recognizable DataArray states.</span>
 
@@ -1168,7 +1187,7 @@ By EasyScience Contributors
 
   <p class="copyright">
     
-      © Copyright 2024, EasyScience Contributors.
+      © Copyright 2025, EasyScience Contributors.
       <br/>
     
   </p>
@@ -1192,8 +1211,8 @@ By EasyScience Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

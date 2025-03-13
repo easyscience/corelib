@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:00.307** total execution time for 2 files **from all galleries**:
+**00:00.267** total execution time for 2 files **from all galleries**:
 
 .. container::
 
@@ -33,7 +33,7 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_base_examples_plot_baseclass1.py` (``../../Examples/base/plot_baseclass1.py``)
-     - 00:00.303
+     - 00:00.264
      - 0.0
    * - :ref:`sphx_glr_fitting_examples_plot_constraints.py` (``../../Examples/fitting/plot_constraints.py``)
      - 00:00.004

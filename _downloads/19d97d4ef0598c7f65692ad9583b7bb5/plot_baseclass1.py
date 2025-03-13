@@ -41,13 +41,13 @@ class Pendulum(BaseObj):
         return cls(A, f, p)
 
     def __call__(self, t):
-        return self.A.raw_value * np.sin(2 * np.pi * self.f.raw_value * t + self.p.raw_value)
+        return self.A.value * np.sin(2 * np.pi * self.f.value * t + self.p.value)
 
     def plot(self, time, axis=None, **kwargs):
         if axis is None:
             axis = plt
         else:
-            axis.set_title(f'A={self.A.raw_value}, F={self.f.raw_value}, P={self.p.raw_value}')
+            axis.set_title(f'A={self.A.value}, F={self.f.value}, P={self.p.value}')
         p = axis.plot(time, self(time), **kwargs)
         return p
 

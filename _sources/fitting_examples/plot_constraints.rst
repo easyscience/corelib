@@ -46,9 +46,9 @@ This  example shows the usages of the different constraints.
 
  .. code-block:: none
 
-    Set Value: 4, Parameter Value: <Parameter 'p1': 4.0+/-0, bounds=[-inf:inf]>
-    Set Value: 5, Parameter Value: <Parameter 'p1': 5.0+/-0, bounds=[-inf:inf]>
-    Set Value: 6, Parameter Value: <Parameter 'p1': 5.0+/-0, bounds=[-inf:inf]>
+    Set Value: 4, Parameter Value: <Parameter 'p1': 4.0000, bounds=[-inf:inf]>
+    Set Value: 5, Parameter Value: <Parameter 'p1': 5.0000, bounds=[-inf:inf]>
+    Set Value: 6, Parameter Value: <Parameter 'p1': 5.0000, bounds=[-inf:inf]>
 
 
 
