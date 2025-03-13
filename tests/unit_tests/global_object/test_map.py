@@ -3,7 +3,7 @@
 #  © 2021-2023 Contributors to the EasyScience project <https://github.com/easyScience/EasyScience
 
 from easyscience.global_object.map import Map
-from easyscience.Objects.Variable import Parameter
+from easyscience.Objects.variable.parameter import Parameter
 from easyscience.Objects.ObjectClasses import BaseObj
 import pytest
 import gc

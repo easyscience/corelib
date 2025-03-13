@@ -16,21 +16,18 @@ from typing import List
 from typing import Optional
 from typing import Set
 from typing import TypeVar
-from typing import Union
 
 from easyscience import global_object
 from easyscience.Utils.classTools import addLoggedProp
 
 from .core import ComponentSerializer
-from .new_variable import Parameter as NewParameter
-from .new_variable.descriptor_base import DescriptorBase
-from .Variable import Descriptor
-from .Variable import Parameter
+from .variable import Parameter
+from .variable.descriptor_base import DescriptorBase
 
 if TYPE_CHECKING:
     from easyscience.Constraints import C
     from easyscience.Objects.Inferface import iF
-    from easyscience.Objects.Variable import V
+    V = TypeVar('V', bound=DescriptorBase)
 
 
 class BasedBase(ComponentSerializer):
@@ -160,8 +157,7 @@ class BasedBase(ComponentSerializer):
                 constraints.append(con[key])
         return constraints
 
-    ## TODO clean when full move to new_variable
-    def get_parameters(self) -> Union[List[Parameter], List[NewParameter]]:
+    def get_parameters(self) -> List[Parameter]:
         """
         Get all parameter objects as a list.
 
@@ -171,11 +167,10 @@ class BasedBase(ComponentSerializer):
         for key, item in self._kwargs.items():
             if hasattr(item, 'get_parameters'):
                 par_list = [*par_list, *item.get_parameters()]
-            elif isinstance(item, Parameter) or isinstance(item, NewParameter):
+            elif isinstance(item, Parameter):
                 par_list.append(item)
         return par_list
 
-    ## TODO clean when full move to new_variable
     def _get_linkable_attributes(self) -> List[V]:
         """
         Get all objects which can be linked against as a list.
@@ -186,12 +181,11 @@ class BasedBase(ComponentSerializer):
         for key, item in self._kwargs.items():
             if hasattr(item, '_get_linkable_attributes'):
                 item_list = [*item_list, *item._get_linkable_attributes()]
-            elif issubclass(type(item), (Descriptor, DescriptorBase)):
+            elif issubclass(type(item), (DescriptorBase)):
                 item_list.append(item)
         return item_list
 
-    ## TODO clean when full move to new_variable
-    def get_fit_parameters(self) -> Union[List[Parameter], List[NewParameter]]:
+    def get_fit_parameters(self) -> List[Parameter]:
         """
         Get all objects which can be fitted (and are not fixed) as a list.
 
@@ -201,7 +195,7 @@ class BasedBase(ComponentSerializer):
         for key, item in self._kwargs.items():
             if hasattr(item, 'get_fit_parameters'):
                 fit_list = [*fit_list, *item.get_fit_parameters()]
-            elif isinstance(item, Parameter) or isinstance(item, NewParameter):
+            elif isinstance(item, Parameter):
                 if item.enabled and not item.fixed:
                     fit_list.append(item)
         return fit_list
@@ -235,7 +229,6 @@ class BaseObj(BasedBase):
     cheat with `BaseObj(*[Descriptor(...), Parameter(...), ...])`.
     """
 
-    ## TODO clean when full move to new_variable
     def __init__(
         self,
         name: str,
@@ -253,7 +246,7 @@ class BaseObj(BasedBase):
         super(BaseObj, self).__init__(name=name, unique_name=unique_name)
         # If Parameter or Descriptor is given as arguments...
         for arg in args:
-            if issubclass(type(arg), (BaseObj, Descriptor, DescriptorBase)):
+            if issubclass(type(arg), (BaseObj, DescriptorBase)):
                 kwargs[getattr(arg, 'name')] = arg
         # Set kwargs, also useful for serialization
         known_keys = self.__dict__.keys()
@@ -261,7 +254,7 @@ class BaseObj(BasedBase):
         for key in kwargs.keys():
             if key in known_keys:
                 raise AttributeError('Kwargs cannot overwrite class attributes in BaseObj.')
-            if issubclass(type(kwargs[key]), (BasedBase, Descriptor, DescriptorBase)) or 'BaseCollection' in [
+            if issubclass(type(kwargs[key]), (BasedBase, DescriptorBase)) or 'BaseCollection' in [
                 c.__name__ for c in type(kwargs[key]).__bases__
             ]:
                 self._global_object.map.add_edge(self, kwargs[key])
@@ -310,7 +303,6 @@ class BaseObj(BasedBase):
             test_class=BaseObj,
         )
 
-    ## TODO clean when full move to new_variable
     def __setattr__(self, key: str, value: BV) -> None:
         # Assume that the annotation is a ClassVar
         old_obj = None
@@ -323,12 +315,12 @@ class BaseObj(BasedBase):
                 self.__class__.__annotations__[key].__args__,
             )
         ):
-            if issubclass(type(getattr(self, key, None)), (BasedBase, Descriptor, DescriptorBase)):
+            if issubclass(type(getattr(self, key, None)), (BasedBase, DescriptorBase)):
                 old_obj = self.__getattribute__(key)
                 self._global_object.map.prune_vertex_from_edge(self, old_obj)
             self._add_component(key, value)
         else:
-            if hasattr(self, key) and issubclass(type(value), (BasedBase, Descriptor, DescriptorBase)):
+            if hasattr(self, key) and issubclass(type(value), (BasedBase, DescriptorBase)):
                 old_obj = self.__getattribute__(key)
                 self._global_object.map.prune_vertex_from_edge(self, old_obj)
                 self._global_object.map.add_edge(self, value)
@@ -352,8 +344,8 @@ class BaseObj(BasedBase):
     @staticmethod
     def __setter(key: str) -> Callable[[BV], None]:
         def setter(obj: BV, value: float) -> None:
-            if issubclass(obj._kwargs[key].__class__, (Descriptor, DescriptorBase)) and not issubclass(
-                value.__class__, (Descriptor, DescriptorBase)
+            if issubclass(obj._kwargs[key].__class__, (DescriptorBase)) and not issubclass(
+                value.__class__, (DescriptorBase)
             ):
                 obj._kwargs[key].value = value
             else:

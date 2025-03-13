@@ -1,6 +1,6 @@
 import pytest
 
-from easyscience.Objects.new_variable.descriptor_str import DescriptorStr
+from easyscience.Objects.variable.descriptor_str import DescriptorStr
 from easyscience import global_object
 
 class TestDescriptorStr:

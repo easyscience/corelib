@@ -12,8 +12,8 @@ import pytest
 import easyscience
 from easyscience.Objects.Groups import BaseCollection
 from easyscience.Objects.ObjectClasses import BaseObj
-from easyscience.Objects.new_variable import DescriptorNumber
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import DescriptorNumber
+from easyscience.Objects.variable import Parameter
 from easyscience import global_object
 
 test_dict = {
@@ -381,6 +381,7 @@ def test_baseCollection_as_dict(cls):
 
 @pytest.mark.parametrize("cls", class_constructors)
 def test_baseCollection_from_dict(cls):
+    global_object.map._clear() #TODO: figure out why this test fails without this line
     name = "testing"
     kwargs = {"p1": DescriptorNumber("par1", 1)}
     expected = cls.from_dict(test_dict)
@@ -437,6 +438,7 @@ def test_baseCollection_iterator(cls):
 
 @pytest.mark.parametrize("cls", class_constructors)
 def test_baseCollection_iterator_dict(cls):
+    global_object.map._clear() #TODO: figure out why this test fails without this line
     name = "test"
     p1 = Parameter("p1", 1)
     p2 = Parameter("p2", 2)
@@ -456,6 +458,7 @@ def test_baseCollection_iterator_dict(cls):
 
 @pytest.mark.parametrize("cls", class_constructors)
 def test_baseCollection_sameName(cls):
+    global_object.map._clear() #TODO: figure out why this test fails without this line
     name = "test"
     p1 = Parameter("p1", 1)
     p2 = Parameter("p1", 2)

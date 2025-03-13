@@ -9,8 +9,8 @@ import pytest
 
 import easyscience
 from easyscience.Objects.ObjectClasses import BaseObj
-from easyscience.Objects.new_variable import DescriptorNumber
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import DescriptorNumber
+from easyscience.Objects.variable import Parameter
 
 dp_param_dict = {
     "argnames": "dp_kwargs, dp_cls",

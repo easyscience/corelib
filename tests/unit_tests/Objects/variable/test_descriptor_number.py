@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import scipp as sc
 from scipp import UnitError
 
-from easyscience.Objects.new_variable.descriptor_number import DescriptorNumber
+from easyscience.Objects.variable.descriptor_number import DescriptorNumber
 from easyscience import global_object
 
 class TestDescriptorNumber:
@@ -157,6 +157,20 @@ class TestDescriptorNumber:
 
         # Expect
         assert descriptor._scalar.variance == 0.2
+        assert descriptor.error == 0.4472135954999579
+
+    def test_error(self, descriptor: DescriptorNumber):
+        # When Then Expect
+        assert descriptor.error == 0.31622776601683794
+        
+    def test_set_error(self, descriptor: DescriptorNumber):
+        # When Then
+        descriptor.error = 0.31622776601683794
+
+        # Expect
+        assert descriptor.error == 0.31622776601683794
+        assert descriptor.variance == 0.1
+
 
     def test_value(self, descriptor: DescriptorNumber):
         # When Then Expect

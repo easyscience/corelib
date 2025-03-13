@@ -13,7 +13,7 @@ from easyscience.fitting.fitter import Fitter
 from easyscience.fitting.minimizers import FitError
 from easyscience.fitting.available_minimizers import AvailableMinimizers
 from easyscience.Objects.ObjectClasses import BaseObj
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import Parameter
 
 
 class AbsSin(BaseObj):

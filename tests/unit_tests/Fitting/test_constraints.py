@@ -13,7 +13,7 @@ from unittest.mock import MagicMock
 
 from easyscience.Constraints import NumericConstraint
 from easyscience.Constraints import ObjConstraint
-from easyscience.Objects.new_variable.parameter import Parameter
+from easyscience.Objects.variable.parameter import Parameter
 
 
 @pytest.fixture

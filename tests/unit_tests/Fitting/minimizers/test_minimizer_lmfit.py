@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import easyscience.fitting.minimizers.minimizer_lmfit
 from easyscience.fitting.minimizers.minimizer_lmfit import LMFit
-from easyscience.Objects.new_variable import Parameter
+from easyscience.Objects.variable import Parameter
 from lmfit import Parameter as LMParameter
 from easyscience.fitting.minimizers.utils import FitError
 
