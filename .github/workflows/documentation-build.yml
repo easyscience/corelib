@@ -42,8 +42,8 @@ jobs:
       with:
         install_requirements: true
         documentation_path: docs/src
-    # - name: Push changes
-    #   uses: ad-m/github-push-action@master
-    #   continue-on-error: true
-    #   with:
-    #     branch: gh-pages
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      continue-on-error: true
+      with:
+        branch: gh-pages
