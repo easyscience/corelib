@@ -33,7 +33,7 @@ class Wavey(BaseObj):
 
     def fit_fun(self, x, *args, **kwargs):
         # In the real case we would gust call the evaluation fn without reference to the BaseObj
-        return self.amplitude.raw_value * np.sin((x + self.phase.raw_value)/self.period.raw_value)
+        return self.amplitude.value * np.sin((x + self.phase.value)/self.period.value)
 
 b = Wavey.from_params()
 bb = Wavey.from_params(1.1, 0.1, 1.9*np.pi)

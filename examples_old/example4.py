@@ -407,14 +407,14 @@ class Line(BaseObj):
         if self.interface:
             return self.interface().get_value("m")
         else:
-            return self.m.raw_value
+            return self.m.value
 
     @property
     def intercept(self):
         if self.interface:
             return self.interface().get_value("c")
         else:
-            return self.c.raw_value
+            return self.c.value
 
     def __repr__(self):
         return f"Line: m={self.m}, c={self.c}"

@@ -16,7 +16,7 @@ b = BaseObj("line", m=Parameter("m", 1), c=Parameter("c", 1))
 
 def fit_fun(x, *args, **kwargs):
     # In the real case we would gust call the evaluation fn without reference to the BaseObj
-    return b.c.raw_value + b.m.raw_value * x
+    return b.c.value + b.m.value * x
 
 
 f = Fitter()
