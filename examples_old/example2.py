@@ -27,11 +27,11 @@ class Line(BaseObj):
 
     @property
     def gradient(self):
-        return self.m.raw_value
+        return self.m.value
 
     @property
     def intercept(self):
-        return self.c.raw_value
+        return self.c.value
 
     def fit_func(self, x: np.ndarray) -> np.ndarray:
         return self.gradient * x + self.intercept

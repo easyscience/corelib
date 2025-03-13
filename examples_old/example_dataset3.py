@@ -36,7 +36,7 @@ b = BaseObj('line',
 
 def fit_fun(x, *args, **kwargs):
     # In the real case we would gust call the evaluation fn without reference to the BaseObj
-    return np.sin(2*np.pi*(x[:, 0] + b.s_off.raw_value)) * np.cos(2*np.pi*(x[:, 1] + b.c_off.raw_value))
+    return np.sin(2*np.pi*(x[:, 0] + b.s_off.value)) * np.cos(2*np.pi*(x[:, 1] + b.c_off.value))
 
 
 f = Fitter()
