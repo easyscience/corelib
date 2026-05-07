@@ -148,7 +148,7 @@ def test_ObjBase_as_dict(clear, setup_pars: dict):
     obtained = obj.as_dict()
     assert isinstance(obtained, dict)
     expected = {
-        '@module': 'easyscience.base_classes.obj_base',
+        '@module': 'easyscience.legacy.obj_base',
         '@class': 'ObjBase',
         '@version': easyscience.__version__,
         'name': 'test',

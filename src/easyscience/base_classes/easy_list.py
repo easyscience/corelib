@@ -17,13 +17,15 @@ from typing import TypeVar
 from typing import overload
 
 from easyscience.io.serializer_base import SerializerBase
+from easyscience.variable.descriptor_base import DescriptorBase
 
+from .model_base import ModelBase
 from .new_base import NewBase
 
 ProtectedType_ = TypeVar('ProtectedType', bound=NewBase)
 
 
-class EasyList(NewBase, MutableSequence[ProtectedType_]):
+class EasyList(ModelBase, MutableSequence[ProtectedType_]):
     # If we were to inherit from List instead of MutableSequence,
     # we would have to overwrite "extend", "remove", "__iadd__", "count", "append", "__iter__" and "clear"
     def __init__(
@@ -190,6 +192,24 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
         :rtype: str
         """
         return obj.unique_name
+
+    def get_all_variables(self) -> List[DescriptorBase]:
+        """Get all `Descriptor` and `Parameter` objects from all
+        elements that are derived from `ModelBase`.
+
+        For each element that is a `ModelBase` instance, the element's
+        own `get_all_variables()` method is called and the results are
+        collected into a single flat list.
+
+        :return: Flat list of all `DescriptorBase` objects from all
+            `ModelBase` elements.
+        :rtype: List[DescriptorBase]
+        """
+        all_vars: List[DescriptorBase] = []
+        for item in self._data:
+            if isinstance(item, ModelBase):
+                all_vars.extend(item.get_all_variables())
+        return all_vars
 
     # Overwriting methods
 

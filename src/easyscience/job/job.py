@@ -4,7 +4,7 @@
 from abc import ABCMeta
 from abc import abstractmethod
 
-from ..base_classes.obj_base import ObjBase
+from ..legacy.obj_base import ObjBase
 from .analysis import AnalysisBase
 from .experiment import ExperimentBase
 from .theoreticalmodel import TheoreticalModelBase
