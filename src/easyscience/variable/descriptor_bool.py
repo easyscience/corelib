@@ -65,6 +65,11 @@ class DescriptorBool(DescriptorBase):
         -------
         None
             None.
+
+        Raises
+        ------
+        TypeError
+            If ``value`` is not a boolean.
         """
         if not isinstance(value, bool):
             raise TypeError(f'{value=} must be type bool')

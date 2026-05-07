@@ -24,6 +24,11 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
     obj : Any
         The object to search for Parameters (can be a single Parameter,
         list, dict, or complex object).
+
+    Raises
+    ------
+    ValueError
+        If one or more pending dependencies cannot be resolved.
     """
 
     def _collect_parameters(item: Any, parameters: List[Parameter]) -> None:

@@ -8,6 +8,7 @@ __version__ = '3.0.0'
 
 
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -29,8 +30,8 @@ class SerializerDict(SerializerBase):
         obj: SerializerComponent,
         skip: Optional[List[str]] = None,
         full_encode: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
         """
         Convert an EasyScience object to a dictionary.
 
@@ -44,13 +45,13 @@ class SerializerDict(SerializerBase):
         full_encode : bool, default=False
             Should the data also be encoded (default False). By default,
             False.
-        **kwargs :
+        **kwargs : Any
             Any additional key word arguments to be passed to the
             encoder.
 
         Returns
         -------
-
+        Dict[str, Any]
             Object encoded to dictionary containing all information to
             reform an EasyScience object.
         """
@@ -58,15 +59,14 @@ class SerializerDict(SerializerBase):
         return self._convert_to_dict(obj, skip=skip, full_encode=full_encode, **kwargs)
 
     @classmethod
-    def decode(cls, d: Dict) -> SerializerComponent:
+    def decode(cls, d: Dict[str, Any]) -> SerializerComponent:
         """
         Re-create an EasyScience object from the dictionary
         representation.
 
         Parameters
         ----------
-        cls :
-        d : Dict
+        d : Dict[str, Any]
             Dict representation of an EasyScience object.
 
         Returns

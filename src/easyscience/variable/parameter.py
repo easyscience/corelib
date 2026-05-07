@@ -65,11 +65,6 @@ class Parameter(DescriptorNumber):
 
         Parameters
         ----------
-        **kwargs : Any
-        callback : property, default=property()
-            By default, property().
-        unique_name : Optional[str], default=None
-            By default, None.
         name : str
             Name of this object.
         value : numbers.Number
@@ -86,6 +81,8 @@ class Parameter(DescriptorNumber):
         fixed : Optional[bool], default=False
             If the parameter is free to vary during fitting. By default,
             False.
+        unique_name : Optional[str], default=None
+            Unique identifier for this object. By default, None.
         description : Optional[str], default=None
             A brief summary of what this object is. By default, None.
         url : Optional[str], default=None
@@ -93,9 +90,22 @@ class Parameter(DescriptorNumber):
         display_name : Optional[str], default=None
             The name of the object as it should be displayed. By
             default, None.
+        callback : property, default=property()
+            Callback used to synchronize the parameter with an external
+            model.
         parent : Optional[Any], default=None
             The object which is the parent to this one. By default,
             None.
+        **kwargs : Any
+            Additional keyword arguments used during serialization.
+
+        Raises
+        ------
+        TypeError
+            If any numeric or boolean input has the wrong type.
+        ValueError
+            If ``value`` falls outside the provided bounds or if the
+            bounds are invalid.
 
         Notes
         -----
@@ -156,7 +166,7 @@ class Parameter(DescriptorNumber):
         dependency_expression: str,
         dependency_map: Optional[dict] = None,
         desired_unit: str | sc.Unit | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Parameter:  # noqa: E501
         """
         Create a dependent Parameter directly from a dependency
@@ -164,7 +174,6 @@ class Parameter(DescriptorNumber):
 
         Parameters
         ----------
-        cls :
         name : str
             The name of the parameter.
         dependency_expression : str
@@ -177,7 +186,7 @@ class Parameter(DescriptorNumber):
         desired_unit : str | sc.Unit | None, default=None
             The desired unit of the dependent parameter. By default,
             None.
-        **kwargs :
+        **kwargs : Any
             Additional keyword arguments to pass to the Parameter
             constructor.
 
@@ -269,6 +278,22 @@ class Parameter(DescriptorNumber):
             The desired unit of the dependent parameter. If None, the
             default unit of the dependency expression result is used. By
             default, None.
+
+        Raises
+        ------
+        NameError
+            If the dependency expression references unresolved names.
+        RuntimeError
+            If the dependency introduces a cyclic dependency.
+        SyntaxError
+            If the dependency expression is invalid.
+        TypeError
+            If the dependency inputs have invalid types.
+        UnitError
+            If converting the dependency result to the desired unit
+            fails.
+        ValueError
+            If the dependency expression or dependency map is invalid.
         """
         if not isinstance(dependency_expression, str):
             raise TypeError(
@@ -409,6 +434,11 @@ class Parameter(DescriptorNumber):
         -------
         None
             None.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is already independent.
         """
         if not self._independent:
             for dependency in self._dependency_map.values():
@@ -450,6 +480,11 @@ class Parameter(DescriptorNumber):
         -------
         str
             The dependency expression of this parameter.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is independent.
         """
         if not self._independent:
             return self._dependency_string
@@ -472,6 +507,11 @@ class Parameter(DescriptorNumber):
         -------
         Dict[str, DescriptorNumber]
             The dependency map of this parameter.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is independent.
         """
         if not self._independent:
             return self._dependency_map
@@ -548,6 +588,13 @@ class Parameter(DescriptorNumber):
         ----------
         value : numbers.Number
             New value of self.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is dependent.
+        TypeError
+            If ``value`` is not numeric.
         """
         if self._independent:
             if not isinstance(value, numbers.Number):
@@ -580,6 +627,11 @@ class Parameter(DescriptorNumber):
         ----------
         variance_float : float
             Variance as a float.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is dependent.
         """
         if self._independent:
             DescriptorNumber.variance.fset(self, variance_float)
@@ -597,6 +649,11 @@ class Parameter(DescriptorNumber):
         ----------
         value : float
             New error value.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is dependent.
         """
         if self._independent:
             DescriptorNumber.error.fset(self, value)
@@ -614,13 +671,7 @@ class Parameter(DescriptorNumber):
         Parameters
         ----------
         unit_str : str
-        new_unit :
             New unit.
-
-        Returns
-        -------
-        None
-            None.
         """
         super()._convert_unit(unit_str=unit_str)
         new_unit = sc.Unit(unit_str)  # unit_str is tested in super method
@@ -637,13 +688,7 @@ class Parameter(DescriptorNumber):
         Parameters
         ----------
         unit_str : str
-        new_unit :
             New unit.
-
-        Returns
-        -------
-        None
-            None.
         """
         self._convert_unit(unit_str)
 
@@ -657,6 +702,15 @@ class Parameter(DescriptorNumber):
         ----------
         unit_str : str | sc.Unit | None
             The desired unit as a string.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is independent.
+        TypeError
+            If ``unit_str`` has an invalid type.
+        UnitError
+            If converting to the desired unit fails.
         """
 
         if self._independent:
@@ -707,6 +761,16 @@ class Parameter(DescriptorNumber):
         -------
         None
             None.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is dependent.
+        TypeError
+            If ``min_value`` is not numeric.
+        ValueError
+            If ``min_value`` conflicts with the current value or upper
+            bound.
         """
         if self._independent:
             if not isinstance(min_value, numbers.Number):
@@ -756,6 +820,16 @@ class Parameter(DescriptorNumber):
         -------
         None
             None.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is dependent.
+        TypeError
+            If ``max_value`` is not numeric.
+        ValueError
+            If ``max_value`` conflicts with the current value or lower
+            bound.
         """
         if self._independent:
             if not isinstance(max_value, numbers.Number):
@@ -800,6 +874,13 @@ class Parameter(DescriptorNumber):
         ----------
         fixed : bool
             True = fixed, False = can vary.
+
+        Raises
+        ------
+        AttributeError
+            If the parameter is dependent.
+        ValueError
+            If ``fixed`` is not a boolean.
         """
         if not isinstance(fixed, bool):
             raise ValueError(f'{fixed=} must be a boolean. Got {type(fixed)}')
@@ -879,6 +960,12 @@ class Parameter(DescriptorNumber):
         ----------
         dependency_expression : str
             The dependency expression to be evaluated.
+
+        Raises
+        ------
+        ValueError
+            If a referenced unique name does not exist or does not map
+            to a supported dependency type.
         """
         # Get the unique_names from the expression string regardless of the quotes used
         inputted_unique_names = re.findall("('.+?')", dependency_expression)

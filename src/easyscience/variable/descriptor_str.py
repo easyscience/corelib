@@ -63,6 +63,11 @@ class DescriptorStr(DescriptorBase):
         -------
         None
             None.
+
+        Raises
+        ------
+        ValueError
+            If ``value`` is not a string.
         """
         if not isinstance(value, str):
             raise ValueError(f'{value=} must be type str')

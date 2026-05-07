@@ -98,7 +98,6 @@ class XMLSerializer(BaseEncoderDecoder):
 
         Parameters
         ----------
-        cls :
         data : str
             String containing XML encoded data.
 

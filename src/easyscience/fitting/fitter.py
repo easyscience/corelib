@@ -48,13 +48,13 @@ class Fitter:
         return self._minimizer.convert_to_pars_obj(pars)
 
     # TODO: remove this method when we are ready to adjust the dependent products
-    def initialize(self, fit_object, fit_function: Callable) -> None:
+    def initialize(self, fit_object: object, fit_function: Callable) -> None:
         """
         Set the model and callable in the calculator interface.
 
         Parameters
         ----------
-        fit_object :
+        fit_object : object
             The EasyScience model object.
         fit_function : Callable
             The function to be optimized against.
@@ -177,8 +177,12 @@ class Fitter:
     @property
     def fit_function(self) -> Callable:
         """
-        The raw fit function that the optimizer will call (no wrapping)
-        :return: Raw fit function.
+        Get the raw fit function that the optimizer will call.
+
+        Returns
+        -------
+        Callable
+            Raw fit function.
         """
         return self._fit_function
 
@@ -201,28 +205,33 @@ class Fitter:
         self._update_minimizer(self._enum_current_minimizer)
 
     @property
-    def fit_object(self):
+    def fit_object(self) -> object:
         """
-        The EasyScience object which will be used as a model :return:
+        Get the EasyScience object used as a model.
 
-        EasyScience Model..
+        Returns
+        -------
+        object
+            EasyScience model object.
         """
         return self._fit_object
 
     @fit_object.setter
-    def fit_object(self, fit_object) -> None:
+    def fit_object(self, fit_object: object) -> None:
         """
         Set the EasyScience object which wil be used as a model.
 
         Parameters
         ----------
-        fit_object :
-            New EasyScience object :return: None.
+        fit_object : object
+            New EasyScience object.
         """
         self._fit_object = fit_object
         self._update_minimizer(self._enum_current_minimizer)
 
-    def _fit_function_wrapper(self, real_x=None, flatten: bool = True) -> Callable:
+    def _fit_function_wrapper(
+        self, real_x: Optional[np.ndarray] = None, flatten: bool = True
+    ) -> Callable:
         """
         Simple fit function which injects the real X (independent)
         values into the optimizer function.
@@ -231,7 +240,7 @@ class Fitter:
 
         Parameters
         ----------
-        real_x : default=None, default=None
+        real_x : Optional[np.ndarray], default=None
             Independent x parameters to be injected. By default, None.
         flatten : bool, default=True
             Should the result be a flat 1D array? By default, True.
@@ -321,20 +330,31 @@ class Fitter:
         y: np.ndarray,
         weights: Optional[np.ndarray],
         vectorized: bool,
-    ):
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, Optional[np.ndarray], tuple[int, ...]]:
         """
         Check the dimensions of the inputs and reshape if necessary.
 
         Parameters
         ----------
-        vectorized : bool
-        weights : Optional[np.ndarray]
         x : np.ndarray
             ND matrix of dependent points.
         y : np.ndarray
             N-1D matrix of independent points.
-        kwargs :
-            Additional key-word arguments.
+        weights : Optional[np.ndarray]
+            Optional weights for the fit.
+        vectorized : bool
+            Whether ``x`` already stores vectorized coordinates.
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray, np.ndarray, Optional[np.ndarray], tuple[int, ...]]
+            Reshaped x values, reshaped input data, flattened y values,
+            flattened weights, and the original x shape.
+
+        Raises
+        ------
+        ValueError
+            If the shapes of ``x`` and ``y`` are incompatible.
         """
         # Make sure that they are np arrays
         x_new = np.array(x)

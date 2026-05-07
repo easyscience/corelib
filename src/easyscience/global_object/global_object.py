@@ -38,11 +38,6 @@ class GlobalObject:
         The undo/redo stack references the collective.
 
         Hence it has to be imported after initialization.
-
-        Returns
-        -------
-        noneType
-            None.
         """
         from easyscience.global_object.undo_redo import UndoStack
 
@@ -58,6 +53,11 @@ class GlobalObject:
         ----------
         name_prefix : str
             The prefix to be used for the name.
+
+        Returns
+        -------
+        str
+            Generated unique name.
         """
         names_with_prefix = [
             name for name in self.map.vertices() if name.startswith(name_prefix + '_')

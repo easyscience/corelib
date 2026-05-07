@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Callable
 from typing import List
 from typing import NamedTuple
@@ -27,7 +28,7 @@ class InterfaceFactoryTemplate:
         self.__interface_obj: None = None
         self.create(*args, **kwargs)
 
-    def create(self, *args, **kwargs):
+    def create(self, *args: Any, interface_name: str | None = None, **kwargs: Any) -> None:
         """
         Create an interface to a calculator from those initialized.
 
@@ -37,30 +38,31 @@ class InterfaceFactoryTemplate:
 
         Parameters
         ----------
-        **kwargs :
-        *args :
-        interface_name : str
+        *args : Any
+            Positional arguments forwarded to the interface constructor.
+        interface_name : str | None, default=None
             Name of interface to be created.
 
-        Returns
-        -------
-        noneType
-            None.
+        **kwargs : Any
+            Keyword arguments forwarded to the interface constructor.
+
+        Raises
+        ------
+        NotImplementedError
+            If no interfaces are available to instantiate.
         """
-        if kwargs.get('interface_name', None) is None:
+        if interface_name is None:
             if len(self._interfaces) > 0:
                 # Fallback name
                 interface_name = self.return_name(self._interfaces[0])
             else:
                 raise NotImplementedError
-        else:
-            interface_name = kwargs.pop('interface_name')
         interfaces = self.available_interfaces
         if interface_name in interfaces:
             self._current_interface = self._interfaces[interfaces.index(interface_name)]
         self.__interface_obj = self._current_interface(*args, **kwargs)
 
-    def switch(self, new_interface: str, fitter: Optional[Type[Fitter]] = None):
+    def switch(self, new_interface: str, fitter: Optional[Type[Fitter]] = None) -> None:
         """
         Changes the current interface to a new interface.
 
@@ -76,10 +78,10 @@ class InterfaceFactoryTemplate:
             Fitting interface which contains the fitting object which
             may have bindings which will be updated. By default, None.
 
-        Returns
-        -------
-        noneType
-            None.
+        Raises
+        ------
+        AttributeError
+            If ``new_interface`` is not a valid interface name.
         """
         interfaces = self.available_interfaces
         if new_interface in interfaces:
@@ -145,19 +147,10 @@ class InterfaceFactoryTemplate:
         """
         Pass through to the underlying interfaces fitting function.
 
-        Parameters
-        ----------
-        x_array : np.ndarray
-            Points to be calculated at.
-        args : Any
-            Positional arguments for the fitting function.
-        kwargs : Any
-            Key/value pair arguments for the fitting function.
-
         Returns
         -------
         Callable
-            Points calculated at positional values ``x``.
+            Callable proxy to the underlying interface fit function.
         """
 
         def __fit_func(*args, **kwargs):
@@ -170,25 +163,23 @@ class InterfaceFactoryTemplate:
         """Call function."""
         return self.fit_func(*args, **kwargs)
 
-    def generate_bindings(self, model, *args, ifun=None, **kwargs):
+    def generate_bindings(self, model: Any, *args: Any, ifun: Any = None, **kwargs: Any) -> None:
         """
         Automatically bind a ``Parameter`` to the corresponding
         interface.
 
         Parameters
         ----------
-        **kwargs :
-        ifun : default=None, default=None
-            By default, None.
-        *args :
-        model :
-        name : str
-            Parameter name.
-
-        Returns
-        -------
-        property
-            Binding property.
+        model : Any
+            Model whose linkable attributes should be bound.
+        *args : Any
+            Positional arguments reserved for interface-specific binding
+            hooks.
+        ifun : Any, default=None
+            Optional interface hook. By default, None.
+        **kwargs : Any
+            Keyword arguments reserved for interface-specific binding
+            hooks.
         """
 
         class_links = self.__interface_obj.create(model)

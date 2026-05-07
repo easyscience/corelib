@@ -3,6 +3,7 @@
 
 import copy
 import warnings
+from typing import Any
 from typing import Callable
 from typing import List
 
@@ -42,19 +43,21 @@ class Bumps(MinimizerBase):
 
     def __init__(
         self,
-        obj,  #: ObjBase,
+        obj: object,  #: ObjBase,
         fit_function: Callable,
         minimizer_enum: AvailableMinimizers | None = None,
     ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
         """
-        Initialize the fitting engine with a ``ObjBase`` and an
-        arbitrary fitting function.
+        Initialize the fitting engine.
 
-        :param obj: Object containing elements of the ``Parameter``
-        class :type obj: ObjBase :param fit_function: function that when
-        called returns y values. 'x' must be the first and only
-        positional argument. Additional values can be supplied by
-        keyword/value pairs :type fit_function: Callable
+        Parameters
+        ----------
+        obj : object
+            Object containing the ``Parameter`` instances to fit.
+        fit_function : Callable
+            Callable returning model y values for the supplied x values.
+        minimizer_enum : AvailableMinimizers | None, default=None
+            Selected BUMPS minimizer configuration. By default, None.
         """
         super().__init__(obj=obj, fit_function=fit_function, minimizer_enum=minimizer_enum)
         self._p_0 = {}
@@ -84,20 +87,13 @@ class Bumps(MinimizerBase):
         progress_callback: Callable[[dict], bool | None] | None = None,
         minimizer_kwargs: dict | None = None,
         engine_kwargs: dict | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> FitResults:
         """
         Perform a fit using the BUMPS engine.
 
         Parameters
         ----------
-        **kwargs :
-        engine_kwargs : dict | None, default=None
-            By default, None.
-        minimizer_kwargs : dict | None, default=None
-            By default, None.
-        tolerance : float | None, default=None
-            By default, None.
         x : np.ndarray
             Points to be calculated at.
         y : np.ndarray
@@ -110,6 +106,8 @@ class Bumps(MinimizerBase):
             Optional parameters for the fit. By default, None.
         method : str | None, default=None
             Method for minimization. By default, None.
+        tolerance : float | None, default=None
+            Requested optimizer tolerance. By default, None.
         max_evaluations : int | None, default=None
             Maximum number of optimizer steps. Forwarded to BUMPS as its
             ``steps`` parameter. If ``None``, the default value defined
@@ -119,11 +117,25 @@ class Bumps(MinimizerBase):
             Optional callback for progress updates. The payload field
             ``iteration`` carries the BUMPS optimizer step index. By
             default, None.
+        minimizer_kwargs : dict | None, default=None
+            Additional keyword arguments passed to the BUMPS minimizer.
+            By default, None.
+        engine_kwargs : dict | None, default=None
+            Additional engine keyword arguments. By default, None.
+        **kwargs : Any
+            Additional keyword arguments passed to ``FitDriver``.
 
         Returns
         -------
         FitResults
             Fit results.
+
+        Raises
+        ------
+        FitError
+            If the BUMPS fit fails.
+        ValueError
+            If the input shapes or weights are invalid.
         """
         method_dict = self._get_method_kwargs(method)
 
@@ -300,10 +312,15 @@ class Bumps(MinimizerBase):
 
     # For some reason I have to double staticmethod :-/
     @staticmethod
-    def convert_to_par_object(obj) -> BumpsParameter:
+    def convert_to_par_object(obj: Parameter) -> BumpsParameter:
         """
         Convert an ``EasyScience.variable.Parameter`` object to a bumps
         Parameter object.
+
+        Parameters
+        ----------
+        obj : Parameter
+            EasyScience parameter to convert.
 
         Returns
         -------
@@ -327,6 +344,11 @@ class Bumps(MinimizerBase):
         as it needs to be initialized with *x*, *y*, *weights*
 
         Weights are converted to dy (standard deviation of y).
+
+        Parameters
+        ----------
+        parameters : List[BumpsParameter] | None, default=None
+            Optional BUMPS parameters to bind into the model.
 
         Returns
         -------
@@ -360,17 +382,17 @@ class Bumps(MinimizerBase):
 
     def _set_parameter_fit_result(
         self,
-        fit_result,
+        fit_result: Any,
         stack_status: bool,
         par_list: List[BumpsParameter],
-    ):
+    ) -> None:
         """
         Update parameters to their final values and assign a std error
         to them.
 
         Parameters
         ----------
-        fit_result :
+        fit_result : Any
             BUMPS OptimizeResult containing best-fit values and errors.
         stack_status : bool
             Whether the undo stack was enabled.
@@ -397,30 +419,24 @@ class Bumps(MinimizerBase):
 
     def _gen_fit_results(
         self,
-        fit_results,
+        fit_results: Any,
         max_evaluations: int | None = None,
         tolerance: float | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> FitResults:
         """
         Convert fit results into the unified ``FitResults`` format.
 
         Parameters
         ----------
-        **kwargs :
-        tolerance : float | None, default=None
-            By default, None.
-        fit_results :
-        x_result :
-            Optimized parameter values from FitDriver.
-        fx :
-            Final objective function value.
-        driver :
-            The FitDriver instance.
-        n_evaluations :
-            Number of iterations completed.
+        fit_results : Any
+            Native BUMPS fit result object.
         max_evaluations : int | None, default=None
             Maximum evaluations budget (if set). By default, None.
+        tolerance : float | None, default=None
+            Requested optimizer tolerance. By default, None.
+        **kwargs : Any
+            Additional result attributes to copy onto ``FitResults``.
 
         Returns
         -------

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from functools import wraps
+from typing import Any
 
 
 def singleton(cls):
@@ -53,15 +54,21 @@ def cached_class(klass):
         # isn't writable once the class is created
         __doc__ = klass.__doc__
 
-        def __new__(cls, *args, **kwargs):
+        def __new__(cls, *args: Any, **kwargs: Any) -> '_decorated':
             """
-            Pass through...
+            Pass through.
 
             Parameters
             ----------
-            cls :
-            *args :
-            **kwargs :
+            *args : Any
+                Positional constructor arguments.
+            **kwargs : Any
+                Keyword constructor arguments.
+
+            Returns
+            -------
+            '_decorated'
+                Cached instance for the provided constructor arguments.
             """
             key = (cls,) + args + tuple(kwargs.items())
             try:

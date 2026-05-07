@@ -43,14 +43,20 @@ class ObjBase(BasedBase):
 
         Parameters
         ----------
-        unique_name : Optional[str], default=None
-            By default, None.
         name : str
             Name of this object.
+        unique_name : Optional[str], default=None
+            Unique identifier for this object. By default, None.
         *args : Optional[SerializerComponent]
-            Any arguments?
+            Positional serializer components to attach to this object.
         **kwargs : Optional[SerializerComponent]
             Fields which this class should contain.
+
+        Raises
+        ------
+        AttributeError
+            If a keyword component name would overwrite an existing
+            class attribute.
         """
         warnings.warn(
             'ObjBase is deprecated and will be removed in a future version. '

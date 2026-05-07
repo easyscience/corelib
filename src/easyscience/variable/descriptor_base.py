@@ -53,10 +53,10 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        unique_name : Optional[str], default=None
-            By default, None.
         name : str
             Name of this object.
+        unique_name : Optional[str], default=None
+            Unique identifier for this object. By default, None.
         description : Optional[str], default=None
             A brief summary of what this object is. By default, None.
         url : Optional[str], default=None
@@ -66,6 +66,12 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
         parent : Optional[Any], default=None
             The object which this descriptor is attached to. By default,
             None.
+
+        Raises
+        ------
+        TypeError
+            If ``name`` is not a string or if any optional string field
+            has an invalid type.
         """
 
         if unique_name is None:
@@ -121,6 +127,11 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
         ----------
         new_name : str
             Name of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``new_name`` is not a string.
         """
         if not isinstance(new_name, str):
             raise TypeError('Name must be a string')
@@ -143,14 +154,19 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
     @display_name.setter
     @property_stack
-    def display_name(self, name: str) -> None:
+    def display_name(self, name: Optional[str]) -> None:
         """
         Set the pretty display name.
 
         Parameters
         ----------
-        name : str
+        name : Optional[str]
             Pretty display name of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``name`` is neither a string nor ``None``.
         """
         if name is not None and not isinstance(name, str):
             raise TypeError('Display name must be a string or None')
@@ -169,14 +185,19 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
         return self._description
 
     @description.setter
-    def description(self, description: str) -> None:
+    def description(self, description: Optional[str]) -> None:
         """
         Set the description of the object.
 
         Parameters
         ----------
-        description : str
+        description : Optional[str]
             Description of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``description`` is neither a string nor ``None``.
         """
         if description is not None and not isinstance(description, str):
             raise TypeError('Description must be a string or None')
@@ -195,14 +216,19 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
         return self._url
 
     @url.setter
-    def url(self, url: str) -> None:
+    def url(self, url: Optional[str]) -> None:
         """
         Set the url of the object.
 
         Parameters
         ----------
-        url : str
+        url : Optional[str]
             Url of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``url`` is neither a string nor ``None``.
         """
         if url is not None and not isinstance(url, str):
             raise TypeError('url must be a string')
@@ -231,6 +257,11 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
         ----------
         new_unique_name : str
             New unique name for the object.
+
+        Raises
+        ------
+        TypeError
+            If ``new_unique_name`` is not a string.
         """
         if not isinstance(new_unique_name, str):
             raise TypeError('Unique name has to be a string.')

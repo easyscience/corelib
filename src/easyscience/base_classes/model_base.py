@@ -116,7 +116,6 @@ class ModelBase(NewBase):
 
         Parameters
         ----------
-        cls :
         obj_dict : Dict[str, Any]
             Dictionary containing the serialized contents (from
             ``SerializerDict``) of an EasyScience object.
@@ -125,6 +124,15 @@ class ModelBase(NewBase):
         -------
         ModelBase
             Reformed EasyScience object.
+
+        Raises
+        ------
+        SyntaxError
+            If a deserialized parameter cannot be attached back to the
+            class definition.
+        ValueError
+            If the input dictionary does not describe the expected
+            class.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError('Input must be a dictionary representing an EasyScience object.')

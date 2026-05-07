@@ -112,24 +112,28 @@ class DescriptorArray(DescriptorBase):
             self.convert_unit(self._base_unit())
 
     @classmethod
-    def from_scipp(cls, name: str, full_value: Variable, **kwargs) -> DescriptorArray:
+    def from_scipp(cls, name: str, full_value: Variable, **kwargs: Any) -> DescriptorArray:
         """
         Create a DescriptorArray from a scipp array.
 
         Parameters
         ----------
-        cls :
         name : str
             Name of the descriptor.
         full_value : Variable
             Value of the descriptor as a scipp variable.
-        **kwargs :
+        **kwargs : Any
             Additional parameters for the descriptor.
 
         Returns
         -------
         DescriptorArray
             DescriptorArray.
+
+        Raises
+        ------
+        TypeError
+            If ``full_value`` is not a scipp ``Variable``.
         """
         if not isinstance(full_value, Variable):
             raise TypeError(f'{full_value=} must be a scipp array')
@@ -192,6 +196,13 @@ class DescriptorArray(DescriptorBase):
         value : Union[list, np.ndarray]
             New value for the DescriptorArray, must be a list or numpy
             array.
+
+        Raises
+        ------
+        TypeError
+            If ``value`` is not a list or NumPy array.
+        ValueError
+            If ``value`` does not match the existing array shape.
         """
         if not isinstance(value, (list, np.ndarray)):
             raise TypeError(f'{value=} must be a list or numpy array.')
@@ -217,7 +228,7 @@ class DescriptorArray(DescriptorBase):
         return self._dimensions
 
     @dimensions.setter
-    def dimensions(self, dimensions: Union[list]) -> None:
+    def dimensions(self, dimensions: Union[list, np.ndarray]) -> None:
         """
         Set the dimensions of self.
 
@@ -226,9 +237,16 @@ class DescriptorArray(DescriptorBase):
 
         Parameters
         ----------
-        dimensions : Union[list]
-        value :
+        dimensions : Union[list, np.ndarray]
             List of dimensions.
+
+        Raises
+        ------
+        TypeError
+            If ``dimensions`` is not a list or NumPy array.
+        ValueError
+            If ``dimensions`` does not match the number of existing
+            dimensions.
         """
         if not isinstance(dimensions, (list, np.ndarray)):
             raise TypeError(f'{dimensions=} must be a list or numpy array.')
@@ -292,6 +310,14 @@ class DescriptorArray(DescriptorBase):
         variance : Union[list, np.ndarray]
             New variance for the DescriptorArray, must be a list or
             numpy array.
+
+        Raises
+        ------
+        TypeError
+            If ``variance`` is not a list or NumPy array.
+        ValueError
+            If ``variance`` has the wrong shape or contains negative
+            values.
         """
         if variance is not None:
             if not isinstance(variance, (list, np.ndarray)):
@@ -337,6 +363,14 @@ class DescriptorArray(DescriptorBase):
         ----------
         error : Union[list, np.ndarray]
             A list or numpy array of standard deviations.
+
+        Raises
+        ------
+        TypeError
+            If ``error`` is not a list or NumPy array.
+        ValueError
+            If ``error`` has the wrong shape or contains negative
+            values.
         """
         if error is not None:
             if not isinstance(error, (list, np.ndarray)):
@@ -363,6 +397,13 @@ class DescriptorArray(DescriptorBase):
         ----------
         unit_str : str
             New unit in string form.
+
+        Raises
+        ------
+        TypeError
+            If ``unit_str`` is not a string.
+        UnitError
+            If the unit conversion fails.
         """
         if not isinstance(unit_str, str):
             raise TypeError(f'{unit_str=} must be a string representing a valid scipp unit')
@@ -460,20 +501,27 @@ class DescriptorArray(DescriptorBase):
 
         Parameters
         ----------
-        units_must_match : bool, default=True
-            By default, True.
         other : Union[DescriptorArray, DescriptorNumber, list, numbers.Number]
             The object to operate on. Must be a DescriptorArray or
             DescriptorNumber with compatible units, or a list with the
             same shape if the DescriptorArray is dimensionless.
         operation : Callable
             The operation to perform.
+        units_must_match : bool, default=True
+            Whether operands must have compatible units.
 
         Returns
         -------
         DescriptorArray
             A new DescriptorArray representing the result of the
             operation.
+
+        Raises
+        ------
+        UnitError
+            If the operands have incompatible units.
+        ValueError
+            If operand shapes are incompatible.
         """
         if isinstance(other, numbers.Number):
             # Does not need to be dimensionless for multiplication and division
@@ -757,6 +805,11 @@ class DescriptorArray(DescriptorBase):
         DescriptorArray
             A new DescriptorArray representing the result of the
             addition.
+
+        Raises
+        ------
+        ZeroDivisionError
+            If any denominator element is zero.
         """
         if not isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
             return NotImplemented
@@ -808,6 +861,16 @@ class DescriptorArray(DescriptorBase):
         DescriptorArray
             A new DescriptorArray representing the result of the
             addition.
+
+        Raises
+        ------
+        Exception
+            If exponentiation fails inside scipp.
+        UnitError
+            If the exponent has units.
+        ValueError
+            If the exponent has variance or if the result is not a
+            number.
         """
         if not isinstance(other, (numbers.Number, DescriptorNumber)):
             return NotImplemented
@@ -905,14 +968,23 @@ class DescriptorArray(DescriptorBase):
 
         Parameters
         ----------
-        dimension2 : Optional[str], default=None
-            By default, None.
         dimension1 : Optional[str], default=None
-            By default, None.
-        dimension1, dimension2 :
-            First and second dimension to perform trace over. Must be in
-            ``self.dimensions``. If not defined, the trace will be taken
-            over the first two dimensions.
+            First dimension to perform trace over. If not provided, the
+            trace uses the first two dimensions.
+        dimension2 : Optional[str], default=None
+            Second dimension to perform trace over. If not provided, the
+            trace uses the first two dimensions.
+
+        Returns
+        -------
+        Union[DescriptorArray, DescriptorNumber]
+            Descriptor representing the trace result.
+
+        Raises
+        ------
+        ValueError
+            If exactly one dimension is provided, if the dimensions are
+            identical, or if a requested dimension does not exist.
         """
         if (dimension1 is not None and dimension2 is None) or (
             dimension1 is None and dimension2 is not None
@@ -974,6 +1046,11 @@ class DescriptorArray(DescriptorBase):
         dim : Optional[Union[str, list]], default=None
             The dim(s) in the scipp array to sum over. If ``None``, will
             sum over all dims. By default, None.
+
+        Returns
+        -------
+        Union[DescriptorArray, DescriptorNumber]
+            Descriptor representing the summed data.
         """
         new_full_value = self.full_value.sum(dim=dim)
 

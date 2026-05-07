@@ -5,6 +5,8 @@ import collections.abc
 import functools
 import warnings
 from time import time
+from typing import Any
+from typing import Callable
 
 from easyscience import global_object
 
@@ -43,16 +45,19 @@ class memoized:
         return functools.partial(self.__call__, obj)
 
 
-def counted(func):
+def counted(func: Callable[..., Any]) -> Callable[..., Any]:
     """
-    Counts how many times a function has been called and adds a
-    ``func.calls`` to it's properties :param func: Function to be
-    counted
+    Count how many times a function has been called.
+
+    Parameters
+    ----------
+    func : Callable[..., Any]
+        Function to be counted.
 
     Returns
     -------
-
-        Results from function call.
+    Callable[..., Any]
+        Wrapped function with a ``n_calls`` counter attribute.
     """
 
     @functools.wraps(func)

@@ -45,24 +45,29 @@ class CollectionBase(BasedBase, MutableSequence):
         *args: Union[BasedBase, DescriptorBase, NewBase],
         interface: Optional[InterfaceFactoryTemplate] = None,
         unique_name: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Set up the base collection class.
 
         Parameters
         ----------
-        **kwargs :
-        unique_name : Optional[str], default=None
-            By default, None.
-        interface : Optional[InterfaceFactoryTemplate], default=None
-            By default, None.
         name : str
             Name of this object.
         *args : Union[BasedBase, DescriptorBase, NewBase]
-            Selection of.
-        _kwargs : dict
+            Initial EasyScience objects to include in the collection.
+        interface : Optional[InterfaceFactoryTemplate], default=None
+            Interface attached to contained objects. By default, None.
+        unique_name : Optional[str], default=None
+            Unique identifier for this collection. By default, None.
+        **kwargs : Any
             Fields which this class should contain.
+
+        Raises
+        ------
+        AttributeError
+            If a provided item is not an EasyScience object or if a
+            keyword collides with an internal attribute.
         """
         warnings.warn(
             'CollectionBase is deprecated and will be removed in a future version. '
@@ -129,6 +134,11 @@ class CollectionBase(BasedBase, MutableSequence):
         -------
         None
             None.
+
+        Raises
+        ------
+        AttributeError
+            If ``value`` is not an EasyScience object.
         """
         t_ = type(value)
         if issubclass(t_, (BasedBase, DescriptorBase, NewBase)):
@@ -159,6 +169,13 @@ class CollectionBase(BasedBase, MutableSequence):
         -------
         Union[DescriptorBase, BasedBase, NewBase]
             Object at index ``idx``.
+
+        Raises
+        ------
+        IndexError
+            If ``idx`` does not resolve to an element.
+        TypeError
+            If boolean indexing is attempted.
         """
         if isinstance(idx, slice):
             start, stop, step = idx.indices(len(self))
@@ -197,6 +214,11 @@ class CollectionBase(BasedBase, MutableSequence):
             Index in self.
         value : Union[BasedBase, DescriptorBase, NewBase]
             Value which index key should be set to.
+
+        Raises
+        ------
+        NotImplementedError
+            If ``value`` is neither numeric nor an EasyScience object.
         """
         if isinstance(value, Number):  # noqa: S3827
             item = self.__getitem__(key)
@@ -247,9 +269,22 @@ class CollectionBase(BasedBase, MutableSequence):
         """
         return len(self._kwargs.keys())
 
-    def _convert_to_dict(self, in_dict, encoder, skip: List[str] = [], **kwargs) -> dict:
+    def _convert_to_dict(
+        self, in_dict: dict, encoder: Any, skip: List[str] = [], **kwargs: Any
+    ) -> dict:
         """
         Convert ones self into a serialized form.
+
+        Parameters
+        ----------
+        in_dict : dict
+            Dictionary being populated during serialization.
+        encoder : Any
+            Serializer used to encode child objects.
+        skip : List[str], default=[]
+            Field names to skip during serialization.
+        **kwargs : Any
+            Additional keyword arguments passed to the serializer.
 
         Returns
         -------
@@ -271,11 +306,6 @@ class CollectionBase(BasedBase, MutableSequence):
         passed to the constructor. This is useful for when you need to
         pass in a dictionary of data to other functions, such as with
         matplotlib's plot function.
-
-        Parameters
-        ----------
-        self :
-            Access attributes of the class within the method.
 
         Returns
         -------

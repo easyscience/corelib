@@ -6,6 +6,7 @@ from abc import abstractmethod
 from inspect import Parameter as InspectParameter
 from inspect import Signature
 from inspect import _empty
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -85,12 +86,6 @@ class MinimizerBase(metaclass=ABCMeta):
 
         Parameters
         ----------
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            By default, None.
-        max_evaluations : int | None, default=None
-            By default, None.
-        tolerance : float | None, default=None
-            By default, None.
         x : np.ndarray
             Points to be calculated at.
         y : np.ndarray
@@ -103,6 +98,12 @@ class MinimizerBase(metaclass=ABCMeta):
             Optional parameters for the fit. By default, None.
         method : str | None, default=None
             Method for the minimizer to use. By default, None.
+        tolerance : float | None, default=None
+            Requested convergence tolerance. By default, None.
+        max_evaluations : int | None, default=None
+            Maximum number of objective evaluations. By default, None.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional progress callback. By default, None.
         **kwargs :
             Additional arguments for the fitting function.
 
@@ -137,6 +138,11 @@ class MinimizerBase(metaclass=ABCMeta):
         -------
         np.ndarray
             Y values calculated at points x for a set of parameters.
+
+        Raises
+        ------
+        TypeError
+            If ``minimizer_parameters`` is not a dictionary.
         """
         if minimizer_parameters is None:
             minimizer_parameters = {}
@@ -164,7 +170,7 @@ class MinimizerBase(metaclass=ABCMeta):
         return {}
 
     @abstractmethod
-    def convert_to_pars_obj(self, par_list: List[Parameter] | None = None):
+    def convert_to_pars_obj(self, par_list: List[Parameter] | None = None) -> Any:
         """
         Create an engine compatible container with the ``Parameters``
         converted from the base object.
@@ -177,7 +183,7 @@ class MinimizerBase(metaclass=ABCMeta):
 
         Returns
         -------
-
+        Any
             Engine Parameters compatible object.
         """
 
@@ -221,6 +227,11 @@ class MinimizerBase(metaclass=ABCMeta):
         ----------
         parameters : dict[str, float]
             Dict of parameters for the minimizer with names as keys.
+
+        Returns
+        -------
+        dict[str, float]
+            Completed parameter dictionary for the minimizer.
         """
         pars = self._cached_pars
 
@@ -251,7 +262,7 @@ class MinimizerBase(metaclass=ABCMeta):
             self._cached_pars_vals[key] = (parameter.value, parameter.error)
 
         # Make a new fit function
-        def _fit_function(x: np.ndarray, **kwargs):
+        def _fit_function(x: np.ndarray, **kwargs) -> np.ndarray:
             """
             Wrapped fit function which now has an EasyScience compatible
             form.

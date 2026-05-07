@@ -302,15 +302,16 @@ class Map:
 
         Parameters
         ----------
-        start_vertex : Optional[str], default=None
-            By default, None.
         end_vertex : str
-        end_obj :
-        start_obj :
+            Final vertex in the path.
+        start_vertex : Optional[str], default=None
+            Starting vertex. If omitted, the shortest reverse route is
+            chosen automatically.
 
         Returns
         -------
         List
+            Reverse path from ``end_vertex`` back to ``start_vertex``.
         """
         path_length = sys.maxsize
         optimum_path = []

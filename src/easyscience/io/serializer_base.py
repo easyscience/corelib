@@ -71,7 +71,6 @@ class SerializerBase:
 
         Parameters
         ----------
-        cls :
         obj : Any
             Encoded EasyScience object.
 
@@ -95,7 +94,7 @@ class SerializerBase:
 
         Returns
         -------
-
+        Tuple[Any, List[str]]
             Tuple of argument spec and arguments.
         """
 
@@ -112,11 +111,6 @@ class SerializerBase:
         ----------
         obj : Any
             Any object to be encoded.
-        skip :
-            List of field names as strings to skip when forming the
-            encoded object.
-        kwargs :
-            Key-words to pass to ``SerializerBase``.
 
         Returns
         -------
@@ -265,19 +259,19 @@ class SerializerBase:
         return d
 
     @staticmethod
-    def _convert_from_dict(d):
+    def _convert_from_dict(d: Any) -> Any:
         """
         Recursive method to support decoding dicts and lists containing
         EasyScience objects.
 
         Parameters
         ----------
-        d :
+        d : Any
             Dictionary containing JSONed EasyScience objects.
 
         Returns
         -------
-
+        Any
             Reformed EasyScience object.
         """
         T_ = type(d)
@@ -394,7 +388,7 @@ class SerializerBase:
         )
 
     @staticmethod
-    def _import_class(module_name: str, class_name: str):
+    def _import_class(module_name: str, class_name: str) -> Any:
         """
         Import a class from a module name and class name.
 
@@ -405,17 +399,17 @@ class SerializerBase:
         class_name : str
             Name of the class.
 
-        Raises
-        ------
-        ImportError :
-            If module cannot be imported.
-        ValueError :
-            If class is not found in module.
-
         Returns
         -------
-
+        Any
             The imported class.
+
+        Raises
+        ------
+        ImportError
+            If the module cannot be imported.
+        ValueError
+            If the class is not found in the module.
         """
         try:
             module = __import__(module_name, globals(), locals(), [class_name], 0)

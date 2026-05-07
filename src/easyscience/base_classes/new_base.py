@@ -74,6 +74,11 @@ class NewBase:
         ----------
         new_unique_name : str
             New unique name for the object.
+
+        Raises
+        ------
+        TypeError
+            If ``new_unique_name`` is not a string.
         """
         if not isinstance(new_unique_name, str):
             raise TypeError('Unique name has to be a string.')
@@ -106,6 +111,11 @@ class NewBase:
         ----------
         name : str | None
             Pretty display name of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``name`` is neither a string nor ``None``.
         """
         if name is not None and not isinstance(name, str):
             raise TypeError('Display name must be a string or None')
@@ -144,7 +154,6 @@ class NewBase:
 
         Parameters
         ----------
-        cls :
         obj_dict : Dict[str, Any]
             Dictionary containing the serialized contents (from
             ``SerializerDict``) of an EasyScience object.
@@ -153,6 +162,12 @@ class NewBase:
         -------
         NewBase
             Reformed EasyScience object.
+
+        Raises
+        ------
+        ValueError
+            If the input dictionary does not describe the expected
+            class.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError('Input must be a dictionary representing an EasyScience object.')

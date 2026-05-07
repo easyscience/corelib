@@ -32,8 +32,8 @@ class DictSerializer(BaseEncoderDecoder):
         obj: ComponentSerializer,
         skip: Optional[List[str]] = None,
         full_encode: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
         """
         Convert an EasyScience object to a JSON encoded dictionary.
 
@@ -47,13 +47,13 @@ class DictSerializer(BaseEncoderDecoder):
         full_encode : bool, default=False
             Should the data also be JSON encoded (default False). By
             default, False.
-        **kwargs :
+        **kwargs : Any
             Any additional key word arguments to be passed to the
             encoder.
 
         Returns
         -------
-
+        Dict[str, Any]
             Object encoded to dictionary containing all information to
             reform an EasyScience object.
         """
@@ -61,14 +61,13 @@ class DictSerializer(BaseEncoderDecoder):
         return self._convert_to_dict(obj, skip=skip, full_encode=full_encode, **kwargs)
 
     @classmethod
-    def decode(cls, d: Dict) -> ComponentSerializer:
+    def decode(cls, d: Dict[str, Any]) -> ComponentSerializer:
         """
         Decode function.
 
         Parameters
         ----------
-        cls :
-        d : Dict
+        d : Dict[str, Any]
             Dict representation.
 
         Returns
@@ -86,7 +85,6 @@ class DictSerializer(BaseEncoderDecoder):
 
         Parameters
         ----------
-        cls :
         d : Dict[str, Any]
             Dict representation.
 
@@ -109,7 +107,7 @@ class DataDictSerializer(DictSerializer):
         obj: ComponentSerializer,
         skip: Optional[List[str]] = None,
         full_encode: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """
         Convert an EasyScience object to a JSON encoded data dictionary.
@@ -124,7 +122,7 @@ class DataDictSerializer(DictSerializer):
         full_encode : bool, default=False
             Should the data also be JSON encoded (default False). By
             default, False.
-        **kwargs :
+        **kwargs : Any
             Any additional key word arguments to be passed to the
             encoder.
 
@@ -132,6 +130,11 @@ class DataDictSerializer(DictSerializer):
         -------
         Dict[str, Any]
             Object encoded to data dictionary.
+
+        Raises
+        ------
+        ValueError
+            If ``skip`` is not a list of strings.
         """
 
         if skip is None:

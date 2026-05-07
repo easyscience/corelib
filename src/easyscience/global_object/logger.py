@@ -11,23 +11,25 @@ class Logger:
         self.level = log_level
         self.logger.setLevel(self.level)
 
-    def getLogger(self, logger_name, color: str = '32', defaults: bool = True) -> logging:
+    def getLogger(
+        self, logger_name: str, color: str = '32', defaults: bool = True
+    ) -> logging.Logger:
         """
         Create a logger :param color:.
 
         Parameters
         ----------
+        logger_name : str
+            Logger name. Usually __name__ on creation.
         color : str, default='32'
             By default, '32'.
-        logger_name :
-            Logger name. Usually __name__ on creation.
         defaults : bool, default=True
             Do you want to associate any current file loggers with this
             logger. By default, True.
 
         Returns
         -------
-        logging
+        logging.Logger
             A logger.
         """
         logger = logging.getLogger(logger_name)

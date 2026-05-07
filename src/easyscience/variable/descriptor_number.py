@@ -6,6 +6,7 @@ from __future__ import annotations
 import numbers
 import uuid
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -24,18 +25,18 @@ from .descriptor_base import DescriptorBase
 
 # Why is this a decorator? Because otherwise we would need a flag on the convert_unit method to avoid
 # infinite recursion. This is a bit cleaner as it avoids the need for a internal only flag on a user method.
-def notify_observers(func):
+def notify_observers(func: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator to notify observers of a change in the descriptor.
 
     Parameters
     ----------
-    func :
+    func : Callable[..., Any]
         Function to be decorated.
 
     Returns
     -------
-
+    Callable[..., Any]
         Decorated function.
     """
 
@@ -115,25 +116,28 @@ class DescriptorNumber(DescriptorBase):
             self._convert_unit(self._base_unit())
 
     @classmethod
-    def from_scipp(cls, name: str, full_value: Variable, **kwargs) -> DescriptorNumber:
+    def from_scipp(cls, name: str, full_value: Variable, **kwargs: Any) -> DescriptorNumber:
         """
         Create a DescriptorNumber from a scipp constant.
 
         Parameters
         ----------
-        full_value : Variable
-        cls :
         name : str
             Name of the descriptor.
-        value :
+        full_value : Variable
             Value of the descriptor as a scipp scalar.
-        **kwargs :
+        **kwargs : Any
             Additional parameters for the descriptor.
 
         Returns
         -------
         DescriptorNumber
             DescriptorNumber.
+
+        Raises
+        ------
+        TypeError
+            If ``full_value`` is not a scalar scipp ``Variable``.
         """
         if not isinstance(full_value, Variable):
             raise TypeError(f'{full_value=} must be a scipp scalar')
@@ -164,16 +168,21 @@ class DescriptorNumber(DescriptorBase):
         for observer in self._observers:
             observer._update()
 
-    def _validate_dependencies(self, origin=None) -> None:
+    def _validate_dependencies(self, origin: Optional[str] = None) -> None:
         """
         Ping all observers to check if any cyclic dependencies have been
         introduced.
 
         Parameters
         ----------
-        origin : default=None, default=None
+        origin : Optional[str], default=None
             Unique_name of the origin of this validation check. Used to
             avoid cyclic depenencies. By default, None.
+
+        Raises
+        ------
+        RuntimeError
+            If a cyclic dependency is detected.
         """
         if origin == self.unique_name:
             raise RuntimeError(
@@ -236,6 +245,11 @@ class DescriptorNumber(DescriptorBase):
         ----------
         value : numbers.Number
             New value of self.
+
+        Raises
+        ------
+        TypeError
+            If ``value`` is not a number.
         """
         if not isinstance(value, numbers.Number) or isinstance(value, bool):
             raise TypeError(f'{value=} must be a number')
@@ -286,6 +300,13 @@ class DescriptorNumber(DescriptorBase):
         ----------
         variance_float : float
             Variance as a float.
+
+        Raises
+        ------
+        TypeError
+            If ``variance_float`` is not numeric.
+        ValueError
+            If ``variance_float`` is negative.
         """
         if variance_float is not None:
             if not isinstance(variance_float, numbers.Number):
@@ -320,6 +341,13 @@ class DescriptorNumber(DescriptorBase):
         ----------
         value : float
             New error value.
+
+        Raises
+        ------
+        TypeError
+            If ``value`` is not numeric.
+        ValueError
+            If ``value`` is negative.
         """
         if value is not None:
             if not isinstance(value, numbers.Number):
@@ -341,6 +369,13 @@ class DescriptorNumber(DescriptorBase):
         ----------
         unit_str : str
             New unit in string form.
+
+        Raises
+        ------
+        TypeError
+            If ``unit_str`` is not a string.
+        UnitError
+            If the unit conversion fails.
         """
         if not isinstance(unit_str, str):
             raise TypeError(f'{unit_str=} must be a string representing a valid scipp unit')

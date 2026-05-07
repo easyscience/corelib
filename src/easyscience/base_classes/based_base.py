@@ -55,7 +55,7 @@ class BasedBase(SerializerComponent):
         ]
         return set(names[1:])
 
-    def __reduce__(self):
+    def __reduce__(self) -> tuple:
         """
         Make the class picklable.
 
@@ -87,6 +87,11 @@ class BasedBase(SerializerComponent):
         ----------
         new_unique_name : str
             New unique name for the object.
+
+        Raises
+        ------
+        TypeError
+            If ``new_unique_name`` is not a string.
         """
         if not isinstance(new_unique_name, str):
             raise TypeError('Unique name has to be a string.')
@@ -114,11 +119,6 @@ class BasedBase(SerializerComponent):
         ----------
         new_name : str
             New name for the object.
-
-        Returns
-        -------
-
-            None.
         """
         self._name = new_name
 
@@ -148,8 +148,8 @@ class BasedBase(SerializerComponent):
 
         Raises
         ------
-
-            AttributeError.
+        AttributeError
+            If ``interface`` has not been set.
         """
         if self.interface is None:
             raise AttributeError(
@@ -253,7 +253,7 @@ class BasedBase(SerializerComponent):
 
         Parameters
         ----------
-        skip : Optional[List[str]], optional
+        skip : Optional[List[str]], default=None
             List of field names as strings to skip when forming
             the dictionary. By default, None.
 

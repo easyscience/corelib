@@ -9,6 +9,8 @@ __version__ = '3.0.0'
 
 import json
 from typing import TYPE_CHECKING
+from typing import Any
+from typing import Dict
 from typing import List
 
 from .template import BaseEncoderDecoder
@@ -80,7 +82,7 @@ class JsonEncoderTemplate(json.JSONEncoder):
     skip = []
     _converter = BaseEncoderDecoder._convert_to_dict
 
-    def default(self, o) -> dict:  # pylint: disable=E0202
+    def default(self, o: Any) -> Dict[str, Any]:  # pylint: disable=E0202
         """
         Overriding default method for JSON encoding.
 
@@ -92,12 +94,13 @@ class JsonEncoderTemplate(json.JSONEncoder):
 
         Parameters
         ----------
-        o :
+        o : Any
             Python object.
 
         Returns
         -------
-        dict
+        Dict[str, Any]
+            JSON-serializable dictionary representation of ``o``.
         """
         return self._converter(o, self.skip, full_encode=True)
 
@@ -120,19 +123,19 @@ class JsonDecoderTemplate(json.JSONDecoder):
 
     _converter = BaseEncoderDecoder._convert_from_dict
 
-    def decode(self, s):
+    def decode(self, s: str) -> Any:
         """
         Overrides decode from JSONDecoder.
 
         Parameters
         ----------
-        s :
-            String.
+        s : str
+            JSON string representation.
 
         Returns
         -------
-
-            Object.
+        Any
+            Decoded object.
         """
         d = json.JSONDecoder.decode(self, s)
         return self.__class__._converter(d)

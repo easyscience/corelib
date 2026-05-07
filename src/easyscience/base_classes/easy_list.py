@@ -41,7 +41,6 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
 
         Parameters
         ----------
-        **kwargs : Any
         *args : ProtectedType_ | list[ProtectedType_]
             Initial items to add to the list.
         protected_types : list[Type[NewBase]] | Type[NewBase] | None, default=None
@@ -51,6 +50,14 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
             Optional unique name for the list. By default, None.
         display_name : Optional[str], default=None
             Optional display name for the list. By default, None.
+        **kwargs : Any
+            Additional keyword arguments used during deserialization.
+
+        Raises
+        ------
+        TypeError
+            If ``protected_types`` is not a supported NewBase type or
+            iterable of supported types.
         """
         super().__init__(unique_name=unique_name, display_name=display_name)
         if protected_types is None:
@@ -103,6 +110,13 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         -------
         ProtectedType_ | 'EasyList[ProtectedType_]'
             The item or a new EasyList for slices.
+
+        Raises
+        ------
+        KeyError
+            If ``idx`` is a string that does not match any item.
+        TypeError
+            If ``idx`` is not an int, slice, or string.
         """
         if isinstance(idx, int):
             return self._data[idx]
@@ -133,6 +147,13 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
             Index to set.
         value : ProtectedType_ | Iterable[ProtectedType_]
             New value.
+
+        Raises
+        ------
+        TypeError
+            If ``idx`` or ``value`` has an invalid type.
+        ValueError
+            If slice assignment changes the slice length.
         """
         if isinstance(idx, int):
             if not isinstance(value, tuple(self._protected_types)):
@@ -174,6 +195,13 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         ----------
         idx : int | slice | str
             Index, slice, or name of item to delete.
+
+        Raises
+        ------
+        KeyError
+            If ``idx`` is a string that does not match any item.
+        TypeError
+            If ``idx`` is not an int, slice, or string.
         """
         if isinstance(idx, (int, slice)):
             del self._data[idx]
@@ -200,6 +228,12 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
             Index to insert at.
         value : ProtectedType_
             Item to insert.
+
+        Raises
+        ------
+        TypeError
+            If ``index`` is not an integer or ``value`` is of a
+            protected type mismatch.
         """
         if not isinstance(index, int):
             raise TypeError('Index must be an integer')
@@ -212,7 +246,7 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
             return
         self._data.insert(index, value)
 
-    def _get_key(self, obj) -> str:
+    def _get_key(self, obj: ProtectedType_) -> str:
         """
         Get the unique name of an object.
 
@@ -220,8 +254,7 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
 
         Parameters
         ----------
-        obj :
-        object :
+        obj : ProtectedType_
             Object to get the key for.
 
         Returns
@@ -307,6 +340,13 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         -------
         ProtectedType_
             The removed item.
+
+        Raises
+        ------
+        KeyError
+            If ``index`` is a string that does not match any item.
+        TypeError
+            If ``index`` is not an int or string.
         """
         if isinstance(index, int):
             return self._data.pop(index)
@@ -345,7 +385,6 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
 
         Parameters
         ----------
-        cls :
         obj_dict : Dict[str, Any]
             Dictionary containing the serialized contents (from
             ``SerializerDict``) of an EasyScience object.
@@ -354,6 +393,13 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         -------
         NewBase
             Reformed EasyScience object.
+
+        Raises
+        ------
+        ImportError
+            If a protected type cannot be imported.
+        ValueError
+            If the input dictionary does not describe an EasyList.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError(

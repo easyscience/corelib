@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import warnings
+from typing import Any
 from typing import Callable
 from typing import List
 
@@ -34,18 +35,21 @@ class LMFit(MinimizerBase):  # noqa: S101
 
     def __init__(
         self,
-        obj,  #: ObjBase,
+        obj: object,  #: ObjBase,
         fit_function: Callable,
         minimizer_enum: AvailableMinimizers | None = None,
     ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
         """
-        Initialize the minimizer with the ``ObjBase`` and the
-        ``fit_function`` to be used.
+        Initialize the minimizer.
 
-        :param obj: Base object which contains the parameters to be
-        fitted :type obj: ObjBase :param fit_function: Function which
-        will be fitted to the data :type fit_function: Callable :param
-        method: Method to be used by the minimizer :type method: str
+        Parameters
+        ----------
+        obj : object
+            Object containing the ``Parameter`` instances to fit.
+        fit_function : Callable
+            Callable returning model y values for the supplied x values.
+        minimizer_enum : AvailableMinimizers | None, default=None
+            Selected LMFit minimizer configuration. By default, None.
         """
         super().__init__(obj=obj, fit_function=fit_function, minimizer_enum=minimizer_enum)
         self._last_iteration: int | None = None
@@ -98,16 +102,6 @@ class LMFit(MinimizerBase):  # noqa: S101
 
         Parameters
         ----------
-        engine_kwargs : dict | None, default=None
-            By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            By default, None.
-        max_evaluations : int | None, default=None
-            By default, None.
-        tolerance : float | None, default=None
-            By default, None.
-        method : str | None, default=None
-            By default, None.
         x : np.ndarray
             Points to be calculated at.
         y : np.ndarray
@@ -118,9 +112,19 @@ class LMFit(MinimizerBase):  # noqa: S101
             Optional Model which is being fitted to. By default, None.
         parameters : LMParameters | None, default=None
             Optional parameters for the fit. By default, None.
+        method : str | None, default=None
+            Minimizer method. By default, None.
+        tolerance : float | None, default=None
+            Requested optimizer tolerance. By default, None.
+        max_evaluations : int | None, default=None
+            Maximum number of function evaluations. By default, None.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback receiving normalized progress payloads.
         minimizer_kwargs : dict | None, default=None
-            Arguments to be passed directly to the minimizer. By
+            Additional keyword arguments passed to LMFit's minimizer. By
             default, None.
+        engine_kwargs : dict | None, default=None
+            Additional engine keyword arguments. By default, None.
         **kwargs :
             Additional arguments for the fitting function.
 
@@ -130,6 +134,13 @@ class LMFit(MinimizerBase):  # noqa: S101
             Fit results should be 1/sigma, where sigma is the standard
             deviation of the measurement. For unweighted least squares,
             these should be 1.
+
+        Raises
+        ------
+        FitError
+            If the LMFit optimization fails.
+        ValueError
+            If the input shapes or weights are invalid.
         """
         x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
 
@@ -273,6 +284,11 @@ class LMFit(MinimizerBase):  # noqa: S101
         Convert an EasyScience Parameter object to a lmfit Parameter
         object.
 
+        Parameters
+        ----------
+        parameter : Parameter
+            EasyScience parameter to convert.
+
         Returns
         -------
         LMParameter
@@ -294,6 +310,11 @@ class LMFit(MinimizerBase):  # noqa: S101
         """
         Generate a lmfit model from the supplied ``fit_function`` and
         parameters in the base object.
+
+        Parameters
+        ----------
+        pars : LMParameters | None, default=None
+            Optional lmfit parameter container.
 
         Returns
         -------
@@ -331,21 +352,17 @@ class LMFit(MinimizerBase):  # noqa: S101
         self._cached_model = model
         return model
 
-    def _set_parameter_fit_result(self, fit_result: ModelResult, stack_status: bool):
+    def _set_parameter_fit_result(self, fit_result: ModelResult, stack_status: bool) -> None:
         """
         Update parameters to their final values and assign a std error
         to them.
 
         Parameters
         ----------
-        stack_status : bool
         fit_result : ModelResult
             Fit object which contains info on the fit.
-
-        Returns
-        -------
-        noneType
-            None.
+        stack_status : bool
+            Whether the undo stack was enabled.
         """
         from easyscience import global_object
 
@@ -363,7 +380,7 @@ class LMFit(MinimizerBase):  # noqa: S101
         if stack_status:
             global_object.stack.endMacro()
 
-    def _gen_fit_results(self, fit_results: ModelResult, **kwargs) -> FitResults:
+    def _gen_fit_results(self, fit_results: ModelResult, **kwargs: Any) -> FitResults:
         """
         Convert fit results into the unified ``FitResults`` format.
 
@@ -372,10 +389,10 @@ class LMFit(MinimizerBase):  # noqa: S101
 
         Parameters
         ----------
-        **kwargs :
         fit_results : ModelResult
-        fit_result :
             Fit object which contains info on the fit.
+        **kwargs : Any
+            Additional result attributes to copy onto ``FitResults``.
 
         Returns
         -------

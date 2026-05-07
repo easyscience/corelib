@@ -77,7 +77,6 @@ class ComponentSerializer:
 
         Parameters
         ----------
-        cls :
         obj : Any
             Encoded EasyScience object.
         decoder : Optional[BaseEncoderDecoder], default=None
@@ -102,7 +101,7 @@ class ComponentSerializer:
 
         Parameters
         ----------
-        skip : Optional[List[str]], optional
+        skip : Optional[List[str]], default=None
             List of field names as strings to skip when forming
             the dictionary. By default, None.
 
@@ -116,20 +115,19 @@ class ComponentSerializer:
         return self.encode(skip=skip, encoder=DictSerializer)
 
     @classmethod
-    def from_dict(cls, obj_dict: Dict[str, Any]) -> None:
+    def from_dict(cls, obj_dict: Dict[str, Any]) -> Any:
         """
         Re-create an EasyScience object from a full encoded dictionary.
 
         Parameters
         ----------
-        cls :
         obj_dict : Dict[str, Any]
             Dictionary containing the serialized contents (from
             ``DictSerializer``) of an EasyScience object.
 
         Returns
         -------
-        None
+        Any
             Reformed EasyScience object.
         """
 
