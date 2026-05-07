@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -1370,14 +1370,13 @@ once using the command line, as shown below.</p>
 <ul>
 <li>Navigate to your existing <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> project, created as described in the
   <a href="#installing-with-pixi">Installing with <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr></a> section.</li>
-<li>Add <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> and the <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> kernel for Jupyter:
-  <div class="language-text highlight"><pre><span></span><code>pixi add --pypi jupyterlab pixi-kernel
+<li>Add <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr>, Interactive Python shell and the <abbr title="A modern package manager for Windows, macOS, and Linux.">Pixi</abbr> kernel for
+  Jupyter:
+  <div class="language-text highlight"><pre><span></span><code>pixi add --pypi jupyterlab ipython pixi-kernel
 </code></pre></div></li>
-<li>Download all the EasyScience tutorials to the <code>tutorials/</code> directory:
-  <div class="language-text highlight"><pre><span></span><code>pixi run easyscience download-all-tutorials
-</code></pre></div></li>
-<li>Start <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> in the <code>tutorials/</code> directory to access the
-  notebooks:
+<li>Download all the EasyScience tutorials to the <code>tutorials/</code> directory.</li>
+<li>Start the <abbr title="Web-based interactive development environment for notebooks, code, and data.">JupyterLab</abbr> server in the <code>tutorials/</code> directory to access
+  the notebooks:
   <div class="language-text highlight"><pre><span></span><code>pixi run jupyter lab tutorials/
 </code></pre></div></li>
 <li>Your web browser should open automatically. Click on one of the
@@ -1385,21 +1384,21 @@ once using the command line, as shown below.</p>
 </ul>
 <h3 id="classical-run-tutorials-locally">Classical Run Tutorials Locally</h3>
 <ul>
-<li>Install <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> and IPython kernel:
-  <div class="language-text highlight"><pre><span></span><code>pip install notebook ipykernel
+<li>Install <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr>, Interactive Python shell and the IPython
+  kernel:
+  <div class="language-text highlight"><pre><span></span><code>pip install notebook ipython ipykernel
 </code></pre></div></li>
 <li>Add the virtual environment as a Jupyter kernel:
   <div class="language-text highlight"><pre><span></span><code>python -m ipykernel install --user --name=venv --display-name &quot;EasyScience Python kernel&quot;
 </code></pre></div></li>
-<li>Download all the EasyScience tutorials to the <code>tutorials/</code> directory:
-  <div class="language-text highlight"><pre><span></span><code>python -m easyscience download-all-tutorials
-</code></pre></div></li>
-<li>Launch the <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> server (opens browser automatically at
-  <code>http://localhost:8888/</code>):
+<li>Download all the EasyScience tutorials to the <code>tutorials/</code> directory.</li>
+<li>Start the <abbr title="An open-source web application that allows you to create and share documents that contain live code, equations, visualizations, and narrative text.">Jupyter Notebook</abbr> server in the <code>tutorials/</code> directory to
+  access the notebooks:
   <div class="language-text highlight"><pre><span></span><code>jupyter notebook tutorials/
 </code></pre></div></li>
-<li>Open one of the <code>*.ipynb</code> files and select the
-  <code>EasyScience Python kernel</code> to get started.</li>
+<li>Your web browser should open automatically. Click on one of the
+  <code>*.ipynb</code> files and select the <code>EasyScience Python kernel</code> to get
+  started.</li>
 </ul>
 <h3 id="run-tutorials-via-google-colab">Run Tutorials via <abbr title="Cloud service that allows you to run Jupyter Notebooks in the cloud.">Google Colab</abbr></h3>
 <p><strong><abbr title="Cloud service that allows you to run Jupyter Notebooks in the cloud.">Google Colab</abbr></strong> lets you run Jupyter Notebooks in the cloud without any
