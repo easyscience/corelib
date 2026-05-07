@@ -74,13 +74,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
@@ -96,10 +96,25 @@ jobs:
             echo
             echo "🔹🔸🔹🔸🔹 Python: $py_ver 🔹🔸🔹🔸🔹"
 
-            env="py-$(echo $py_ver | tr -d .)-env" # Converts 3.11 -> py-311-env
+            env="py-$(echo $py_ver | tr -d .)-env" # Converts 3.XX -> py-3XX-env
 
             echo "Running tests in environment: $env"
             pixi run --environment $env unit-tests
+          done
+
+      - name: Run functional tests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for py_ver in $PY_VERSIONS; do
+            echo
+            echo "🔹🔸🔹🔸🔹 Python: $py_ver 🔹🔸🔹🔸🔹"
+
+            env="py-$(echo $py_ver | tr -d .)-env" # Converts 3.XX -> py-3XX-env
+
+            echo "Running tests in environment: $env"
+            pixi run --environment $env functional-tests
           done
 
       - name: Run integration tests ${{ needs.env-prepare.outputs.pytest-marks }}
@@ -111,7 +126,7 @@ jobs:
             echo
             echo "🔹🔸🔹🔸🔹 Python: $py_ver 🔹🔸🔹🔸🔹"
 
-            env="py-$(echo $py_ver | tr -d .)-env" # Converts 3.11 -> py-311-env
+            env="py-$(echo $py_ver | tr -d .)-env" # Converts 3.XX -> py-3XX-env
 
             echo "Running tests in environment: $env"
             pixi run --environment $env integration-tests ${{ needs.env-prepare.outputs.pytest-marks }}
@@ -163,13 +178,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download package (incl. extras) from previous job
         uses: ./.github/actions/download-artifact
@@ -202,11 +217,8 @@ jobs:
             echo "Adding Python $py_ver"
             pixi add "python=$py_ver"
 
-            echo "Adding Conda dependencies"
-            pixi add gsl
-
-            #echo "Adding PyPI dependencies"
-            #pixi add --pypi pytest pytest-xdist
+            echo "Setting macOS 14.0 as minimum required"
+            pixi project system-requirements add macos 14.0
 
             echo "Looking for wheel in ../dist/py$py_ver/"
             ls -l "../dist/py$py_ver/"
@@ -240,6 +252,25 @@ jobs:
 
             echo "Running tests"
             pixi run python -m pytest ../tests/unit/ --color=yes -v
+
+            echo "Exiting pixi project directory"
+            cd ..
+          done
+
+      - name: Run functional tests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for py_ver in $PY_VERSIONS; do
+            echo
+            echo "🔹🔸🔹🔸🔹 Python: $py_ver 🔹🔸🔹🔸🔹"
+
+            echo "Entering pixi project directory easyscience_py$py_ver"
+            cd easyscience_py$py_ver
+
+            echo "Running tests"
+            pixi run python -m pytest ../tests/functional/ --color=yes -v
 
             echo "Exiting pixi project directory"
             cd ..

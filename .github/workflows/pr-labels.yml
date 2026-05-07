@@ -9,12 +9,19 @@
 # (e.g. by manual labeling, another workflow, or GitHub App).
 #
 # These are separate GitHub events, so two workflow runs can be started.
+# The `concurrency` configuration below ensures that only the latest run
+# for the same PR remains active, canceling any previous in-progress
+# run.
 
 name: PR labels check
 
 on:
   pull_request_target:
     types: [opened, labeled, unlabeled, synchronize]
+
+concurrency:
+  group: pr-labels-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 permissions:
   pull-requests: read

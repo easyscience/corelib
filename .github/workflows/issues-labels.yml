@@ -1,6 +1,6 @@
-# Verifies if an issue has at least one of the `[scope]` and one of the
-# `[priority]` labels. If not, the bot adds labels with a warning emoji
-# to indicate that those labels need to be added.
+# Verifies if the current issue has at least one real `[scope]` label and one
+# real `[priority]` label. If either is missing, the workflow adds a reminder
+# label with a warning emoji.
 
 name: Issue labels check
 
@@ -15,28 +15,135 @@ jobs:
   check-labels:
     runs-on: ubuntu-latest
 
+    concurrency:
+      group: issue-labels-${{ github.event.issue.number }}
+      cancel-in-progress: true
+
     steps:
-      - name: Setup easyscience[bot]
-        id: bot
-        uses: ./.github/actions/setup-easyscience-bot
-        with:
-          app-id: ${{ vars.EASYSCIENCE_APP_ID }}
-          private-key: ${{ secrets.EASYSCIENCE_APP_KEY }}
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - name: Check for required [scope] label
-        uses: trstringer/require-label-prefix@v1
+      - name: Sync missing-label reminders
+        uses: ./.github/actions/github-script
         with:
-          secret: ${{ steps.bot.outputs.token }}
-          prefix: '[scope]'
-          labelSeparator: ' '
-          addLabel: true
-          defaultLabel: '[scope] ⚠️ label needed'
+          script: |
+            const fs = require('fs');
 
-      - name: Check for required [priority] label
-        uses: trstringer/require-label-prefix@v1
-        with:
-          secret: ${{ steps.bot.outputs.token }}
-          prefix: '[priority]'
-          labelSeparator: ' '
-          addLabel: true
-          defaultLabel: '[priority] ⚠️ label needed'
+            const issueNumber = context.issue.number;
+            const action = context.payload.action;
+            const changedLabel = context.payload.label?.name ?? null;
+            const labels = context.payload.issue.labels.map(({ name }) => name);
+            const requirements = [
+              {
+                prefix: '[scope] ',
+                reminder: '[scope] ⚠️ label needed',
+              },
+              {
+                prefix: '[priority] ',
+                reminder: '[priority] ⚠️ label needed',
+              },
+            ];
+
+            const labelsToAdd = [];
+            const labelsToRemove = [];
+            const evaluations = [];
+
+            console.log(`::group::Issue label check for #${issueNumber}`);
+            console.log(`Event action: ${action}`);
+            if (changedLabel) {
+              console.log(`Event label: ${changedLabel}`);
+            }
+            console.log(
+              `Current labels: ${labels.length > 0 ? labels.join(', ') : '(none)'}`,
+            );
+
+            for (const { prefix, reminder } of requirements) {
+              const matchingRealLabels = labels.filter(
+                (name) => name.startsWith(prefix) && name !== reminder,
+              );
+              const hasRealLabel = matchingRealLabels.length > 0;
+              const hasReminderLabel = labels.includes(reminder);
+
+              evaluations.push({
+                prefix,
+                reminder,
+                matchingRealLabels,
+                hasReminderLabel,
+              });
+
+              if (hasRealLabel && hasReminderLabel) {
+                labelsToRemove.push(reminder);
+              } else if (!hasRealLabel && !hasReminderLabel) {
+                labelsToAdd.push(reminder);
+              }
+            }
+
+            for (const evaluation of evaluations) {
+              if (evaluation.matchingRealLabels.length > 0) {
+                console.log(
+                  `Found required ${evaluation.prefix}label(s): ${evaluation.matchingRealLabels.join(', ')}`,
+                );
+              } else {
+                console.log(`Missing required ${evaluation.prefix}label.`);
+              }
+
+              if (evaluation.hasReminderLabel) {
+                console.log(`Reminder label already present: ${evaluation.reminder}`);
+              }
+            }
+
+            if (labelsToAdd.length > 0) {
+              console.log(`Adding reminder labels: ${labelsToAdd.join(', ')}`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labelsToAdd,
+              });
+            }
+
+            for (const name of labelsToRemove) {
+              console.log(`Removing reminder label: ${name}`);
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name,
+              });
+            }
+
+            if (labelsToAdd.length === 0 && labelsToRemove.length === 0) {
+              console.log('No label changes required.');
+            }
+
+            console.log('::endgroup::');
+
+            if (process.env.GITHUB_STEP_SUMMARY) {
+              const summaryLines = [
+                '### Issue Label Check',
+                `- Issue: #${issueNumber}`,
+                `- Event: ${action}`,
+                `- Trigger label: ${changedLabel ?? '(none)'}`,
+                `- Current labels: ${labels.length > 0 ? labels.join(', ') : '(none)'}`,
+                '',
+                '#### Requirement status',
+                ...evaluations.map((evaluation) => {
+                  const status =
+                    evaluation.matchingRealLabels.length > 0
+                      ? `found ${evaluation.matchingRealLabels.join(', ')}`
+                      : 'missing';
+                  const reminder = evaluation.hasReminderLabel
+                    ? `reminder present: ${evaluation.reminder}`
+                    : `reminder absent: ${evaluation.reminder}`;
+                  return `- ${evaluation.prefix}: ${status}; ${reminder}`;
+                }),
+                '',
+                `- Labels to add: ${labelsToAdd.length > 0 ? labelsToAdd.join(', ') : '(none)'}`,
+                `- Labels to remove: ${labelsToRemove.length > 0 ? labelsToRemove.join(', ') : '(none)'}`,
+              ];
+
+              fs.appendFileSync(
+                process.env.GITHUB_STEP_SUMMARY,
+                `${summaryLines.join('\n')}\n`,
+              );
+            }

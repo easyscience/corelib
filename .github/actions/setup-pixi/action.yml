@@ -1,5 +1,5 @@
 name: 'Setup Pixi Environment'
-description: 'Sets up pixi with common configuration'
+description: 'Wrapper for prefix-dev/setup-pixi'
 inputs:
   environments:
     description: 'Pixi environments to setup'

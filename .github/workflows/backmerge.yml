@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout repository (for local actions)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup easyscience[bot]
         id: bot
@@ -38,7 +38,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
 
       - name: Checkout repository (with bot token)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ steps.bot.outputs.token }}

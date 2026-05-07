@@ -1,3 +1,6 @@
+# Git
+.git/
+
 # Copier
 .copier-answers*.yml
 
@@ -14,4 +17,16 @@ docs/docs/assets/
 .pytest_cache/
 
 # MyPy
-.mypy_cache
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Node
+node_modules
+
+# Misc
+.benchmarks
+.cache
+deps/
+tmp/

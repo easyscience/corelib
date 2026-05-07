@@ -27,12 +27,16 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Allow only one concurrent deployment to gh-pages at a time.
-# All docs workflows share the same concurrency group to prevent race conditions
-# when multiple branches/tags trigger simultaneous deployments.
+# - Non-tagged pushes and pull requests all use `docs-dev` group, so
+#   they cancel each other.
+# - Tagged pushes use their own group like docs-v1.2.3, so they do not
+#   cancel non-tagged runs, and non-tagged runs do not cancel them.
 concurrency:
-  group: docs-gh-pages-deploy
-  cancel-in-progress: false
+  group: >-
+    ${{ startsWith(github.ref, 'refs/tags/v')
+      && format('docs-{0}', github.ref_name)
+      || 'docs-dev' }}
+  cancel-in-progress: true
 
 # Set the environment variables to be used in all jobs defined in this workflow
 env:
@@ -83,7 +87,7 @@ jobs:
       # Check out the repository source code.
       # Note: The gh-pages branch is fetched separately later for mike deployment.
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # Activate dark mode to create documentation with Plotly charts in dark mode
       # Need a better solution to automatically switch the chart colour theme based on the mkdocs material switcher

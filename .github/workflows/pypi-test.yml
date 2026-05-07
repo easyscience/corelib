@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
@@ -45,6 +45,10 @@ jobs:
       - name: Init pixi project
         run: pixi init easyscience
 
+      - name: Set the minimum system requirements
+        working-directory: easyscience
+        run: pixi project system-requirements add macos 14.0
+
       - name: Add Python 3.13 from Conda
         working-directory: easyscience
         run: pixi add "python=3.13"
@@ -53,21 +57,17 @@ jobs:
         working-directory: easyscience
         run: pixi add gsl
 
-      - name: Add easyscience from PyPI
+      - name: Add easyscience (with dev dependencies) from PyPI
         working-directory: easyscience
-        run: pixi add --pypi "easyscience"
-
-      - name: Add dev dependencies from PyPI
-        working-directory: easyscience
-        run: pixi add --pypi pytest pytest-xdist
-
-      - name: Add Pixi task as a shortcut
-        working-directory: easyscience
-        run: pixi task add easyscience "python -m easyscience"
+        run: pixi add --pypi "easyscience[dev]"
 
       - name: Run unit tests to verify the installation
         working-directory: easyscience
         run: pixi run python -m pytest ../tests/unit/ --color=yes -v
+
+      - name: Run functional tests to verify the installation
+        working-directory: easyscience
+        run: pixi run python -m pytest ../tests/functional/ --color=yes -v
 
       - name: Run integration tests to verify the installation
         working-directory: easyscience

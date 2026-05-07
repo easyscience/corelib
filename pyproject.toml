@@ -58,8 +58,10 @@ dev = [
   'versioningit',                    # Automatic versioning from git tags
   'jupytext',                        # Jupyter notebook text format support
   'jupyterquiz',                     # Quizzes in Jupyter notebooks
-  'docformatter',                    # Code formatter for docstrings
-  'interrogate',                     # Check for missing docstrings
+  'pydoclint',                       # Docstring linter
+  'format-docstring',                # Docstring formatter
+  'docstripy',                       # Convert docstrings to other formats
+  'interrogate',                     # Docstring coverage checker
   'copier',                          # Template management
   'mike',                            # MkDocs: Versioned documentation support
   'mkdocs',                          # Static site generator
@@ -83,12 +85,6 @@ Documentation = 'https://easyscience.github.io/core'
 # Build system configuration
 ############################
 
-# Build system 'hatch' -- Python project manager
-# https://hatch.pypa.io/
-
-# Versioning system 'versioningit' -- Versioning from git tags
-# https://versioningit.readthedocs.io/
-
 [build-system]
 build-backend = 'hatchling.build'
 requires = ['hatchling', 'versioningit']
@@ -96,6 +92,9 @@ requires = ['hatchling', 'versioningit']
 #############################
 # Configuration for hatchling
 #############################
+
+# 'hatch' -- Build system for Python
+# https://hatch.pypa.io/
 
 [tool.hatch.build.targets.wheel]
 packages = ['src/easyscience']
@@ -110,6 +109,9 @@ source = 'versioningit' # Use versioningit to manage the version
 ################################
 # Configuration for versioningit
 ################################
+
+# 'versioningit' -- Versioning from git tags
+# https://versioningit.readthedocs.io/
 
 # Versioningit generates versions from git tags, so we don't need to
 # either specify them statically in pyproject.toml or save them in the
@@ -134,7 +136,7 @@ default-tag = 'v999.0.0'
 # Configuration for interrogate
 ################################
 
-# 'interrogate' -- Check for missing docstrings
+# 'interrogate' -- Docstring coverage checker
 # https://interrogate.readthedocs.io/en/latest/
 
 [tool.interrogate]
@@ -145,6 +147,9 @@ verbose = 1
 #######################################
 # Configuration for coverage/pytest-cov
 #######################################
+
+# 'coverage' -- Code coverage measurement tool
+# https://coverage.readthedocs.io/en/latest/
 
 [tool.coverage.run]
 branch = true    # Measure branch coverage as well
@@ -158,6 +163,9 @@ fail_under = 0       # Minimum coverage percentage to pass
 ##########################
 # Configuration for pytest
 ##########################
+
+# 'pytest' -- Testing framework
+# https://docs.pytest.org/en/stable/
 
 [tool.pytest.ini_options]
 addopts = '--import-mode=importlib'
@@ -174,17 +182,19 @@ testpaths = ['tests']
 [tool.ruff]
 exclude = ['legacy', 'tests']
 indent-width = 4
-line-length = 99
+line-length = 99              # See also `max-line-length` in [tool.ruff.lint.pycodestyle]
 preview = true                # Enable new rules that are not yet stable, like DOC
+
+# Formatting options for Ruff
 
 [tool.ruff.format]
 docstring-code-format = true    # Whether to format code snippets in docstrings
 docstring-code-line-length = 72 # Line length for code snippets in docstrings
 indent-style = 'space'          # PEP 8 recommends using spaces over tabs
-line-ending = 'lf'              # Line endings will be converted to \n
 quote-style = 'single'          # But double quotes in docstrings (PEP 8, PEP 257)
 
-# https://docs.astral.sh/ruff/rules/
+# Linting rules to use with Ruff
+
 [tool.ruff.lint]
 select = [
   #  'E',   # General PEP 8 style errors
@@ -198,46 +208,96 @@ select = [
   #  'W',   # General PEP 8 warnings (e.g., lines too long, trailing whitespace)
 ]
 
+# Exceptions to the linting rules
+
+# Ignore specific rules globally
+ignore = [
+  'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]
+  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
+  'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
+]
+
+# Ignore specific rules in certain files or directories
 [tool.ruff.lint.per-file-ignores]
-'tests/**/*.py' = ['S101'] # Allow assert statements in tests
+'*/__init__.py' = [
+  'F401', # re-exports are intentional in __init__.py
+]
+'tests/**' = [
+  'ANN',    # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  'D',      # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  'DOC',    # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  'S101',   # https://docs.astral.sh/ruff/rules/assert/
+]
+'docs/**' = [
+  'INP001', # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  'T201',   # https://docs.astral.sh/ruff/rules/print/
+]
+
+# Specific options for certain rules
 
 [tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports
 ban-relative-imports = 'all'
 
 [tool.ruff.lint.isort]
+# Forces all from imports to appear on their own line
 force-single-line = true
 
 [tool.ruff.lint.mccabe]
-max-complexity = 10 # default is 10
+# Cyclomatic complexity threshold (default is 10)
+max-complexity = 10
 
 [tool.ruff.lint.pycodestyle]
 # PEP 8 line length guidance:
 # https://peps.python.org/pep-0008/#maximum-line-length
 # Use 99 characters as the project-wide maximum for regular code lines.
-max-line-length = 99
-# allow longer lines so that parameter declarations such as
-# `name (Type | Type | None):` remain on a single line. Splitting these
-# lines can prevent tools such as MkDocs and IDEs from correctly
-# parsing and rendering parameter documentation.
-# The descriptive text itself is wrapped more strictly by
-# `docformatter` (see the configuration in [tool.docformatter] below)
-# whenever it is treated as normal paragraph text.
-# The line length for code snippets in docstrings is also more strict,
-# as defined in the [tool.ruff.format] section above.
-max-doc-length = 99
+# Use 72 characters for docstrings.
+max-line-length = 99 # See also `line-length` in [tool.ruff]
+max-doc-length = 72
 
 [tool.ruff.lint.pydocstyle]
-convention = 'google'
+convention = 'numpy'
 
-################################
-# Configuration for docformatter
-################################
+[tool.ruff.lint.pylint]
+# Ruff counts `self`/`cls` in max-args; traditional pylint does not.
+# Setting 6 here matches pylint's default of 5 (excluding self).
+max-args = 6
+max-positional-args = 6
 
-# 'docformatter' -- Code formatter for docstrings
-# https://docformatter.readthedocs.io/en/latest/
+#############################
+# Configuration for pydoclint
+#############################
 
-[tool.docformatter]
-recursive = true
-wrap-summaries = 72
-wrap-descriptions = 72
-close-quotes-on-newline = true
+# 'pydoclint' -- Docstring linter, a faster alternative to
+# 'darglint' or 'darglint2'.
+# https://pypi.org/project/pydoclint/
+
+# This is a more advanced docstring linter compared to Ruff's built-in
+# docstring check rules D or DOC. For example, among many other things,
+# it can check that arguments in the docstring, which are used by MkDocs
+# and IDEs to render parameter documentation, remain synchronized with
+# the parameter declarations in the code (in function's signature).
+
+[tool.pydoclint]
+exclude = '\.'              # Temporarily disable pydoclint until we are ready
+style = 'numpy'
+check-style-mismatch = true
+check-arg-defaults = true
+allow-init-docstring = true
+
+####################################
+# Configuration for format-docstring
+####################################
+
+# 'format-docstring' -- Code formatter for docstrings
+# https://github.com/jsh9/format-docstring
+
+[tool.format_docstring]
+exclude = '\.'            # Temporarily disable format-docstring until we are ready
+docstring_style = 'numpy'
+line_length = 72
+fix_rst_backticks = true
+verbose = 'default'

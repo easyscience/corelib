@@ -40,14 +40,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
-
-      - name: Test tutorials as python scripts
-        shell: bash
-        run: pixi run script-tests
 
       - name: Prepare notebooks
         shell: bash
