@@ -26,8 +26,9 @@ MINIMIZER_PARAMETER_PREFIX = 'p'
 
 
 class MinimizerBase(metaclass=ABCMeta):
-    """This template class is the basis for all minimizer engines in
-    `EasyScience`.
+    """
+    This template class is the basis for all minimizer engines in
+    ``EasyScience``.
     """
 
     package: str = None
@@ -79,15 +80,16 @@ class MinimizerBase(metaclass=ABCMeta):
         progress_callback: Callable[[dict], bool | None] | None = None,
         **kwargs,
     ) -> FitResults:
-        """Perform a fit using the  engine.
+        """
+        Perform a fit using the  engine.
 
         Parameters
         ----------
-        progress_callback : Callable[[dict], bool | None] | None, optional
+        progress_callback : Callable[[dict], bool | None] | None, default=None
             By default, None.
-        max_evaluations : int | None, optional
+        max_evaluations : int | None, default=None
             By default, None.
-        tolerance : float | None, optional
+        tolerance : float | None, default=None
             By default, None.
         x : np.ndarray
             Points to be calculated at.
@@ -95,11 +97,11 @@ class MinimizerBase(metaclass=ABCMeta):
             Measured points.
         weights : np.ndarray
             Weights for supplied measured points.
-        model : Callable | None, optional
+        model : Callable | None, default=None
             Optional Model which is being fitted to. By default, None.
-        parameters : List[Parameter] | None, optional
+        parameters : List[Parameter] | None, default=None
             Optional parameters for the fit. By default, None.
-        method : str | None, optional
+        method : str | None, default=None
             Method for the minimizer to use. By default, None.
         **kwargs :
             Additional arguments for the fitting function.
@@ -113,20 +115,21 @@ class MinimizerBase(metaclass=ABCMeta):
     def evaluate(
         self, x: np.ndarray, minimizer_parameters: dict[str, float] | None = None, **kwargs
     ) -> np.ndarray:
-        """Evaluate the fit function for values of x.
+        """
+        Evaluate the fit function for values of x.
 
-        Parameters used
-are either the latest or user supplied. If the parameters are
-        user supplied, it must be in a dictionary of {'parameter_name':
-        parameter_value,...}.
+        Parameters used are either the latest or user supplied. If the
+        parameters are user supplied, it must be in a dictionary of
+        {'parameter_name': parameter_value,...}.
 
         Parameters
         ----------
         x : np.ndarray
             X values for which the fit function will be evaluated.
-        minimizer_parameters : dict[str, float] | None, optional
-            Dictionary of parameters which will be used in the fit function. They must be in a dictionary
-            of {'parameter_name': parameter_value,...}. By default, None.
+        minimizer_parameters : dict[str, float] | None, default=None
+            Dictionary of parameters which will be used in the fit
+            function. They must be in a dictionary of {'parameter_name':
+            parameter_value,...}. By default, None.
         **kwargs :
             Additional arguments.
 
@@ -162,14 +165,15 @@ are either the latest or user supplied. If the parameters are
 
     @abstractmethod
     def convert_to_pars_obj(self, par_list: List[Parameter] | None = None):
-        """Create an engine compatible container with the `Parameters`
+        """
+        Create an engine compatible container with the ``Parameters``
         converted from the base object.
 
         Parameters
         ----------
-        par_list : List[Parameter] | None, optional
-            If only a single/selection of parameter is
-            required. Specify as a list. By default, None.
+        par_list : List[Parameter] | None, default=None
+            If only a single/selection of parameter is required. Specify
+            as a list. By default, None.
 
         Returns
         -------
@@ -180,7 +184,8 @@ are either the latest or user supplied. If the parameters are
     @staticmethod
     @abstractmethod
     def supported_methods() -> List[str]:
-        """Return a list of supported methods for the minimizer.
+        """
+        Return a list of supported methods for the minimizer.
 
         Returns
         -------
@@ -191,7 +196,8 @@ are either the latest or user supplied. If the parameters are
     @staticmethod
     @abstractmethod
     def all_methods() -> List[str]:
-        """Return a list of all available methods for the minimizer.
+        """
+        Return a list of all available methods for the minimizer.
 
         Returns
         -------
@@ -202,18 +208,19 @@ are either the latest or user supplied. If the parameters are
     @staticmethod
     @abstractmethod
     def convert_to_par_object(obj):  # todo after constraint changes, add type hint: obj: ObjBase
-        """Convert an `EasyScience.variable.Parameter` object to an
+        """
+        Convert an ``EasyScience.variable.Parameter`` object to an
         engine Parameter object.
         """
 
     def _prepare_parameters(self, parameters: dict[str, float]) -> dict[str, float]:
-        """Prepare the parameters for the minimizer.
+        """
+        Prepare the parameters for the minimizer.
 
         Parameters
         ----------
         parameters : dict[str, float]
-            Dict of parameters for the minimizer with
-            names as keys.
+            Dict of parameters for the minimizer with names as keys.
         """
         pars = self._cached_pars
 
@@ -224,8 +231,9 @@ are either the latest or user supplied. If the parameters are
         return parameters
 
     def _generate_fit_function(self) -> Callable:
-        """Using the user supplied `fit_function`, wrap it in such a way
-        we can update `Parameter` on iterations.
+        """
+        Using the user supplied ``fit_function``, wrap it in such a way
+        we can update ``Parameter`` on iterations.
 
         Returns
         -------
@@ -244,8 +252,9 @@ are either the latest or user supplied. If the parameters are
 
         # Make a new fit function
         def _fit_function(x: np.ndarray, **kwargs):
-            """Wrapped fit function which now has an EasyScience
-            compatible form.
+            """
+            Wrapped fit function which now has an EasyScience compatible
+            form.
 
             Parameters
             ----------
@@ -257,7 +266,7 @@ are either the latest or user supplied. If the parameters are
             Returns
             -------
             np.ndarray
-                Points calculated at `x`.
+                Points calculated at ``x``.
             """
             # Update the `Parameter` values and the callback if needed
             # TODO THIS IS NOT THREAD SAFE :-(
@@ -280,11 +289,12 @@ are either the latest or user supplied. If the parameters are
 
     @staticmethod
     def _create_signature(parameters: Dict[int, Parameter]) -> Signature:
-        """Wrap the function signature.
+        """
+        Wrap the function signature.
 
-        This is done as lmfit wants the function to be in the form:
-        f = (x, a=1, b=2)...
-        Where we need to be generic. Note that this won't hold for much outside of this scope.
+        This is done as lmfit wants the function to be in the form: f =
+        (x, a=1, b=2)... Where we need to be generic. Note that this
+        won't hold for much outside of this scope.
         """
         wrapped_parameters = []
         wrapped_parameters.append(

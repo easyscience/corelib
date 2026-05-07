@@ -14,13 +14,14 @@ from ..variable import Parameter
 
 
 class Polynomial(ObjBase):
-    """A polynomial model.
+    """
+    A polynomial model.
 
     Parameters
     ----------
-    coefficients : Optional[Union[Iterable[Union[float, Parameter]], CollectionBase]], optional
+    coefficients : Optional[Union[Iterable[Union[float, Parameter]], CollectionBase]], default=None
         By default, None.
-    name : str, optional
+    name : str, default='polynomial'
         The name of the model. By default, 'polynomial'.
     degree : int
         The degree of the polynomial.

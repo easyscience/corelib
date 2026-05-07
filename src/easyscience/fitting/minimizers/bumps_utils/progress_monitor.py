@@ -6,8 +6,9 @@ from bumps.monitor import Monitor
 
 
 class BumpsProgressMonitor(Monitor):
-    """BUMPS :class:`Monitor` that forwards per-step progress
-    information to a user-supplied callback.
+    """
+    BUMPS :class:`Monitor` that forwards per-step progress information
+    to a user-supplied callback.
 
     The monitor delegates payload construction to ``payload_builder`` so
     the BUMPS minimizer can keep all backend-specific payload semantics

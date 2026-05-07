@@ -37,7 +37,10 @@ class DFOCallbackState:
 
 
 class DFO(MinimizerBase):
-    """This is a wrapper to Derivative Free Optimisation for Least Square: https://numericalalgorithmsgroup.github.io/dfols/."""
+    """
+    This is a wrapper to Derivative Free Optimisation for Least Square:
+    https://numericalalgorithmsgroup.github.io/dfols/.
+    """
 
     package = 'dfo'
 
@@ -47,15 +50,15 @@ class DFO(MinimizerBase):
         fit_function: Callable,
         minimizer_enum: AvailableMinimizers | None = None,
     ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
-        """Initialize the fitting engine with a `ObjBase` and an
+        """
+        Initialize the fitting engine with a ``ObjBase`` and an
         arbitrary fitting function.
 
-        :param obj: Object containing elements of the `Parameter` class
-        :type obj: ObjBase
-        :param fit_function: function that when called returns y values. 'x' must be the first
-                            and only positional argument. Additional values can be supplied by
-                            keyword/value pairs
-        :type fit_function: Callable
+        :param obj: Object containing elements of the ``Parameter``
+        class :type obj: ObjBase :param fit_function: function that when
+        called returns y values. 'x' must be the first and only
+        positional argument. Additional values can be supplied by
+        keyword/value pairs :type fit_function: Callable
         """
         super().__init__(obj=obj, fit_function=fit_function, minimizer_enum=minimizer_enum)
         self._p_0 = {}
@@ -83,17 +86,18 @@ class DFO(MinimizerBase):
         callback: Callable[[DFOCallbackState], None] | None = None,
         **kwargs,
     ) -> FitResults:
-        """Perform a fit using the DFO-ls engine.
+        """
+        Perform a fit using the DFO-ls engine.
 
         Parameters
         ----------
-        callback : Callable[[DFOCallbackState], None] | None, optional
+        callback : Callable[[DFOCallbackState], None] | None, default=None
             By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, optional
+        progress_callback : Callable[[dict], bool | None] | None, default=None
             By default, None.
-        max_evaluations : int | None, optional
+        max_evaluations : int | None, default=None
             By default, None.
-        tolerance : float | None, optional
+        tolerance : float | None, default=None
             By default, None.
         x : np.ndarray
             Points to be calculated at.
@@ -101,22 +105,21 @@ class DFO(MinimizerBase):
             Measured points.
         weights : np.ndarray
             Weights for supplied measured points.
-        model : Callable | None, optional
+        model : Callable | None, default=None
             Optional Model which is being fitted to. By default, None.
-        parameters : List[Parameter] | None, optional
+        parameters : List[Parameter] | None, default=None
             Optional parameters for the fit. By default, None.
         **kwargs :
             Additional arguments for the fitting function.
-        method : str | None, optional
+        method : str | None, default=None
             Method for minimization. By default, None.
 
         Returns
         -------
-        ModelResult For standard least squares, the weights
-            Fit results
-            should be 1/sigma, where sigma is the standard deviation of
-            the measurement. For unweighted least squares, these should
-            be 1.
+        FitResults
+            Fit results should be 1/sigma, where sigma is the standard
+            deviation of the measurement. For unweighted least squares,
+            these should be 1.
         """
         x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
 
@@ -190,7 +193,8 @@ class DFO(MinimizerBase):
         parameters: List[Parameter] | None = None,
         callback: Callable[[DFOCallbackState], None] | None = None,
     ) -> Callable:
-        """Generate a model from the supplied `fit_function` and
+        """
+        Generate a model from the supplied ``fit_function`` and
         parameters in the base object. Note that this makes a callable
         as it needs to be initialized with *x*, *y*, *weights*
 
@@ -203,6 +207,7 @@ class DFO(MinimizerBase):
 
         def _outer(obj: DFO):
             """Outer function."""
+
             def _make_func(x, y, weights):
                 """Make func."""
                 dfo_pars = {}
@@ -290,14 +295,14 @@ class DFO(MinimizerBase):
     def _make_progress_adapter(
         progress_callback: Callable[[dict], bool | None],
     ) -> Callable[['DFOCallbackState'], None]:
-        """Create a DFO callback that translates DFOCallbackState into
-        the standard progress_callback dict format used by the GUI.
+        """
+        Create a DFO callback that translates DFOCallbackState into the
+        standard progress_callback dict format used by the GUI.
 
         Parameters
         ----------
         progress_callback : Callable[[dict], bool | None]
-            Standard progress callback (dict ->
-            bool|None).
+            Standard progress callback (dict -> bool|None).
 
         Returns
         -------
@@ -327,21 +332,22 @@ class DFO(MinimizerBase):
         return adapter
 
     def _set_parameter_fit_result(self, fit_result, stack_status, ci: float = 0.95) -> None:
-        """Update parameters to their final values and assign a std
-        error to them.
+        """
+        Update parameters to their final values and assign a std error
+        to them.
 
         Parameters
         ----------
         stack_status :
         fit_result :
             Fit object which contains info on the fit.
-        ci : float, optional
-            Confidence interval for calculating errors. Default
-            95%. By default, 0.95.
+        ci : float, default=0.95
+            Confidence interval for calculating errors. Default 95%. By
+            default, 0.95.
 
         Returns
         -------
-        noneType
+        None
             None.
         """
         from easyscience import global_object
@@ -361,7 +367,8 @@ class DFO(MinimizerBase):
             global_object.stack.endMacro()
 
     def _gen_fit_results(self, fit_results, weights, **kwargs) -> FitResults:
-        """Convert fit results into the unified `FitResults` format.
+        """
+        Convert fit results into the unified ``FitResults`` format.
 
         Parameters
         ----------
@@ -443,7 +450,8 @@ class DFO(MinimizerBase):
         model: Callable,
         **kwargs,
     ):
-        """Method to convert EasyScience styling to DFO-LS styling (yes,
+        """
+        Method to convert EasyScience styling to DFO-LS styling (yes,
         again)
 
         Parameters

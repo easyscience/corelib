@@ -11,21 +11,24 @@ This module provides utility classes for string operations.
 def transformation_to_string(
     matrix, translation_vec=(0, 0, 0), components=('x', 'y', 'z'), c='', delim=','
 ):
-    """Convenience method.
+    """
+    Convenience method.
 
     Given matrix returns string, e.g. x+2y+1/4
 
     Parameters
     ----------
-    translation_vec :
+    translation_vec : default=(0, 0, 0), default=(0, 0, 0)
         By default, (0, 0, 0).
     matrix :
         Param translation_vec.
-    components :
-        Either ('x', 'y', 'z') or ('a', 'b', 'c'). By default, ('x', 'y', 'z').
-    c :
-        Optional additional character to print (used for magmoms). By default, ''.
-    delim :
+    components : default=('x', 'y', 'z'), default=('x', 'y', 'z')
+        Either ('x', 'y', 'z') or ('a', 'b', 'c'). By default, ('x',
+        'y', 'z').
+    c : default='', default=''
+        Optional additional character to print (used for magmoms). By
+        default, ''.
+    delim : default=',', default=','
         Delimiter. By default, ','.
 
     Returns

@@ -13,17 +13,18 @@ from easyscience.io import SerializerComponent
 
 
 class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
-    """This is the base of all variable descriptions for models.
+    """
+    This is the base of all variable descriptions for models.
 
-    It
-contains all information to describe a single unique property of an
-    object. This description includes a name and value as well as
+    It contains all information to describe a single unique property of
+    an object. This description includes a name and value as well as
     optionally a unit, description and url (for reference material).
     Also implemented is a callback so that the value can be read/set
     from a linked library object.
 
-    A `Descriptor` is typically something which describes part of a model and is non-fittable and generally changes the
-    state of an object.
+    A ``Descriptor`` is typically something which describes part of a
+    model and is non-fittable and generally changes the state of an
+    object.
     """
 
     _global_object = global_object
@@ -39,30 +40,32 @@ contains all information to describe a single unique property of an
         display_name: Optional[str] = None,
         parent: Optional[Any] = None,
     ):
-        """This is the base of variables for models.
+        """
+        This is the base of variables for models.
 
-        It contains all
-information to describe a single unique property of an object.
-        This description includes a name, description and url (for
-        reference material).
+        It contains all information to describe a single unique property
+        of an object. This description includes a name, description and
+        url (for reference material).
 
-        A `Descriptor` is typically something which describes part of a model and is non-fittable and generally changes
-        the state of an object.
+        A ``Descriptor`` is typically something which describes part of
+        a model and is non-fittable and generally changes the state of
+        an object.
 
         Parameters
         ----------
-        unique_name : Optional[str], optional
+        unique_name : Optional[str], default=None
             By default, None.
         name : str
             Name of this object.
-        description : Optional[str], optional
+        description : Optional[str], default=None
             A brief summary of what this object is. By default, None.
-        url : Optional[str], optional
+        url : Optional[str], default=None
             Lookup url for documentation/information. By default, None.
-        display_name : Optional[str], optional
+        display_name : Optional[str], default=None
             A pretty name for the object. By default, None.
-        parent : Optional[Any], optional
-            The object which this descriptor is attached to. By default, None.
+        parent : Optional[Any], default=None
+            The object which this descriptor is attached to. By default,
+            None.
         """
 
         if unique_name is None:
@@ -98,7 +101,8 @@ information to describe a single unique property of an object.
 
     @property
     def name(self) -> str:
-        """Get the name of the object.
+        """
+        Get the name of the object.
 
         Returns
         -------
@@ -110,7 +114,8 @@ information to describe a single unique property of an object.
     @name.setter
     @property_stack
     def name(self, new_name: str) -> None:
-        """Set the name.
+        """
+        Set the name.
 
         Parameters
         ----------
@@ -123,7 +128,8 @@ information to describe a single unique property of an object.
 
     @property
     def display_name(self) -> str:
-        """Get a pretty display name.
+        """
+        Get a pretty display name.
 
         Returns
         -------
@@ -138,7 +144,8 @@ information to describe a single unique property of an object.
     @display_name.setter
     @property_stack
     def display_name(self, name: str) -> None:
-        """Set the pretty display name.
+        """
+        Set the pretty display name.
 
         Parameters
         ----------
@@ -151,7 +158,8 @@ information to describe a single unique property of an object.
 
     @property
     def description(self) -> str:
-        """Get the description of the object.
+        """
+        Get the description of the object.
 
         Returns
         -------
@@ -162,7 +170,8 @@ information to describe a single unique property of an object.
 
     @description.setter
     def description(self, description: str) -> None:
-        """Set the description of the object.
+        """
+        Set the description of the object.
 
         Parameters
         ----------
@@ -175,7 +184,8 @@ information to describe a single unique property of an object.
 
     @property
     def url(self) -> str:
-        """Get the url of the object.
+        """
+        Get the url of the object.
 
         Returns
         -------
@@ -186,7 +196,8 @@ information to describe a single unique property of an object.
 
     @url.setter
     def url(self, url: str) -> None:
-        """Set the url of the object.
+        """
+        Set the url of the object.
 
         Parameters
         ----------
@@ -199,7 +210,8 @@ information to describe a single unique property of an object.
 
     @property
     def unique_name(self) -> str:
-        """Get the unique name of this object.
+        """
+        Get the unique name of this object.
 
         Returns
         -------
@@ -210,10 +222,10 @@ information to describe a single unique property of an object.
 
     @unique_name.setter
     def unique_name(self, new_unique_name: str):
-        """Set a new unique name for the object.
+        """
+        Set a new unique name for the object.
 
-        The old name is still
-kept in the map.
+        The old name is still kept in the map.
 
         Parameters
         ----------

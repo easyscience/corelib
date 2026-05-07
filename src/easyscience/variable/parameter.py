@@ -28,7 +28,8 @@ from .descriptor_number import notify_observers
 
 
 class Parameter(DescriptorNumber):
-    """A Parameter is a DescriptorNumber which can be used in fitting.
+    """
+    A Parameter is a DescriptorNumber which can be used in fitting.
 
     It has additional fields to facilitate this.
     """
@@ -55,46 +56,52 @@ class Parameter(DescriptorNumber):
         parent: Optional[Any] = None,
         **kwargs: Any,  # Additional keyword arguments (used for (de)serialization)
     ):
-        """This class is an extension of a `DescriptorNumber`.
+        """
+        This class is an extension of a ``DescriptorNumber``.
 
-        Where the
-descriptor was for static objects, a `Parameter` is for dynamic
-        objects. A parameter has the ability to be used in fitting and
-        has additional fields to facilitate this.
+        Where the descriptor was for static objects, a ``Parameter`` is
+        for dynamic objects. A parameter has the ability to be used in
+        fitting and has additional fields to facilitate this.
 
         Parameters
         ----------
         **kwargs : Any
-        callback : property, optional
+        callback : property, default=property()
             By default, property().
-        unique_name : Optional[str], optional
+        unique_name : Optional[str], default=None
             By default, None.
         name : str
             Name of this object.
         value : numbers.Number
             Value of this object.
-        unit : Optional[Union[str, sc.Unit]], optional
-            This object can have a physical unit associated with it. By default, ''.
-        variance : Optional[numbers.Number], optional
+        unit : Optional[Union[str, sc.Unit]], default=''
+            This object can have a physical unit associated with it. By
+            default, ''.
+        variance : Optional[numbers.Number], default=0.0
             The variance of the value. By default, 0.0.
-        min : Optional[numbers.Number], optional
+        min : Optional[numbers.Number], default=-np.inf
             The minimum value for fitting. By default, -np.inf.
-        max : Optional[numbers.Number], optional
+        max : Optional[numbers.Number], default=np.inf
             The maximum value for fitting. By default, np.inf.
-        fixed : Optional[bool], optional
-            If the parameter is free to vary during fitting. By default, False.
-        description : Optional[str], optional
+        fixed : Optional[bool], default=False
+            If the parameter is free to vary during fitting. By default,
+            False.
+        description : Optional[str], default=None
             A brief summary of what this object is. By default, None.
-        url : Optional[str], optional
+        url : Optional[str], default=None
             Lookup url for documentation/information. By default, None.
-        display_name : Optional[str], optional
-            The name of the object as it should be displayed. By default, None.
-        parent : Optional[Any], optional
-            The object which is the parent to this one. By default, None.
+        display_name : Optional[str], default=None
+            The name of the object as it should be displayed. By
+            default, None.
+        parent : Optional[Any], default=None
+            The object which is the parent to this one. By default,
+            None.
 
-        Note
-        ----
-        Undo/Redo functionality is implemented for the attributes `value`, `variance`, `error`, `min`, `max`, `bounds`, `fixed`, `unit`
+        Notes
+        -----
+        Undo/Redo functionality is implemented for the attributes
+        ``value``, ``variance``, ``error``, ``min``, ``max``,
+        ``bounds``, ``fixed``, ``unit``
         """
         # Extract and ignore serialization-specific fields from kwargs
         kwargs.pop('_dependency_string', None)
@@ -151,7 +158,8 @@ descriptor was for static objects, a `Parameter` is for dynamic
         desired_unit: str | sc.Unit | None = None,
         **kwargs,
     ) -> Parameter:  # noqa: E501
-        """Create a dependent Parameter directly from a dependency
+        """
+        Create a dependent Parameter directly from a dependency
         expression.
 
         Parameters
@@ -160,19 +168,18 @@ descriptor was for static objects, a `Parameter` is for dynamic
         name : str
             The name of the parameter.
         dependency_expression : str
-            The dependency expression to
-            evaluate. This should be a string which can be evaluated by
-            the ASTEval interpreter.
-        dependency_map : Optional[dict], optional
-            A dictionary of dependency expression
-            symbol name and dependency object pairs. This is inserted
-            into the asteval interpreter to resolve dependencies. By default, None.
-        desired_unit : str | sc.Unit | None, optional
-            The desired unit of the dependent
-            parameter. By default, None.
+            The dependency expression to evaluate. This should be a
+            string which can be evaluated by the ASTEval interpreter.
+        dependency_map : Optional[dict], default=None
+            A dictionary of dependency expression symbol name and
+            dependency object pairs. This is inserted into the asteval
+            interpreter to resolve dependencies. By default, None.
+        desired_unit : str | sc.Unit | None, default=None
+            The desired unit of the dependent parameter. By default,
+            None.
         **kwargs :
-            Additional keyword arguments to pass to the
-            Parameter constructor.
+            Additional keyword arguments to pass to the Parameter
+            constructor.
 
         Returns
         -------
@@ -192,7 +199,8 @@ descriptor was for static objects, a `Parameter` is for dynamic
         return parameter
 
     def _update(self) -> None:
-        """Update the parameter.
+        """
+        Update the parameter.
 
         This is called by the DescriptorNumbers/Parameters who have this
         Parameter as a dependency.
@@ -229,30 +237,38 @@ descriptor was for static objects, a `Parameter` is for dynamic
         dependency_map: Optional[dict] = None,
         desired_unit: str | sc.Unit | None = None,
     ) -> None:
-        """Make this parameter dependent on another parameter.
+        """
+        Make this parameter dependent on another parameter.
 
-        This will
-overwrite the current value, unit, variance, min and max.
+        This will overwrite the current value, unit, variance, min and
+        max.
 
-        How to use the dependency map:
-        If a parameter c has a dependency expression of 'a + b', where a and b are parameters belonging to the model class,
-        then the dependency map needs to have the form {'a': model.a, 'b': model.b}, where model is the model class.
-        I.e. the values are the actual objects, whereas the keys are how they are represented in the dependency expression.
+        How to use the dependency map: If a parameter c has a dependency
+        expression of 'a + b', where a and b are parameters belonging to
+        the model class, then the dependency map needs to have the form
+        {'a': model.a, 'b': model.b}, where model is the model class.
+        I.e. the values are the actual objects, whereas the keys are how
+        they are represented in the dependency expression.
 
-        The dependency map is not needed if the dependency expression uses the unique names of the parameters.
-        Unique names in dependency expressions are defined by quotes, e.g. 'Parameter_0' or "Parameter_0" depending on
-        the quotes used for the expression.
+        The dependency map is not needed if the dependency expression
+        uses the unique names of the parameters. Unique names in
+        dependency expressions are defined by quotes, e.g. 'Parameter_0'
+        or "Parameter_0" depending on the quotes used for the
+        expression.
 
         Parameters
         ----------
         dependency_expression : str
-            The dependency expression to evaluate. This should be a string which
-            can be evaluated by a python interpreter.
-        dependency_map : Optional[dict], optional
-            A dictionary of dependency expression symbol name and dependency object pairs.
-            This is inserted into the asteval interpreter to resolve dependencies. By default, None.
-        desired_unit : str | sc.Unit | None, optional
-            The desired unit of the dependent parameter. If None, the default unit of the dependency expression result is used. By default, None.
+            The dependency expression to evaluate. This should be a
+            string which can be evaluated by a python interpreter.
+        dependency_map : Optional[dict], default=None
+            A dictionary of dependency expression symbol name and
+            dependency object pairs. This is inserted into the asteval
+            interpreter to resolve dependencies. By default, None.
+        desired_unit : str | sc.Unit | None, default=None
+            The desired unit of the dependent parameter. If None, the
+            default unit of the dependency expression result is used. By
+            default, None.
         """
         if not isinstance(dependency_expression, str):
             raise TypeError(
@@ -383,11 +399,11 @@ overwrite the current value, unit, variance, min and max.
         self._update()
 
     def make_independent(self) -> None:
-        """Make this parameter independent.
+        """
+        Make this parameter independent.
 
-        This will remove the
-dependency expression, the dependency map and the dependency
-        interpreter.
+        This will remove the dependency expression, the dependency map
+        and the dependency interpreter.
 
         Returns
         -------
@@ -408,7 +424,8 @@ dependency expression, the dependency map and the dependency
 
     @property
     def independent(self) -> bool:
-        """Is the parameter independent?
+        """
+        Is the parameter independent?
 
         Returns
         -------
@@ -426,7 +443,8 @@ dependency expression, the dependency map and the dependency
 
     @property
     def dependency_expression(self) -> str:
-        """Get the dependency expression of this parameter.
+        """
+        Get the dependency expression of this parameter.
 
         Returns
         -------
@@ -447,7 +465,8 @@ dependency expression, the dependency map and the dependency
 
     @property
     def dependency_map(self) -> Dict[str, DescriptorNumber]:
-        """Get the dependency map of this parameter.
+        """
+        Get the dependency map of this parameter.
 
         Returns
         -------
@@ -468,7 +487,8 @@ dependency expression, the dependency map and the dependency
 
     @property
     def value_no_call_back(self) -> numbers.Number:
-        """Get the currently hold value of self suppressing call back.
+        """
+        Get the currently hold value of self suppressing call back.
 
         Returns
         -------
@@ -479,11 +499,12 @@ dependency expression, the dependency map and the dependency
 
     @property
     def full_value(self) -> Variable:
-        """Get the value of self as a scipp scalar.
+        """
+        Get the value of self as a scipp scalar.
 
-        This is should be
-usable for most cases. If a scipp scalar is not acceptable then
-        the raw value can be obtained through `obj.value`.
+        This is should be usable for most cases. If a scipp scalar is
+        not acceptable then the raw value can be obtained through
+        ``obj.value``.
 
         Returns
         -------
@@ -501,7 +522,8 @@ usable for most cases. If a scipp scalar is not acceptable then
 
     @property
     def value(self) -> numbers.Number:
-        """Get the value of self as a Number.
+        """
+        Get the value of self as a Number.
 
         Returns
         -------
@@ -517,10 +539,10 @@ usable for most cases. If a scipp scalar is not acceptable then
     @value.setter
     @property_stack
     def value(self, value: numbers.Number) -> None:
-        """Set the value of self.
+        """
+        Set the value of self.
 
-        This only updates the value of the
-scipp scalar.
+        This only updates the value of the scipp scalar.
 
         Parameters
         ----------
@@ -551,7 +573,8 @@ scipp scalar.
 
     @DescriptorNumber.variance.setter
     def variance(self, variance_float: float) -> None:
-        """Set the variance.
+        """
+        Set the variance.
 
         Parameters
         ----------
@@ -567,7 +590,8 @@ scipp scalar.
 
     @DescriptorNumber.error.setter
     def error(self, value: float) -> None:
-        """Set the standard deviation for the parameter.
+        """
+        Set the standard deviation for the parameter.
 
         Parameters
         ----------
@@ -582,10 +606,10 @@ scipp scalar.
             )
 
     def _convert_unit(self, unit_str: str) -> None:
-        """Perform unit conversion.
+        """
+        Perform unit conversion.
 
-        The value, max and min can change on
-unit change.
+        The value, max and min can change on unit change.
 
         Parameters
         ----------
@@ -605,10 +629,10 @@ unit change.
 
     @notify_observers
     def convert_unit(self, unit_str: str) -> None:
-        """Perform unit conversion.
+        """
+        Perform unit conversion.
 
-        The value, max and min can change on
-unit change.
+        The value, max and min can change on unit change.
 
         Parameters
         ----------
@@ -624,10 +648,10 @@ unit change.
         self._convert_unit(unit_str)
 
     def set_desired_unit(self, unit_str: str | sc.Unit | None) -> None:
-        """Set the desired unit for a dependent Parameter.
+        """
+        Set the desired unit for a dependent Parameter.
 
-        This will
-convert the parameter to the desired unit.
+        This will convert the parameter to the desired unit.
 
         Parameters
         ----------
@@ -656,7 +680,8 @@ convert the parameter to the desired unit.
 
     @property
     def min(self) -> numbers.Number:
-        """Get the minimum value for fitting.
+        """
+        Get the minimum value for fitting.
 
         Returns
         -------
@@ -668,7 +693,8 @@ convert the parameter to the desired unit.
     @min.setter
     @property_stack
     def min(self, min_value: numbers.Number) -> None:
-        """Set the minimum value for fitting.
+        """
+        Set the minimum value for fitting.
 
         - implements undo/redo functionality.
 
@@ -703,7 +729,8 @@ convert the parameter to the desired unit.
 
     @property
     def max(self) -> numbers.Number:
-        """Get the maximum value for fitting.
+        """
+        Get the maximum value for fitting.
 
         Returns
         -------
@@ -715,7 +742,8 @@ convert the parameter to the desired unit.
     @max.setter
     @property_stack
     def max(self, max_value: numbers.Number) -> None:
-        """Get the maximum value for fitting.
+        """
+        Get the maximum value for fitting.
 
         - implements undo/redo functionality.
 
@@ -750,7 +778,8 @@ convert the parameter to the desired unit.
 
     @property
     def fixed(self) -> bool:
-        """Can the parameter vary while fitting?
+        """
+        Can the parameter vary while fitting?
 
         Returns
         -------
@@ -762,7 +791,8 @@ convert the parameter to the desired unit.
     @fixed.setter
     @property_stack
     def fixed(self, fixed: bool) -> None:
-        """Change the parameter vary while fitting state.
+        """
+        Change the parameter vary while fitting state.
 
         - implements undo/redo functionality.
 
@@ -795,8 +825,8 @@ convert the parameter to the desired unit.
         self.fixed = not value
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        """Overwrite the as_dict method to handle dependency
-        information.
+        """
+        Overwrite the as_dict method to handle dependency information.
         """
         raw_dict = super().as_dict(skip=skip)
 
@@ -821,7 +851,8 @@ convert the parameter to the desired unit.
         return raw_dict
 
     def _revert_dependency(self, skip_detach=False) -> None:
-        """Revert the dependency to the old dependency.
+        """
+        Revert the dependency to the old dependency.
 
         This is used when an error is raised during setting the
         dependency.
@@ -840,14 +871,14 @@ convert the parameter to the desired unit.
         del self._previous_independent
 
     def _process_dependency_unique_names(self, dependency_expression: str):
-        """Add the unique names of the parameters to the ASTEval
+        """
+        Add the unique names of the parameters to the ASTEval
         interpreter. This is used to evaluate the dependency expression.
 
         Parameters
         ----------
         dependency_expression : str
-            The dependency expression to be
-            evaluated.
+            The dependency expression to be evaluated.
         """
         # Get the unique_names from the expression string regardless of the quotes used
         inputted_unique_names = re.findall("('.+?')", dependency_expression)
@@ -877,7 +908,8 @@ convert the parameter to the desired unit.
 
     @classmethod
     def from_dict(cls, obj_dict: dict) -> 'Parameter':
-        """Custom deserialization to handle parameter dependencies.
+        """
+        Custom deserialization to handle parameter dependencies.
 
         Override the parent method to handle dependency information.
         """
@@ -1316,7 +1348,8 @@ convert the parameter to the desired unit.
         return parameter
 
     def resolve_pending_dependencies(self) -> None:
-        """Resolve pending dependencies after deserialization.
+        """
+        Resolve pending dependencies after deserialization.
 
         This method should be called after all parameters have been
         deserialized to establish dependency relationships using
@@ -1355,8 +1388,9 @@ convert the parameter to the desired unit.
             delattr(self, '_pending_desired_unit')
 
     def _find_parameter_by_serializer_id(self, serializer_id: str) -> Optional['DescriptorNumber']:
-        """Find a parameter by its serializer_id from all parameters in
-        the global map.
+        """
+        Find a parameter by its serializer_id from all parameters in the
+        global map.
         """
         for obj in self._global_object.map._store.values():
             if isinstance(obj, DescriptorNumber) and hasattr(

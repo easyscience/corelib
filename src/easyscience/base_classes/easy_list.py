@@ -36,19 +36,20 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         display_name: Optional[str] = None,
         **kwargs: Any,
     ):
-        """Initialize the EasyList.
+        """
+        Initialize the EasyList.
 
         Parameters
         ----------
         **kwargs : Any
         *args : ProtectedType_ | list[ProtectedType_]
             Initial items to add to the list.
-        protected_types : list[Type[NewBase]] | Type[NewBase] | None, optional
-            Types that are allowed in the list. Can
-            be a single NewBase subclass or a list of them. If None,. By default, None.
-        unique_name : Optional[str], optional
+        protected_types : list[Type[NewBase]] | Type[NewBase] | None, default=None
+            Types that are allowed in the list. Can be a single NewBase
+            subclass or a list of them. If None,. By default, None.
+        unique_name : Optional[str], default=None
             Optional unique name for the list. By default, None.
-        display_name : Optional[str], optional
+        display_name : Optional[str], default=None
             Optional display name for the list. By default, None.
         """
         super().__init__(unique_name=unique_name, display_name=display_name)
@@ -90,7 +91,8 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
     @overload
     def __getitem__(self, idx: str) -> ProtectedType_: ...
     def __getitem__(self, idx: int | slice | str) -> ProtectedType_ | 'EasyList[ProtectedType_]':
-        """Get an item by index, slice, or unique_name.
+        """
+        Get an item by index, slice, or unique_name.
 
         Parameters
         ----------
@@ -122,7 +124,8 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
     def __setitem__(
         self, idx: int | slice, value: ProtectedType_ | Iterable[ProtectedType_]
     ) -> None:
-        """Set an item at an index.
+        """
+        Set an item at an index.
 
         Parameters
         ----------
@@ -164,7 +167,8 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
             raise TypeError('Index must be an int or slice')
 
     def __delitem__(self, idx: int | slice | str) -> None:
-        """Delete an item by index, slice, or name.
+        """
+        Delete an item by index, slice, or name.
 
         Parameters
         ----------
@@ -187,7 +191,8 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         return len(self._data)
 
     def insert(self, index: int, value: ProtectedType_) -> None:
-        """Insert an item at an index.
+        """
+        Insert an item at an index.
 
         Parameters
         ----------
@@ -208,7 +213,8 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         self._data.insert(index, value)
 
     def _get_key(self, obj) -> str:
-        """Get the unique name of an object.
+        """
+        Get the unique name of an object.
 
         Can be overridden to use a different attribute as the key.
 
@@ -226,18 +232,19 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         return obj.unique_name
 
     def get_all_variables(self) -> List[DescriptorBase]:
-        """Get all `Descriptor` and `Parameter` objects from all
-        elements that are derived from `ModelBase`.
+        """
+        Get all ``Descriptor`` and ``Parameter`` objects from all
+        elements that are derived from ``ModelBase``.
 
-        For each element that is a `ModelBase` instance, the element's
-        own `get_all_variables()` method is called and the results are
+        For each element that is a ``ModelBase`` instance, the element's
+        own ``get_all_variables()`` method is called and the results are
         collected into a single flat list.
 
         Returns
         -------
         List[DescriptorBase]
-            Flat list of all `DescriptorBase` objects from all
-            `ModelBase` elements.
+            Flat list of all ``DescriptorBase`` objects from all
+            ``ModelBase`` elements.
         """
         all_vars: List[DescriptorBase] = []
         for item in self._data:
@@ -264,13 +271,14 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         return self._data.__reversed__()
 
     def sort(self, key: Callable[[ProtectedType_], Any] = None, reverse: bool = False) -> None:
-        """Sort the collection according to the given key function.
+        """
+        Sort the collection according to the given key function.
 
         Parameters
         ----------
-        key : Callable[[ProtectedType_], Any], optional
+        key : Callable[[ProtectedType_], Any], default=None
             Mapping function to sort by. By default, None.
-        reverse : bool, optional
+        reverse : bool, default=False
             Whether to reverse the sort. By default, False.
         """
         self._data.sort(reverse=reverse, key=key)
@@ -287,11 +295,12 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         return self._data.index(value, start, stop)
 
     def pop(self, index: int | str = -1) -> ProtectedType_:
-        """Remove and return an item at the given index or unique_name.
+        """
+        Remove and return an item at the given index or unique_name.
 
         Parameters
         ----------
-        index : int | str, optional
+        index : int | str, default=-1
             Index or unique_name of the item to remove. By default, -1.
 
         Returns
@@ -312,7 +321,8 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
     # Serialization support
 
     def to_dict(self) -> dict:
-        """Convert the EasyList to a dictionary for serialization.
+        """
+        Convert the EasyList to a dictionary for serialization.
 
         Returns
         -------
@@ -330,14 +340,15 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
 
     @classmethod
     def from_dict(cls, obj_dict: Dict[str, Any]) -> NewBase:
-        """Re-create an EasyScience object from a full encoded
-        dictionary.
+        """
+        Re-create an EasyScience object from a full encoded dictionary.
 
         Parameters
         ----------
         cls :
         obj_dict : Dict[str, Any]
-            Dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object.
+            Dictionary containing the serialized contents (from
+            ``SerializerDict``) of an EasyScience object.
 
         Returns
         -------

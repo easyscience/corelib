@@ -10,7 +10,8 @@ from easyscience import global_object
 
 
 class memoized:
-    """Decorator.
+    """
+    Decorator.
 
     Caches a function's return value each time it is called. If called
     later with the same arguments, the cached value is returned (not
@@ -43,8 +44,10 @@ class memoized:
 
 
 def counted(func):
-    """Counts how many times a function has been called and adds a
-    `func.calls` to it's properties :param func: Function to be counted
+    """
+    Counts how many times a function has been called and adds a
+    ``func.calls`` to it's properties :param func: Function to be
+    counted
 
     Returns
     -------
@@ -63,7 +66,8 @@ def counted(func):
 
 
 def time_it(func):
-    """Times a function and reports the time either to the class' log or
+    """
+    Times a function and reports the time either to the class' log or
     the base logger :param func: function to be timed :return: callable
     function with timer.
     """
@@ -84,7 +88,8 @@ def time_it(func):
 
 
 def deprecated(func):
-    """This is a decorator which can be used to mark functions as
+    """
+    This is a decorator which can be used to mark functions as
     deprecated.
 
     It will result in a warning being emitted when the function is used.

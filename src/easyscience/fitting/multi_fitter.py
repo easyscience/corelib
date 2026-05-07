@@ -13,8 +13,8 @@ from .minimizers import FitResults
 
 
 class MultiFitter(Fitter):
-    """Extension of Fitter to enable multiple dataset/fit function
-    fitting.
+    """
+    Extension of Fitter to enable multiple dataset/fit function fitting.
 
     We can fit these types of data simultaneously:
     - Multiple models on multiple datasets.
@@ -37,16 +37,18 @@ class MultiFitter(Fitter):
         super().__init__(self._fit_objects, self._fit_functions[0])
 
     def _fit_function_wrapper(self, real_x=None, flatten: bool = True) -> Callable:
-        """Simple fit function which injects the N real X (independent)
+        """
+        Simple fit function which injects the N real X (independent)
         values into the optimizer function.
 
         This will also flatten the results if needed.
 
         Parameters
         ----------
-        real_x :
-            List of independent x parameters to be injected. By default, None.
-        flatten : bool, optional
+        real_x : default=None, default=None
+            List of independent x parameters to be injected. By default,
+            None.
+        flatten : bool, default=True
             Should the result be a flat 1D array? By default, True.
 
         Returns
@@ -82,7 +84,8 @@ class MultiFitter(Fitter):
         weights: Optional[List[np.ndarray]],
         vectorized: bool,
     ):
-        """Convert an array of X's and Y's  to an acceptable shape for
+        """
+        Convert an array of X's and Y's  to an acceptable shape for
         fitting.
 
         Parameters
@@ -133,10 +136,11 @@ class MultiFitter(Fitter):
         x: List[np.ndarray],
         y: List[np.ndarray],
     ) -> List[FitResults]:
-        """Take a fit results object and split it into n chuncks based
-        on the size of the x, y inputs :param fit_result_obj: Result
-        from a multifit :param x: List of X co-ords :param y: List of Y
-        co-ords :return: List of fit results.
+        """
+        Take a fit results object and split it into n chuncks based on
+        the size of the x, y inputs :param fit_result_obj: Result from a
+        multifit :param x: List of X co-ords :param y: List of Y co-ords
+        :return: List of fit results.
         """
 
         cls = fit_result_obj.__class__

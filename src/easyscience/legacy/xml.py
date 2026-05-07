@@ -25,8 +25,9 @@ can_intent = (sys.version_info.major > 2) & (sys.version_info.minor > 8)
 
 
 class XMLSerializer(BaseEncoderDecoder):
-    """This is a serializer that can encode and decode EasyScience
-    objects to a basic xml format.
+    """
+    This is a serializer that can encode and decode EasyScience objects
+    to a basic xml format.
     """
 
     def encode(
@@ -38,30 +39,30 @@ class XMLSerializer(BaseEncoderDecoder):
         use_header: bool = False,
         **kwargs,
     ) -> str:
-        """Convert an EasyScience object to an XML encoded string.
+        """
+        Convert an EasyScience object to an XML encoded string.
 
-        Note
-that for speed the `fast` setting can be changed to `True`. An
-        XML document with initial block *data* is returned.
+        Note that for speed the ``fast`` setting can be changed to
+        ``True``. An XML document with initial block *data* is returned.
 
         Parameters
         ----------
         obj : ComponentSerializer
             Object to be encoded.
-        skip : Optional[List[str]], optional
-            List of field names as strings to skip when forming
-            the encoded object. By default, None.
-        data_only : bool, optional
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            encoded object. By default, None.
+        data_only : bool, default=False
             Should only the object's data be encoded. By default, False.
-        fast : bool, optional
-            Should the returned string be pretty? This can be
-            turned off for speed. By default, False.
-        use_header : bool, optional
-            Should a header of `'?xml version="1.0"
-            encoding="UTF-8"?'` be included? By default, False.
+        fast : bool, default=False
+            Should the returned string be pretty? This can be turned off
+            for speed. By default, False.
+        use_header : bool, default=False
+            Should a header of ``'?xml version="1.0"
+            encoding="UTF-8"?'`` be included? By default, False.
         **kwargs :
-            Any additional key-words to pass to the
-            Dictionary Serializer.
+            Any additional key-words to pass to the Dictionary
+            Serializer.
 
         Returns
         -------
@@ -91,7 +92,8 @@ that for speed the `fast` setting can be changed to `True`. An
 
     @classmethod
     def decode(cls, data: str) -> ComponentSerializer:
-        """Decode an EasyScience object which has been encoded in XML
+        """
+        Decode an EasyScience object which has been encoded in XML
         format.
 
         Parameters
@@ -158,8 +160,9 @@ that for speed the `fast` setting can be changed to `True`. An
         return value
 
     def _check_class(self, element, key: str, value: Any, skip: Optional[List[str]] = None):
-        """Add a value to an element or create a new element based on
-        input type.
+        """
+        Add a value to an element or create a new element based on input
+        type.
         """
         T_ = type(value)
         if isinstance(value, dict):

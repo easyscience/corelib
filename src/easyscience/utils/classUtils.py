@@ -5,7 +5,8 @@ from functools import wraps
 
 
 def singleton(cls):
-    """This decorator can be used to create a singleton out of a class.
+    """
+    This decorator can be used to create a singleton out of a class.
 
     Usage::
 
@@ -28,21 +29,21 @@ def singleton(cls):
 
 
 def cached_class(klass):
-    """Decorator to cache class instances by constructor arguments.
+    """
+    Decorator to cache class instances by constructor arguments.
 
-        This
-    results in a class that behaves like a singleton for each set of
-        constructor arguments, ensuring efficiency.
+        This results in a class that behaves like a singleton for each
+        set of constructor arguments, ensuring efficiency.
 
-        Note that this should be used for *immutable classes only*.  Having
-        a cached mutable class makes very little sense.  For efficiency,
-        avoid using this decorator for situations where there are many
-        constructor arguments permutations.
+        Note that this should be used for *immutable classes only*.
+        Having a cached mutable class makes very little sense.  For
+        efficiency, avoid using this decorator for situations where
+        there are many constructor arguments permutations.
 
         The keywords argument dictionary is converted to a tuple because
-        dicts are mutable; keywords themselves are strings and so are always
-        hashable, but if any arguments (keyword or positional) are non-
-        hashable, that set of arguments is not cached.
+        dicts are mutable; keywords themselves are strings and so are
+        always hashable, but if any arguments (keyword or positional)
+        are non- hashable, that set of arguments is not cached.
     """
     cache = {}
 
@@ -53,7 +54,8 @@ def cached_class(klass):
         __doc__ = klass.__doc__
 
         def __new__(cls, *args, **kwargs):
-            """Pass through...
+            """
+            Pass through...
 
             Parameters
             ----------

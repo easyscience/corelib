@@ -32,8 +32,10 @@ FIT_AVAILABLE_IDS_FILTERED.remove('pt')
 
 
 class Bumps(MinimizerBase):
-    """This is a wrapper to Bumps: https://bumps.readthedocs.io/
-    It allows for the Bumps fitting engine to use parameters declared in an `EasyScience.base_classes.ObjBase`.
+    """
+    This is a wrapper to Bumps: https://bumps.readthedocs.io/ It allows
+    for the Bumps fitting engine to use parameters declared in an
+    ``EasyScience.base_classes.ObjBase``.
     """
 
     package = 'bumps'
@@ -44,15 +46,15 @@ class Bumps(MinimizerBase):
         fit_function: Callable,
         minimizer_enum: AvailableMinimizers | None = None,
     ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
-        """Initialize the fitting engine with a `ObjBase` and an
+        """
+        Initialize the fitting engine with a ``ObjBase`` and an
         arbitrary fitting function.
 
-        :param obj: Object containing elements of the `Parameter` class
-        :type obj: ObjBase
-        :param fit_function: function that when called returns y values. 'x' must be the first
-                            and only positional argument. Additional values can be supplied by
-                            keyword/value pairs
-        :type fit_function: Callable
+        :param obj: Object containing elements of the ``Parameter``
+        class :type obj: ObjBase :param fit_function: function that when
+        called returns y values. 'x' must be the first and only
+        positional argument. Additional values can be supplied by
+        keyword/value pairs :type fit_function: Callable
         """
         super().__init__(obj=obj, fit_function=fit_function, minimizer_enum=minimizer_enum)
         self._p_0 = {}
@@ -84,16 +86,17 @@ class Bumps(MinimizerBase):
         engine_kwargs: dict | None = None,
         **kwargs,
     ) -> FitResults:
-        """Perform a fit using the BUMPS engine.
+        """
+        Perform a fit using the BUMPS engine.
 
         Parameters
         ----------
         **kwargs :
-        engine_kwargs : dict | None, optional
+        engine_kwargs : dict | None, default=None
             By default, None.
-        minimizer_kwargs : dict | None, optional
+        minimizer_kwargs : dict | None, default=None
             By default, None.
-        tolerance : float | None, optional
+        tolerance : float | None, default=None
             By default, None.
         x : np.ndarray
             Points to be calculated at.
@@ -101,19 +104,21 @@ class Bumps(MinimizerBase):
             Measured points.
         weights : np.ndarray
             Weights for supplied measured points.
-        model : Callable | None, optional
+        model : Callable | None, default=None
             Optional Model which is being fitted to. By default, None.
-        parameters : List[Parameter] | None, optional
+        parameters : List[Parameter] | None, default=None
             Optional parameters for the fit. By default, None.
-        method : str | None, optional
+        method : str | None, default=None
             Method for minimization. By default, None.
-        max_evaluations : int | None, optional
-            Maximum number of optimizer steps. Forwarded to BUMPS as
-            its ``steps`` parameter. If ``None``, the default value defined by the
-            selected BUMPS fitter (``fitclass.settings``) is used. By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, optional
-            Optional callback for progress updates. The payload
-            field ``iteration`` carries the BUMPS optimizer step index. By default, None.
+        max_evaluations : int | None, default=None
+            Maximum number of optimizer steps. Forwarded to BUMPS as its
+            ``steps`` parameter. If ``None``, the default value defined
+            by the selected BUMPS fitter (``fitclass.settings``) is
+            used. By default, None.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback for progress updates. The payload field
+            ``iteration`` carries the BUMPS optimizer step index. By
+            default, None.
 
         Returns
         -------
@@ -272,14 +277,15 @@ class Bumps(MinimizerBase):
         return snapshot
 
     def convert_to_pars_obj(self, par_list: List[Parameter] | None = None) -> List[BumpsParameter]:
-        """Create a container with the `Parameters` converted from the
+        """
+        Create a container with the ``Parameters`` converted from the
         base object.
 
         Parameters
         ----------
-        par_list : List[Parameter] | None, optional
-            If only a single/selection of parameter is
-            required. Specify as a list. By default, None.
+        par_list : List[Parameter] | None, default=None
+            If only a single/selection of parameter is required. Specify
+            as a list. By default, None.
 
         Returns
         -------
@@ -295,7 +301,8 @@ class Bumps(MinimizerBase):
     # For some reason I have to double staticmethod :-/
     @staticmethod
     def convert_to_par_object(obj) -> BumpsParameter:
-        """Convert an `EasyScience.variable.Parameter` object to a bumps
+        """
+        Convert an ``EasyScience.variable.Parameter`` object to a bumps
         Parameter object.
 
         Returns
@@ -314,7 +321,8 @@ class Bumps(MinimizerBase):
         )
 
     def _make_model(self, parameters: List[BumpsParameter] | None = None) -> Callable:
-        """Generate a bumps model from the supplied `fit_function` and
+        """
+        Generate a bumps model from the supplied ``fit_function`` and
         parameters in the base object. Note that this makes a callable
         as it needs to be initialized with *x*, *y*, *weights*
 
@@ -330,6 +338,7 @@ class Bumps(MinimizerBase):
 
         def _outer(obj):
             """Outer function."""
+
             def _make_func(x, y, weights):
                 """Make func."""
                 bumps_pars = {}
@@ -355,14 +364,14 @@ class Bumps(MinimizerBase):
         stack_status: bool,
         par_list: List[BumpsParameter],
     ):
-        """Update parameters to their final values and assign a std
-        error to them.
+        """
+        Update parameters to their final values and assign a std error
+        to them.
 
         Parameters
         ----------
         fit_result :
-            BUMPS OptimizeResult containing best-fit
-            values and errors.
+            BUMPS OptimizeResult containing best-fit values and errors.
         stack_status : bool
             Whether the undo stack was enabled.
         par_list : List[BumpsParameter]
@@ -393,12 +402,13 @@ class Bumps(MinimizerBase):
         tolerance: float | None = None,
         **kwargs,
     ) -> FitResults:
-        """Convert fit results into the unified `FitResults` format.
+        """
+        Convert fit results into the unified ``FitResults`` format.
 
         Parameters
         ----------
         **kwargs :
-        tolerance : float | None, optional
+        tolerance : float | None, default=None
             By default, None.
         fit_results :
         x_result :
@@ -409,7 +419,7 @@ class Bumps(MinimizerBase):
             The FitDriver instance.
         n_evaluations :
             Number of iterations completed.
-        max_evaluations : int | None, optional
+        max_evaluations : int | None, default=None
             Maximum evaluations budget (if set). By default, None.
 
         Returns

@@ -23,8 +23,11 @@ from .utils import FitResults
 
 
 class LMFit(MinimizerBase):  # noqa: S101
-    """This is a wrapper to the extended Levenberg-Marquardt Fit: https://lmfit.github.io/lmfit-py/
-    It allows for the lmfit fitting engine to use parameters declared in an `EasyScience.base_classes.ObjBase`.
+    """
+    This is a wrapper to the extended Levenberg-Marquardt Fit:
+    https://lmfit.github.io/lmfit-py/ It allows for the lmfit fitting
+    engine to use parameters declared in an
+    ``EasyScience.base_classes.ObjBase``.
     """
 
     package = 'lmfit'
@@ -35,16 +38,14 @@ class LMFit(MinimizerBase):  # noqa: S101
         fit_function: Callable,
         minimizer_enum: AvailableMinimizers | None = None,
     ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
-        """Initialize the minimizer with the `ObjBase` and the
-        `fit_function` to be used.
+        """
+        Initialize the minimizer with the ``ObjBase`` and the
+        ``fit_function`` to be used.
 
         :param obj: Base object which contains the parameters to be
-            fitted
-        :type obj: ObjBase
-        :param fit_function: Function which will be fitted to the data
-        :type fit_function: Callable
-        :param method: Method to be used by the minimizer
-        :type method: str
+        fitted :type obj: ObjBase :param fit_function: Function which
+        will be fitted to the data :type fit_function: Callable :param
+        method: Method to be used by the minimizer :type method: str
         """
         super().__init__(obj=obj, fit_function=fit_function, minimizer_enum=minimizer_enum)
         self._last_iteration: int | None = None
@@ -92,43 +93,43 @@ class LMFit(MinimizerBase):  # noqa: S101
         engine_kwargs: dict | None = None,
         **kwargs,
     ) -> FitResults:
-        """Perform a fit using the lmfit engine.
+        """
+        Perform a fit using the lmfit engine.
 
         Parameters
         ----------
-        engine_kwargs : dict | None, optional
+        engine_kwargs : dict | None, default=None
             By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, optional
+        progress_callback : Callable[[dict], bool | None] | None, default=None
             By default, None.
-        max_evaluations : int | None, optional
+        max_evaluations : int | None, default=None
             By default, None.
-        tolerance : float | None, optional
+        tolerance : float | None, default=None
             By default, None.
-        method : str | None, optional
+        method : str | None, default=None
             By default, None.
         x : np.ndarray
             Points to be calculated at.
         y : np.ndarray
             Measured points.
-        weights : np.ndarray, optional
+        weights : np.ndarray, default=None
             Weights for supplied measured points. By default, None.
-        model : LMModel | None, optional
+        model : LMModel | None, default=None
             Optional Model which is being fitted to. By default, None.
-        parameters : LMParameters | None, optional
+        parameters : LMParameters | None, default=None
             Optional parameters for the fit. By default, None.
-        minimizer_kwargs : dict | None, optional
-            Arguments to be passed directly to the
-            minimizer. By default, None.
+        minimizer_kwargs : dict | None, default=None
+            Arguments to be passed directly to the minimizer. By
+            default, None.
         **kwargs :
             Additional arguments for the fitting function.
 
         Returns
         -------
-        ModelResult For standard least squares, the weights
-            Fit results
-            should be 1/sigma, where sigma is the standard deviation of
-            the measurement. For unweighted least squares, these should
-            be 1.
+        FitResults
+            Fit results should be 1/sigma, where sigma is the standard
+            deviation of the measurement. For unweighted least squares,
+            these should be 1.
         """
         x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
 
@@ -187,6 +188,7 @@ class LMFit(MinimizerBase):  # noqa: S101
         progress_callback: Callable[[dict], bool | None] | None,
     ) -> Callable | None:
         """Create iter callback."""
+
         def iter_cb(params, iteration: int, residuals: np.ndarray, *args, **kwargs) -> bool:
             """Iter cb."""
             if iteration >= 0:
@@ -242,14 +244,15 @@ class LMFit(MinimizerBase):  # noqa: S101
         return minimizer_kwargs
 
     def convert_to_pars_obj(self, parameters: List[Parameter] | None = None) -> LMParameters:
-        """Create an lmfit compatible container with the `Parameters`
+        """
+        Create an lmfit compatible container with the ``Parameters``
         converted from the base object.
 
         Parameters
         ----------
-        parameters : List[Parameter] | None, optional
-            If only a single/selection of parameter is
-            required. Specify as a list. By default, None.
+        parameters : List[Parameter] | None, default=None
+            If only a single/selection of parameter is required. Specify
+            as a list. By default, None.
 
         Returns
         -------
@@ -266,7 +269,8 @@ class LMFit(MinimizerBase):  # noqa: S101
 
     @staticmethod
     def convert_to_par_object(parameter: Parameter) -> LMParameter:
-        """Convert an EasyScience Parameter object to a lmfit Parameter
+        """
+        Convert an EasyScience Parameter object to a lmfit Parameter
         object.
 
         Returns
@@ -287,7 +291,8 @@ class LMFit(MinimizerBase):  # noqa: S101
         )
 
     def _make_model(self, pars: LMParameters | None = None) -> LMModel:
-        """Generate a lmfit model from the supplied `fit_function` and
+        """
+        Generate a lmfit model from the supplied ``fit_function`` and
         parameters in the base object.
 
         Returns
@@ -327,8 +332,9 @@ class LMFit(MinimizerBase):  # noqa: S101
         return model
 
     def _set_parameter_fit_result(self, fit_result: ModelResult, stack_status: bool):
-        """Update parameters to their final values and assign a std
-        error to them.
+        """
+        Update parameters to their final values and assign a std error
+        to them.
 
         Parameters
         ----------
@@ -358,9 +364,11 @@ class LMFit(MinimizerBase):  # noqa: S101
             global_object.stack.endMacro()
 
     def _gen_fit_results(self, fit_results: ModelResult, **kwargs) -> FitResults:
-        """Convert fit results into the unified `FitResults` format.
+        """
+        Convert fit results into the unified ``FitResults`` format.
 
-        See https://github.com/lmfit/lmfit-py/blob/480072b9f7834b31ff2ca66277a5ad31246843a4/lmfit/model.py#L1272
+        See
+        https://github.com/lmfit/lmfit-py/blob/480072b9f7834b31ff2ca66277a5ad31246843a4/lmfit/model.py#L1272
 
         Parameters
         ----------

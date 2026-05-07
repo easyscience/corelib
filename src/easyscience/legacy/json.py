@@ -19,8 +19,9 @@ if TYPE_CHECKING:
 
 class JsonSerializer(BaseEncoderDecoder):
     def encode(self, obj: ComponentSerializer, skip: List[str] = []) -> str:
-        """Returns a json string representation of the
-        ComponentSerializer object.
+        """
+        Returns a json string representation of the ComponentSerializer
+        object.
         """
         ENCODER = type(
             JsonEncoderTemplate.__name__,
@@ -37,8 +38,9 @@ class JsonSerializer(BaseEncoderDecoder):
 
 class JsonDataSerializer(BaseEncoderDecoder):
     def encode(self, obj: ComponentSerializer, skip: List[str] = []) -> str:
-        """Returns a json string representation of the
-        ComponentSerializer object.
+        """
+        Returns a json string representation of the ComponentSerializer
+        object.
         """
         from .dict import DataDictSerializer
 
@@ -64,9 +66,10 @@ class JsonDataSerializer(BaseEncoderDecoder):
 
 
 class JsonEncoderTemplate(json.JSONEncoder):
-    """A Json Encoder which supports the ComponentSerializer API, plus
-    adds support for numpy arrays, datetime objects, bson ObjectIds
-    (requires bson).
+    """
+    A Json Encoder which supports the ComponentSerializer API, plus adds
+    support for numpy arrays, datetime objects, bson ObjectIds (requires
+    bson).
 
     Usage::
 
@@ -78,13 +81,14 @@ class JsonEncoderTemplate(json.JSONEncoder):
     _converter = BaseEncoderDecoder._convert_to_dict
 
     def default(self, o) -> dict:  # pylint: disable=E0202
-        """Overriding default method for JSON encoding.
+        """
+        Overriding default method for JSON encoding.
 
-        This method does two
-things: (a) If an object has a to_dict property, return the to_dict
-        output. (b) If the @module and @class keys are not in the to_dict,
-        add them to the output automatically. If the object has no to_dict
-        property, the default Python json encoder default method is called.
+        This method does two things: (a) If an object has a to_dict
+        property, return the to_dict output. (b) If the @module and
+        @class keys are not in the to_dict, add them to the output
+        automatically. If the object has no to_dict property, the
+        default Python json encoder default method is called.
 
         Parameters
         ----------
@@ -93,20 +97,20 @@ things: (a) If an object has a to_dict property, return the to_dict
 
         Returns
         -------
-        Python dict representation.
+        dict
         """
         return self._converter(o, self.skip, full_encode=True)
 
 
 class JsonDecoderTemplate(json.JSONDecoder):
-    """A Json Decoder which supports the ComponentSerializer API.
+    """
+    A Json Decoder which supports the ComponentSerializer API.
 
-    By
-default, the decoder attempts to find a module and name associated
-    with a dict. If found, the decoder will generate a Pymatgen as a
-    priority.  If that fails, the original decoded dictionary from the
-    string is returned. Note that nested lists and dicts containing
-    pymatgen object will be decoded correctly as well.
+    By default, the decoder attempts to find a module and name
+    associated with a dict. If found, the decoder will generate a
+    Pymatgen as a priority.  If that fails, the original decoded
+    dictionary from the string is returned. Note that nested lists and
+    dicts containing pymatgen object will be decoded correctly as well.
 
     Usage:
 
@@ -117,7 +121,8 @@ default, the decoder attempts to find a module and name associated
     _converter = BaseEncoderDecoder._convert_from_dict
 
     def decode(self, s):
-        """Overrides decode from JSONDecoder.
+        """
+        Overrides decode from JSONDecoder.
 
         Parameters
         ----------

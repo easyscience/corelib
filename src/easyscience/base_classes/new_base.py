@@ -21,7 +21,8 @@ from ..io.serializer_base import SerializerBase
 
 
 class NewBase:
-    """This is the new base class for easyscience objects.
+    """
+    This is the new base class for easyscience objects.
 
     It provides serialization capabilities as well as unique naming and
     display naming.
@@ -44,7 +45,8 @@ class NewBase:
 
     @property
     def _arg_spec(self) -> Set[str]:
-        """This method is used by the serializer to determine which
+        """
+        This method is used by the serializer to determine which
         arguments are needed by the constructor to deserialize the
         object.
         """
@@ -63,10 +65,10 @@ class NewBase:
 
     @unique_name.setter
     def unique_name(self, new_unique_name: str):
-        """Set a new unique name for the object.
+        """
+        Set a new unique name for the object.
 
-        The old name is still
-kept in the map.
+        The old name is still kept in the map.
 
         Parameters
         ----------
@@ -81,7 +83,8 @@ kept in the map.
 
     @property
     def display_name(self) -> str:
-        """Get a pretty display name.
+        """
+        Get a pretty display name.
 
         Returns
         -------
@@ -96,7 +99,8 @@ kept in the map.
     @display_name.setter
     @property_stack
     def display_name(self, name: str | None) -> None:
-        """Set the pretty display name.
+        """
+        Set the pretty display name.
 
         Parameters
         ----------
@@ -108,14 +112,15 @@ kept in the map.
         self._display_name = name
 
     def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        """Convert an EasyScience object into a full dictionary using
-        `SerializerBase`s generic `convert_to_dict` method.
+        """
+        Convert an EasyScience object into a full dictionary using
+        ``SerializerBase``s generic ``convert_to_dict`` method.
 
         Parameters
         ----------
-        skip : Optional[List[str]], optional
-            List of field names as strings to skip when forming
-            the dictionary. By default, None.
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            dictionary. By default, None.
 
         Returns
         -------
@@ -134,14 +139,15 @@ kept in the map.
 
     @classmethod
     def from_dict(cls, obj_dict: Dict[str, Any]) -> NewBase:
-        """Re-create an EasyScience object from a full encoded
-        dictionary.
+        """
+        Re-create an EasyScience object from a full encoded dictionary.
 
         Parameters
         ----------
         cls :
         obj_dict : Dict[str, Any]
-            Dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object.
+            Dictionary containing the serialized contents (from
+            ``SerializerDict``) of an EasyScience object.
 
         Returns
         -------
@@ -159,14 +165,13 @@ kept in the map.
             )
 
     def __dir__(self) -> Iterable[str]:
-        """This creates auto-completion and helps out in iPython
-        notebooks.
+        """
+        This creates auto-completion and helps out in iPython notebooks.
 
         Returns
         -------
         Iterable[str]
-            List of function and parameter names for auto-
-            completion.
+            List of function and parameter names for auto- completion.
         """
         new_class_objs = list(k for k in dir(self.__class__) if not k.startswith('_'))
         return sorted(new_class_objs)

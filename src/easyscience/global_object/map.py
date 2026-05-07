@@ -86,7 +86,8 @@ class Map:
         self.__type_dict = {}
 
     def _snapshot_items(self):
-        """Return a stable snapshot of __type_dict items.
+        """
+        Return a stable snapshot of __type_dict items.
 
         Some callers iterate over __type_dict while other threads or
         weakref finalizers may modify it. Creating a list snapshot (with
@@ -101,7 +102,8 @@ class Map:
                 continue
 
     def vertices(self) -> List[str]:
-        """Returns the vertices of a map.
+        """
+        Returns the vertices of a map.
 
         Uses a retry loop to handle RuntimeError that can occur when the
         WeakValueDictionary is modified during iteration (e.g., by
@@ -157,7 +159,8 @@ class Map:
         raise ValueError('Item not in map.')
 
     def is_known(self, vertex: object) -> bool:
-        """Check if a vertex is known in the map.
+        """
+        Check if a vertex is known in the map.
 
         All objects should have a 'unique_name' attribute.
         """
@@ -210,7 +213,8 @@ class Map:
             raise AttributeError
 
     def __generate_edges(self) -> list:
-        """A static method generating the edges of the map.
+        """
+        A static method generating the edges of the map.
 
         Edges are represented as sets with one (a loop back to the
         vertex) or two vertices
@@ -289,15 +293,16 @@ class Map:
         return paths
 
     def reverse_route(self, end_vertex: str, start_vertex: Optional[str] = None) -> List:
-        """In this case we have an object and want to know the
-        connections to get to another in reverse.
+        """
+        In this case we have an object and want to know the connections
+        to get to another in reverse.
 
         We might not know the start_object. In which case we follow the
         shortest path to a base vertex.
 
         Parameters
         ----------
-        start_vertex : Optional[str], optional
+        start_vertex : Optional[str], default=None
             By default, None.
         end_vertex : str
         end_obj :
@@ -344,7 +349,8 @@ class Map:
         return False
 
     def _clear(self):
-        """Reset the map to an empty state.
+        """
+        Reset the map to an empty state.
 
         Only to be used for testing
         """

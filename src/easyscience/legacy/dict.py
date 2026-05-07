@@ -22,8 +22,9 @@ _KNOWN_CORE_TYPES = ('Descriptor', 'Parameter')
 
 
 class DictSerializer(BaseEncoderDecoder):
-    """This is a serializer that can encode and decode EasyScience
-    objects to a JSON encoded dictionary.
+    """
+    This is a serializer that can encode and decode EasyScience objects
+    to a JSON encoded dictionary.
     """
 
     def encode(
@@ -33,34 +34,36 @@ class DictSerializer(BaseEncoderDecoder):
         full_encode: bool = False,
         **kwargs,
     ):
-        """Convert an EasyScience object to a JSON encoded dictionary.
+        """
+        Convert an EasyScience object to a JSON encoded dictionary.
 
         Parameters
         ----------
         obj : ComponentSerializer
             Object to be encoded.
-        skip : Optional[List[str]], optional
-            List of field names as strings to skip when forming
-            the encoded object. By default, None.
-        full_encode : bool, optional
-            Should the data also be JSON encoded
-            (default False). By default, False.
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            encoded object. By default, None.
+        full_encode : bool, default=False
+            Should the data also be JSON encoded (default False). By
+            default, False.
         **kwargs :
-            Any additional key word arguments to be passed to
-            the encoder.
+            Any additional key word arguments to be passed to the
+            encoder.
 
         Returns
         -------
 
-            Object encoded to dictionary containing all information
-            to reform an EasyScience object.
+            Object encoded to dictionary containing all information to
+            reform an EasyScience object.
         """
 
         return self._convert_to_dict(obj, skip=skip, full_encode=full_encode, **kwargs)
 
     @classmethod
     def decode(cls, d: Dict) -> ComponentSerializer:
-        """Decode function.
+        """
+        Decode function.
 
         Parameters
         ----------
@@ -78,7 +81,8 @@ class DictSerializer(BaseEncoderDecoder):
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> ComponentSerializer:
-        """From dict.
+        """
+        From dict.
 
         Parameters
         ----------
@@ -95,7 +99,8 @@ class DictSerializer(BaseEncoderDecoder):
 
 
 class DataDictSerializer(DictSerializer):
-    """This is a serializer that can encode the data in an EasyScience
+    """
+    This is a serializer that can encode the data in an EasyScience
     object to a JSON encoded dictionary.
     """
 
@@ -106,22 +111,22 @@ class DataDictSerializer(DictSerializer):
         full_encode: bool = False,
         **kwargs,
     ) -> Dict[str, Any]:
-        """Convert an EasyScience object to a JSON encoded data
-        dictionary.
+        """
+        Convert an EasyScience object to a JSON encoded data dictionary.
 
         Parameters
         ----------
         obj : ComponentSerializer
             Object to be encoded.
-        skip : Optional[List[str]], optional
-            List of field names as strings to skip when forming
-            the encoded object. By default, None.
-        full_encode : bool, optional
-            Should the data also be JSON encoded
-            (default False). By default, False.
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            encoded object. By default, None.
+        full_encode : bool, default=False
+            Should the data also be JSON encoded (default False). By
+            default, False.
         **kwargs :
-            Any additional key word arguments to be passed to
-            the encoder.
+            Any additional key word arguments to be passed to the
+            encoder.
 
         Returns
         -------
@@ -140,8 +145,9 @@ class DataDictSerializer(DictSerializer):
 
     @classmethod
     def decode(cls, d: Dict[str, Any]) -> ComponentSerializer:
-        """This function is not implemented as a data dictionary does
-        not contain the necessary information to re-form an EasyScience
+        """
+        This function is not implemented as a data dictionary does not
+        contain the necessary information to re-form an EasyScience
         object.
         """
 

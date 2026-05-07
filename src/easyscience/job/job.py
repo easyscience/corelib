@@ -11,8 +11,9 @@ from .theoreticalmodel import TheoreticalModelBase
 
 
 class JobBase(ObjBase, metaclass=ABCMeta):
-    """This virtual class allows for the creation of technique-specific
-    Job objects.
+    """
+    This virtual class allows for the creation of technique-specific Job
+    objects.
     """
 
     def __init__(self, name: str, *args, **kwargs):

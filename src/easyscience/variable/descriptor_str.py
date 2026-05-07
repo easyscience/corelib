@@ -12,7 +12,7 @@ from .descriptor_base import DescriptorBase
 
 
 class DescriptorStr(DescriptorBase):
-    """A `Descriptor` for string values."""
+    """A ``Descriptor`` for string values."""
 
     def __init__(
         self,
@@ -38,7 +38,8 @@ class DescriptorStr(DescriptorBase):
 
     @property
     def value(self) -> str:
-        """Get the value of self.
+        """
+        Get the value of self.
 
         Returns
         -------
@@ -50,7 +51,8 @@ class DescriptorStr(DescriptorBase):
     @value.setter
     @property_stack
     def value(self, value: str) -> None:
-        """Set the value of self.
+        """
+        Set the value of self.
 
         Parameters
         ----------

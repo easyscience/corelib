@@ -48,6 +48,7 @@ T_ = TypeVar('T_', bound=UndoCommand)
 
 def dict_stack_deco(func: Callable) -> Callable:
     """Dict stack deco."""
+
     def inner(obj, *args, **kwargs):
         """Inner function."""
         from easyscience import global_object  # Local import to avoid circular dependency
@@ -65,7 +66,8 @@ def dict_stack_deco(func: Callable) -> Callable:
 
 
 class NotarizedDict(UserDict):
-    """A simple dict drop in for EasyScience group classes.
+    """
+    A simple dict drop in for EasyScience group classes.
 
     This is used as it wraps the get/set methods
     """
@@ -104,8 +106,8 @@ class NotarizedDict(UserDict):
 
 
 class CommandHolder:
-    """A holder for one or more commands which are added to the
-    stack.
+    """
+    A holder for one or more commands which are added to the stack.
     """
 
     def __init__(self, text: str = None):
@@ -217,13 +219,15 @@ class UndoStack:
         self._future = deque(maxlen=self._max_history)
 
     def pop(self) -> T_:
-        """!! WARNING - TO BE USED WITH EXTREME CAUTION !!
-        !! THIS IS PROBABLY NOT THE FN YOU'RE LOOKING FOR, IT CAN BREAK A LOT OF STUFF !!
-        Sometimes you really don't want the last command. Remove it from the stack
+        """
+        !! WARNING - TO BE USED WITH EXTREME CAUTION !! !! THIS IS
+        PROBABLY NOT THE FN YOU'RE LOOKING FOR, IT CAN BREAK A LOT OF
+        STUFF !! Sometimes you really don't want the last command.
+        Remove it from the stack
 
         Returns
         -------
-        None
+        T_
             None.
         """
         pop_it = self._history.popleft()
@@ -256,7 +260,7 @@ class UndoStack:
                     self._command_running = False
 
     def redo(self) -> NoReturn:
-        """Redo the last `undo` command on the stack."""
+        """Redo the last ``undo`` command on the stack."""
         if self.canRedo():
             # Move from the future to the past
             this_command_stack = self._future.popleft()
@@ -274,8 +278,9 @@ class UndoStack:
                     self._command_running = False
 
     def beginMacro(self, text: str) -> NoReturn:
-        """Start a bulk update i.e. multiple commands under one
-        undo/redo command.
+        """
+        Start a bulk update i.e. multiple commands under one undo/redo
+        command.
         """
         if self._macro_running:
             raise AssertionError('Cannot start a macro when one is already running')
@@ -284,7 +289,8 @@ class UndoStack:
         self._macro_running = True
 
     def endMacro(self) -> NoReturn:
-        """End a bulk update i.e. multiple commands under one undo/redo
+        """
+        End a bulk update i.e. multiple commands under one undo/redo
         command.
         """
         if not self._macro_running:
@@ -468,6 +474,7 @@ def property_stack(arg: Union[str, Callable], begin_macro: bool = False) -> Call
 
     def make_wrapper(func: Callable, name: str, **kwargs) -> Callable:
         """Func function."""
+
         def wrapper(obj, *args) -> NoReturn:
             """Wrapper function."""
             from easyscience import global_object  # Local import to avoid circular dependency

@@ -9,10 +9,11 @@ from .map import Map
 
 @singleton
 class GlobalObject:
-    """GlobalObject is the assimilated knowledge of `EasyScience`.
+    """
+    GlobalObject is the assimilated knowledge of ``EasyScience``.
 
-    Every class based on `EasyScience` gets brought
-    into the collective.
+    Every class based on ``EasyScience`` gets brought into the
+    collective.
     """
 
     __log = Logger()
@@ -33,10 +34,10 @@ class GlobalObject:
         self.map: Map = self.__map
 
     def instantiate_stack(self):
-        """The undo/redo stack references the collective.
+        """
+        The undo/redo stack references the collective.
 
-        Hence it has
-to be imported after initialization.
+        Hence it has to be imported after initialization.
 
         Returns
         -------
@@ -48,9 +49,10 @@ to be imported after initialization.
         self.stack = UndoStack()
 
     def generate_unique_name(self, name_prefix: str) -> str:
-        """Generate a generic unique name for the object using the class
+        """
+        Generate a generic unique name for the object using the class
         name and a global iterator. Names are in the format
-        `name_prefix_0`, `name_prefix_1`, `name_prefix_2`, etc.
+        ``name_prefix_0``, ``name_prefix_1``, ``name_prefix_2``, etc.
 
         Parameters
         ----------

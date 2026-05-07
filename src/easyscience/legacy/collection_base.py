@@ -25,16 +25,18 @@ if TYPE_CHECKING:
 
 
 class CollectionBase(BasedBase, MutableSequence):
-    """This is the base class for which all higher level classes are
-    built off of.
+    """
+    This is the base class for which all higher level classes are built
+    off of.
 
     .. deprecated::
-        `CollectionBase` is deprecated and will be removed in a future version.
-        Please migrate to `ModelBase` or `EasyList` instead.
+        ``CollectionBase`` is deprecated and will be removed in a future version.
+        Please migrate to ``ModelBase`` or ``EasyList`` instead.
 
-    NOTE: This object is serializable only if parameters are supplied as:
-    `ObjBase(a=value, b=value)`. For `Parameter` or `Descriptor` objects we can
-    cheat with `ObjBase(*[Descriptor(...), Parameter(...), ...])`.
+    NOTE: This object is serializable only if parameters are supplied
+    as: ``ObjBase(a=value, b=value)``. For ``Parameter`` or
+    ``Descriptor`` objects we can cheat with
+    ``ObjBase(*[Descriptor(...), Parameter(...), ...])``.
     """
 
     def __init__(
@@ -45,14 +47,15 @@ class CollectionBase(BasedBase, MutableSequence):
         unique_name: Optional[str] = None,
         **kwargs,
     ):
-        """Set up the base collection class.
+        """
+        Set up the base collection class.
 
         Parameters
         ----------
         **kwargs :
-        unique_name : Optional[str], optional
+        unique_name : Optional[str], default=None
             By default, None.
-        interface : Optional[InterfaceFactoryTemplate], optional
+        interface : Optional[InterfaceFactoryTemplate], default=None
             By default, None.
         name : str
             Name of this object.
@@ -112,7 +115,8 @@ class CollectionBase(BasedBase, MutableSequence):
         self._kwargs._stack_enabled = True
 
     def insert(self, index: int, value: Union[DescriptorBase, BasedBase, NewBase]) -> None:
-        """Insert an object into the collection at an index.
+        """
+        Insert an object into the collection at an index.
 
         Parameters
         ----------
@@ -143,7 +147,8 @@ class CollectionBase(BasedBase, MutableSequence):
             raise AttributeError('Only EasyScience objects can be put into an EasyScience group')
 
     def __getitem__(self, idx: Union[int, slice]) -> Union[DescriptorBase, BasedBase, NewBase]:
-        """Get an item in the collection based on its index.
+        """
+        Get an item in the collection based on its index.
 
         Parameters
         ----------
@@ -152,8 +157,8 @@ class CollectionBase(BasedBase, MutableSequence):
 
         Returns
         -------
-        Union[Parameter, Descriptor, ObjBase, 'CollectionBase']
-            Object at index `idx`.
+        Union[DescriptorBase, BasedBase, NewBase]
+            Object at index ``idx``.
         """
         if isinstance(idx, slice):
             start, stop, step = idx.indices(len(self))
@@ -183,7 +188,8 @@ class CollectionBase(BasedBase, MutableSequence):
         return self._kwargs[keys[idx]]
 
     def __setitem__(self, key: int, value: Union[BasedBase, DescriptorBase, NewBase]) -> None:
-        """Set an item via it's index.
+        """
+        Set an item via it's index.
 
         Parameters
         ----------
@@ -214,7 +220,8 @@ class CollectionBase(BasedBase, MutableSequence):
             )
 
     def __delitem__(self, key: int) -> None:
-        """Try to delete  an idem by key.
+        """
+        Try to delete  an idem by key.
 
         Parameters
         ----------
@@ -230,7 +237,8 @@ class CollectionBase(BasedBase, MutableSequence):
         del self._kwargs[keys[key]]
 
     def __len__(self) -> int:
-        """Get the number of items in this collection.
+        """
+        Get the number of items in this collection.
 
         Returns
         -------
@@ -240,7 +248,8 @@ class CollectionBase(BasedBase, MutableSequence):
         return len(self._kwargs.keys())
 
     def _convert_to_dict(self, in_dict, encoder, skip: List[str] = [], **kwargs) -> dict:
-        """Convert ones self into a serialized form.
+        """
+        Convert ones self into a serialized form.
 
         Returns
         -------
@@ -257,7 +266,8 @@ class CollectionBase(BasedBase, MutableSequence):
 
     @property
     def data(self) -> Tuple:
-        """The data function returns a tuple of the keyword arguments
+        """
+        The data function returns a tuple of the keyword arguments
         passed to the constructor. This is useful for when you need to
         pass in a dictionary of data to other functions, such as with
         matplotlib's plot function.
@@ -284,14 +294,15 @@ class CollectionBase(BasedBase, MutableSequence):
         mapping: Callable[[Union[BasedBase, DescriptorBase, NewBase]], Any],
         reverse: bool = False,
     ) -> None:
-        """Sort the collection according to the given mapping.
+        """
+        Sort the collection according to the given mapping.
 
         Parameters
         ----------
         mapping : Callable[[Union[BasedBase, DescriptorBase, NewBase]], Any]
-            Mapping function to sort the collection. i.e.
-            lambda parameter: parameter.value.
-        reverse : bool, optional
+            Mapping function to sort the collection. i.e. lambda
+            parameter: parameter.value.
+        reverse : bool, default=False
             Reverse the sorting. By default, False.
         """
         i = list(self._kwargs.items())

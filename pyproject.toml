@@ -281,7 +281,7 @@ max-positional-args = 6
 # the parameter declarations in the code (in function's signature).
 
 [tool.pydoclint]
-exclude = '\.'              # Temporarily disable pydoclint until we are ready
+#exclude = '\.'              # Temporarily disable pydoclint until we are ready
 style = 'numpy'
 check-style-mismatch = true
 check-arg-defaults = true
@@ -295,7 +295,7 @@ allow-init-docstring = true
 # https://github.com/jsh9/format-docstring
 
 [tool.format_docstring]
-exclude = '\.'            # Temporarily disable format-docstring until we are ready
+#exclude = '\.'            # Temporarily disable format-docstring until we are ready
 docstring_style = 'numpy'
 line_length = 72
 fix_rst_backticks = true

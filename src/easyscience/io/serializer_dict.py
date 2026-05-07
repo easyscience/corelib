@@ -19,8 +19,9 @@ if TYPE_CHECKING:
 
 
 class SerializerDict(SerializerBase):
-    """This is a serializer that can encode and decode EasyScience
-    objects to and from a dictionary.
+    """
+    This is a serializer that can encode and decode EasyScience objects
+    to and from a dictionary.
     """
 
     def encode(
@@ -30,34 +31,36 @@ class SerializerDict(SerializerBase):
         full_encode: bool = False,
         **kwargs,
     ):
-        """Convert an EasyScience object to a dictionary.
+        """
+        Convert an EasyScience object to a dictionary.
 
         Parameters
         ----------
         obj : SerializerComponent
             Object to be encoded.
-        skip : Optional[List[str]], optional
-            List of field names as strings to skip when forming
-            the encoded object. By default, None.
-        full_encode : bool, optional
-            Should the data also be encoded (default
-            False). By default, False.
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            encoded object. By default, None.
+        full_encode : bool, default=False
+            Should the data also be encoded (default False). By default,
+            False.
         **kwargs :
-            Any additional key word arguments to be passed to
-            the encoder.
+            Any additional key word arguments to be passed to the
+            encoder.
 
         Returns
         -------
 
-            Object encoded to dictionary containing all information
-            to reform an EasyScience object.
+            Object encoded to dictionary containing all information to
+            reform an EasyScience object.
         """
 
         return self._convert_to_dict(obj, skip=skip, full_encode=full_encode, **kwargs)
 
     @classmethod
     def decode(cls, d: Dict) -> SerializerComponent:
-        """Re-create an EasyScience object from the dictionary
+        """
+        Re-create an EasyScience object from the dictionary
         representation.
 
         Parameters

@@ -56,10 +56,11 @@ class BasedBase(SerializerComponent):
         return set(names[1:])
 
     def __reduce__(self):
-        """Make the class picklable.
+        """
+        Make the class picklable.
 
-        Due to the nature of the dynamic
-class definitions special measures need to be taken.
+        Due to the nature of the dynamic class definitions special
+        measures need to be taken.
 
         Returns
         -------
@@ -77,10 +78,10 @@ class definitions special measures need to be taken.
 
     @unique_name.setter
     def unique_name(self, new_unique_name: str):
-        """Set a new unique name for the object.
+        """
+        Set a new unique name for the object.
 
-        The old name is still
-kept in the map.
+        The old name is still kept in the map.
 
         Parameters
         ----------
@@ -94,7 +95,8 @@ kept in the map.
 
     @property
     def name(self) -> str:
-        """Get the common name of the object.
+        """
+        Get the common name of the object.
 
         Returns
         -------
@@ -105,7 +107,8 @@ kept in the map.
 
     @name.setter
     def name(self, new_name: str):
-        """Set a new common name for the object.
+        """
+        Set a new common name for the object.
 
         Parameters
         ----------
@@ -126,8 +129,9 @@ kept in the map.
 
     @interface.setter
     def interface(self, new_interface: InterfaceFactoryTemplate):
-        """Set the current interface to the object and generate bindings
-        if possible.
+        """
+        Set the current interface to the object and generate bindings if
+        possible.
 
         iF.e. ``` def __init__(self, bar, interface=None, **kwargs):
         super().__init__(self, **kwargs)     self.foo = bar
@@ -139,7 +143,8 @@ kept in the map.
             self.generate_bindings()
 
     def generate_bindings(self):
-        """Generate or re-generate bindings to an interface (if exists).
+        """
+        Generate or re-generate bindings to an interface (if exists).
 
         Raises
         ------
@@ -170,12 +175,13 @@ kept in the map.
         self.generate_bindings()
 
     def get_parameters(self) -> List[Parameter]:
-        """Get all parameter objects as a list.
+        """
+        Get all parameter objects as a list.
 
         Returns
         -------
         List[Parameter]
-            List of `Parameter` objects.
+            List of ``Parameter`` objects.
         """
         par_list = []
         for key, item in self._kwargs.items():
@@ -186,12 +192,13 @@ kept in the map.
         return par_list
 
     def _get_linkable_attributes(self) -> List[DescriptorBase]:
-        """Get all objects which can be linked against as a list.
+        """
+        Get all objects which can be linked against as a list.
 
         Returns
         -------
         List[DescriptorBase]
-            List of `Descriptor`/`Parameter` objects.
+            List of ``Descriptor``/`Parameter` objects.
         """
         item_list = []
         for key, item in self._kwargs.items():
@@ -202,13 +209,14 @@ kept in the map.
         return item_list
 
     def get_fit_parameters(self) -> List[Parameter]:
-        """Get all objects which can be fitted (and are not fixed) as a
+        """
+        Get all objects which can be fitted (and are not fixed) as a
         list.
 
         Returns
         -------
         List[Parameter]
-            List of `Parameter` objects which can be used in fitting.
+            List of ``Parameter`` objects which can be used in fitting.
         """
         fit_list = []
         for key, item in self._kwargs.items():
@@ -220,14 +228,13 @@ kept in the map.
         return fit_list
 
     def __dir__(self) -> Iterable[str]:
-        """This creates auto-completion and helps out in iPython
-        notebooks.
+        """
+        This creates auto-completion and helps out in iPython notebooks.
 
         Returns
         -------
         Iterable[str]
-            List of function and parameter names for auto-
-            completion.
+            List of function and parameter names for auto- completion.
         """
         new_class_objs = list(k for k in dir(self.__class__) if not k.startswith('_'))
         return sorted(new_class_objs)
@@ -239,8 +246,9 @@ kept in the map.
         return new_obj
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        """Convert an object into a full dictionary using
-        `SerializerDict`. This is a shortcut for
+        """
+        Convert an object into a full dictionary using
+        ``SerializerDict``. This is a shortcut for
         ```obj.encode(encoder=SerializerDict)```
 
         Parameters

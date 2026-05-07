@@ -17,16 +17,18 @@ if TYPE_CHECKING:
 
 
 class ObjBase(BasedBase):
-    """This is the base class for which all higher level classes are
-    built off of.
+    """
+    This is the base class for which all higher level classes are built
+    off of.
 
     .. deprecated::
-        `ObjBase` is deprecated and will be removed in a future version.
-        Please migrate to `ModelBase` instead.
+        ``ObjBase`` is deprecated and will be removed in a future version.
+        Please migrate to ``ModelBase`` instead.
 
-    NOTE: This object is serializable only if parameters are supplied as:
-    `ObjBase(a=value, b=value)`. For `Parameter` or `Descriptor` objects we can
-    cheat with `ObjBase(*[Descriptor(...), Parameter(...), ...])`.
+    NOTE: This object is serializable only if parameters are supplied
+    as: ``ObjBase(a=value, b=value)``. For ``Parameter`` or
+    ``Descriptor`` objects we can cheat with
+    ``ObjBase(*[Descriptor(...), Parameter(...), ...])``.
     """
 
     def __init__(
@@ -36,11 +38,12 @@ class ObjBase(BasedBase):
         *args: Optional[SerializerComponent],
         **kwargs: Optional[SerializerComponent],
     ):
-        """Set up the base class.
+        """
+        Set up the base class.
 
         Parameters
         ----------
-        unique_name : Optional[str], optional
+        unique_name : Optional[str], default=None
             By default, None.
         name : str
             Name of this object.
@@ -91,7 +94,7 @@ class ObjBase(BasedBase):
 
             class Foo(Bar):
                 def __init__(self, foo: Parameter, bar: Parameter):
-                    """Init function."""
+                    '''Init function.'''
                     super(Foo, self).__init__(bar=bar)
                     self._add_component('foo', foo)
 

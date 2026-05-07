@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 
 class InterfaceFactoryTemplate:
-    """This class allows for the creation and transference of
-    interfaces.
+    """
+    This class allows for the creation and transference of interfaces.
     """
 
     def __init__(self, interface_list: List[ABCMeta], *args, **kwargs):
@@ -28,10 +28,11 @@ class InterfaceFactoryTemplate:
         self.create(*args, **kwargs)
 
     def create(self, *args, **kwargs):
-        """Create an interface to a calculator from those initialized.
+        """
+        Create an interface to a calculator from those initialized.
 
-        Interfaces can be selected by `interface_name` where
-        `interface_name` is one of `obj.available_interfaces`. This
+        Interfaces can be selected by ``interface_name`` where
+        ``interface_name`` is one of ``obj.available_interfaces``. This
         interface can now be accessed by obj().
 
         Parameters
@@ -60,20 +61,20 @@ class InterfaceFactoryTemplate:
         self.__interface_obj = self._current_interface(*args, **kwargs)
 
     def switch(self, new_interface: str, fitter: Optional[Type[Fitter]] = None):
-        """Changes the current interface to a new interface.
+        """
+        Changes the current interface to a new interface.
 
-        The current
-interface is destroyed and all SerializerComponent parameters
-        carried over to the new interface. i.e. pick up where you left
-        off.
+        The current interface is destroyed and all SerializerComponent
+        parameters carried over to the new interface. i.e. pick up where
+        you left off.
 
         Parameters
         ----------
         new_interface : str
             Name of new interface to be created.
-        fitter : Optional[Type[Fitter]], optional
-            Fitting interface which contains the fitting
-            object which may have bindings which will be updated. By default, None.
+        fitter : Optional[Type[Fitter]], default=None
+            Fitting interface which contains the fitting object which
+            may have bindings which will be updated. By default, None.
 
         Returns
         -------
@@ -102,7 +103,8 @@ interface is destroyed and all SerializerComponent parameters
 
     @property
     def available_interfaces(self) -> List[str]:
-        """Return all available interfaces.
+        """
+        Return all available interfaces.
 
         Returns
         -------
@@ -113,18 +115,20 @@ interface is destroyed and all SerializerComponent parameters
 
     @property
     def current_interface(self) -> ABCMeta:
-        """Returns the constructor for the currently selected interface.
+        """
+        Returns the constructor for the currently selected interface.
 
         Returns
         -------
-        InterfaceTemplate
+        ABCMeta
             Interface constructor.
         """
         return self._current_interface
 
     @property
     def current_interface_name(self) -> str:
-        """Returns the constructor name for the currently selected
+        """
+        Returns the constructor name for the currently selected
         interface.
 
         Returns
@@ -138,7 +142,8 @@ interface is destroyed and all SerializerComponent parameters
     def fit_func(
         self,
     ) -> Callable:  # , x_array: np.ndarray, *args, **kwargs) -> np.ndarray:
-        """Pass through to the underlying interfaces fitting function.
+        """
+        Pass through to the underlying interfaces fitting function.
 
         Parameters
         ----------
@@ -151,8 +156,8 @@ interface is destroyed and all SerializerComponent parameters
 
         Returns
         -------
-        np.ndarray
-            Points calculated at positional values `x`.
+        Callable
+            Points calculated at positional values ``x``.
         """
 
         def __fit_func(*args, **kwargs):
@@ -166,13 +171,14 @@ interface is destroyed and all SerializerComponent parameters
         return self.fit_func(*args, **kwargs)
 
     def generate_bindings(self, model, *args, ifun=None, **kwargs):
-        """Automatically bind a `Parameter` to the corresponding
+        """
+        Automatically bind a ``Parameter`` to the corresponding
         interface.
 
         Parameters
         ----------
         **kwargs :
-        ifun :
+        ifun : default=None, default=None
             By default, None.
         *args :
         model :
@@ -257,6 +263,7 @@ class ItemContainer(NamedTuple):
 
     def __make_getter(self, get_name: str) -> Callable:
         """Make getter."""
+
         def get_value():
             """Get value."""
             inner_key = self.name_conversion.get(get_name, None)
@@ -266,6 +273,7 @@ class ItemContainer(NamedTuple):
 
     def __make_setter(self, get_name: str) -> Callable:
         """Make setter."""
+
         def set_value(value):
             """Set value."""
             inner_key = self.name_conversion.get(get_name, None)

@@ -25,7 +25,8 @@ from .descriptor_base import DescriptorBase
 # Why is this a decorator? Because otherwise we would need a flag on the convert_unit method to avoid
 # infinite recursion. This is a bit cleaner as it avoids the need for a internal only flag on a user method.
 def notify_observers(func):
-    """Decorator to notify observers of a change in the descriptor.
+    """
+    Decorator to notify observers of a change in the descriptor.
 
     Parameters
     ----------
@@ -48,7 +49,8 @@ def notify_observers(func):
 
 
 class DescriptorNumber(DescriptorBase):
-    """A `Descriptor` for Number values with units.
+    """
+    A ``Descriptor`` for Number values with units.
 
     The internal representation is a scipp scalar.
     """
@@ -66,17 +68,16 @@ class DescriptorNumber(DescriptorBase):
         parent: Optional[Any] = None,
         **kwargs: Any,  # Additional keyword arguments (used for (de)serialization)
     ):
-        """Constructor for the DescriptorNumber class.
+        """
+        Constructor for the DescriptorNumber class.
 
-        param name: Name of the descriptor
-        param value: Value of the descriptor
-        param unit: Unit of the descriptor
-        param variance: Variance of the descriptor
-        param description: Description of the descriptor
-        param url: URL of the descriptor
-        param display_name: Display name of the descriptor
-        param parent: Parent of the descriptor
-        .. note:: Undo/Redo functionality is implemented for the attributes `variance`, `error`, `unit` and `value`.
+        param name: Name of the descriptor param value: Value of the
+        descriptor param unit: Unit of the descriptor param variance:
+        Variance of the descriptor param description: Description of the
+        descriptor param url: URL of the descriptor param display_name:
+        Display name of the descriptor param parent: Parent of the
+        descriptor .. note:: Undo/Redo functionality is implemented for
+        the attributes ``variance``, ``error``, ``unit`` and ``value``.
         """
         self._observers: List[DescriptorNumber] = []
 
@@ -115,7 +116,8 @@ class DescriptorNumber(DescriptorBase):
 
     @classmethod
     def from_scipp(cls, name: str, full_value: Variable, **kwargs) -> DescriptorNumber:
-        """Create a DescriptorNumber from a scipp constant.
+        """
+        Create a DescriptorNumber from a scipp constant.
 
         Parameters
         ----------
@@ -163,14 +165,15 @@ class DescriptorNumber(DescriptorBase):
             observer._update()
 
     def _validate_dependencies(self, origin=None) -> None:
-        """Ping all observers to check if any cyclic dependencies have
-        been introduced.
+        """
+        Ping all observers to check if any cyclic dependencies have been
+        introduced.
 
         Parameters
         ----------
-        origin :
-            Unique_name of the origin of this validation
-            check. Used to avoid cyclic depenencies. By default, None.
+        origin : default=None, default=None
+            Unique_name of the origin of this validation check. Used to
+            avoid cyclic depenencies. By default, None.
         """
         if origin == self.unique_name:
             raise RuntimeError(
@@ -185,10 +188,10 @@ class DescriptorNumber(DescriptorBase):
 
     @property
     def full_value(self) -> Variable:
-        """Get the value of self as a scipp scalar.
+        """
+        Get the value of self as a scipp scalar.
 
-        This is should be
-usable for most cases.
+        This is should be usable for most cases.
 
         Returns
         -------
@@ -206,10 +209,11 @@ usable for most cases.
 
     @property
     def value(self) -> numbers.Number:
-        """Get the value.
+        """
+        Get the value.
 
-        This should be usable for most cases. The full
-value can be obtained from `obj.full_value`.
+        This should be usable for most cases. The full value can be
+        obtained from ``obj.full_value``.
 
         Returns
         -------
@@ -222,10 +226,11 @@ value can be obtained from `obj.full_value`.
     @notify_observers
     @property_stack
     def value(self, value: numbers.Number) -> None:
-        """Set the value of self.
+        """
+        Set the value of self.
 
-        This should be usable for most cases.
-The full value can be obtained from `obj.full_value`.
+        This should be usable for most cases. The full value can be
+        obtained from ``obj.full_value``.
 
         Parameters
         ----------
@@ -238,7 +243,8 @@ The full value can be obtained from `obj.full_value`.
 
     @property
     def unit(self) -> str:
-        """Get the unit.
+        """
+        Get the unit.
 
         Returns
         -------
@@ -259,7 +265,8 @@ The full value can be obtained from `obj.full_value`.
 
     @property
     def variance(self) -> float:
-        """Get the variance.
+        """
+        Get the variance.
 
         Returns
         -------
@@ -272,7 +279,8 @@ The full value can be obtained from `obj.full_value`.
     @notify_observers
     @property_stack
     def variance(self, variance_float: float) -> None:
-        """Set the variance.
+        """
+        Set the variance.
 
         Parameters
         ----------
@@ -289,7 +297,8 @@ The full value can be obtained from `obj.full_value`.
 
     @property
     def error(self) -> float:
-        """The standard deviation for the parameter.
+        """
+        The standard deviation for the parameter.
 
         Returns
         -------
@@ -304,7 +313,8 @@ The full value can be obtained from `obj.full_value`.
     @notify_observers
     @property_stack
     def error(self, value: float) -> None:
-        """Set the standard deviation for the parameter.
+        """
+        Set the standard deviation for the parameter.
 
         Parameters
         ----------
@@ -324,7 +334,8 @@ The full value can be obtained from `obj.full_value`.
     # When we convert units internally, we dont want to notify observers as this can cause infinite recursion.
     # Therefore the convert_unit method is split into two methods, a private internal method and a public method.
     def _convert_unit(self, unit_str: str) -> None:
-        """Convert the value from one unit system to another.
+        """
+        Convert the value from one unit system to another.
 
         Parameters
         ----------
@@ -362,7 +373,8 @@ The full value can be obtained from `obj.full_value`.
     # When the user calls convert_unit, we want to notify observers of the change to propagate the change.
     @notify_observers
     def convert_unit(self, unit_str: str) -> None:
-        """Convert the value from one unit system to another.
+        """
+        Convert the value from one unit system to another.
 
         Parameters
         ----------
@@ -581,8 +593,9 @@ The full value can be obtained from `obj.full_value`.
         return descriptor_number
 
     def _base_unit(self) -> str:
-        """Extract the base unit from the unit string by removing
-        numeric components and scientific notation.
+        """
+        Extract the base unit from the unit string by removing numeric
+        components and scientific notation.
         """
         string = str(self._scalar.unit)
         for i, letter in enumerate(string):

@@ -11,7 +11,8 @@ from .parameter import Parameter
 
 
 def resolve_all_parameter_dependencies(obj: Any) -> None:
-    """Recursively find all Parameter objects in an object hierarchy and
+    """
+    Recursively find all Parameter objects in an object hierarchy and
     resolve their pending dependencies.
 
     This function should be called after deserializing a complex object
@@ -21,8 +22,8 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
     Parameters
     ----------
     obj : Any
-        The object to search for Parameters (can be a single
-        Parameter, list, dict, or complex object).
+        The object to search for Parameters (can be a single Parameter,
+        list, dict, or complex object).
     """
 
     def _collect_parameters(item: Any, parameters: List[Parameter]) -> None:
@@ -89,8 +90,9 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
 
 
 def get_parameters_with_pending_dependencies(obj: Any) -> List[Parameter]:
-    """Find all Parameter objects in an object hierarchy that have
-    pending dependencies.
+    """
+    Find all Parameter objects in an object hierarchy that have pending
+    dependencies.
 
     Parameters
     ----------
@@ -105,7 +107,8 @@ def get_parameters_with_pending_dependencies(obj: Any) -> List[Parameter]:
     parameters_with_pending = []
 
     def _collect_pending_parameters(item: Any) -> None:
-        """Recursively collect all Parameter objects with pending
+        """
+        Recursively collect all Parameter objects with pending
         dependencies.
         """
         if isinstance(item, Parameter):
@@ -144,7 +147,8 @@ def get_parameters_with_pending_dependencies(obj: Any) -> List[Parameter]:
 def deserialize_and_resolve_parameters(
     params_data: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Parameter]:
-    """Deserialize parameters from a dictionary and resolve their
+    """
+    Deserialize parameters from a dictionary and resolve their
     dependencies.
 
     This is a convenience function that combines Parameter.from_dict()
@@ -153,14 +157,13 @@ def deserialize_and_resolve_parameters(
     Parameters
     ----------
     params_data : Dict[str, Dict[str, Any]]
-        Dictionary mapping parameter names to their
-        serialized data.
+        Dictionary mapping parameter names to their serialized data.
 
     Returns
     -------
     Dict[str, Parameter]
-        Dictionary mapping parameter names to deserialized
-        Parameters with resolved dependencies.
+        Dictionary mapping parameter names to deserialized Parameters
+        with resolved dependencies.
     """
     # Deserialize all parameters first
     new_params = {}

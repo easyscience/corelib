@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 """
 .. deprecated::
-    This module has been moved to `easyscience.legacy.collection_base`.
+    This module has been moved to ``easyscience.legacy.collection_base``.
     Please update your imports.
 """
 
