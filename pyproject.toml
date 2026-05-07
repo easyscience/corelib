@@ -23,25 +23,24 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'asteval',       # Safely evaluate Python expressions from strings
-  'lmfit',         # Non-linear least squares fitting
-  'bumps',         # Bayesian uncertainty estimation
-  'dfo-ls',        # Derivative-free optimization
-  'uncertainties', # Propagation of uncertainties in calculations
-  'numpy',         # Numerical computing
-  'scipp',         # Handling and analysis of scientific data
-  'pooch',         # Data downloader
-  'matplotlib',    # Plotting library
-  'jupyterlab',    # Jupyter notebooks
-  'pixi-kernel',   # Pixi Jupyter kernel
-  'ipykernel',     # Jupyter kernel (required for running notebooks)
-  'ipywidgets',    # Widgets (needed for interactive matplotlib backends)
-  'ipympl',        # Matplotlib Jupyter widget backend (%matplotlib widget)
-  'IPython',       # Interactive Python shell
+  'asteval', # Safely evaluate Python expressions from strings
+  'lmfit',   # Non-linear least squares fitting
+  'bumps',   # Bayesian uncertainty estimation
+  'dfo-ls',  # Derivative-free optimization
+  'numpy',   # Numerical computing
+  'scipp',   # Handling and analysis of scientific data
 ]
 
 [project.optional-dependencies]
 dev = [
+  'uncertainties',                   # Propagation of uncertainties in calculations
+  'pooch',                           # Data downloader
+  'matplotlib',                      # Plotting library
+  'jupyterlab',                      # Jupyter notebooks
+  'ipykernel',                       # Jupyter kernel (required for running notebooks)
+  'ipywidgets',                      # Widgets (needed for interactive matplotlib backends)
+  'ipympl',                          # Matplotlib Jupyter widget backend (%matplotlib widget)
+  'IPython',                         # Interactive Python shell
   'GitPython',                       # Interact with Git repositories
   'build',                           # Building the package
   'pre-commit',                      # Pre-commit hooks

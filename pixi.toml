@@ -40,8 +40,6 @@ python = '3.13.*'
 
 [feature.dev.dependencies]
 nodejs = '*'      # Required for Prettier (non-Python formatting)
-jupyterlab = '*'  # Jupyter notebooks
-ipython = '*'     # Interactive Python shell
 pixi-kernel = '*' # Pixi Jupyter kernel
 
 [feature.dev.pypi-dependencies]
@@ -52,8 +50,6 @@ easyscience = { path = '.', editable = true, extras = ['dev'] }
 # of editable installations.
 
 [feature.user.dependencies]
-jupyterlab = '*'  # Jupyter notebooks
-ipython = '*'     # Interactive Python shell
 pixi-kernel = '*' # Pixi Jupyter kernel
 
 [feature.user.pypi-dependencies]
