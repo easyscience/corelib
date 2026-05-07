@@ -38,21 +38,35 @@ class XMLSerializer(BaseEncoderDecoder):
         use_header: bool = False,
         **kwargs,
     ) -> str:
-        """Convert an EasyScience object to an XML encoded string. Note
-        that for speed the `fast` setting can be changed to `True`. An
+        """Convert an EasyScience object to an XML encoded string.
+
+        Note
+that for speed the `fast` setting can be changed to `True`. An
         XML document with initial block *data* is returned.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param data_only: Should only the object's data be encoded.
-        :param fast: Should the returned string be pretty? This can be
-            turned off for speed.
-        :param use_header: Should a header of `'?xml version="1.0"
-            encoding="UTF-8"?'` be included?
-        :param kwargs: Any additional key-words to pass to the
+        Parameters
+        ----------
+        obj : ComponentSerializer
+            Object to be encoded.
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the encoded object. By default, None.
+        data_only : bool, optional
+            Should only the object's data be encoded. By default, False.
+        fast : bool, optional
+            Should the returned string be pretty? This can be
+            turned off for speed. By default, False.
+        use_header : bool, optional
+            Should a header of `'?xml version="1.0"
+            encoding="UTF-8"?'` be included? By default, False.
+        **kwargs :
+            Any additional key-words to pass to the
             Dictionary Serializer.
-        :return: string containing the XML encoded object
+
+        Returns
+        -------
+        str
+            String containing the XML encoded object.
         """
 
         if skip is None:
@@ -80,8 +94,16 @@ class XMLSerializer(BaseEncoderDecoder):
         """Decode an EasyScience object which has been encoded in XML
         format.
 
-        :param data: String containing XML encoded data.
-        :return: Reformed EasyScience object.
+        Parameters
+        ----------
+        cls :
+        data : str
+            String containing XML encoded data.
+
+        Returns
+        -------
+        ComponentSerializer
+            Reformed EasyScience object.
         """
 
         data_xml = ET.XML(data)

@@ -31,22 +31,28 @@ class ModelBase(NewBase):
     ```python
     @property
     def my_param(self) -> Parameter:
+        '''My param.'''
         return self._my_param
 
 
     @my_param.setter
     def my_param(self, new_value: float) -> None:
+        '''My param.'''
         self._my_param.value = new_value
     ```
     """
 
     def __init__(self, unique_name: Optional[str] = None, display_name: Optional[str] = None):
+        """Init function."""
         super().__init__(unique_name=unique_name, display_name=display_name)
 
     def get_all_variables(self) -> List[DescriptorBase]:
         """Get all `Descriptor` and `Parameter` objects as a list.
 
-        :return: List of `Descriptor` and `Parameter` objects.
+        Returns
+        -------
+        List[DescriptorBase]
+            List of `Descriptor` and `Parameter` objects.
         """
         vars = []
         for attr_name in dir(self):
@@ -60,14 +66,20 @@ class ModelBase(NewBase):
     def get_all_parameters(self) -> List[Parameter]:
         """Get all `Parameter` objects as a list.
 
-        :return: List of `Parameter` objects.
+        Returns
+        -------
+        List[Parameter]
+            List of `Parameter` objects.
         """
         return [param for param in self.get_all_variables() if isinstance(param, Parameter)]
 
     def get_fittable_parameters(self) -> List[Parameter]:
         """Get all parameters which can be fitted as a list.
 
-        :return: List of `Parameter` objects.
+        Returns
+        -------
+        List[Parameter]
+            List of `Parameter` objects.
         """
         return [param for param in self.get_all_parameters() if param.independent]
 
@@ -75,7 +87,10 @@ class ModelBase(NewBase):
         """Get all parameters which are currently free to be fitted as a
         list.
 
-        :return: List of `Parameter` objects.
+        Returns
+        -------
+        List[Parameter]
+            List of `Parameter` objects.
         """
         return [param for param in self.get_fittable_parameters() if not param.fixed]
 
@@ -92,8 +107,16 @@ class ModelBase(NewBase):
         """Re-create an EasyScience object with DescriptorNumber
         attributes from a full encoded dictionary.
 
-        :param obj_dict: dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        cls :
+        obj_dict : Dict[str, Any]
+            Dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object.
+
+        Returns
+        -------
+        ModelBase
+            Reformed EasyScience object.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError('Input must be a dictionary representing an EasyScience object.')

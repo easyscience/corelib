@@ -18,6 +18,7 @@ if available_minimizers.bumps_engine_available:
 def factory(
     minimizer_enum: AvailableMinimizers, fit_object, fit_function: Callable
 ) -> MinimizerBase:
+    """Factory function."""
     if minimizer_enum.package == 'lm':
         minimizer = LMFit(obj=fit_object, fit_function=fit_function, minimizer_enum=minimizer_enum)
 

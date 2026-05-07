@@ -42,7 +42,10 @@ class DescriptorBool(DescriptorBase):
     def value(self) -> bool:
         """Get the value of self.
 
-        :return: Value of self
+        Returns
+        -------
+        bool
+            Value of self.
         """
         return self._bool_value
 
@@ -51,8 +54,15 @@ class DescriptorBool(DescriptorBase):
     def value(self, value: bool) -> None:
         """Set the value of self.
 
-        :param value: New value of self
-        :return: None
+        Parameters
+        ----------
+        value : bool
+            New value of self.
+
+        Returns
+        -------
+        None
+            None.
         """
         if not isinstance(value, bool):
             raise TypeError(f'{value=} must be type bool')
@@ -67,4 +77,5 @@ class DescriptorBool(DescriptorBase):
 
     # To get return type right
     def __copy__(self) -> DescriptorBool:
+        """Copy function."""
         return super().__copy__()

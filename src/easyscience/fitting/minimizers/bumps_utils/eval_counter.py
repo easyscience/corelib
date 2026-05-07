@@ -23,5 +23,6 @@ class EvalCounter:
         functools.update_wrapper(self, fn)
 
     def __call__(self, *args, **kwargs):
+        """Call function."""
         self.count += 1
         return self._fn(*args, **kwargs)

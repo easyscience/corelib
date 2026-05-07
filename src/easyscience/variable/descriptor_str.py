@@ -40,7 +40,10 @@ class DescriptorStr(DescriptorBase):
     def value(self) -> str:
         """Get the value of self.
 
-        :return: Value of self with unit.
+        Returns
+        -------
+        str
+            Value of self with unit.
         """
         return self._string
 
@@ -49,8 +52,15 @@ class DescriptorStr(DescriptorBase):
     def value(self, value: str) -> None:
         """Set the value of self.
 
-        :param value: New value of self
-        :return: None
+        Parameters
+        ----------
+        value : str
+            New value of self.
+
+        Returns
+        -------
+        None
+            None.
         """
         if not isinstance(value, str):
             raise ValueError(f'{value=} must be type str')
@@ -65,4 +75,5 @@ class DescriptorStr(DescriptorBase):
 
     # To get return type right
     def __copy__(self) -> DescriptorStr:
+        """Copy function."""
         return super().__copy__()

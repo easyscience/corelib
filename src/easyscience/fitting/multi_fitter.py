@@ -41,9 +41,18 @@ class MultiFitter(Fitter):
         values into the optimizer function.
 
         This will also flatten the results if needed.
-        :param real_x: List of independent x parameters to be injected
-        :param flatten: Should the result be a flat 1D array?
-        :return: Wrapped optimizer function.
+
+        Parameters
+        ----------
+        real_x :
+            List of independent x parameters to be injected. By default, None.
+        flatten : bool, optional
+            Should the result be a flat 1D array? By default, True.
+
+        Returns
+        -------
+        Callable
+            Wrapped optimizer function.
         """
         # Extract of a list of callable functions
         wrapped_fns = []
@@ -52,6 +61,7 @@ class MultiFitter(Fitter):
             wrapped_fns.append(Fitter._fit_function_wrapper(self, this_x, flatten=flatten))
 
         def wrapped_fun(x, **kwargs):
+            """Wrapped fun."""
             # Generate an empty Y based on x
             y = np.zeros_like(x)
             i = 0
@@ -75,11 +85,22 @@ class MultiFitter(Fitter):
         """Convert an array of X's and Y's  to an acceptable shape for
         fitting.
 
-        :param x: List of independent variables.
-        :param y: List of dependent variables.
-        :param vectorized: Is the fn input vectorized or point based?
-        :param kwargs: Additional kwy words.
-        :return: Variables for optimization
+        Parameters
+        ----------
+        weights : Optional[List[np.ndarray]]
+        x : List[np.ndarray]
+            List of independent variables.
+        y : List[np.ndarray]
+            List of dependent variables.
+        vectorized : bool
+            Is the fn input vectorized or point based?
+        kwargs :
+            Additional kwy words.
+
+        Returns
+        -------
+
+            Variables for optimization.
         """
         if weights is None:
             weights = [None] * len(x)

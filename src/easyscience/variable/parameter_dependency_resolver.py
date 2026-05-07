@@ -18,8 +18,11 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
     that contains Parameters with dependencies to ensure all dependency
     relationships are properly established.
 
-    :param obj: The object to search for Parameters (can be a single
-        Parameter, list, dict, or complex object)
+    Parameters
+    ----------
+    obj : Any
+        The object to search for Parameters (can be a single
+        Parameter, list, dict, or complex object).
     """
 
     def _collect_parameters(item: Any, parameters: List[Parameter]) -> None:
@@ -89,8 +92,15 @@ def get_parameters_with_pending_dependencies(obj: Any) -> List[Parameter]:
     """Find all Parameter objects in an object hierarchy that have
     pending dependencies.
 
-    :param obj: The object to search for Parameters
-    :return: List of Parameters with pending dependencies
+    Parameters
+    ----------
+    obj : Any
+        The object to search for Parameters.
+
+    Returns
+    -------
+    List[Parameter]
+        List of Parameters with pending dependencies.
     """
     parameters_with_pending = []
 
@@ -140,10 +150,17 @@ def deserialize_and_resolve_parameters(
     This is a convenience function that combines Parameter.from_dict()
     deserialization with dependency resolution in a single call.
 
-    :param params_data: Dictionary mapping parameter names to their
-        serialized data
-    :return: Dictionary mapping parameter names to deserialized
-        Parameters with resolved dependencies
+    Parameters
+    ----------
+    params_data : Dict[str, Dict[str, Any]]
+        Dictionary mapping parameter names to their
+        serialized data.
+
+    Returns
+    -------
+    Dict[str, Parameter]
+        Dictionary mapping parameter names to deserialized
+        Parameters with resolved dependencies.
     """
     # Deserialize all parameters first
     new_params = {}

@@ -114,10 +114,20 @@ class DescriptorArray(DescriptorBase):
     def from_scipp(cls, name: str, full_value: Variable, **kwargs) -> DescriptorArray:
         """Create a DescriptorArray from a scipp array.
 
-        :param name: Name of the descriptor
-        :param full_value: Value of the descriptor as a scipp variable
-        :param kwargs: Additional parameters for the descriptor
-        :return: DescriptorArray
+        Parameters
+        ----------
+        cls :
+        name : str
+            Name of the descriptor.
+        full_value : Variable
+            Value of the descriptor as a scipp variable.
+        **kwargs :
+            Additional parameters for the descriptor.
+
+        Returns
+        -------
+        DescriptorArray
+            DescriptorArray.
         """
         if not isinstance(full_value, Variable):
             raise TypeError(f'{full_value=} must be a scipp array')
@@ -132,36 +142,52 @@ class DescriptorArray(DescriptorBase):
 
     @property
     def full_value(self) -> Variable:
-        """Get the value of self as a scipp array. This should be usable
-        for most cases.
+        """Get the value of self as a scipp array.
 
-        :return: Value of self with unit.
+        This should be usable
+for most cases.
+
+        Returns
+        -------
+        Variable
+            Value of self with unit.
         """
         return self._array
 
     @full_value.setter
     def full_value(self, full_value: Variable) -> None:
+        """Full value."""
         raise AttributeError(
             f'Full_value is read-only. Change the value and variance separately. Or create a new {self.__class__.__name__}.'
         )
 
     @property
     def value(self) -> numbers.Number:
-        """Get the value without units. The Scipp array can be obtained
-        from `obj.full_value`.
+        """Get the value without units.
 
-        :return: Value of self without unit.
+        The Scipp array can be obtained
+from `obj.full_value`.
+
+        Returns
+        -------
+        numbers.Number
+            Value of self without unit.
         """
         return self._array.values
 
     @value.setter
     @property_stack
     def value(self, value: Union[list, np.ndarray]) -> None:
-        """Set the value of self. Ensures the input is an array and
-        matches the shape of the existing array. The full value can be
+        """Set the value of self.
+
+        Ensures the input is an array and
+matches the shape of the existing array. The full value can be
         obtained from `obj.full_value`.
 
-        :param value: New value for the DescriptorArray, must be a list
+        Parameters
+        ----------
+        value : Union[list, np.ndarray]
+            New value for the DescriptorArray, must be a list
             or numpy array.
         """
         if not isinstance(value, (list, np.ndarray)):
@@ -179,16 +205,25 @@ class DescriptorArray(DescriptorBase):
     def dimensions(self) -> list:
         """Get the dimensions used for the underlying scipp array.
 
-        :return: dimensions of self.
+        Returns
+        -------
+        list
+            Dimensions of self.
         """
         return self._dimensions
 
     @dimensions.setter
     def dimensions(self, dimensions: Union[list]) -> None:
-        """Set the dimensions of self. Ensures that the input has a
-        shape compatible with self.full_value.
+        """Set the dimensions of self.
 
-        :param value: list of dimensions.
+        Ensures that the input has a
+shape compatible with self.full_value.
+
+        Parameters
+        ----------
+        dimensions : Union[list]
+        value :
+            List of dimensions.
         """
         if not isinstance(dimensions, (list, np.ndarray)):
             raise TypeError(f'{dimensions=} must be a list or numpy array.')
@@ -208,12 +243,16 @@ class DescriptorArray(DescriptorBase):
     def unit(self) -> str:
         """Get the unit.
 
-        :return: Unit as a string.
+        Returns
+        -------
+        str
+            Unit as a string.
         """
         return str(self._array.unit)
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
+        """Unit function."""
         raise AttributeError(
             (
                 f'Unit is read-only. Use convert_unit to change the unit between allowed types '
@@ -225,17 +264,25 @@ class DescriptorArray(DescriptorBase):
     def variance(self) -> np.ndarray:
         """Get the variance as a Numpy ndarray.
 
-        :return: variance.
+        Returns
+        -------
+        np.ndarray
+            Variance.
         """
         return self._array.variances
 
     @variance.setter
     @property_stack
     def variance(self, variance: Union[list, np.ndarray]) -> None:
-        """Set the variance of self. Ensures the input is an array and
-        matches the shape of the existing values.
+        """Set the variance of self.
 
-        :param variance: New variance for the DescriptorArray, must be a
+        Ensures the input is an array and
+matches the shape of the existing values.
+
+        Parameters
+        ----------
+        variance : Union[list, np.ndarray]
+            New variance for the DescriptorArray, must be a
             list or numpy array.
         """
         if variance is not None:
@@ -260,7 +307,10 @@ class DescriptorArray(DescriptorBase):
         """The standard deviations, calculated as the square root of
         variances.
 
-        :return: A numpy array of standard deviations, or None if
+        Returns
+        -------
+        Optional[np.ndarray]
+            A numpy array of standard deviations, or None if
             variances are not set.
         """
         if self._array.variances is None:
@@ -273,7 +323,10 @@ class DescriptorArray(DescriptorBase):
         """Set the standard deviation for the parameter, which updates
         the variances.
 
-        :param error: A list or numpy array of standard deviations.
+        Parameters
+        ----------
+        error : Union[list, np.ndarray]
+            A list or numpy array of standard deviations.
         """
         if error is not None:
             if not isinstance(error, (list, np.ndarray)):
@@ -295,7 +348,10 @@ class DescriptorArray(DescriptorBase):
     def convert_unit(self, unit_str: str) -> None:
         """Convert the value from one unit system to another.
 
-        :param unit_str: New unit in string form
+        Parameters
+        ----------
+        unit_str : str
+            New unit in string form.
         """
         if not isinstance(unit_str, str):
             raise TypeError(f'{unit_str=} must be a string representing a valid scipp unit')
@@ -312,6 +368,7 @@ class DescriptorArray(DescriptorBase):
 
         # Define the setter function for the undo stack
         def set_array(obj, scalar):
+            """Set array."""
             obj._array = scalar
 
         # Push to undo stack
@@ -387,12 +444,22 @@ class DescriptorArray(DescriptorBase):
         """Perform element-wise operations with another
         DescriptorNumber, DescriptorArray, list, or number.
 
-        :param other: The object to operate on. Must be a
+        Parameters
+        ----------
+        units_must_match : bool, optional
+            By default, True.
+        other : Union[DescriptorArray, DescriptorNumber, list, numbers.Number]
+            The object to operate on. Must be a
             DescriptorArray or DescriptorNumber with compatible units,
             or a list with the same shape if the DescriptorArray is
             dimensionless.
-        :param operation: The operation to perform
-        :return: A new DescriptorArray representing the result of the
+        operation : Callable
+            The operation to perform.
+
+        Returns
+        -------
+        DescriptorArray
+            A new DescriptorArray representing the result of the
             operation.
         """
         if isinstance(other, numbers.Number):
@@ -483,6 +550,7 @@ class DescriptorArray(DescriptorBase):
         """
 
         def reversed_operation(a, b):
+            """Reversed operation."""
             return operation(b, a)
 
         if isinstance(other, DescriptorNumber):
@@ -533,11 +601,18 @@ class DescriptorArray(DescriptorBase):
         """Perform element-wise addition with another DescriptorNumber,
         DescriptorArray, list, or number.
 
-        :param other: The object to add. Must be a DescriptorArray or
+        Parameters
+        ----------
+        other : Union[DescriptorArray, DescriptorNumber, list, numbers.Number]
+            The object to add. Must be a DescriptorArray or
             DescriptorNumber with compatible units, or a list with the
             same shape if the DescriptorArray is dimensionless, or a
             number.
-        :return: A new DescriptorArray representing the result of the
+
+        Returns
+        -------
+        DescriptorArray
+            A new DescriptorArray representing the result of the
             addition.
         """
         return self._apply_operation(other, operator.add)
@@ -556,10 +631,17 @@ class DescriptorArray(DescriptorBase):
         """Perform element-wise subtraction with another
         DescriptorArray, list, or number.
 
-        :param other: The object to subtract. Must be a DescriptorArray
+        Parameters
+        ----------
+        other : Union[DescriptorArray, list, np.ndarray, numbers.Number]
+            The object to subtract. Must be a DescriptorArray
             with compatible units, or a list with the same shape if the
             DescriptorArray is dimensionless.
-        :return: A new DescriptorArray representing the result of the
+
+        Returns
+        -------
+        DescriptorArray
+            A new DescriptorArray representing the result of the
             subtraction.
         """
         if isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
@@ -577,10 +659,17 @@ class DescriptorArray(DescriptorBase):
         """Perform element-wise subtraction with another
         DescriptorNumber, list, or number.
 
-        :param other: The object to subtract. Must be a DescriptorArray
+        Parameters
+        ----------
+        other : Union[DescriptorNumber, list, numbers.Number]
+            The object to subtract. Must be a DescriptorArray
             with compatible units, or a list with the same shape if the
             DescriptorArray is dimensionless.
-        :return: A new DescriptorArray representing the result of the
+
+        Returns
+        -------
+        DescriptorArray
+            A new DescriptorArray representing the result of the
             subtraction.
         """
         if isinstance(other, (DescriptorNumber, list, numbers.Number)):
@@ -599,10 +688,17 @@ class DescriptorArray(DescriptorBase):
         """Perform element-wise multiplication with another
         DescriptorNumber, DescriptorArray, list, or number.
 
-        :param other: The object to multiply. Must be a DescriptorArray
+        Parameters
+        ----------
+        other : Union[DescriptorArray, DescriptorNumber, list, numbers.Number]
+            The object to multiply. Must be a DescriptorArray
             or DescriptorNumber with compatible units, or a list with
             the same shape if the DescriptorArray is dimensionless.
-        :return: A new DescriptorArray representing the result of the
+
+        Returns
+        -------
+        DescriptorArray
+            A new DescriptorArray representing the result of the
             addition.
         """
         if not isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
@@ -625,11 +721,18 @@ class DescriptorArray(DescriptorBase):
         """Perform element-wise division with another DescriptorNumber,
         DescriptorArray, list, or number.
 
-        :param other: The object to use as a denominator. Must be a
+        Parameters
+        ----------
+        other : Union[DescriptorArray, DescriptorNumber, list, numbers.Number]
+            The object to use as a denominator. Must be a
             DescriptorArray or DescriptorNumber with compatible units,
             or a list with the same shape if the DescriptorArray is
             dimensionless.
-        :return: A new DescriptorArray representing the result of the
+
+        Returns
+        -------
+        DescriptorArray
+            A new DescriptorArray representing the result of the
             addition.
         """
         if not isinstance(other, (DescriptorArray, DescriptorNumber, list, numbers.Number)):
@@ -669,9 +772,16 @@ class DescriptorArray(DescriptorBase):
         """Perform element-wise exponentiation with another
         DescriptorNumber or number.
 
-        :param other: The object to use as a denominator. Must be a
+        Parameters
+        ----------
+        other : Union[DescriptorNumber, numbers.Number]
+            The object to use as a denominator. Must be a
             number or DescriptorNumber with no unit or variance.
-        :return: A new DescriptorArray representing the result of the
+
+        Returns
+        -------
+        DescriptorArray
+            A new DescriptorArray representing the result of the
             addition.
         """
         if not isinstance(other, (numbers.Number, DescriptorNumber)):
@@ -756,12 +866,21 @@ class DescriptorArray(DescriptorBase):
     def trace(
         self, dimension1: Optional[str] = None, dimension2: Optional[str] = None
     ) -> Union[DescriptorArray, DescriptorNumber]:
-        """Computes the trace over the descriptor array. The submatrix
-        defined `dimension1` and `dimension2` must be square. For a rank
+        """Computes the trace over the descriptor array.
+
+        The submatrix
+defined `dimension1` and `dimension2` must be square. For a rank
         `k` tensor, the trace will run over the firs two dimensions,
         resulting in a rank `k-2` tensor.
 
-        :param dimension1, dimension2: First and second dimension to perform trace over. Must be in `self.dimensions`.
+        Parameters
+        ----------
+        dimension2 : Optional[str], optional
+            By default, None.
+        dimension1 : Optional[str], optional
+            By default, None.
+        dimension1, dimension2 :
+            First and second dimension to perform trace over. Must be in `self.dimensions`.
             If not defined, the trace will be taken over the first two dimensions.
         """
         if (dimension1 is not None and dimension2 is None) or (
@@ -818,7 +937,10 @@ class DescriptorArray(DescriptorBase):
     ) -> Union[DescriptorArray, DescriptorNumber]:
         """Uses scipp to sum over the requested dims.
 
-        :param dim: The dim(s) in the scipp array to sum over. If `None`, will sum over all dims.
+        Parameters
+        ----------
+        dim : Optional[Union[str, list]], optional
+            The dim(s) in the scipp array to sum over. If `None`, will sum over all dims. By default, None.
         """
         new_full_value = self.full_value.sum(dim=dim)
 

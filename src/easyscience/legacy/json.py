@@ -31,6 +31,7 @@ class JsonSerializer(BaseEncoderDecoder):
 
     @classmethod
     def decode(cls, data: str) -> ComponentSerializer:
+        """Decode function."""
         return json.loads(data, cls=JsonDecoderTemplate)
 
 
@@ -56,6 +57,7 @@ class JsonDataSerializer(BaseEncoderDecoder):
 
     @classmethod
     def decode(cls, data: str) -> ComponentSerializer:
+        """Decode function."""
         raise NotImplementedError(
             'It is not possible to reconstitute objects from data only objects.'
         )
@@ -76,25 +78,31 @@ class JsonEncoderTemplate(json.JSONEncoder):
     _converter = BaseEncoderDecoder._convert_to_dict
 
     def default(self, o) -> dict:  # pylint: disable=E0202
-        """
-        Overriding default method for JSON encoding. This method does two
-        things: (a) If an object has a to_dict property, return the to_dict
+        """Overriding default method for JSON encoding.
+
+        This method does two
+things: (a) If an object has a to_dict property, return the to_dict
         output. (b) If the @module and @class keys are not in the to_dict,
         add them to the output automatically. If the object has no to_dict
         property, the default Python json encoder default method is called.
 
-        Args:
-            o: Python object.
+        Parameters
+        ----------
+        o :
+            Python object.
 
-        Return:
-            Python dict representation.
+        Returns
+        -------
+        Python dict representation.
         """
         return self._converter(o, self.skip, full_encode=True)
 
 
 class JsonDecoderTemplate(json.JSONDecoder):
-    """A Json Decoder which supports the ComponentSerializer API. By
-    default, the decoder attempts to find a module and name associated
+    """A Json Decoder which supports the ComponentSerializer API.
+
+    By
+default, the decoder attempts to find a module and name associated
     with a dict. If found, the decoder will generate a Pymatgen as a
     priority.  If that fails, the original decoded dictionary from the
     string is returned. Note that nested lists and dicts containing
@@ -111,8 +119,15 @@ class JsonDecoderTemplate(json.JSONDecoder):
     def decode(self, s):
         """Overrides decode from JSONDecoder.
 
-        :param s: string
-        :return: Object.
+        Parameters
+        ----------
+        s :
+            String.
+
+        Returns
+        -------
+
+            Object.
         """
         d = json.JSONDecoder.decode(self, s)
         return self.__class__._converter(d)

@@ -27,11 +27,19 @@ from .descriptor_base import DescriptorBase
 def notify_observers(func):
     """Decorator to notify observers of a change in the descriptor.
 
-    :param func: Function to be decorated
-    :return: Decorated function
+    Parameters
+    ----------
+    func :
+        Function to be decorated.
+
+    Returns
+    -------
+
+        Decorated function.
     """
 
     def wrapper(self, *args, **kwargs):
+        """Wrapper function."""
         result = func(self, *args, **kwargs)
         self._notify_observers()
         return result
@@ -109,10 +117,21 @@ class DescriptorNumber(DescriptorBase):
     def from_scipp(cls, name: str, full_value: Variable, **kwargs) -> DescriptorNumber:
         """Create a DescriptorNumber from a scipp constant.
 
-        :param name: Name of the descriptor
-        :param value: Value of the descriptor as a scipp scalar
-        :param kwargs: Additional parameters for the descriptor
-        :return: DescriptorNumber
+        Parameters
+        ----------
+        full_value : Variable
+        cls :
+        name : str
+            Name of the descriptor.
+        value :
+            Value of the descriptor as a scipp scalar.
+        **kwargs :
+            Additional parameters for the descriptor.
+
+        Returns
+        -------
+        DescriptorNumber
+            DescriptorNumber.
         """
         if not isinstance(full_value, Variable):
             raise TypeError(f'{full_value=} must be a scipp scalar')
@@ -147,8 +166,11 @@ class DescriptorNumber(DescriptorBase):
         """Ping all observers to check if any cyclic dependencies have
         been introduced.
 
-        :param origin: Unique_name of the origin of this validation
-            check. Used to avoid cyclic depenencies.
+        Parameters
+        ----------
+        origin :
+            Unique_name of the origin of this validation
+            check. Used to avoid cyclic depenencies. By default, None.
         """
         if origin == self.unique_name:
             raise RuntimeError(
@@ -163,25 +185,36 @@ class DescriptorNumber(DescriptorBase):
 
     @property
     def full_value(self) -> Variable:
-        """Get the value of self as a scipp scalar. This is should be
-        usable for most cases.
+        """Get the value of self as a scipp scalar.
 
-        :return: Value of self with unit.
+        This is should be
+usable for most cases.
+
+        Returns
+        -------
+        Variable
+            Value of self with unit.
         """
         return self._scalar
 
     @full_value.setter
     def full_value(self, full_value: Variable) -> None:
+        """Full value."""
         raise AttributeError(
             f'Full_value is read-only. Change the value and variance seperately. Or create a new {self.__class__.__name__}.'
         )
 
     @property
     def value(self) -> numbers.Number:
-        """Get the value. This should be usable for most cases. The full
-        value can be obtained from `obj.full_value`.
+        """Get the value.
 
-        :return: Value of self with unit.
+        This should be usable for most cases. The full
+value can be obtained from `obj.full_value`.
+
+        Returns
+        -------
+        numbers.Number
+            Value of self with unit.
         """
         return self._scalar.value
 
@@ -189,10 +222,15 @@ class DescriptorNumber(DescriptorBase):
     @notify_observers
     @property_stack
     def value(self, value: numbers.Number) -> None:
-        """Set the value of self. This should be usable for most cases.
-        The full value can be obtained from `obj.full_value`.
+        """Set the value of self.
 
-        :param value: New value of self
+        This should be usable for most cases.
+The full value can be obtained from `obj.full_value`.
+
+        Parameters
+        ----------
+        value : numbers.Number
+            New value of self.
         """
         if not isinstance(value, numbers.Number) or isinstance(value, bool):
             raise TypeError(f'{value=} must be a number')
@@ -202,12 +240,16 @@ class DescriptorNumber(DescriptorBase):
     def unit(self) -> str:
         """Get the unit.
 
-        :return: Unit as a string.
+        Returns
+        -------
+        str
+            Unit as a string.
         """
         return str(self._scalar.unit)
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
+        """Unit function."""
         raise AttributeError(
             (
                 f'Unit is read-only. Use convert_unit to change the unit between allowed types '
@@ -219,7 +261,10 @@ class DescriptorNumber(DescriptorBase):
     def variance(self) -> float:
         """Get the variance.
 
-        :return: variance.
+        Returns
+        -------
+        float
+            Variance.
         """
         return self._scalar.variance
 
@@ -229,7 +274,10 @@ class DescriptorNumber(DescriptorBase):
     def variance(self, variance_float: float) -> None:
         """Set the variance.
 
-        :param variance_float: Variance as a float
+        Parameters
+        ----------
+        variance_float : float
+            Variance as a float.
         """
         if variance_float is not None:
             if not isinstance(variance_float, numbers.Number):
@@ -243,7 +291,10 @@ class DescriptorNumber(DescriptorBase):
     def error(self) -> float:
         """The standard deviation for the parameter.
 
-        :return: Error associated with parameter
+        Returns
+        -------
+        float
+            Error associated with parameter.
         """
         if self._scalar.variance is None:
             return None
@@ -255,7 +306,10 @@ class DescriptorNumber(DescriptorBase):
     def error(self, value: float) -> None:
         """Set the standard deviation for the parameter.
 
-        :param value: New error value
+        Parameters
+        ----------
+        value : float
+            New error value.
         """
         if value is not None:
             if not isinstance(value, numbers.Number):
@@ -272,7 +326,10 @@ class DescriptorNumber(DescriptorBase):
     def _convert_unit(self, unit_str: str) -> None:
         """Convert the value from one unit system to another.
 
-        :param unit_str: New unit in string form
+        Parameters
+        ----------
+        unit_str : str
+            New unit in string form.
         """
         if not isinstance(unit_str, str):
             raise TypeError(f'{unit_str=} must be a string representing a valid scipp unit')
@@ -289,6 +346,7 @@ class DescriptorNumber(DescriptorBase):
 
         # Define the setter function for the undo stack
         def set_scalar(obj, scalar):
+            """Set scalar."""
             obj._scalar = scalar
 
         # Push to undo stack
@@ -306,12 +364,16 @@ class DescriptorNumber(DescriptorBase):
     def convert_unit(self, unit_str: str) -> None:
         """Convert the value from one unit system to another.
 
-        :param unit_str: New unit in string form
+        Parameters
+        ----------
+        unit_str : str
+            New unit in string form.
         """
         self._convert_unit(unit_str)
 
     # Just to get return type right
     def __copy__(self) -> DescriptorNumber:
+        """Copy function."""
         return super().__copy__()
 
     def __repr__(self) -> str:
@@ -341,6 +403,7 @@ class DescriptorNumber(DescriptorBase):
         # return f"<{class_name} '{obj_name}': {obj_value:0.04f}{obj_unit}>"
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+        """As dict."""
         raw_dict = super().as_dict(skip=skip)
         raw_dict['value'] = self._scalar.value
         raw_dict['unit'] = str(self._scalar.unit)
@@ -350,6 +413,7 @@ class DescriptorNumber(DescriptorBase):
         return raw_dict
 
     def __add__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
+        """Add function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -371,6 +435,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __radd__(self, other: numbers.Number) -> DescriptorNumber:
+        """Radd function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -382,6 +447,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __sub__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
+        """Sub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -403,6 +469,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rsub__(self, other: numbers.Number) -> DescriptorNumber:
+        """Rsub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -414,6 +481,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor
 
     def __mul__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
+        """Mul function."""
         if isinstance(other, numbers.Number):
             new_value = self.full_value * other
         elif type(other) is DescriptorNumber:
@@ -426,6 +494,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rmul__(self, other: numbers.Number) -> DescriptorNumber:
+        """Rmul function."""
         if isinstance(other, numbers.Number):
             new_value = other * self.full_value
         else:
@@ -435,6 +504,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __truediv__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
+        """Truediv function."""
         if isinstance(other, numbers.Number):
             if other == 0:
                 raise ZeroDivisionError('Cannot divide by zero')
@@ -451,6 +521,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rtruediv__(self, other: numbers.Number) -> DescriptorNumber:
+        """Rtruediv function."""
         if isinstance(other, numbers.Number):
             if self.value == 0:
                 raise ZeroDivisionError('Cannot divide by zero')
@@ -462,6 +533,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __pow__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
+        """Pow function."""
         if isinstance(other, numbers.Number):
             exponent = other
         elif type(other) is DescriptorNumber:
@@ -483,6 +555,7 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rpow__(self, other: numbers.Number) -> numbers.Number:
+        """Rpow function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Exponents must be dimensionless')
@@ -494,12 +567,14 @@ class DescriptorNumber(DescriptorBase):
         return new_value
 
     def __neg__(self) -> DescriptorNumber:
+        """Neg function."""
         new_value = -self.full_value
         descriptor_number = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
         descriptor_number.name = descriptor_number.unique_name
         return descriptor_number
 
     def __abs__(self) -> DescriptorNumber:
+        """Abs function."""
         new_value = abs(self.full_value)
         descriptor_number = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
         descriptor_number.name = descriptor_number.unique_name

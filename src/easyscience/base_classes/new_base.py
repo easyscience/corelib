@@ -63,10 +63,15 @@ class NewBase:
 
     @unique_name.setter
     def unique_name(self, new_unique_name: str):
-        """Set a new unique name for the object. The old name is still
-        kept in the map.
+        """Set a new unique name for the object.
 
-        :param new_unique_name: New unique name for the object
+        The old name is still
+kept in the map.
+
+        Parameters
+        ----------
+        new_unique_name : str
+            New unique name for the object.
         """
         if not isinstance(new_unique_name, str):
             raise TypeError('Unique name has to be a string.')
@@ -78,7 +83,10 @@ class NewBase:
     def display_name(self) -> str:
         """Get a pretty display name.
 
-        :return: The pretty display name.
+        Returns
+        -------
+        str
+            The pretty display name.
         """
         display_name = self._display_name
         if display_name is None:
@@ -90,7 +98,10 @@ class NewBase:
     def display_name(self, name: str | None) -> None:
         """Set the pretty display name.
 
-        :param name: Pretty display name of the object.
+        Parameters
+        ----------
+        name : str | None
+            Pretty display name of the object.
         """
         if name is not None and not isinstance(name, str):
             raise TypeError('Display name must be a string or None')
@@ -100,9 +111,16 @@ class NewBase:
         """Convert an EasyScience object into a full dictionary using
         `SerializerBase`s generic `convert_to_dict` method.
 
-        :param skip: List of field names as strings to skip when forming
-            the dictionary
-        :return: encoded object containing all information to reform an
+        Parameters
+        ----------
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the dictionary. By default, None.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Encoded object containing all information to reform an
             EasyScience object.
         """
         serializer = SerializerBase()
@@ -119,8 +137,16 @@ class NewBase:
         """Re-create an EasyScience object from a full encoded
         dictionary.
 
-        :param obj_dict: dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        cls :
+        obj_dict : Dict[str, Any]
+            Dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object.
+
+        Returns
+        -------
+        NewBase
+            Reformed EasyScience object.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError('Input must be a dictionary representing an EasyScience object.')
@@ -136,8 +162,11 @@ class NewBase:
         """This creates auto-completion and helps out in iPython
         notebooks.
 
-        :return: list of function and parameter names for auto-
-            completion
+        Returns
+        -------
+        Iterable[str]
+            List of function and parameter names for auto-
+            completion.
         """
         new_class_objs = list(k for k in dir(self.__class__) if not k.startswith('_'))
         return sorted(new_class_objs)
@@ -149,7 +178,9 @@ class NewBase:
         return new_obj
 
     def __deepcopy__(self, memo):
+        """Deepcopy function."""
         return self.__copy__()
 
     def __repr__(self) -> str:
+        """Repr function."""
         return f'{self.__class__.__name__} `{self.unique_name}`'

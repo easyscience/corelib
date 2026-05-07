@@ -35,20 +35,27 @@ class Fitter:
         self._update_minimizer(DEFAULT_MINIMIZER)
 
     def make_model(self, pars=None) -> Callable:
+        """Make model."""
         return self._minimizer.make_model(pars)
 
     def evaluate(self, pars=None) -> np.ndarray:
+        """Evaluate function."""
         return self._minimizer.evaluate(pars)
 
     def convert_to_pars_obj(self, pars) -> object:
+        """Convert to pars obj."""
         return self._minimizer.convert_to_pars_obj(pars)
 
     # TODO: remove this method when we are ready to adjust the dependent products
     def initialize(self, fit_object, fit_function: Callable) -> None:
         """Set the model and callable in the calculator interface.
 
-        :param fit_object: The EasyScience model object
-        :param fit_function: The function to be optimized against.
+        Parameters
+        ----------
+        fit_object :
+            The EasyScience model object.
+        fit_function : Callable
+            The function to be optimized against.
         """
         self._fit_object = fit_object
         self._fit_function = fit_function
@@ -58,8 +65,11 @@ class Fitter:
     def create(self, minimizer_enum: Union[AvailableMinimizers, str] = DEFAULT_MINIMIZER) -> None:
         """Create the required minimizer.
 
-        :param minimizer_enum: The enum of the minimization engine to
-            create.
+        Parameters
+        ----------
+        minimizer_enum : Union[AvailableMinimizers, str], optional
+            The enum of the minimization engine to
+            create. By default, DEFAULT_MINIMIZER.
         """
         if isinstance(minimizer_enum, str):
             print(f'minimizer should be set with enum {minimizer_enum}')
@@ -69,7 +79,10 @@ class Fitter:
     def switch_minimizer(self, minimizer_enum: Union[AvailableMinimizers, str]) -> None:
         """Switch minimizer and initialize.
 
-        :param minimizer_enum: The enum of the minimizer to create and
+        Parameters
+        ----------
+        minimizer_enum : Union[AvailableMinimizers, str]
+            The enum of the minimizer to create and
             instantiate.
         """
         if isinstance(minimizer_enum, str):
@@ -79,6 +92,7 @@ class Fitter:
         self._update_minimizer(minimizer_enum)
 
     def _update_minimizer(self, minimizer_enum: AvailableMinimizers) -> None:
+        """Update minimizer."""
         self._minimizer = factory(
             minimizer_enum=minimizer_enum,
             fit_object=self._fit_object,
@@ -90,8 +104,10 @@ class Fitter:
     def available_minimizers(self) -> List[str]:
         """Get a list of the names of available fitting minimizers.
 
-        :return: List of available fitting minimizers
-        :rtype: List[str]
+        Returns
+        -------
+        List[str]
+            List of available fitting minimizers.
         """
         return [minimize.name for minimize in AvailableMinimizers]
 
@@ -99,8 +115,9 @@ class Fitter:
     def minimizer(self) -> MinimizerBase:
         """Get the current fitting minimizer object.
 
-        :return:
-        :rtype: MinimizerBase
+        Returns
+        -------
+        MinimizerBase
         """
         return self._minimizer
 
@@ -108,7 +125,10 @@ class Fitter:
     def tolerance(self) -> float:
         """Get the tolerance for the minimizer.
 
-        :return: Tolerance for the minimizer
+        Returns
+        -------
+        float
+            Tolerance for the minimizer.
         """
         return self._tolerance
 
@@ -116,7 +136,10 @@ class Fitter:
     def tolerance(self, tolerance: float) -> None:
         """Set the tolerance for the minimizer.
 
-        :param tolerance: Tolerance for the minimizer
+        Parameters
+        ----------
+        tolerance : float
+            Tolerance for the minimizer.
         """
         self._tolerance = tolerance
 
@@ -124,7 +147,10 @@ class Fitter:
     def max_evaluations(self) -> int:
         """Get the maximal number of evaluations for the minimizer.
 
-        :return: Maximal number of steps for the minimizer
+        Returns
+        -------
+        int
+            Maximal number of steps for the minimizer.
         """
         return self._max_evaluations
 
@@ -132,8 +158,11 @@ class Fitter:
     def max_evaluations(self, max_evaluations: int) -> None:
         """Set the maximal number of evaluations for the minimizer.
 
-        :param max_evaluations: Maximal number of steps for the
-            minimizer
+        Parameters
+        ----------
+        max_evaluations : int
+            Maximal number of steps for the
+            minimizer.
         """
         self._max_evaluations = max_evaluations
 
@@ -148,8 +177,15 @@ class Fitter:
     def fit_function(self, fit_function: Callable) -> None:
         """Set the raw fit function to a new one.
 
-        :param fit_function: New fit function
-        :return: None
+        Parameters
+        ----------
+        fit_function : Callable
+            New fit function.
+
+        Returns
+        -------
+        None
+            None.
         """
         self._fit_function = fit_function
         self._update_minimizer(self._enum_current_minimizer)
@@ -158,14 +194,18 @@ class Fitter:
     def fit_object(self):
         """The EasyScience object which will be used as a model :return:
 
-        EasyScience Model.
+        EasyScience Model..
         """
         return self._fit_object
 
     @fit_object.setter
     def fit_object(self, fit_object) -> None:
-        """Set the EasyScience object which wil be used as a model
-        :param fit_object: New EasyScience object :return: None.
+        """Set the EasyScience object which wil be used as a model.
+
+        Parameters
+        ----------
+        fit_object :
+            New EasyScience object :return: None.
         """
         self._fit_object = fit_object
         self._update_minimizer(self._enum_current_minimizer)
@@ -175,14 +215,24 @@ class Fitter:
         values into the optimizer function.
 
         This will also flatten the results if needed.
-        :param real_x: Independent x parameters to be injected
-        :param flatten: Should the result be a flat 1D array?
-        :return: Wrapped optimizer function.
+
+        Parameters
+        ----------
+        real_x :
+            Independent x parameters to be injected. By default, None.
+        flatten : bool, optional
+            Should the result be a flat 1D array? By default, True.
+
+        Returns
+        -------
+        Callable
+            Wrapped optimizer function.
         """
         fun = self._fit_function
 
         @functools.wraps(fun)
         def wrapped_fit_function(x, **kwargs):
+            """Wrapped fit function."""
             if real_x is not None:
                 x = real_x
             dependent = fun(x, **kwargs)
@@ -259,10 +309,16 @@ class Fitter:
     ):
         """Check the dimensions of the inputs and reshape if necessary.
 
-        :param x: ND matrix of dependent points
-        :param y: N-1D matrix of independent points
-        :param kwargs: Additional key-word arguments
-        :return:
+        Parameters
+        ----------
+        vectorized : bool
+        weights : Optional[np.ndarray]
+        x : np.ndarray
+            ND matrix of dependent points.
+        y : np.ndarray
+            N-1D matrix of independent points.
+        kwargs :
+            Additional key-word arguments.
         """
         # Make sure that they are np arrays
         x_new = np.array(x)
@@ -305,10 +361,19 @@ class Fitter:
     ) -> FitResults:
         """Reshape the output of the fitter into the correct dimensions.
 
-        :param fit_result: Output from the fitter
-        :param x: Input x independent
-        :param y: Input y dependent
-        :return: Reshaped Fit Results
+        Parameters
+        ----------
+        fit_result : FitResults
+            Output from the fitter.
+        x : np.ndarray
+            Input x independent.
+        y : np.ndarray
+            Input y dependent.
+
+        Returns
+        -------
+        FitResults
+            Reshaped Fit Results.
         """
         fit_result.x = x
         fit_result.y_obs = y

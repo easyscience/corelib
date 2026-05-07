@@ -61,7 +61,10 @@ class DescriptorAnyType(DescriptorBase):
     def value(self) -> numbers.Number:
         """Get the value.
 
-        :return: Value of self.
+        Returns
+        -------
+        numbers.Number
+            Value of self.
         """
         return self._value
 
@@ -70,11 +73,15 @@ class DescriptorAnyType(DescriptorBase):
     def value(self, value: Union[list, np.ndarray]) -> None:
         """Set the value of self.
 
-        :param value: New value for the DescriptorAnyType.
+        Parameters
+        ----------
+        value : Union[list, np.ndarray]
+            New value for the DescriptorAnyType.
         """
         self._value = value
 
     def __copy__(self) -> DescriptorAnyType:
+        """Copy function."""
         return super().__copy__()
 
     def __repr__(self) -> str:
@@ -90,6 +97,7 @@ class DescriptorAnyType(DescriptorBase):
         return f"<{self.__class__.__name__} '{self._name}': {value_repr}>"
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+        """As dict."""
         raw_dict = super().as_dict(skip=skip)
         raw_dict['value'] = self._value
         return raw_dict

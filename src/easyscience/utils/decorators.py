@@ -22,6 +22,7 @@ class memoized:
         self.cache = {}
 
     def __call__(self, *args):
+        """Call function."""
         if not isinstance(args, collections.abc.Hashable):
             # uncacheable. a list, for instance.
             # better to not cache than blow up.
@@ -44,11 +45,16 @@ class memoized:
 def counted(func):
     """Counts how many times a function has been called and adds a
     `func.calls` to it's properties :param func: Function to be counted
-    :return: Results from function call.
+
+    Returns
+    -------
+
+        Results from function call.
     """
 
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
+        """Wrapped function."""
         wrapped.n_calls += 1
         return func(*args, **kwargs)
 
@@ -66,6 +72,7 @@ def time_it(func):
 
     @functools.wraps(func)
     def _time_it(*args, **kwargs):
+        """Time it."""
         start = int(round(time() * 1000))
         try:
             return func(*args, **kwargs)
@@ -85,6 +92,7 @@ def deprecated(func):
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
+        """New func."""
         warnings.warn_explicit(
             'Call to deprecated function {}.'.format(func.__name__),
             category=DeprecationWarning,

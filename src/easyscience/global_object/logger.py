@@ -6,17 +6,28 @@ import logging
 
 class Logger:
     def __init__(self, log_level: int = logging.INFO):
+        """Init function."""
         self.logger = logging.getLogger(__name__)
         self.level = log_level
         self.logger.setLevel(self.level)
 
     def getLogger(self, logger_name, color: str = '32', defaults: bool = True) -> logging:
-        """Create a logger :param color:
+        """Create a logger :param color:.
 
-        :param logger_name: logger name. Usually __name__ on creation
-        :param defaults: Do you want to associate any current file
-            loggers with this logger
-        :return: A logger
+        Parameters
+        ----------
+        color : str, optional
+            By default, '32'.
+        logger_name :
+            Logger name. Usually __name__ on creation.
+        defaults : bool, optional
+            Do you want to associate any current file
+            loggers with this logger. By default, True.
+
+        Returns
+        -------
+        logging
+            A logger.
         """
         logger = logging.getLogger(logger_name)
         logger.setLevel(self.level)

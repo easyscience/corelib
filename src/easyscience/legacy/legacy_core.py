@@ -32,6 +32,7 @@ class ComponentSerializer:
     _CORE = True
 
     def __deepcopy__(self, memo):
+        """Deepcopy function."""
         return self.from_dict(self.as_dict())
 
     def encode(
@@ -43,10 +44,19 @@ class ComponentSerializer:
         """Use an encoder to covert an EasyScience object into another
         format. Default is to a dictionary using `DictSerializer`.
 
-        :param skip: List of field names as strings to skip when forming the encoded object
-        :param encoder: The encoder to be used for encoding the data. Default is `DictSerializer`
-        :param kwargs: Any additional key word arguments to be passed to the encoder
-        :return: encoded object containing all information to reform an EasyScience object.
+        Parameters
+        ----------
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming the encoded object. By default, None.
+        encoder : Optional[BaseEncoderDecoder], optional
+            The encoder to be used for encoding the data. By default, None.
+        **kwargs :
+            Any additional key word arguments to be passed to the encoder.
+
+        Returns
+        -------
+        Any
+            Encoded object containing all information to reform an EasyScience object.
         """
         if encoder is None:
             encoder = DictSerializer
@@ -58,10 +68,19 @@ class ComponentSerializer:
         """Re-create an EasyScience object from the output of an
         encoder. The default decoder is `DictSerializer`.
 
-        :param obj: encoded EasyScience object
-        :param decoder: decoder to be used to reform the EasyScience
-            object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        cls :
+        obj : Any
+            Encoded EasyScience object.
+        decoder : Optional[BaseEncoderDecoder], optional
+            Decoder to be used to reform the EasyScience
+            object. By default, None.
+
+        Returns
+        -------
+        Any
+            Reformed EasyScience object.
         """
 
         if decoder is None:
@@ -73,9 +92,16 @@ class ComponentSerializer:
         `DictSerializer`. This is a shortcut for
         ```obj.encode(encoder=DictSerializer)```
 
-        :param skip: List of field names as strings to skip when forming
-            the dictionary
-        :return: encoded object containing all information to reform an
+        Parameters
+        ----------
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the dictionary. By default, None.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Encoded object containing all information to reform an
             EasyScience object.
         """
 
@@ -86,8 +112,16 @@ class ComponentSerializer:
         """Re-create an EasyScience object from a full encoded
         dictionary.
 
-        :param obj_dict: dictionary containing the serialized contents (from `DictSerializer`) of an EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        cls :
+        obj_dict : Dict[str, Any]
+            Dictionary containing the serialized contents (from `DictSerializer`) of an EasyScience object.
+
+        Returns
+        -------
+        None
+            Reformed EasyScience object.
         """
 
         return cls.decode(obj_dict, decoder=DictSerializer)
@@ -101,10 +135,19 @@ class ComponentSerializer:
         """Returns just the data in an EasyScience object win the format
         specified by an encoder.
 
-        :param skip: List of field names as strings to skip when forming the dictionary
-        :param encoder: The encoder to be used for encoding the data. Default is `DataDictSerializer`
-        :param kwargs: Any additional keywords to pass to the encoder when encoding
-        :return: encoded object containing just the data of an EasyScience object.
+        Parameters
+        ----------
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming the dictionary. By default, None.
+        encoder : Optional[BaseEncoderDecoder], optional
+            The encoder to be used for encoding the data. By default, None.
+        **kwargs :
+            Any additional keywords to pass to the encoder when encoding.
+
+        Returns
+        -------
+        Any
+            Encoded object containing just the data of an EasyScience object.
         """
 
         if encoder is None:
@@ -115,9 +158,16 @@ class ComponentSerializer:
         """Returns a dictionary containing just the data of an
         EasyScience object.
 
-        :param skip: List of field names as strings to skip when forming
-            the dictionary
-        :return: dictionary containing just the data of an EasyScience
+        Parameters
+        ----------
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the dictionary. By default, None.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Dictionary containing just the data of an EasyScience
             object.
         """
 
@@ -132,6 +182,7 @@ class ComponentSerializer:
         """
 
         def flatten(obj, seperator='.'):
+            """Flatten function."""
             # Flattens a dictionary
 
             flat_dict = {}

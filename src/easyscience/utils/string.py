@@ -14,11 +14,24 @@ def transformation_to_string(
     """Convenience method.
 
     Given matrix returns string, e.g. x+2y+1/4
-    :param matrix : param translation_vec
-    :param components: either ('x', 'y', 'z') or ('a', 'b', 'c')
-    :param c: optional additional character to print (used for magmoms)
-    :param delim: delimiter
-    :return: xyz string
+
+    Parameters
+    ----------
+    translation_vec :
+        By default, (0, 0, 0).
+    matrix :
+        Param translation_vec.
+    components :
+        Either ('x', 'y', 'z') or ('a', 'b', 'c'). By default, ('x', 'y', 'z').
+    c :
+        Optional additional character to print (used for magmoms). By default, ''.
+    delim :
+        Delimiter. By default, ','.
+
+    Returns
+    -------
+
+        Xyz string.
     """
     parts = []
     for i in range(3):

@@ -12,12 +12,14 @@ def singleton(cls):
         @singleton
         class MySingleton:
             def __init__():
+                '''Init function.'''
                 pass
     """
 
     instances = {}
 
     def get_instance():
+        """Get instance."""
         if cls not in instances:
             instances[cls] = cls()
         return instances[cls]
@@ -26,19 +28,21 @@ def singleton(cls):
 
 
 def cached_class(klass):
-    """Decorator to cache class instances by constructor arguments. This
+    """Decorator to cache class instances by constructor arguments.
+
+        This
     results in a class that behaves like a singleton for each set of
-    constructor arguments, ensuring efficiency.
+        constructor arguments, ensuring efficiency.
 
-    Note that this should be used for *immutable classes only*.  Having
-    a cached mutable class makes very little sense.  For efficiency,
-    avoid using this decorator for situations where there are many
-    constructor arguments permutations.
+        Note that this should be used for *immutable classes only*.  Having
+        a cached mutable class makes very little sense.  For efficiency,
+        avoid using this decorator for situations where there are many
+        constructor arguments permutations.
 
-    The keywords argument dictionary is converted to a tuple because
-    dicts are mutable; keywords themselves are strings and so are always
-    hashable, but if any arguments (keyword or positional) are non-
-    hashable, that set of arguments is not cached.
+        The keywords argument dictionary is converted to a tuple because
+        dicts are mutable; keywords themselves are strings and so are always
+        hashable, but if any arguments (keyword or positional) are non-
+        hashable, that set of arguments is not cached.
     """
     cache = {}
 
@@ -51,9 +55,11 @@ def cached_class(klass):
         def __new__(cls, *args, **kwargs):
             """Pass through...
 
-            :param args:
-            :param kwargs:
-            :return:
+            Parameters
+            ----------
+            cls :
+            *args :
+            **kwargs :
             """
             key = (cls,) + args + tuple(kwargs.items())
             try:
@@ -81,6 +87,7 @@ def cached_class(klass):
             return inst
 
         def __init__(self, *args, **kwargs):
+            """Init function."""
             # This will be called every time __new__ is
             # called, so we skip initializing here and do
             # it only when the instance is created above

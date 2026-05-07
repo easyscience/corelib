@@ -55,26 +55,47 @@ class Parameter(DescriptorNumber):
         parent: Optional[Any] = None,
         **kwargs: Any,  # Additional keyword arguments (used for (de)serialization)
     ):
-        """This class is an extension of a `DescriptorNumber`. Where the
-        descriptor was for static objects, a `Parameter` is for dynamic
+        """This class is an extension of a `DescriptorNumber`.
+
+        Where the
+descriptor was for static objects, a `Parameter` is for dynamic
         objects. A parameter has the ability to be used in fitting and
         has additional fields to facilitate this.
 
-        :param name: Name of this object
-        :param value: Value of this object
-        :param unit: This object can have a physical unit associated with it
-        :param variance: The variance of the value
-        :param min: The minimum value for fitting
-        :param max: The maximum value for fitting
-        :param fixed: If the parameter is free to vary during fitting
-        :param description: A brief summary of what this object is
-        :param url: Lookup url for documentation/information
-        :param display_name: The name of the object as it should be displayed
-        :param parent: The object which is the parent to this one
+        Parameters
+        ----------
+        **kwargs : Any
+        callback : property, optional
+            By default, property().
+        unique_name : Optional[str], optional
+            By default, None.
+        name : str
+            Name of this object.
+        value : numbers.Number
+            Value of this object.
+        unit : Optional[Union[str, sc.Unit]], optional
+            This object can have a physical unit associated with it. By default, ''.
+        variance : Optional[numbers.Number], optional
+            The variance of the value. By default, 0.0.
+        min : Optional[numbers.Number], optional
+            The minimum value for fitting. By default, -np.inf.
+        max : Optional[numbers.Number], optional
+            The maximum value for fitting. By default, np.inf.
+        fixed : Optional[bool], optional
+            If the parameter is free to vary during fitting. By default, False.
+        description : Optional[str], optional
+            A brief summary of what this object is. By default, None.
+        url : Optional[str], optional
+            Lookup url for documentation/information. By default, None.
+        display_name : Optional[str], optional
+            The name of the object as it should be displayed. By default, None.
+        parent : Optional[Any], optional
+            The object which is the parent to this one. By default, None.
 
-        Note:
-            Undo/Redo functionality is implemented for the attributes `value`, `variance`, `error`, `min`, `max`, `bounds`, `fixed`, `unit`
-        """  # noqa: E501
+        Note
+        ----
+        Undo/Redo functionality is implemented for the attributes `value`, `variance`, `error`, `min`, `max`, `bounds`, `fixed`, `unit`
+        """
         # Extract and ignore serialization-specific fields from kwargs
         kwargs.pop('_dependency_string', None)
         kwargs.pop('_dependency_map_serializer_ids', None)
@@ -133,19 +154,31 @@ class Parameter(DescriptorNumber):
         """Create a dependent Parameter directly from a dependency
         expression.
 
-        :param name: The name of the parameter
-        :param dependency_expression: The dependency expression to
+        Parameters
+        ----------
+        cls :
+        name : str
+            The name of the parameter.
+        dependency_expression : str
+            The dependency expression to
             evaluate. This should be a string which can be evaluated by
             the ASTEval interpreter.
-        :param dependency_map: A dictionary of dependency expression
+        dependency_map : Optional[dict], optional
+            A dictionary of dependency expression
             symbol name and dependency object pairs. This is inserted
-            into the asteval interpreter to resolve dependencies.
-        :param desired_unit: The desired unit of the dependent
-            parameter.
-        :param kwargs: Additional keyword arguments to pass to the
+            into the asteval interpreter to resolve dependencies. By default, None.
+        desired_unit : str | sc.Unit | None, optional
+            The desired unit of the dependent
+            parameter. By default, None.
+        **kwargs :
+            Additional keyword arguments to pass to the
             Parameter constructor.
-        :return: A new dependent Parameter object.
-        """  # noqa: E501
+
+        Returns
+        -------
+        Parameter
+            A new dependent Parameter object.
+        """
         # Set default values for required parameters for the constructor, they get overwritten by the dependency anyways
         default_kwargs = {'value': 0.0, 'variance': 0.0, 'min': -np.inf, 'max': np.inf}
         # Update with user-provided kwargs, to avoid errors.
@@ -196,8 +229,10 @@ class Parameter(DescriptorNumber):
         dependency_map: Optional[dict] = None,
         desired_unit: str | sc.Unit | None = None,
     ) -> None:
-        """Make this parameter dependent on another parameter. This will
-        overwrite the current value, unit, variance, min and max.
+        """Make this parameter dependent on another parameter.
+
+        This will
+overwrite the current value, unit, variance, min and max.
 
         How to use the dependency map:
         If a parameter c has a dependency expression of 'a + b', where a and b are parameters belonging to the model class,
@@ -208,17 +243,17 @@ class Parameter(DescriptorNumber):
         Unique names in dependency expressions are defined by quotes, e.g. 'Parameter_0' or "Parameter_0" depending on
         the quotes used for the expression.
 
-        :param dependency_expression:
+        Parameters
+        ----------
+        dependency_expression : str
             The dependency expression to evaluate. This should be a string which
             can be evaluated by a python interpreter.
-
-        :param dependency_map:
+        dependency_map : Optional[dict], optional
             A dictionary of dependency expression symbol name and dependency object pairs.
-            This is inserted into the asteval interpreter to resolve dependencies.
-
-        :param desired_unit:
-            The desired unit of the dependent parameter. If None, the default unit of the dependency expression result is used.
-        """  # noqa: E501
+            This is inserted into the asteval interpreter to resolve dependencies. By default, None.
+        desired_unit : str | sc.Unit | None, optional
+            The desired unit of the dependent parameter. If None, the default unit of the dependency expression result is used. By default, None.
+        """
         if not isinstance(dependency_expression, str):
             raise TypeError(
                 '`dependency_expression` must be a string representing a valid dependency expression.'
@@ -348,11 +383,16 @@ class Parameter(DescriptorNumber):
         self._update()
 
     def make_independent(self) -> None:
-        """Make this parameter independent. This will remove the
-        dependency expression, the dependency map and the dependency
+        """Make this parameter independent.
+
+        This will remove the
+dependency expression, the dependency map and the dependency
         interpreter.
 
-        :return: None
+        Returns
+        -------
+        None
+            None.
         """
         if not self._independent:
             for dependency in self._dependency_map.values():
@@ -370,12 +410,16 @@ class Parameter(DescriptorNumber):
     def independent(self) -> bool:
         """Is the parameter independent?
 
-        :return: True = independent, False = dependent
+        Returns
+        -------
+        bool
+            True = independent, False = dependent.
         """
         return self._independent
 
     @independent.setter
     def independent(self, value: bool) -> None:
+        """Independent function."""
         raise AttributeError(
             'This property is read-only. Use `make_independent` and  `make_dependent_on` to change the state of the parameter.'
         )  # noqa: E501
@@ -384,7 +428,10 @@ class Parameter(DescriptorNumber):
     def dependency_expression(self) -> str:
         """Get the dependency expression of this parameter.
 
-        :return: The dependency expression of this parameter.
+        Returns
+        -------
+        str
+            The dependency expression of this parameter.
         """
         if not self._independent:
             return self._dependency_string
@@ -393,6 +440,7 @@ class Parameter(DescriptorNumber):
 
     @dependency_expression.setter
     def dependency_expression(self, new_expression: str) -> None:
+        """Dependency expression."""
         raise AttributeError(
             'Dependency expression is read-only. Use `make_dependent_on` to change the dependency expression.'
         )  # noqa: E501
@@ -401,7 +449,10 @@ class Parameter(DescriptorNumber):
     def dependency_map(self) -> Dict[str, DescriptorNumber]:
         """Get the dependency map of this parameter.
 
-        :return: The dependency map of this parameter.
+        Returns
+        -------
+        Dict[str, DescriptorNumber]
+            The dependency map of this parameter.
         """
         if not self._independent:
             return self._dependency_map
@@ -410,6 +461,7 @@ class Parameter(DescriptorNumber):
 
     @dependency_map.setter
     def dependency_map(self, new_map: Dict[str, DescriptorNumber]) -> None:
+        """Dependency map."""
         raise AttributeError(
             'Dependency map is read-only. Use `make_dependent_on` to change the dependency map.'
         )
@@ -418,22 +470,31 @@ class Parameter(DescriptorNumber):
     def value_no_call_back(self) -> numbers.Number:
         """Get the currently hold value of self suppressing call back.
 
-        :return: Value of self without unit.
+        Returns
+        -------
+        numbers.Number
+            Value of self without unit.
         """
         return self._scalar.value
 
     @property
     def full_value(self) -> Variable:
-        """Get the value of self as a scipp scalar. This is should be
-        usable for most cases. If a scipp scalar is not acceptable then
+        """Get the value of self as a scipp scalar.
+
+        This is should be
+usable for most cases. If a scipp scalar is not acceptable then
         the raw value can be obtained through `obj.value`.
 
-        :return: Value of self with unit and variance.
+        Returns
+        -------
+        Variable
+            Value of self with unit and variance.
         """
         return self._scalar
 
     @full_value.setter
     def full_value(self, scalar: Variable) -> None:
+        """Full value."""
         raise AttributeError(
             f'Full_value is read-only. Change the value and variance seperately. Or create a new {self.__class__.__name__}.'
         )  # noqa: E501
@@ -442,7 +503,10 @@ class Parameter(DescriptorNumber):
     def value(self) -> numbers.Number:
         """Get the value of self as a Number.
 
-        :return: Value of self without unit.
+        Returns
+        -------
+        numbers.Number
+            Value of self without unit.
         """
         if self._callback.fget is not None:
             existing_value = self._callback.fget()
@@ -453,10 +517,15 @@ class Parameter(DescriptorNumber):
     @value.setter
     @property_stack
     def value(self, value: numbers.Number) -> None:
-        """Set the value of self. This only updates the value of the
-        scipp scalar.
+        """Set the value of self.
 
-        :param value: New value of self
+        This only updates the value of the
+scipp scalar.
+
+        Parameters
+        ----------
+        value : numbers.Number
+            New value of self.
         """
         if self._independent:
             if not isinstance(value, numbers.Number):
@@ -484,7 +553,10 @@ class Parameter(DescriptorNumber):
     def variance(self, variance_float: float) -> None:
         """Set the variance.
 
-        :param variance_float: Variance as a float
+        Parameters
+        ----------
+        variance_float : float
+            Variance as a float.
         """
         if self._independent:
             DescriptorNumber.variance.fset(self, variance_float)
@@ -497,7 +569,10 @@ class Parameter(DescriptorNumber):
     def error(self, value: float) -> None:
         """Set the standard deviation for the parameter.
 
-        :param value: New error value
+        Parameters
+        ----------
+        value : float
+            New error value.
         """
         if self._independent:
             DescriptorNumber.error.fset(self, value)
@@ -507,11 +582,21 @@ class Parameter(DescriptorNumber):
             )
 
     def _convert_unit(self, unit_str: str) -> None:
-        """Perform unit conversion. The value, max and min can change on
-        unit change.
+        """Perform unit conversion.
 
-        :param new_unit: new unit
-        :return: None
+        The value, max and min can change on
+unit change.
+
+        Parameters
+        ----------
+        unit_str : str
+        new_unit :
+            New unit.
+
+        Returns
+        -------
+        None
+            None.
         """
         super()._convert_unit(unit_str=unit_str)
         new_unit = sc.Unit(unit_str)  # unit_str is tested in super method
@@ -520,19 +605,34 @@ class Parameter(DescriptorNumber):
 
     @notify_observers
     def convert_unit(self, unit_str: str) -> None:
-        """Perform unit conversion. The value, max and min can change on
-        unit change.
+        """Perform unit conversion.
 
-        :param new_unit: new unit
-        :return: None
+        The value, max and min can change on
+unit change.
+
+        Parameters
+        ----------
+        unit_str : str
+        new_unit :
+            New unit.
+
+        Returns
+        -------
+        None
+            None.
         """
         self._convert_unit(unit_str)
 
     def set_desired_unit(self, unit_str: str | sc.Unit | None) -> None:
-        """Set the desired unit for a dependent Parameter. This will
-        convert the parameter to the desired unit.
+        """Set the desired unit for a dependent Parameter.
 
-        :param unit_str: The desired unit as a string.
+        This will
+convert the parameter to the desired unit.
+
+        Parameters
+        ----------
+        unit_str : str | sc.Unit | None
+            The desired unit as a string.
         """
 
         if self._independent:
@@ -558,19 +658,29 @@ class Parameter(DescriptorNumber):
     def min(self) -> numbers.Number:
         """Get the minimum value for fitting.
 
-        :return: minimum value
+        Returns
+        -------
+        numbers.Number
+            Minimum value.
         """
         return self._min.value
 
     @min.setter
     @property_stack
     def min(self, min_value: numbers.Number) -> None:
-        """
-        Set the minimum value for fitting.
+        """Set the minimum value for fitting.
+
         - implements undo/redo functionality.
 
-        :param min_value: new minimum value
-        :return: None
+        Parameters
+        ----------
+        min_value : numbers.Number
+            New minimum value.
+
+        Returns
+        -------
+        None
+            None.
         """
         if self._independent:
             if not isinstance(min_value, numbers.Number):
@@ -595,19 +705,29 @@ class Parameter(DescriptorNumber):
     def max(self) -> numbers.Number:
         """Get the maximum value for fitting.
 
-        :return: maximum value
+        Returns
+        -------
+        numbers.Number
+            Maximum value.
         """
         return self._max.value
 
     @max.setter
     @property_stack
     def max(self, max_value: numbers.Number) -> None:
-        """
-        Get the maximum value for fitting.
+        """Get the maximum value for fitting.
+
         - implements undo/redo functionality.
 
-        :param max_value: new maximum value
-        :return: None
+        Parameters
+        ----------
+        max_value : numbers.Number
+            New maximum value.
+
+        Returns
+        -------
+        None
+            None.
         """
         if self._independent:
             if not isinstance(max_value, numbers.Number):
@@ -632,18 +752,24 @@ class Parameter(DescriptorNumber):
     def fixed(self) -> bool:
         """Can the parameter vary while fitting?
 
-        :return: True = fixed, False = can vary
+        Returns
+        -------
+        bool
+            True = fixed, False = can vary.
         """
         return self._fixed
 
     @fixed.setter
     @property_stack
     def fixed(self, fixed: bool) -> None:
-        """
-        Change the parameter vary while fitting state.
+        """Change the parameter vary while fitting state.
+
         - implements undo/redo functionality.
 
-        :param fixed: True = fixed, False = can vary
+        Parameters
+        ----------
+        fixed : bool
+            True = fixed, False = can vary.
         """
         if not isinstance(fixed, bool):
             raise ValueError(f'{fixed=} must be a boolean. Got {type(fixed)}')
@@ -660,10 +786,12 @@ class Parameter(DescriptorNumber):
     # Is this alias really needed?
     @property
     def free(self) -> bool:
+        """Free function."""
         return not self.fixed
 
     @free.setter
     def free(self, value: bool) -> None:
+        """Free function."""
         self.fixed = not value
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -715,8 +843,11 @@ class Parameter(DescriptorNumber):
         """Add the unique names of the parameters to the ASTEval
         interpreter. This is used to evaluate the dependency expression.
 
-        :param dependency_expression: The dependency expression to be
-            evaluated
+        Parameters
+        ----------
+        dependency_expression : str
+            The dependency expression to be
+            evaluated.
         """
         # Get the unique_names from the expression string regardless of the quotes used
         inputted_unique_names = re.findall("('.+?')", dependency_expression)
@@ -772,6 +903,7 @@ class Parameter(DescriptorNumber):
         return param
 
     def __copy__(self) -> Parameter:
+        """Copy function."""
         new_obj = super().__copy__()
         new_obj._callback = property()
         return new_obj
@@ -792,6 +924,7 @@ class Parameter(DescriptorNumber):
     #     return float(self._scalar.value)
 
     def __add__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
+        """Add function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -825,6 +958,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __radd__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
+        """Radd function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -854,6 +988,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __sub__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
+        """Sub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -887,6 +1022,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __rsub__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
+        """Rsub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -916,6 +1052,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __mul__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
+        """Mul function."""
         if isinstance(other, numbers.Number):
             new_full_value = self.full_value * other
             if other == 0:
@@ -965,6 +1102,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __rmul__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
+        """Rmul function."""
         if isinstance(other, numbers.Number):
             new_full_value = other * self.full_value
             if other == 0:
@@ -997,6 +1135,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __truediv__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
+        """Truediv function."""
         if isinstance(other, numbers.Number):
             if other == 0:
                 raise ZeroDivisionError('Cannot divide by zero')
@@ -1047,6 +1186,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __rtruediv__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
+        """Rtruediv function."""
         original_self = self.value
         if original_self == 0:
             raise ZeroDivisionError('Cannot divide by zero')
@@ -1096,6 +1236,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __pow__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
+        """Pow function."""
         if isinstance(other, numbers.Number):
             exponent = other
         elif (
@@ -1150,6 +1291,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __neg__(self) -> Parameter:
+        """Neg function."""
         new_full_value = -self.full_value
         min_value = -self.max
         max_value = -self.min
@@ -1160,6 +1302,7 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __abs__(self) -> Parameter:
+        """Abs function."""
         new_full_value = abs(self.full_value)
         combinations = [abs(self.min), abs(self.max)]
         if self.min < 0 and self.max > 0:

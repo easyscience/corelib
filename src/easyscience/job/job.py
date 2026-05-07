@@ -31,29 +31,35 @@ class JobBase(ObjBase, metaclass=ABCMeta):
 
     @property
     def theorerical_model(self):
+        """Theorerical model."""
         return self._theory
 
     @theorerical_model.setter
     @abstractmethod
     def theoretical_model(self, theory: TheoreticalModelBase):
+        """Theoretical model."""
         raise NotImplementedError('theory setter not implemented')
 
     @property
     def experiment(self):
+        """Experiment function."""
         return self._experiment
 
     @experiment.setter
     @abstractmethod
     def experiment(self, experiment: ExperimentBase):
+        """Experiment function."""
         raise NotImplementedError('experiment setter not implemented')
 
     @property
     def analysis(self):
+        """Analysis function."""
         return self._analysis
 
     @analysis.setter
     @abstractmethod
     def analysis(self, analysis: AnalysisBase):
+        """Analysis function."""
         raise NotImplementedError('analysis setter not implemented')
 
     # TODO: extend derived classes to include Summary and Info
@@ -77,8 +83,10 @@ class JobBase(ObjBase, metaclass=ABCMeta):
 
     @abstractmethod
     def calculate_theory(self, *args, **kwargs):
+        """Calculate theory."""
         raise NotImplementedError('calculate_theory not implemented')
 
     @abstractmethod
     def fit(self, *args, **kwargs):
+        """Fit function."""
         raise NotImplementedError('fit not implemented')

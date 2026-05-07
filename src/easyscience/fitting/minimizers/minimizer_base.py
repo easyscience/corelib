@@ -51,13 +51,16 @@ class MinimizerBase(metaclass=ABCMeta):
 
     @property
     def enum(self) -> AvailableMinimizers:
+        """Enum function."""
         return self._minimizer_enum
 
     @property
     def name(self) -> str:
+        """Name function."""
         return self._minimizer_enum.name
 
     def _restore_parameter_values(self) -> None:
+        """Restore parameter values."""
         for key in self._cached_pars.keys():
             self._cached_pars[key].value = self._cached_pars_vals[key][0]
             self._cached_pars[key].error = self._cached_pars_vals[key][1]
@@ -78,37 +81,60 @@ class MinimizerBase(metaclass=ABCMeta):
     ) -> FitResults:
         """Perform a fit using the  engine.
 
-        :param x: points to be calculated at
-        :type x: np.ndarray
-        :param y: measured points
-        :type y: np.ndarray
-        :param weights: Weights for supplied measured points
-        :type weights: np.ndarray
-        :param model: Optional Model which is being fitted to
-        :param parameters: Optional parameters for the fit
-        :param method: method for the minimizer to use.
-        :type method: str
-        :param kwargs: Additional arguments for the fitting function.
-        :return: Fit results
+        Parameters
+        ----------
+        progress_callback : Callable[[dict], bool | None] | None, optional
+            By default, None.
+        max_evaluations : int | None, optional
+            By default, None.
+        tolerance : float | None, optional
+            By default, None.
+        x : np.ndarray
+            Points to be calculated at.
+        y : np.ndarray
+            Measured points.
+        weights : np.ndarray
+            Weights for supplied measured points.
+        model : Callable | None, optional
+            Optional Model which is being fitted to. By default, None.
+        parameters : List[Parameter] | None, optional
+            Optional parameters for the fit. By default, None.
+        method : str | None, optional
+            Method for the minimizer to use. By default, None.
+        **kwargs :
+            Additional arguments for the fitting function.
+
+        Returns
+        -------
+        FitResults
+            Fit results.
         """
 
     def evaluate(
         self, x: np.ndarray, minimizer_parameters: dict[str, float] | None = None, **kwargs
     ) -> np.ndarray:
-        """Evaluate the fit function for values of x. Parameters used
-        are either the latest or user supplied. If the parameters are
+        """Evaluate the fit function for values of x.
+
+        Parameters used
+are either the latest or user supplied. If the parameters are
         user supplied, it must be in a dictionary of {'parameter_name':
         parameter_value,...}.
 
-        :param x: x values for which the fit function will be evaluated
-        :type x:  np.ndarray
-        :param minimizer_parameters: Dictionary of parameters which will be used in the fit function. They must be in a dictionary
-         of {'parameter_name': parameter_value,...}
-        :type minimizer_parameters: dict
-        :param kwargs: additional arguments
-        :return: y values calculated at points x for a set of parameters.
-        :rtype: np.ndarray
-        """  # noqa: E501
+        Parameters
+        ----------
+        x : np.ndarray
+            X values for which the fit function will be evaluated.
+        minimizer_parameters : dict[str, float] | None, optional
+            Dictionary of parameters which will be used in the fit function. They must be in a dictionary
+            of {'parameter_name': parameter_value,...}. By default, None.
+        **kwargs :
+            Additional arguments.
+
+        Returns
+        -------
+        np.ndarray
+            Y values calculated at points x for a set of parameters.
+        """
         if minimizer_parameters is None:
             minimizer_parameters = {}
         if not isinstance(minimizer_parameters, dict):
@@ -123,6 +149,7 @@ class MinimizerBase(metaclass=ABCMeta):
         return self._fit_function(x, **minimizer_parameters, **kwargs)
 
     def _get_method_kwargs(self, passed_method: str | None = None) -> dict[str, str]:
+        """Get method kwargs."""
         if passed_method is not None:
             if passed_method not in self.supported_methods():
                 raise FitError(f'Method {passed_method} not available in {self.__class__}')
@@ -138,10 +165,16 @@ class MinimizerBase(metaclass=ABCMeta):
         """Create an engine compatible container with the `Parameters`
         converted from the base object.
 
-        :param par_list: If only a single/selection of parameter is
-            required. Specify as a list
-        :type par_list: List[str]
-        :return: engine Parameters compatible object
+        Parameters
+        ----------
+        par_list : List[Parameter] | None, optional
+            If only a single/selection of parameter is
+            required. Specify as a list. By default, None.
+
+        Returns
+        -------
+
+            Engine Parameters compatible object.
         """
 
     @staticmethod
@@ -149,8 +182,10 @@ class MinimizerBase(metaclass=ABCMeta):
     def supported_methods() -> List[str]:
         """Return a list of supported methods for the minimizer.
 
-        :return: List of supported methods
-        :rtype: List[str]
+        Returns
+        -------
+        List[str]
+            List of supported methods.
         """
 
     @staticmethod
@@ -158,8 +193,10 @@ class MinimizerBase(metaclass=ABCMeta):
     def all_methods() -> List[str]:
         """Return a list of all available methods for the minimizer.
 
-        :return: List of all available methods
-        :rtype: List[str]
+        Returns
+        -------
+        List[str]
+            List of all available methods.
         """
 
     @staticmethod
@@ -172,7 +209,10 @@ class MinimizerBase(metaclass=ABCMeta):
     def _prepare_parameters(self, parameters: dict[str, float]) -> dict[str, float]:
         """Prepare the parameters for the minimizer.
 
-        :param parameters: Dict of parameters for the minimizer with
+        Parameters
+        ----------
+        parameters : dict[str, float]
+            Dict of parameters for the minimizer with
             names as keys.
         """
         pars = self._cached_pars
@@ -187,7 +227,10 @@ class MinimizerBase(metaclass=ABCMeta):
         """Using the user supplied `fit_function`, wrap it in such a way
         we can update `Parameter` on iterations.
 
-        :return: a fit function which is compatible with bumps models
+        Returns
+        -------
+        Callable
+            A fit function which is compatible with bumps models.
         """
         # Original fit function
         func = self._original_fit_function
@@ -204,11 +247,17 @@ class MinimizerBase(metaclass=ABCMeta):
             """Wrapped fit function which now has an EasyScience
             compatible form.
 
-            :param x: array of data points to be calculated
-            :type x: np.ndarray
-            :param kwargs: key word arguments
-            :return: points calculated at `x`
-            :rtype: np.ndarray
+            Parameters
+            ----------
+            x : np.ndarray
+                Array of data points to be calculated.
+            **kwargs :
+                Key word arguments.
+
+            Returns
+            -------
+            np.ndarray
+                Points calculated at `x`.
             """
             # Update the `Parameter` values and the callback if needed
             # TODO THIS IS NOT THREAD SAFE :-(
@@ -259,6 +308,7 @@ class MinimizerBase(metaclass=ABCMeta):
     def _error_from_jacobian(
         jacobian: np.ndarray, residuals: np.ndarray, confidence: float = 0.95
     ) -> np.ndarray:
+        """Error from jacobian."""
         from scipy import stats
 
         JtJi = np.linalg.inv(np.dot(jacobian.T, jacobian))

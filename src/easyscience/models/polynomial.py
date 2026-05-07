@@ -18,8 +18,10 @@ class Polynomial(ObjBase):
 
     Parameters
     ----------
-    name : str
-        The name of the model.
+    coefficients : Optional[Union[Iterable[Union[float, Parameter]], CollectionBase]], optional
+        By default, None.
+    name : str, optional
+        The name of the model. By default, 'polynomial'.
     degree : int
         The degree of the polynomial.
     """
@@ -47,9 +49,11 @@ class Polynomial(ObjBase):
                 raise TypeError('coefficients must be a list or a CollectionBase')
 
     def __call__(self, x: np.ndarray, *args, **kwargs) -> np.ndarray:
+        """Call function."""
         return np.polyval([c.value for c in self.coefficients], x)
 
     def __repr__(self):
+        """Repr function."""
         s = []
         if len(self.coefficients) >= 1:
             s += [f'{self.coefficients[0].value}']

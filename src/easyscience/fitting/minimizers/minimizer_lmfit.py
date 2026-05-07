@@ -23,8 +23,7 @@ from .utils import FitResults
 
 
 class LMFit(MinimizerBase):  # noqa: S101
-    """
-    This is a wrapper to the extended Levenberg-Marquardt Fit: https://lmfit.github.io/lmfit-py/
+    """This is a wrapper to the extended Levenberg-Marquardt Fit: https://lmfit.github.io/lmfit-py/
     It allows for the lmfit fitting engine to use parameters declared in an `EasyScience.base_classes.ObjBase`.
     """
 
@@ -69,6 +68,7 @@ class LMFit(MinimizerBase):  # noqa: S101
 
     @staticmethod
     def supported_methods() -> List[str]:
+        """Supported methods."""
         return [
             'least_squares',
             'leastsq',
@@ -94,24 +94,38 @@ class LMFit(MinimizerBase):  # noqa: S101
     ) -> FitResults:
         """Perform a fit using the lmfit engine.
 
-        :param method:
-        :type method:
-        :param x: points to be calculated at
-        :type x: np.ndarray
-        :param y: measured points
-        :type y: np.ndarray
-        :param weights: Weights for supplied measured points
-        :type weights: np.ndarray
-        :param model: Optional Model which is being fitted to
-        :type model: LMModel
-        :param parameters: Optional parameters for the fit
-        :type parameters: LMParameters
-        :param minimizer_kwargs: Arguments to be passed directly to the
-            minimizer
-        :type minimizer_kwargs: dict
-        :param kwargs: Additional arguments for the fitting function.
-        :return: Fit results
-        :rtype: ModelResult For standard least squares, the weights
+        Parameters
+        ----------
+        engine_kwargs : dict | None, optional
+            By default, None.
+        progress_callback : Callable[[dict], bool | None] | None, optional
+            By default, None.
+        max_evaluations : int | None, optional
+            By default, None.
+        tolerance : float | None, optional
+            By default, None.
+        method : str | None, optional
+            By default, None.
+        x : np.ndarray
+            Points to be calculated at.
+        y : np.ndarray
+            Measured points.
+        weights : np.ndarray, optional
+            Weights for supplied measured points. By default, None.
+        model : LMModel | None, optional
+            Optional Model which is being fitted to. By default, None.
+        parameters : LMParameters | None, optional
+            Optional parameters for the fit. By default, None.
+        minimizer_kwargs : dict | None, optional
+            Arguments to be passed directly to the
+            minimizer. By default, None.
+        **kwargs :
+            Additional arguments for the fitting function.
+
+        Returns
+        -------
+        ModelResult For standard least squares, the weights
+            Fit results
             should be 1/sigma, where sigma is the standard deviation of
             the measurement. For unweighted least squares, these should
             be 1.
@@ -172,7 +186,9 @@ class LMFit(MinimizerBase):  # noqa: S101
         self,
         progress_callback: Callable[[dict], bool | None] | None,
     ) -> Callable | None:
+        """Create iter callback."""
         def iter_cb(params, iteration: int, residuals: np.ndarray, *args, **kwargs) -> bool:
+            """Iter cb."""
             if iteration >= 0:
                 self._last_iteration = int(iteration)
             if progress_callback is None:
@@ -184,6 +200,7 @@ class LMFit(MinimizerBase):  # noqa: S101
         return iter_cb
 
     def _build_progress_payload(self, params, iteration: int, residuals: np.ndarray) -> dict:
+        """Build progress payload."""
         residual_array = np.asarray(residuals)
         chi2 = float(np.square(residual_array).sum())
         varied_parameter_count = sum(
@@ -214,6 +231,7 @@ class LMFit(MinimizerBase):  # noqa: S101
     def _get_fit_kws(
         self, method: str, tolerance: float, minimizer_kwargs: dict[str:str]
     ) -> dict[str:str]:
+        """Get fit kws."""
         if minimizer_kwargs is None:
             minimizer_kwargs = {}
         if tolerance is not None:
@@ -227,9 +245,16 @@ class LMFit(MinimizerBase):  # noqa: S101
         """Create an lmfit compatible container with the `Parameters`
         converted from the base object.
 
-        :param parameters: If only a single/selection of parameter is
-            required. Specify as a list
-        :return: lmfit Parameters compatible object
+        Parameters
+        ----------
+        parameters : List[Parameter] | None, optional
+            If only a single/selection of parameter is
+            required. Specify as a list. By default, None.
+
+        Returns
+        -------
+        LMParameters
+            Lmfit Parameters compatible object.
         """
         if parameters is None:
             # Assume that we have a ObjBase for which we can obtain a list
@@ -244,8 +269,10 @@ class LMFit(MinimizerBase):  # noqa: S101
         """Convert an EasyScience Parameter object to a lmfit Parameter
         object.
 
-        :return: lmfit Parameter compatible object.
-        :rtype: LMParameter
+        Returns
+        -------
+        LMParameter
+            Lmfit Parameter compatible object.
         """
         value = parameter.value
 
@@ -263,8 +290,10 @@ class LMFit(MinimizerBase):  # noqa: S101
         """Generate a lmfit model from the supplied `fit_function` and
         parameters in the base object.
 
-        :return: Callable lmfit model
-        :rtype: LMModel
+        Returns
+        -------
+        LMModel
+            Callable lmfit model.
         """
         # Generate the fitting function
         fit_func = self._generate_fit_function()
@@ -301,9 +330,16 @@ class LMFit(MinimizerBase):  # noqa: S101
         """Update parameters to their final values and assign a std
         error to them.
 
-        :param fit_result: Fit object which contains info on the fit
-        :return: None
-        :rtype: noneType
+        Parameters
+        ----------
+        stack_status : bool
+        fit_result : ModelResult
+            Fit object which contains info on the fit.
+
+        Returns
+        -------
+        noneType
+            None.
         """
         from easyscience import global_object
 
@@ -322,13 +358,21 @@ class LMFit(MinimizerBase):  # noqa: S101
             global_object.stack.endMacro()
 
     def _gen_fit_results(self, fit_results: ModelResult, **kwargs) -> FitResults:
-        """
-        Convert fit results into the unified `FitResults` format.
+        """Convert fit results into the unified `FitResults` format.
+
         See https://github.com/lmfit/lmfit-py/blob/480072b9f7834b31ff2ca66277a5ad31246843a4/lmfit/model.py#L1272
 
-        :param fit_result: Fit object which contains info on the fit
-        :return: fit results container
-        :rtype: FitResults
+        Parameters
+        ----------
+        **kwargs :
+        fit_results : ModelResult
+        fit_result :
+            Fit object which contains info on the fit.
+
+        Returns
+        -------
+        FitResults
+            Fit results container.
         """
         results = FitResults()
         for name, value in kwargs.items():

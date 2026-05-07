@@ -33,6 +33,7 @@ class BasedBase(SerializerComponent):
         interface: Optional[InterfaceFactoryTemplate] = None,
         unique_name: Optional[str] = None,
     ):
+        """Init function."""
         self._global_object = global_object
         if unique_name is None:
             unique_name = self._global_object.generate_unique_name(self.__class__.__name__)
@@ -44,6 +45,7 @@ class BasedBase(SerializerComponent):
 
     @property
     def _arg_spec(self) -> Set[str]:
+        """Arg spec."""
         base_cls = getattr(self, '__old_class__', self.__class__)
         sign = signature(base_cls.__init__)
         names = [
@@ -54,11 +56,15 @@ class BasedBase(SerializerComponent):
         return set(names[1:])
 
     def __reduce__(self):
-        """Make the class picklable. Due to the nature of the dynamic
-        class definitions special measures need to be taken.
+        """Make the class picklable.
 
-        :return: Tuple consisting of how to make the object
-        :rtype: tuple
+        Due to the nature of the dynamic
+class definitions special measures need to be taken.
+
+        Returns
+        -------
+        tuple
+            Tuple consisting of how to make the object.
         """
         state = self.encode()
         cls = getattr(self, '__old_class__', self.__class__)
@@ -71,10 +77,15 @@ class BasedBase(SerializerComponent):
 
     @unique_name.setter
     def unique_name(self, new_unique_name: str):
-        """Set a new unique name for the object. The old name is still
-        kept in the map.
+        """Set a new unique name for the object.
 
-        :param new_unique_name: New unique name for the object
+        The old name is still
+kept in the map.
+
+        Parameters
+        ----------
+        new_unique_name : str
+            New unique name for the object.
         """
         if not isinstance(new_unique_name, str):
             raise TypeError('Unique name has to be a string.')
@@ -85,7 +96,10 @@ class BasedBase(SerializerComponent):
     def name(self) -> str:
         """Get the common name of the object.
 
-        :return: Common name of the object
+        Returns
+        -------
+        str
+            Common name of the object.
         """
         return self._name
 
@@ -93,8 +107,15 @@ class BasedBase(SerializerComponent):
     def name(self, new_name: str):
         """Set a new common name for the object.
 
-        :param new_name: New name for the object
-        :return: None
+        Parameters
+        ----------
+        new_name : str
+            New name for the object.
+
+        Returns
+        -------
+
+            None.
         """
         self._name = new_name
 
@@ -118,9 +139,12 @@ class BasedBase(SerializerComponent):
             self.generate_bindings()
 
     def generate_bindings(self):
-        """Generate or re-generate bindings to an interface (if exists)
+        """Generate or re-generate bindings to an interface (if exists).
 
-        :raises: AttributeError
+        Raises
+        ------
+
+            AttributeError.
         """
         if self.interface is None:
             raise AttributeError(
@@ -148,7 +172,10 @@ class BasedBase(SerializerComponent):
     def get_parameters(self) -> List[Parameter]:
         """Get all parameter objects as a list.
 
-        :return: List of `Parameter` objects.
+        Returns
+        -------
+        List[Parameter]
+            List of `Parameter` objects.
         """
         par_list = []
         for key, item in self._kwargs.items():
@@ -161,7 +188,10 @@ class BasedBase(SerializerComponent):
     def _get_linkable_attributes(self) -> List[DescriptorBase]:
         """Get all objects which can be linked against as a list.
 
-        :return: List of `Descriptor`/`Parameter` objects.
+        Returns
+        -------
+        List[DescriptorBase]
+            List of `Descriptor`/`Parameter` objects.
         """
         item_list = []
         for key, item in self._kwargs.items():
@@ -175,7 +205,10 @@ class BasedBase(SerializerComponent):
         """Get all objects which can be fitted (and are not fixed) as a
         list.
 
-        :return: List of `Parameter` objects which can be used in fitting.
+        Returns
+        -------
+        List[Parameter]
+            List of `Parameter` objects which can be used in fitting.
         """
         fit_list = []
         for key, item in self._kwargs.items():
@@ -190,8 +223,11 @@ class BasedBase(SerializerComponent):
         """This creates auto-completion and helps out in iPython
         notebooks.
 
-        :return: list of function and parameter names for auto-
-            completion
+        Returns
+        -------
+        Iterable[str]
+            List of function and parameter names for auto-
+            completion.
         """
         new_class_objs = list(k for k in dir(self.__class__) if not k.startswith('_'))
         return sorted(new_class_objs)
@@ -207,9 +243,16 @@ class BasedBase(SerializerComponent):
         `SerializerDict`. This is a shortcut for
         ```obj.encode(encoder=SerializerDict)```
 
-        :param skip: List of field names as strings to skip when forming
-            the dictionary
-        :return: encoded object containing all information to reform an
+        Parameters
+        ----------
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the dictionary. By default, None.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Encoded object containing all information to reform an
             EasyScience object.
         """
         # extend skip to include unique_name by default

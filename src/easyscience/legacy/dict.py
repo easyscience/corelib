@@ -35,14 +35,24 @@ class DictSerializer(BaseEncoderDecoder):
     ):
         """Convert an EasyScience object to a JSON encoded dictionary.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param full_encode: Should the data also be JSON encoded
-            (default False)
-        :param kwargs: Any additional key word arguments to be passed to
-            the encoder
-        :return: object encoded to dictionary containing all information
+        Parameters
+        ----------
+        obj : ComponentSerializer
+            Object to be encoded.
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the encoded object. By default, None.
+        full_encode : bool, optional
+            Should the data also be JSON encoded
+            (default False). By default, False.
+        **kwargs :
+            Any additional key word arguments to be passed to
+            the encoder.
+
+        Returns
+        -------
+
+            Object encoded to dictionary containing all information
             to reform an EasyScience object.
         """
 
@@ -50,18 +60,36 @@ class DictSerializer(BaseEncoderDecoder):
 
     @classmethod
     def decode(cls, d: Dict) -> ComponentSerializer:
-        """
-        :param d: Dict representation.
-        :return: ComponentSerializer class.
+        """Decode function.
+
+        Parameters
+        ----------
+        cls :
+        d : Dict
+            Dict representation.
+
+        Returns
+        -------
+        ComponentSerializer
+            ComponentSerializer class.
         """
 
         return BaseEncoderDecoder._convert_from_dict(d)
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> ComponentSerializer:
-        """
-        :param d: Dict representation.
-        :return: ComponentSerializer class.
+        """From dict.
+
+        Parameters
+        ----------
+        cls :
+        d : Dict[str, Any]
+            Dict representation.
+
+        Returns
+        -------
+        ComponentSerializer
+            ComponentSerializer class.
         """
         return BaseEncoderDecoder._convert_from_dict(d)
 
@@ -81,14 +109,24 @@ class DataDictSerializer(DictSerializer):
         """Convert an EasyScience object to a JSON encoded data
         dictionary.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param full_encode: Should the data also be JSON encoded
-            (default False)
-        :param kwargs: Any additional key word arguments to be passed to
-            the encoder
-        :return: object encoded to data dictionary.
+        Parameters
+        ----------
+        obj : ComponentSerializer
+            Object to be encoded.
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the encoded object. By default, None.
+        full_encode : bool, optional
+            Should the data also be JSON encoded
+            (default False). By default, False.
+        **kwargs :
+            Any additional key word arguments to be passed to
+            the encoder.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Object encoded to data dictionary.
         """
 
         if skip is None:

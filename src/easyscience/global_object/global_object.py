@@ -33,11 +33,15 @@ class GlobalObject:
         self.map: Map = self.__map
 
     def instantiate_stack(self):
-        """The undo/redo stack references the collective. Hence it has
-        to be imported after initialization.
+        """The undo/redo stack references the collective.
 
-        :return: None
-        :rtype: noneType
+        Hence it has
+to be imported after initialization.
+
+        Returns
+        -------
+        noneType
+            None.
         """
         from easyscience.global_object.undo_redo import UndoStack
 
@@ -48,7 +52,10 @@ class GlobalObject:
         name and a global iterator. Names are in the format
         `name_prefix_0`, `name_prefix_1`, `name_prefix_2`, etc.
 
-        :param name_prefix: The prefix to be used for the name
+        Parameters
+        ----------
+        name_prefix : str
+            The prefix to be used for the name.
         """
         names_with_prefix = [
             name for name in self.map.vertices() if name.startswith(name_prefix + '_')

@@ -32,14 +32,24 @@ class SerializerDict(SerializerBase):
     ):
         """Convert an EasyScience object to a dictionary.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param full_encode: Should the data also be encoded (default
-            False)
-        :param kwargs: Any additional key word arguments to be passed to
-            the encoder
-        :return: object encoded to dictionary containing all information
+        Parameters
+        ----------
+        obj : SerializerComponent
+            Object to be encoded.
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the encoded object. By default, None.
+        full_encode : bool, optional
+            Should the data also be encoded (default
+            False). By default, False.
+        **kwargs :
+            Any additional key word arguments to be passed to
+            the encoder.
+
+        Returns
+        -------
+
+            Object encoded to dictionary containing all information
             to reform an EasyScience object.
         """
 
@@ -50,8 +60,16 @@ class SerializerDict(SerializerBase):
         """Re-create an EasyScience object from the dictionary
         representation.
 
-        :param d: Dict representation of an EasyScience object.
-        :return: EasyScience object.
+        Parameters
+        ----------
+        cls :
+        d : Dict
+            Dict representation of an EasyScience object.
+
+        Returns
+        -------
+        SerializerComponent
+            EasyScience object.
         """
 
         return SerializerBase._convert_from_dict(d)

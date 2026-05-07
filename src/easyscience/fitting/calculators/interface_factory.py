@@ -29,14 +29,22 @@ class InterfaceFactoryTemplate:
 
     def create(self, *args, **kwargs):
         """Create an interface to a calculator from those initialized.
+
         Interfaces can be selected by `interface_name` where
         `interface_name` is one of `obj.available_interfaces`. This
         interface can now be accessed by obj().
 
-        :param interface_name: name of interface to be created
-        :type interface_name: str
-        :return: None
-        :rtype: noneType
+        Parameters
+        ----------
+        **kwargs :
+        *args :
+        interface_name : str
+            Name of interface to be created.
+
+        Returns
+        -------
+        noneType
+            None.
         """
         if kwargs.get('interface_name', None) is None:
             if len(self._interfaces) > 0:
@@ -52,18 +60,25 @@ class InterfaceFactoryTemplate:
         self.__interface_obj = self._current_interface(*args, **kwargs)
 
     def switch(self, new_interface: str, fitter: Optional[Type[Fitter]] = None):
-        """Changes the current interface to a new interface. The current
-        interface is destroyed and all SerializerComponent parameters
+        """Changes the current interface to a new interface.
+
+        The current
+interface is destroyed and all SerializerComponent parameters
         carried over to the new interface. i.e. pick up where you left
         off.
 
-        :param new_interface: name of new interface to be created
-        :type new_interface: str
-        :param fitter: Fitting interface which contains the fitting
-            object which may have bindings which will be updated.
-        :type fitter: EasyScience.fitting.Fitter
-        :return: None
-        :rtype: noneType
+        Parameters
+        ----------
+        new_interface : str
+            Name of new interface to be created.
+        fitter : Optional[Type[Fitter]], optional
+            Fitting interface which contains the fitting
+            object which may have bindings which will be updated. By default, None.
+
+        Returns
+        -------
+        noneType
+            None.
         """
         interfaces = self.available_interfaces
         if new_interface in interfaces:
@@ -89,8 +104,10 @@ class InterfaceFactoryTemplate:
     def available_interfaces(self) -> List[str]:
         """Return all available interfaces.
 
-        :return: List of available interface names
-        :rtype: List[str]
+        Returns
+        -------
+        List[str]
+            List of available interface names.
         """
         return [self.return_name(this_interface) for this_interface in self._interfaces]
 
@@ -98,8 +115,10 @@ class InterfaceFactoryTemplate:
     def current_interface(self) -> ABCMeta:
         """Returns the constructor for the currently selected interface.
 
-        :return: Interface constructor
-        :rtype: InterfaceTemplate
+        Returns
+        -------
+        InterfaceTemplate
+            Interface constructor.
         """
         return self._current_interface
 
@@ -108,8 +127,10 @@ class InterfaceFactoryTemplate:
         """Returns the constructor name for the currently selected
         interface.
 
-        :return: Interface constructor name
-        :rtype: str
+        Returns
+        -------
+        str
+            Interface constructor name.
         """
         return self.return_name(self._current_interface)
 
@@ -119,33 +140,49 @@ class InterfaceFactoryTemplate:
     ) -> Callable:  # , x_array: np.ndarray, *args, **kwargs) -> np.ndarray:
         """Pass through to the underlying interfaces fitting function.
 
-        :param x_array: points to be calculated at
-        :type x_array: np.ndarray
-        :param args: positional arguments for the fitting function
-        :type args: Any
-        :param kwargs: key/value pair arguments for the fitting function.
-        :type kwargs: Any
-        :return: points calculated at positional values `x`
-        :rtype: np.ndarray
-        #
+        Parameters
+        ----------
+        x_array : np.ndarray
+            Points to be calculated at.
+        args : Any
+            Positional arguments for the fitting function.
+        kwargs : Any
+            Key/value pair arguments for the fitting function.
+
+        Returns
+        -------
+        np.ndarray
+            Points calculated at positional values `x`.
         """
 
         def __fit_func(*args, **kwargs):
+            """Fit func."""
             return self.__interface_obj.fit_func(*args, **kwargs)
 
         return __fit_func
 
     def call(self, *args, **kwargs):
+        """Call function."""
         return self.fit_func(*args, **kwargs)
 
     def generate_bindings(self, model, *args, ifun=None, **kwargs):
         """Automatically bind a `Parameter` to the corresponding
         interface.
 
-        :param name: parameter name
-        :type name: str
-        :return: binding property
-        :rtype: property
+        Parameters
+        ----------
+        **kwargs :
+        ifun :
+            By default, None.
+        *args :
+        model :
+        name : str
+            Parameter name.
+
+        Returns
+        -------
+        property
+            Binding property.
         """
 
         class_links = self.__interface_obj.create(model)
@@ -170,9 +207,11 @@ class InterfaceFactoryTemplate:
                 prop._callback.fset(prop_value)
 
     def __call__(self, *args, **kwargs) -> None:
+        """Call function."""
         return self.__interface_obj
 
     def __reduce__(self):
+        """Reduce function."""
         return (
             self.__state_restore__,
             (
@@ -183,6 +222,7 @@ class InterfaceFactoryTemplate:
 
     @staticmethod
     def __state_restore__(cls, interface_str):
+        """State restore."""
         obj = cls()
         if interface_str in obj.available_interfaces:
             obj.switch(interface_str)
@@ -204,24 +244,30 @@ class ItemContainer(NamedTuple):
     setter_fn: Callable
 
     def make_prop(self, parameter_name) -> property:
+        """Make prop."""
         return property(
             fget=self.__make_getter(parameter_name),
             fset=self.__make_setter(parameter_name),
         )
 
     def convert_key(self, lookup_key: str) -> str:
+        """Convert key."""
         key = self.name_conversion.get(lookup_key, None)
         return key
 
     def __make_getter(self, get_name: str) -> Callable:
+        """Make getter."""
         def get_value():
+            """Get value."""
             inner_key = self.name_conversion.get(get_name, None)
             return self.getter_fn(self.link_name, inner_key)
 
         return get_value
 
     def __make_setter(self, get_name: str) -> Callable:
+        """Make setter."""
         def set_value(value):
+            """Set value."""
             inner_key = self.name_conversion.get(get_name, None)
             self.setter_fn(self.link_name, **{inner_key: value})
 

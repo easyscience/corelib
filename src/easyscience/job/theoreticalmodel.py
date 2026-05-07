@@ -15,8 +15,10 @@ class TheoreticalModelBase(ObjBase):
 
     # required dunder methods
     def __str__(self):
+        """Str function."""
         raise NotImplementedError('Copy not implemented')
 
     def as_dict(self, skip: list = []) -> dict:
+        """As dict."""
         this_dict = super().as_dict(skip=skip)
         return this_dict

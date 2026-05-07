@@ -39,12 +39,21 @@ class SerializerBase:
     def encode(self, obj: SerializerComponent, skip: Optional[List[str]] = None, **kwargs) -> any:
         """Abstract implementation of an encoder.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param kwargs: Any additional key word arguments to be passed to
-            the encoder
-        :return: encoded object containing all information to reform an
+        Parameters
+        ----------
+        obj : SerializerComponent
+            Object to be encoded.
+        skip : Optional[List[str]], optional
+            List of field names as strings to skip when forming
+            the encoded object. By default, None.
+        **kwargs :
+            Any additional key word arguments to be passed to
+            the encoder.
+
+        Returns
+        -------
+        any
+            Encoded object containing all information to reform an
             EasyScience object.
         """
 
@@ -56,8 +65,16 @@ class SerializerBase:
         """Re-create an EasyScience object from the output of an
         encoder. The default decoder is `SerializerDict`.
 
-        :param obj: encoded EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        cls :
+        obj : Any
+            Encoded EasyScience object.
+
+        Returns
+        -------
+        Any
+            Reformed EasyScience object.
         """
         pass
 
@@ -66,8 +83,15 @@ class SerializerBase:
         """Get the full argument specification of a function (typically
         `__init__`)
 
-        :param func: Function to be inspected
-        :return: Tuple of argument spec and arguments
+        Parameters
+        ----------
+        func : Callable
+            Function to be inspected.
+
+        Returns
+        -------
+
+            Tuple of argument spec and arguments.
         """
 
         spec = getfullargspec(func)
@@ -78,10 +102,19 @@ class SerializerBase:
     def _encode_objs(obj: Any) -> Dict[str, Any]:
         """A JSON serializable dict representation of an object.
 
-        :param obj: any object to be encoded
-        :param skip: List of field names as strings to skip when forming the encoded object
-        :param kwargs: Key-words to pass to `SerializerBase`
-        :return: JSON encoded dictionary
+        Parameters
+        ----------
+        obj : Any
+            Any object to be encoded.
+        skip :
+            List of field names as strings to skip when forming the encoded object.
+        kwargs :
+            Key-words to pass to `SerializerBase`.
+
+        Returns
+        -------
+        Dict[str, Any]
+            JSON encoded dictionary.
         """
 
         if isinstance(obj, datetime.datetime):
@@ -144,6 +177,7 @@ class SerializerBase:
         redirect = getattr(obj, '_REDIRECT', {})
 
         def runner(o):
+            """Runner function."""
             if full_encode:
                 return SerializerBase._encode_objs(o)
             else:
@@ -228,8 +262,15 @@ class SerializerBase:
         """Recursive method to support decoding dicts and lists
         containing EasyScience objects.
 
-        :param d: Dictionary containing JSONed EasyScience objects
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        d :
+            Dictionary containing JSONed EasyScience objects.
+
+        Returns
+        -------
+
+            Reformed EasyScience object.
         """
         T_ = type(d)
         if isinstance(d, dict):
@@ -271,8 +312,15 @@ class SerializerBase:
         SerializerBase otherwise. This method processes constructor
         arguments, skipping metadata keys starting with '@'.
 
-        :param in_dict: dictionary to deserialize
-        :return: deserialized dictionary with constructor arguments
+        Parameters
+        ----------
+        in_dict : Dict[str, Any]
+            Dictionary to deserialize.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Deserialized dictionary with constructor arguments.
         """
         d = {
             key: SerializerBase._deserialize_value(value)
@@ -286,8 +334,14 @@ class SerializerBase:
         """Deserialize a single value, using specialized handling for ES
         objects.
 
-        :param value:
-        :return: deserialized value
+        Parameters
+        ----------
+        value : Any
+
+        Returns
+        -------
+        Any
+            Deserialized value.
         """
         if not SerializerBase._is_serialized_easyscience_object(value):
             return SerializerBase._convert_from_dict(value)
@@ -312,8 +366,14 @@ class SerializerBase:
     def _is_serialized_easyscience_object(value: Any) -> bool:
         """Check if a value represents a serialized ES object.
 
-        :param value:
-        :return: True if this is a serialized ES object
+        Parameters
+        ----------
+        value : Any
+
+        Returns
+        -------
+        bool
+            True if this is a serialized ES object.
         """
         return (
             isinstance(value, dict)
@@ -326,11 +386,24 @@ class SerializerBase:
     def _import_class(module_name: str, class_name: str):
         """Import a class from a module name and class name.
 
-        :param module_name: name of the module
-        :param class_name: name of the class
-        :return: the imported class
-        :raises ImportError: if module cannot be imported
-        :raises ValueError: if class is not found in module
+        Parameters
+        ----------
+        module_name : str
+            Name of the module.
+        class_name : str
+            Name of the class.
+
+        Raises
+        ------
+        ImportError :
+            If module cannot be imported.
+        ValueError :
+            If class is not found in module.
+
+        Returns
+        -------
+
+            The imported class.
         """
         try:
             module = __import__(module_name, globals(), locals(), [class_name], 0)

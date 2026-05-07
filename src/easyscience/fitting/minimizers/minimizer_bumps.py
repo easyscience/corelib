@@ -32,8 +32,7 @@ FIT_AVAILABLE_IDS_FILTERED.remove('pt')
 
 
 class Bumps(MinimizerBase):
-    """
-    This is a wrapper to Bumps: https://bumps.readthedocs.io/
+    """This is a wrapper to Bumps: https://bumps.readthedocs.io/
     It allows for the Bumps fitting engine to use parameters declared in an `EasyScience.base_classes.ObjBase`.
     """
 
@@ -65,6 +64,7 @@ class Bumps(MinimizerBase):
 
     @staticmethod
     def supported_methods() -> List[str]:
+        """Supported methods."""
         # only a small subset
         methods = ['amoeba', 'newton', 'lm']
         return methods
@@ -86,38 +86,39 @@ class Bumps(MinimizerBase):
     ) -> FitResults:
         """Perform a fit using the BUMPS engine.
 
-        :param x: points to be calculated at
-        :type x: np.ndarray
-        :param y: measured points
-        :type y: np.ndarray
-        :param weights: Weights for supplied measured points
-        :type weights: np.ndarray
-        :param model: Optional Model which is being fitted to
-        :param parameters: Optional parameters for the fit
-        :type parameters: List[BumpsParameter]
-        :param method: Method for minimization
-        :type method: str
-        :param max_evaluations: Maximum number of optimizer steps. Forwarded to BUMPS as
+        Parameters
+        ----------
+        **kwargs :
+        engine_kwargs : dict | None, optional
+            By default, None.
+        minimizer_kwargs : dict | None, optional
+            By default, None.
+        tolerance : float | None, optional
+            By default, None.
+        x : np.ndarray
+            Points to be calculated at.
+        y : np.ndarray
+            Measured points.
+        weights : np.ndarray
+            Weights for supplied measured points.
+        model : Callable | None, optional
+            Optional Model which is being fitted to. By default, None.
+        parameters : List[Parameter] | None, optional
+            Optional parameters for the fit. By default, None.
+        method : str | None, optional
+            Method for minimization. By default, None.
+        max_evaluations : int | None, optional
+            Maximum number of optimizer steps. Forwarded to BUMPS as
             its ``steps`` parameter. If ``None``, the default value defined by the
-            selected BUMPS fitter (``fitclass.settings``) is used.
-        :type max_evaluations: int | None
-        :param progress_callback: Optional callback for progress updates. The payload
-            field ``iteration`` carries the BUMPS optimizer step index.
-        :type progress_callback: Callable
+            selected BUMPS fitter (``fitclass.settings``) is used. By default, None.
+        progress_callback : Callable[[dict], bool | None] | None, optional
+            Optional callback for progress updates. The payload
+            field ``iteration`` carries the BUMPS optimizer step index. By default, None.
 
-        .. note::
-            The :class:`FitResults` field ``n_evaluations`` reports the number of
-            **objective-function evaluations** consumed by the fit, for cross-backend
-            consistency with LMFit (``nfev``) and DFO-LS (``nf``). For BUMPS this is
-            distinct from the optimizer **step count** that ``max_evaluations`` (i.e.
-            BUMPS ``steps``) is budgeted against and returned as
-            :class:`FitResults.iterations`; a single step may trigger several objective
-            evaluations, so ``n_evaluations`` can legitimately exceed
-            ``max_evaluations``. The budget-exhaustion check is performed against
-            ``iterations``, not ``n_evaluations``.
-
-        :return: Fit results
-        :rtype: FitResults
+        Returns
+        -------
+        FitResults
+            Fit results.
         """
         method_dict = self._get_method_kwargs(method)
 
@@ -234,6 +235,7 @@ class Bumps(MinimizerBase):
 
     @staticmethod
     def _resolve_fitclass(method: str):
+        """Resolve fitclass."""
         for fitclass in FITTERS:
             if fitclass.id == method:
                 return fitclass
@@ -242,6 +244,7 @@ class Bumps(MinimizerBase):
     def _build_progress_payload(
         self, problem, iteration: int, point: np.ndarray, nllf: float
     ) -> dict:
+        """Build progress payload."""
         # Use the nllf already computed by the fitter to avoid a costly
         # model re-evaluation, and let BUMPS apply its own chisq scaling.
         chi2 = float(problem.chisq(nllf=nllf, norm=False))
@@ -259,6 +262,7 @@ class Bumps(MinimizerBase):
         }
 
     def _current_parameter_snapshot(self, problem, point: np.ndarray) -> dict:
+        """Current parameter snapshot."""
         labels = problem.labels()
         values = problem.getp() if point is None else point
         snapshot = {}
@@ -271,11 +275,16 @@ class Bumps(MinimizerBase):
         """Create a container with the `Parameters` converted from the
         base object.
 
-        :param par_list: If only a single/selection of parameter is
-            required. Specify as a list
-        :type par_list: List[str]
-        :return: bumps Parameters list
-        :rtype: List[BumpsParameter]
+        Parameters
+        ----------
+        par_list : List[Parameter] | None, optional
+            If only a single/selection of parameter is
+            required. Specify as a list. By default, None.
+
+        Returns
+        -------
+        List[BumpsParameter]
+            Bumps Parameters list.
         """
         if par_list is None:
             # Assume that we have a ObjBase for which we can obtain a list
@@ -289,8 +298,10 @@ class Bumps(MinimizerBase):
         """Convert an `EasyScience.variable.Parameter` object to a bumps
         Parameter object.
 
-        :return: bumps Parameter compatible object.
-        :rtype: BumpsParameter
+        Returns
+        -------
+        BumpsParameter
+            Bumps Parameter compatible object.
         """
 
         value = obj.value
@@ -309,14 +320,18 @@ class Bumps(MinimizerBase):
 
         Weights are converted to dy (standard deviation of y).
 
-        :return: Callable to make a bumps Curve model
-        :rtype: Callable
+        Returns
+        -------
+        Callable
+            Callable to make a bumps Curve model.
         """
         fit_func = EvalCounter(self._generate_fit_function())
         self._eval_counter = fit_func
 
         def _outer(obj):
+            """Outer function."""
             def _make_func(x, y, weights):
+                """Make func."""
                 bumps_pars = {}
                 if not parameters:
                     for name, par in obj._cached_pars.items():
@@ -343,10 +358,15 @@ class Bumps(MinimizerBase):
         """Update parameters to their final values and assign a std
         error to them.
 
-        :param fit_result: BUMPS OptimizeResult containing best-fit
-            values and errors
-        :param stack_status: Whether the undo stack was enabled
-        :param par_list: List of BUMPS parameter objects
+        Parameters
+        ----------
+        fit_result :
+            BUMPS OptimizeResult containing best-fit
+            values and errors.
+        stack_status : bool
+            Whether the undo stack was enabled.
+        par_list : List[BumpsParameter]
+            List of BUMPS parameter objects.
         """
         from easyscience import global_object
 
@@ -375,13 +395,27 @@ class Bumps(MinimizerBase):
     ) -> FitResults:
         """Convert fit results into the unified `FitResults` format.
 
-        :param x_result: Optimized parameter values from FitDriver
-        :param fx: Final objective function value
-        :param driver: The FitDriver instance
-        :param n_evaluations: Number of iterations completed
-        :param max_evaluations: Maximum evaluations budget (if set)
-        :return: fit results container
-        :rtype: FitResults
+        Parameters
+        ----------
+        **kwargs :
+        tolerance : float | None, optional
+            By default, None.
+        fit_results :
+        x_result :
+            Optimized parameter values from FitDriver.
+        fx :
+            Final objective function value.
+        driver :
+            The FitDriver instance.
+        n_evaluations :
+            Number of iterations completed.
+        max_evaluations : int | None, optional
+            Maximum evaluations budget (if set). By default, None.
+
+        Returns
+        -------
+        FitResults
+            Fit results container.
         """
         results = FitResults()
 
