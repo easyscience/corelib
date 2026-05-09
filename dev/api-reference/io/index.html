@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
@@ -1365,10 +1365,9 @@
 
         <p>This is the base class for creating an encoder/decoder which can
 convert EasyScience objects.</p>
-<p><code>encode</code> and <code>decode</code> are abstract methods to be implemented for
-each serializer. It is expected that the helper function
-<code>_convert_to_dict</code> will be used as a base for encoding (or the
-<code>SerializerDict</code> as it's more flexible).</p>
+<p><code>encode</code> and <code>decode</code> are
+abstract methods to be implemented for each serializer. It is expected that the helper function <code>_convert_to_dict</code>
+will be used as a base for encoding (or the <code>SerializerDict</code> as it's more flexible).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -1728,116 +1727,25 @@ each serializer. It is expected that the helper function
 <span class="normal">372</span>
 <span class="normal">373</span>
 <span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SerializerBase</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is the base class for creating an encoder/decoder which can</span>
+<span class="normal">375</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SerializerBase</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the base class for creating an encoder/decoder which can</span>
 <span class="sd">    convert EasyScience objects.</span>
 
-<span class="sd">    ``encode`` and ``decode`` are abstract methods to be implemented for</span>
-<span class="sd">    each serializer. It is expected that the helper function</span>
-<span class="sd">    `_convert_to_dict` will be used as a base for encoding (or the</span>
-<span class="sd">    ``SerializerDict`` as it&#39;s more flexible).</span>
+<span class="sd">    `encode` and `decode` are</span>
+<span class="sd">    abstract methods to be implemented for each serializer. It is expected that the helper function `_convert_to_dict`</span>
+<span class="sd">    will be used as a base for encoding (or the `SerializerDict` as it&#39;s more flexible).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">SerializerComponent</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Abstract implementation of an encoder.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract implementation of an encoder.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        obj : SerializerComponent</span>
-<span class="sd">            Object to be encoded.</span>
-<span class="sd">        skip : Optional[List[str]], default=None</span>
-<span class="sd">            List of field names as strings to skip when forming the</span>
-<span class="sd">            encoded object. By default, None.</span>
-<span class="sd">        **kwargs :</span>
-<span class="sd">            Any additional key word arguments to be passed to the</span>
-<span class="sd">            encoder.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        any</span>
-<span class="sd">            Encoded object containing all information to reform an</span>
+<span class="sd">        :param obj: Object to be encoded.</span>
+<span class="sd">        :param skip: List of field names as strings to skip when forming</span>
+<span class="sd">            the encoded object</span>
+<span class="sd">        :param kwargs: Any additional key word arguments to be passed to</span>
+<span class="sd">            the encoder</span>
+<span class="sd">        :return: encoded object containing all information to reform an</span>
 <span class="sd">            EasyScience object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1846,37 +1754,21 @@ each serializer. It is expected that the helper function
     <span class="nd">@classmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Re-create an EasyScience object from the output of an encoder.</span>
-<span class="sd">        The default decoder is ``SerializerDict``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from the output of an</span>
+<span class="sd">        encoder. The default decoder is `SerializerDict`.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        obj : Any</span>
-<span class="sd">            Encoded EasyScience object.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Any</span>
-<span class="sd">            Reformed EasyScience object.</span>
+<span class="sd">        :param obj: encoded EasyScience object</span>
+<span class="sd">        :return: Reformed EasyScience object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_arg_spec</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the full argument specification of a function (typically</span>
-<span class="sd">        ``__init__``)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the full argument specification of a function (typically</span>
+<span class="sd">        `__init__`)</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        func : Callable</span>
-<span class="sd">            Function to be inspected.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Tuple[Any, List[str]]</span>
-<span class="sd">            Tuple of argument spec and arguments.</span>
+<span class="sd">        :param func: Function to be inspected</span>
+<span class="sd">        :return: Tuple of argument spec and arguments</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">spec</span> <span class="o">=</span> <span class="n">getfullargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
@@ -1885,18 +1777,12 @@ each serializer. It is expected that the helper function
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_encode_objs</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A JSON serializable dict representation of an object.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A JSON serializable dict representation of an object.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        obj : Any</span>
-<span class="sd">            Any object to be encoded.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Dict[str, Any]</span>
-<span class="sd">            JSON encoded dictionary.</span>
+<span class="sd">        :param obj: any object to be encoded</span>
+<span class="sd">        :param skip: List of field names as strings to skip when forming the encoded object</span>
+<span class="sd">        :param kwargs: Key-words to pass to `SerializerBase`</span>
+<span class="sd">        :return: JSON encoded dictionary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
@@ -1959,7 +1845,6 @@ each serializer. It is expected that the helper function
         <span class="n">redirect</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;_REDIRECT&#39;</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">runner</span><span class="p">(</span><span class="n">o</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Runner function.&quot;&quot;&quot;</span>
             <span class="k">if</span> <span class="n">full_encode</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">SerializerBase</span><span class="o">.</span><span class="n">_encode_objs</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -2040,20 +1925,12 @@ each serializer. It is expected that the helper function
         <span class="k">return</span> <span class="n">d</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_convert_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Recursive method to support decoding dicts and lists containing</span>
-<span class="sd">        EasyScience objects.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_convert_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursive method to support decoding dicts and lists</span>
+<span class="sd">        containing EasyScience objects.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        d : Any</span>
-<span class="sd">            Dictionary containing JSONed EasyScience objects.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Any</span>
-<span class="sd">            Reformed EasyScience object.</span>
+<span class="sd">        :param d: Dictionary containing JSONed EasyScience objects</span>
+<span class="sd">        :return: Reformed EasyScience object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">T_</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -2091,20 +1968,12 @@ each serializer. It is expected that the helper function
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_dict</span><span class="p">(</span><span class="n">in_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Deserialize a dictionary using from_dict for ES objects and</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deserialize a dictionary using from_dict for ES objects and</span>
 <span class="sd">        SerializerBase otherwise. This method processes constructor</span>
 <span class="sd">        arguments, skipping metadata keys starting with &#39;@&#39;.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        in_dict : Dict[str, Any]</span>
-<span class="sd">            Dictionary to deserialize.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Dict[str, Any]</span>
-<span class="sd">            Deserialized dictionary with constructor arguments.</span>
+<span class="sd">        :param in_dict: dictionary to deserialize</span>
+<span class="sd">        :return: deserialized dictionary with constructor arguments</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">key</span><span class="p">:</span> <span class="n">SerializerBase</span><span class="o">.</span><span class="n">_deserialize_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -2115,18 +1984,11 @@ each serializer. It is expected that the helper function
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_deserialize_value</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Deserialize a single value, using specialized handling for ES</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deserialize a single value, using specialized handling for ES</span>
 <span class="sd">        objects.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : Any</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Any</span>
-<span class="sd">            Deserialized value.</span>
+<span class="sd">        :param value:</span>
+<span class="sd">        :return: deserialized value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">SerializerBase</span><span class="o">.</span><span class="n">_is_serialized_easyscience_object</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">SerializerBase</span><span class="o">.</span><span class="n">_convert_from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -2149,17 +2011,10 @@ each serializer. It is expected that the helper function
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_serialized_easyscience_object</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check if a value represents a serialized ES object.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a value represents a serialized ES object.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : Any</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        bool</span>
-<span class="sd">            True if this is a serialized ES object.</span>
+<span class="sd">        :param value:</span>
+<span class="sd">        :return: True if this is a serialized ES object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
@@ -2169,28 +2024,14 @@ each serializer. It is expected that the helper function
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_import_class</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Import a class from a module name and class name.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_import_class</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Import a class from a module name and class name.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        module_name : str</span>
-<span class="sd">            Name of the module.</span>
-<span class="sd">        class_name : str</span>
-<span class="sd">            Name of the class.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Any</span>
-<span class="sd">            The imported class.</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ImportError</span>
-<span class="sd">            If the module cannot be imported.</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            If the class is not found in the module.</span>
+<span class="sd">        :param module_name: name of the module</span>
+<span class="sd">        :param class_name: name of the class</span>
+<span class="sd">        :return: the imported class</span>
+<span class="sd">        :raises ImportError: if module cannot be imported</span>
+<span class="sd">        :raises ValueError: if class is not found in module</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span> <span class="p">[</span><span class="n">class_name</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
@@ -2262,108 +2103,34 @@ each serializer. It is expected that the helper function
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object from the output of an encoder.
-The default decoder is <code>SerializerDict</code>.</p>
+        <p>Re-create an EasyScience object from the output of an
+encoder. The default decoder is <code>SerializerDict</code>.</p>
+<p>:param obj: encoded EasyScience object
+:return: Reformed EasyScience object</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>obj</code>
-            </td>
-            <td>
-                  <code><span title="typing.Any">Any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Encoded EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.Any">Any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Re-create an EasyScience object from the output of an encoder.</span>
-<span class="sd">    The default decoder is ``SerializerDict``.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from the output of an</span>
+<span class="sd">    encoder. The default decoder is `SerializerDict`.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    obj : Any</span>
-<span class="sd">        Encoded EasyScience object.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Any</span>
-<span class="sd">        Reformed EasyScience object.</span>
+<span class="sd">    :param obj: encoded EasyScience object</span>
+<span class="sd">    :return: Reformed EasyScience object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
@@ -2395,111 +2162,37 @@ The default decoder is <code>SerializerDict</code>.</p>
         <p>Deserialize a dictionary using from_dict for ES objects and
 SerializerBase otherwise. This method processes constructor
 arguments, skipping metadata keys starting with '@'.</p>
+<p>:param in_dict: dictionary to deserialize
+:return: deserialized dictionary with constructor arguments</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>in_dict</code>
-            </td>
-            <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Dictionary to deserialize.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Deserialized dictionary with constructor arguments.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_dict</span><span class="p">(</span><span class="n">in_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Deserialize a dictionary using from_dict for ES objects and</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deserialize a dictionary using from_dict for ES objects and</span>
 <span class="sd">    SerializerBase otherwise. This method processes constructor</span>
 <span class="sd">    arguments, skipping metadata keys starting with &#39;@&#39;.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    in_dict : Dict[str, Any]</span>
-<span class="sd">        Dictionary to deserialize.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Dict[str, Any]</span>
-<span class="sd">        Deserialized dictionary with constructor arguments.</span>
+<span class="sd">    :param in_dict: dictionary to deserialize</span>
+<span class="sd">    :return: deserialized dictionary with constructor arguments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">key</span><span class="p">:</span> <span class="n">SerializerBase</span><span class="o">.</span><span class="n">_deserialize_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -2534,114 +2227,23 @@ arguments, skipping metadata keys starting with '@'.</p>
     <div class="doc doc-contents ">
 
         <p>Abstract implementation of an encoder.</p>
+<p>:param obj: Object to be encoded.
+:param skip: List of field names as strings to skip when forming
+    the encoded object
+:param kwargs: Any additional key word arguments to be passed to
+    the encoder
+:return: encoded object containing all information to reform an
+    EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>obj</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;SerializerComponent&lt;/code&gt; (&lt;code&gt;easyscience.io.serializer_component.SerializerComponent&lt;/code&gt;)" href="#easyscience.io.serializer_component.SerializerComponent">SerializerComponent</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Object to be encoded.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>skip</code>
-            </td>
-            <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-encoded object. By default, None.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>**kwargs</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Any additional key word arguments to be passed to the
-encoder.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>{}</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="any">any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">40</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
@@ -2652,38 +2254,16 @@ EasyScience object.</p>
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="normal">51</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">SerializerComponent</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Abstract implementation of an encoder.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract implementation of an encoder.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    obj : SerializerComponent</span>
-<span class="sd">        Object to be encoded.</span>
-<span class="sd">    skip : Optional[List[str]], default=None</span>
-<span class="sd">        List of field names as strings to skip when forming the</span>
-<span class="sd">        encoded object. By default, None.</span>
-<span class="sd">    **kwargs :</span>
-<span class="sd">        Any additional key word arguments to be passed to the</span>
-<span class="sd">        encoder.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    any</span>
-<span class="sd">        Encoded object containing all information to reform an</span>
+<span class="sd">    :param obj: Object to be encoded.</span>
+<span class="sd">    :param skip: List of field names as strings to skip when forming</span>
+<span class="sd">        the encoded object</span>
+<span class="sd">    :param kwargs: Any additional key word arguments to be passed to</span>
+<span class="sd">        the encoder</span>
+<span class="sd">    :return: encoded object containing all information to reform an</span>
 <span class="sd">        EasyScience object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -2716,107 +2296,33 @@ EasyScience object.</p>
 
         <p>Get the full argument specification of a function (typically
 <code>__init__</code>)</p>
+<p>:param func: Function to be inspected
+:return: Tuple of argument spec and arguments</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>func</code>
-            </td>
-            <td>
-                  <code><span title="typing.Callable">Callable</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Function to be inspected.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.Tuple">Tuple</span>[<span title="typing.Any">Any</span>, <span title="typing.List">List</span>[<span title="str">str</span>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Tuple of argument spec and arguments.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_base.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_arg_spec</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the full argument specification of a function (typically</span>
-<span class="sd">    ``__init__``)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the full argument specification of a function (typically</span>
+<span class="sd">    `__init__`)</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    func : Callable</span>
-<span class="sd">        Function to be inspected.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Tuple[Any, List[str]]</span>
-<span class="sd">        Tuple of argument spec and arguments.</span>
+<span class="sd">    :param func: Function to be inspected</span>
+<span class="sd">    :return: Tuple of argument spec and arguments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">spec</span> <span class="o">=</span> <span class="n">getfullargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
@@ -2921,150 +2427,93 @@ via the <code>encode</code> and <code>decode</code> methods. The default encoder
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easyscience/io/serializer_component.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SerializerComponent</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This base class adds the capability of saving and loading</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SerializerComponent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This base class adds the capability of saving and loading</span>
 <span class="sd">    (encoding/decoding, serializing/deserializing) easyscience objects</span>
-<span class="sd">    via the ``encode`` and ``decode`` methods. The default encoder is</span>
-<span class="sd">    ``SerializerDict``, which converts the object to a dictionary.</span>
+<span class="sd">    via the `encode` and `decode` methods. The default encoder is</span>
+<span class="sd">    `SerializerDict`, which converts the object to a dictionary.</span>
 
 <span class="sd">    Shortcuts for dictionary and encoding is also present.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deepcopy function.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">())</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">encoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializerBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Use an encoder to covert an EasyScience object into another</span>
-<span class="sd">        format. Default is to a dictionary using ``SerializerDict``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Use an encoder to covert an EasyScience object into another</span>
+<span class="sd">        format. Default is to a dictionary using `SerializerDict`.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        skip : Optional[List[str]], default=None</span>
-<span class="sd">            List of field names as strings to skip when forming the</span>
-<span class="sd">            encoded object. By default, None.</span>
-<span class="sd">        encoder : Optional[SerializerBase], default=None</span>
-<span class="sd">            The encoder to be used for encoding the data. By default,</span>
-<span class="sd">            None.</span>
-<span class="sd">        **kwargs :</span>
-<span class="sd">            Any additional key word arguments to be passed to the</span>
-<span class="sd">            encoder.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Any</span>
-<span class="sd">            Encoded object containing all information to reform an</span>
-<span class="sd">            EasyScience object.</span>
+<span class="sd">        :param skip: List of field names as strings to skip when forming the encoded object</span>
+<span class="sd">        :param encoder: The encoder to be used for encoding the data. Default is `SerializerDict`</span>
+<span class="sd">        :param kwargs: Any additional key word arguments to be passed to the encoder</span>
+<span class="sd">        :return: encoded object containing all information to reform an EasyScience object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">encoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">encoder</span> <span class="o">=</span> <span class="n">SerializerDict</span>
@@ -3073,22 +2522,13 @@ via the <code>encode</code> and <code>decode</code> methods. The default encoder
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">decoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializerBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Re-create an EasyScience object from the output of an encoder.</span>
-<span class="sd">        The default decoder is ``SerializerDict``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from the output of an</span>
+<span class="sd">        encoder. The default decoder is `SerializerDict`.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        obj : Any</span>
-<span class="sd">            Encoded EasyScience object.</span>
-<span class="sd">        decoder : Optional[SerializerBase], default=None</span>
-<span class="sd">            Decoder to be used to reform the EasyScience object. By</span>
-<span class="sd">            default, None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Any</span>
-<span class="sd">            Reformed EasyScience object.</span>
+<span class="sd">        :param obj: encoded EasyScience object</span>
+<span class="sd">        :param decoder: decoder to be used to reform the EasyScience</span>
+<span class="sd">            object</span>
+<span class="sd">        :return: Reformed EasyScience object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">decoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -3096,41 +2536,25 @@ via the <code>encode</code> and <code>decode</code> methods. The default encoder
         <span class="k">return</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert an EasyScience object into a full dictionary using</span>
-<span class="sd">        ``SerializerDict``. This is a shortcut for</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert an EasyScience object into a full dictionary using</span>
+<span class="sd">        `SerializerDict`. This is a shortcut for</span>
 <span class="sd">        ```obj.encode(encoder=SerializerDict)```</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        skip : Optional[List[str]], default=None</span>
-<span class="sd">            List of field names as strings to skip when forming</span>
-<span class="sd">            the dictionary. By default, None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Dict[str, Any]</span>
-<span class="sd">            Encoded object containing all information to reform an</span>
+<span class="sd">        :param skip: List of field names as strings to skip when forming</span>
+<span class="sd">            the dictionary</span>
+<span class="sd">        :return: encoded object containing all information to reform an</span>
 <span class="sd">            EasyScience object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">encoder</span><span class="o">=</span><span class="n">SerializerDict</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Re-create an EasyScience object from a full encoded dictionary.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from a full encoded</span>
+<span class="sd">        dictionary.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        obj_dict : Dict[str, Any]</span>
-<span class="sd">            Dictionary containing the serialized contents (from</span>
-<span class="sd">            ``SerializerDict``) of an EasyScience object.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Any</span>
-<span class="sd">            Reformed EasyScience object.</span>
+<span class="sd">        :param obj_dict: dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object</span>
+<span class="sd">        :return: Reformed EasyScience object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="n">SerializerDict</span><span class="p">)</span>
@@ -3141,41 +2565,6 @@ via the <code>encode</code> and <code>decode</code> methods. The default encoder
 
 <div class="doc doc-children">
 
-
-
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="easyscience.io.serializer_component.SerializerComponent.__deepcopy__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">__deepcopy__</span><span class="p">(</span><span class="n">memo</span><span class="p">)</span></code>
-
-</h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Deepcopy function.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/easyscience/io/serializer_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deepcopy function.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">())</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
 
 
 
@@ -3196,13 +2585,9 @@ via the <code>encode</code> and <code>decode</code> methods. The default encoder
         <p>Convert an EasyScience object into a full dictionary using
 <code>SerializerDict</code>. This is a shortcut for
 <code>obj.encode(encoder=SerializerDict)</code></p>
-<h6 id="easyscience.io.serializer_component.SerializerComponent.as_dict--parameters">Parameters</h6>
-<p>skip : Optional[List[str]], default=None
-    List of field names as strings to skip when forming
-    the dictionary. By default, None.</p>
-<h6 id="easyscience.io.serializer_component.SerializerComponent.as_dict--returns">Returns</h6>
-<p>Dict[str, Any]
-    Encoded object containing all information to reform an
+<p>:param skip: List of field names as strings to skip when forming
+    the dictionary
+:return: encoded object containing all information to reform an
     EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
@@ -3211,41 +2596,25 @@ via the <code>encode</code> and <code>decode</code> methods. The default encoder
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert an EasyScience object into a full dictionary using</span>
-<span class="sd">    ``SerializerDict``. This is a shortcut for</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an EasyScience object into a full dictionary using</span>
+<span class="sd">    `SerializerDict`. This is a shortcut for</span>
 <span class="sd">    ```obj.encode(encoder=SerializerDict)```</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    skip : Optional[List[str]], default=None</span>
-<span class="sd">        List of field names as strings to skip when forming</span>
-<span class="sd">        the dictionary. By default, None.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Dict[str, Any]</span>
-<span class="sd">        Encoded object containing all information to reform an</span>
+<span class="sd">    :param skip: List of field names as strings to skip when forming</span>
+<span class="sd">        the dictionary</span>
+<span class="sd">    :return: encoded object containing all information to reform an</span>
 <span class="sd">        EasyScience object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -3276,135 +2645,41 @@ via the <code>encode</code> and <code>decode</code> methods. The default encoder
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object from the output of an encoder.
-The default decoder is <code>SerializerDict</code>.</p>
+        <p>Re-create an EasyScience object from the output of an
+encoder. The default decoder is <code>SerializerDict</code>.</p>
+<p>:param obj: encoded EasyScience object
+:param decoder: decoder to be used to reform the EasyScience
+    object
+:return: Reformed EasyScience object</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>obj</code>
-            </td>
-            <td>
-                  <code><span title="typing.Any">Any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Encoded EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>decoder</code>
-            </td>
-            <td>
-                  <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;SerializerBase&lt;/code&gt; (&lt;code&gt;easyscience.io.serializer_base.SerializerBase&lt;/code&gt;)" href="#easyscience.io.serializer_base.SerializerBase">SerializerBase</a>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Decoder to be used to reform the EasyScience object. By
-default, None.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.Any">Any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">decoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializerBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Re-create an EasyScience object from the output of an encoder.</span>
-<span class="sd">    The default decoder is ``SerializerDict``.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from the output of an</span>
+<span class="sd">    encoder. The default decoder is `SerializerDict`.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    obj : Any</span>
-<span class="sd">        Encoded EasyScience object.</span>
-<span class="sd">    decoder : Optional[SerializerBase], default=None</span>
-<span class="sd">        Decoder to be used to reform the EasyScience object. By</span>
-<span class="sd">        default, None.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Any</span>
-<span class="sd">        Reformed EasyScience object.</span>
+<span class="sd">    :param obj: encoded EasyScience object</span>
+<span class="sd">    :param decoder: decoder to be used to reform the EasyScience</span>
+<span class="sd">        object</span>
+<span class="sd">    :return: Reformed EasyScience object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">decoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -3434,115 +2709,20 @@ default, None.</p>
 
         <p>Use an encoder to covert an EasyScience object into another
 format. Default is to a dictionary using <code>SerializerDict</code>.</p>
+<p>:param skip: List of field names as strings to skip when forming the encoded object
+:param encoder: The encoder to be used for encoding the data. Default is <code>SerializerDict</code>
+:param kwargs: Any additional key word arguments to be passed to the encoder
+:return: encoded object containing all information to reform an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>skip</code>
-            </td>
-            <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-encoded object. By default, None.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>encoder</code>
-            </td>
-            <td>
-                  <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="&lt;code&gt;SerializerBase&lt;/code&gt; (&lt;code&gt;easyscience.io.serializer_base.SerializerBase&lt;/code&gt;)" href="#easyscience.io.serializer_base.SerializerBase">SerializerBase</a>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The encoder to be used for encoding the data. By default,
-None.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>**kwargs</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Any additional key word arguments to be passed to the
-encoder.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>{}</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.Any">Any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Encoded object containing all information to reform an
-EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">32</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
@@ -3554,46 +2734,16 @@ EasyScience object.</p>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">encoder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializerBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Use an encoder to covert an EasyScience object into another</span>
-<span class="sd">    format. Default is to a dictionary using ``SerializerDict``.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use an encoder to covert an EasyScience object into another</span>
+<span class="sd">    format. Default is to a dictionary using `SerializerDict`.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    skip : Optional[List[str]], default=None</span>
-<span class="sd">        List of field names as strings to skip when forming the</span>
-<span class="sd">        encoded object. By default, None.</span>
-<span class="sd">    encoder : Optional[SerializerBase], default=None</span>
-<span class="sd">        The encoder to be used for encoding the data. By default,</span>
-<span class="sd">        None.</span>
-<span class="sd">    **kwargs :</span>
-<span class="sd">        Any additional key word arguments to be passed to the</span>
-<span class="sd">        encoder.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Any</span>
-<span class="sd">        Encoded object containing all information to reform an</span>
-<span class="sd">        EasyScience object.</span>
+<span class="sd">    :param skip: List of field names as strings to skip when forming the encoded object</span>
+<span class="sd">    :param encoder: The encoder to be used for encoding the data. Default is `SerializerDict`</span>
+<span class="sd">    :param kwargs: Any additional key word arguments to be passed to the encoder</span>
+<span class="sd">    :return: encoded object containing all information to reform an EasyScience object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">encoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">encoder</span> <span class="o">=</span> <span class="n">SerializerDict</span>
@@ -3625,107 +2775,33 @@ EasyScience object.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Re-create an EasyScience object from a full encoded dictionary.</p>
+        <p>Re-create an EasyScience object from a full encoded
+dictionary.</p>
+<p>:param obj_dict: dictionary containing the serialized contents (from <code>SerializerDict</code>) of an EasyScience object
+:return: Reformed EasyScience object</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>obj_dict</code>
-            </td>
-            <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Dictionary containing the serialized contents (from
-<code>SerializerDict</code>) of an EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.Any">Any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Reformed EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_component.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Re-create an EasyScience object from a full encoded dictionary.</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from a full encoded</span>
+<span class="sd">    dictionary.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    obj_dict : Dict[str, Any]</span>
-<span class="sd">        Dictionary containing the serialized contents (from</span>
-<span class="sd">        ``SerializerDict``) of an EasyScience object.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Any</span>
-<span class="sd">        Reformed EasyScience object.</span>
+<span class="sd">    :param obj_dict: dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object</span>
+<span class="sd">    :return: Reformed EasyScience object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="n">SerializerDict</span><span class="p">)</span>
@@ -3816,8 +2892,8 @@ EasyScience object.</p>
 
 
 
-        <p>This is a serializer that can encode and decode EasyScience objects
-to and from a dictionary.</p>
+        <p>This is a serializer that can encode and decode EasyScience
+objects to and from a dictionary.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -3831,7 +2907,8 @@ to and from a dictionary.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easyscience/io/serializer_dict.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
+<span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
@@ -3866,31 +2943,9 @@ to and from a dictionary.</p>
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SerializerDict</span><span class="p">(</span><span class="n">SerializerBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is a serializer that can encode and decode EasyScience objects</span>
-<span class="sd">    to and from a dictionary.</span>
+<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SerializerDict</span><span class="p">(</span><span class="n">SerializerBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is a serializer that can encode and decode EasyScience</span>
+<span class="sd">    objects to and from a dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span>
@@ -3898,49 +2953,30 @@ to and from a dictionary.</p>
         <span class="n">obj</span><span class="p">:</span> <span class="n">SerializerComponent</span><span class="p">,</span>
         <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">full_encode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert an EasyScience object to a dictionary.</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert an EasyScience object to a dictionary.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        obj : SerializerComponent</span>
-<span class="sd">            Object to be encoded.</span>
-<span class="sd">        skip : Optional[List[str]], default=None</span>
-<span class="sd">            List of field names as strings to skip when forming the</span>
-<span class="sd">            encoded object. By default, None.</span>
-<span class="sd">        full_encode : bool, default=False</span>
-<span class="sd">            Should the data also be encoded (default False). By default,</span>
-<span class="sd">            False.</span>
-<span class="sd">        **kwargs : Any</span>
-<span class="sd">            Any additional key word arguments to be passed to the</span>
-<span class="sd">            encoder.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Dict[str, Any]</span>
-<span class="sd">            Object encoded to dictionary containing all information to</span>
-<span class="sd">            reform an EasyScience object.</span>
+<span class="sd">        :param obj: Object to be encoded.</span>
+<span class="sd">        :param skip: List of field names as strings to skip when forming</span>
+<span class="sd">            the encoded object</span>
+<span class="sd">        :param full_encode: Should the data also be encoded (default</span>
+<span class="sd">            False)</span>
+<span class="sd">        :param kwargs: Any additional key word arguments to be passed to</span>
+<span class="sd">            the encoder</span>
+<span class="sd">        :return: object encoded to dictionary containing all information</span>
+<span class="sd">            to reform an EasyScience object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">full_encode</span><span class="o">=</span><span class="n">full_encode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SerializerComponent</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Re-create an EasyScience object from the dictionary</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializerComponent</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from the dictionary</span>
 <span class="sd">        representation.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        d : Dict[str, Any]</span>
-<span class="sd">            Dict representation of an EasyScience object.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        SerializerComponent</span>
-<span class="sd">            EasyScience object.</span>
+<span class="sd">        :param d: Dict representation of an EasyScience object.</span>
+<span class="sd">        :return: EasyScience object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">SerializerBase</span><span class="o">.</span><span class="n">_convert_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
@@ -3974,105 +3010,31 @@ to and from a dictionary.</p>
 
         <p>Re-create an EasyScience object from the dictionary
 representation.</p>
+<p>:param d: Dict representation of an EasyScience object.
+:return: EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>d</code>
-            </td>
-            <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Dict representation of an EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;SerializerComponent&lt;/code&gt; (&lt;code&gt;easyscience.io.serializer_component.SerializerComponent&lt;/code&gt;)" href="#easyscience.io.serializer_component.SerializerComponent">SerializerComponent</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_dict.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SerializerComponent</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Re-create an EasyScience object from the dictionary</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializerComponent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-create an EasyScience object from the dictionary</span>
 <span class="sd">    representation.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    d : Dict[str, Any]</span>
-<span class="sd">        Dict representation of an EasyScience object.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    SerializerComponent</span>
-<span class="sd">        EasyScience object.</span>
+<span class="sd">    :param d: Dict representation of an EasyScience object.</span>
+<span class="sd">    :return: EasyScience object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">SerializerBase</span><span class="o">.</span><span class="n">_convert_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
@@ -4099,135 +3061,25 @@ representation.</p>
     <div class="doc doc-contents ">
 
         <p>Convert an EasyScience object to a dictionary.</p>
+<p>:param obj: Object to be encoded.
+:param skip: List of field names as strings to skip when forming
+    the encoded object
+:param full_encode: Should the data also be encoded (default
+    False)
+:param kwargs: Any additional key word arguments to be passed to
+    the encoder
+:return: object encoded to dictionary containing all information
+    to reform an EasyScience object.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>obj</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;code&gt;SerializerComponent&lt;/code&gt; (&lt;code&gt;easyscience.io.serializer_component.SerializerComponent&lt;/code&gt;)" href="#easyscience.io.serializer_component.SerializerComponent">SerializerComponent</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Object to be encoded.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>skip</code>
-            </td>
-            <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of field names as strings to skip when forming the
-encoded object. By default, None.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>full_encode</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Should the data also be encoded (default False). By default,
-False.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>**kwargs</code>
-            </td>
-            <td>
-                  <code><span title="typing.Any">Any</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Any additional key word arguments to be passed to the
-encoder.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>{}</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Object encoded to dictionary containing all information to
-reform an EasyScience object.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/io/serializer_dict.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
@@ -4245,48 +3097,24 @@ reform an EasyScience object.</p>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span>
+<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">SerializerComponent</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">full_encode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert an EasyScience object to a dictionary.</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an EasyScience object to a dictionary.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    obj : SerializerComponent</span>
-<span class="sd">        Object to be encoded.</span>
-<span class="sd">    skip : Optional[List[str]], default=None</span>
-<span class="sd">        List of field names as strings to skip when forming the</span>
-<span class="sd">        encoded object. By default, None.</span>
-<span class="sd">    full_encode : bool, default=False</span>
-<span class="sd">        Should the data also be encoded (default False). By default,</span>
-<span class="sd">        False.</span>
-<span class="sd">    **kwargs : Any</span>
-<span class="sd">        Any additional key word arguments to be passed to the</span>
-<span class="sd">        encoder.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Dict[str, Any]</span>
-<span class="sd">        Object encoded to dictionary containing all information to</span>
-<span class="sd">        reform an EasyScience object.</span>
+<span class="sd">    :param obj: Object to be encoded.</span>
+<span class="sd">    :param skip: List of field names as strings to skip when forming</span>
+<span class="sd">        the encoded object</span>
+<span class="sd">    :param full_encode: Should the data also be encoded (default</span>
+<span class="sd">        False)</span>
+<span class="sd">    :param kwargs: Any additional key word arguments to be passed to</span>
+<span class="sd">        the encoder</span>
+<span class="sd">    :return: object encoded to dictionary containing all information</span>
+<span class="sd">        to reform an EasyScience object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">full_encode</span><span class="o">=</span><span class="n">full_encode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
