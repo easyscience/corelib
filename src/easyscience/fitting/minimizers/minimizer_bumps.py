@@ -80,6 +80,7 @@ class Bumps(MinimizerBase):
         tolerance: float | None = None,
         max_evaluations: int | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
+        abort_test: Callable[[], bool] | None = None,
         minimizer_kwargs: dict | None = None,
         engine_kwargs: dict | None = None,
         **kwargs,
@@ -186,6 +187,7 @@ class Bumps(MinimizerBase):
             fitclass=fitclass,
             problem=problem,
             monitors=monitors,
+            abort_test=abort_test or (lambda: False),
             **minimizer_kwargs,
             **kwargs,
         )
@@ -346,6 +348,8 @@ class Bumps(MinimizerBase):
         population: int | None = None,
         seed: int | None = None,
         sampler_kwargs: dict | None = None,
+        progress_callback: Callable[[dict], bool | None] | None = None,
+        abort_test: Callable[[], bool] | None = None,
     ) -> dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
@@ -356,33 +360,23 @@ class Bumps(MinimizerBase):
         to this method after flattening multi-dataset arrays.
 
         :param x: Flattened independent variable array.
-        :type x: np.ndarray
         :param y: Flattened dependent variable array.
-        :type y: np.ndarray
         :param weights: Flattened weight array.
-        :type weights: np.ndarray
         :param samples: Number of retained DREAM samples requested from BUMPS.
-        :type samples: int
         :param burn: Burn-in steps.
-        :type burn: int
         :param thin: Thinning interval.
-        :type thin: int
         :param chains: User-friendly alias for BUMPS DREAM population count.
-        :type chains: int | None
-        :param population: BUMPS DREAM population count (``pop``) for advanced users.
-        :type population: int | None
-        :param seed: Best-effort random seed passed to ``numpy.random.seed``.
-            BUMPS DREAM may use additional internal RNG state that is not
-            controlled by this seed, so exact reproducibility is not guaranteed.
-        :type seed: int | None
+        :param population: BUMPS DREAM population count for advanced users.
+        :param seed: Best-effort random seed.
         :param sampler_kwargs: Additional keyword arguments forwarded to
             :func:`bumps.fitters.fit`.
-        :type sampler_kwargs: dict | None
-        :return: Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
+        :param progress_callback: Optional callback for progress updates during
+            sampling.  The payload dict includes ``iteration`` (DREAM generation
+            number) and ``sampling: True``.
+        :return: Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'`",
             and ``'logp'``.
-        :rtype: dict
         """
-        from bumps.fitters import fit as bumps_fit
+        from bumps.fitters import DreamFit
         from bumps.names import FitProblem
 
         # Build the BUMPS Curve model using the minimizer's existing machinery
@@ -392,30 +386,104 @@ class Bumps(MinimizerBase):
         problem = FitProblem(curve)
 
         # Best-effort seed: sets numpy's global RNG state just before DREAM starts.
-        # BUMPS DREAM may have its own internal RNG paths that are not fully
-        # controlled by this, so exact reproducibility is not guaranteed.
         if seed is not None:
             np.random.seed(seed)
 
-        # Run DREAM sampler
+        # Resolve population parameter
+        if chains is not None and population is not None:
+            if chains != population:
+                raise ValueError(
+                    f'Conflicting population arguments: chains={chains}, population={population}. '
+                    'Only provide one.'
+                )
+            pop = chains
+        elif chains is not None:
+            pop = chains
+        elif population is not None:
+            pop = population
+        else:
+            pop = None
+
+        # Build DREAM kwargs
         dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
-        if chains is not None or population is not None:
-            pop = chains if chains is not None else population
+        if pop is not None:
             dream_kwargs['pop'] = pop
         if sampler_kwargs:
             dream_kwargs.update(sampler_kwargs)
-        result = bumps_fit(problem, method='dream', **dream_kwargs)
 
-        # Extract posterior
-        draws = result.state.draw().points
+        # Build monitors (same pattern as classical Bumps.fit())
+        monitors = []
+        if progress_callback is not None:
+            if not callable(progress_callback):
+                raise ValueError('progress_callback must be callable')
+            # Compute total DREAM steps for progress display (burn + sampling generations)
+            pop_val = pop if pop else 10
+            _total_steps = burn + (samples + pop_val - 1) // pop_val
+            monitors.append(
+                BumpsProgressMonitor(
+                    problem,
+                    progress_callback,
+                    lambda problem, iteration, point, nllf: {
+                        **self._build_sample_progress_payload(problem, iteration, point, nllf),
+                        'total_steps': _total_steps,
+                    },
+                )
+            )
+
+        driver = FitDriver(
+            fitclass=DreamFit,
+            problem=problem,
+            monitors=monitors,
+            abort_test=abort_test or (lambda: False),
+            **dream_kwargs,
+        )
+        driver.clip()
+
+        from easyscience import global_object
+
+        stack_status = global_object.stack.enabled
+        global_object.stack.enabled = False
+
+        try:
+            x_opt, fx = driver.fit()
+            result_state = getattr(driver.fitter, 'state', None)
+            if result_state is None:
+                raise FitError('Sampling aborted by user')
+        except Exception:
+            self._restore_parameter_values()
+            raise
+        finally:
+            global_object.stack.enabled = stack_status
+
+        draws = result_state.draw().points
         param_names = [p.name[len(MINIMIZER_PARAMETER_PREFIX) :] for p in problem._parameters]
-        logp = getattr(result.state, 'logp', None)
+        logp = getattr(result_state, 'logp', None)
 
         return {
             'draws': draws,
             'param_names': param_names,
-            'state': result.state,
+            'state': result_state,
             'logp': logp,
+        }
+
+    def _build_sample_progress_payload(
+        self, problem, iteration: int, point: np.ndarray, nllf: float
+    ) -> dict:
+        """Build a progress payload for Bayesian DREAM sampling steps.
+
+        Called by :class:`BumpsProgressMonitor` at each DREAM generation.
+        The payload includes ``sampling: True`` so downstream consumers can
+        distinguish sampling progress from classical fitting progress.
+        """
+        parameter_values = self._current_parameter_snapshot(problem, point)
+        return {
+            'iteration': iteration,
+            'chi2': float(problem.chisq(nllf=nllf, norm=False)),
+            'reduced_chi2': float(problem.chisq(nllf=nllf, norm=True)),
+            'parameter_values': parameter_values,
+            'refresh_plots': False,
+            'finished': False,
+            'sampling': True,
         }
 
     def _set_parameter_fit_result(

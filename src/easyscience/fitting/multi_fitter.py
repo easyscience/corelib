@@ -164,6 +164,8 @@ class MultiFitter(Fitter):
         seed: int | None = None,
         vectorized: bool = False,
         sampler_kwargs: dict | None = None,
+        progress_callback: Callable[[dict], bool | None] | None = None,
+        abort_test: Callable[[], bool] | None = None,
     ) -> Dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
@@ -196,7 +198,10 @@ class MultiFitter(Fitter):
         :param sampler_kwargs: Additional keyword arguments forwarded to the
             BUMPS DREAM sampler via :func:`bumps.fitters.fit`.
         :type sampler_kwargs: dict | None
-        :return: Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
+        :param progress_callback: Optional callback for progress updates during
+            sampling.  The payload dict includes ``iteration`` (DREAM generation
+            number) and ``sampling: True``.
+        :return: Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'`",
             and ``'logp'``.
         :rtype: dict
         :raises RuntimeError: If the current minimizer is not a BUMPS instance.
@@ -251,6 +256,8 @@ class MultiFitter(Fitter):
                 population=pop,
                 seed=seed,
                 sampler_kwargs=sampler_kwargs,
+                progress_callback=progress_callback,
+                abort_test=abort_test,
             )
         finally:
             self.fit_function = original_fit_func
