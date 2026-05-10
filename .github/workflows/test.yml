@@ -217,10 +217,10 @@ jobs:
               exit 1
             fi
 
-            whl_url="file://$(python -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "${whl_path[0]}")"
+            whl_path=$(python -c 'import os,sys; print(os.path.relpath(os.path.abspath(sys.argv[1]), os.getcwd()))' "${whl_path[0]}")
 
-            echo "Adding easyscience from: $whl_url"
-            pixi add --pypi "easyscience[dev] @ ${whl_url}"
+            echo "Adding easyscience from local wheel: $whl_path"
+            pixi add --pypi "easyscience[dev] @ ${whl_path}"
 
             echo "Exiting pixi project directory"
             cd ..
