@@ -138,7 +138,7 @@ default-tag = 'v999.0.0'
 # https://interrogate.readthedocs.io/en/latest/
 
 [tool.interrogate]
-fail-under = 0                       # Minimum docstring coverage percentage to pass
+fail-under = 45                      # Minimum docstring coverage percentage to pass
 verbose = 1
 exclude = ['src/easyscience/legacy']
 
@@ -156,7 +156,7 @@ source = ['src'] # Limit coverage to the source code directory
 [tool.coverage.report]
 show_missing = true  # Show missing lines
 skip_covered = false # Skip files with 100% coverage in the report
-fail_under = 0       # Minimum coverage percentage to pass
+fail_under = 80      # Minimum coverage percentage to pass
 
 ##########################
 # Configuration for pytest
