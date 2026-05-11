@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 
 def addLoggedProp(inst: SerializerComponent, name: str, *args, **kwargs) -> None:
-    """Addloggedprop function."""
     cls = type(inst)
     annotations = getattr(cls, '__annotations__', False)
     if not hasattr(cls, '__perinstance'):
@@ -30,7 +29,6 @@ def addLoggedProp(inst: SerializerComponent, name: str, *args, **kwargs) -> None
 
 
 def addProp(inst: SerializerComponent, name: str, *args, **kwargs) -> None:
-    """Addprop function."""
     cls = type(inst)
     annotations = getattr(cls, '__annotations__', False)
     if not hasattr(cls, '__perinstance'):
@@ -45,7 +43,6 @@ def addProp(inst: SerializerComponent, name: str, *args, **kwargs) -> None:
 
 
 def removeProp(inst: SerializerComponent, name: str) -> None:
-    """Removeprop function."""
     cls = type(inst)
     if not hasattr(cls, '__perinstance'):
         cls = type(cls.__name__, (cls,), {'__module__': __name__})
@@ -56,7 +53,6 @@ def removeProp(inst: SerializerComponent, name: str) -> None:
 
 
 def generatePath(model_obj: BasedBase, skip_first: bool = False) -> Tuple[List[int], List[str]]:
-    """Generatepath function."""
     pars = model_obj.get_parameters()
     start_idx = 0 + int(skip_first)
     unique_names = []

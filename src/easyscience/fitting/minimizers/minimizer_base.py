@@ -53,16 +53,13 @@ class MinimizerBase(metaclass=ABCMeta):
 
     @property
     def enum(self) -> AvailableMinimizers:
-        """Enum function."""
         return self._minimizer_enum
 
     @property
     def name(self) -> str:
-        """Name function."""
         return self._minimizer_enum.name
 
     def _restore_parameter_values(self) -> None:
-        """Restore parameter values."""
         for key in self._cached_pars.keys():
             self._cached_pars[key].value = self._cached_pars_vals[key][0]
             self._cached_pars[key].error = self._cached_pars_vals[key][1]
@@ -158,7 +155,6 @@ class MinimizerBase(metaclass=ABCMeta):
         return self._fit_function(x, **minimizer_parameters, **kwargs)
 
     def _get_method_kwargs(self, passed_method: str | None = None) -> dict[str, str]:
-        """Get method kwargs."""
         if passed_method is not None:
             if passed_method not in self.supported_methods():
                 raise FitError(f'Method {passed_method} not available in {self.__class__}')
@@ -329,7 +325,6 @@ class MinimizerBase(metaclass=ABCMeta):
     def _error_from_jacobian(
         jacobian: np.ndarray, residuals: np.ndarray, confidence: float = 0.95
     ) -> np.ndarray:
-        """Error from jacobian."""
         from scipy import stats
 
         JtJi = np.linalg.inv(np.dot(jacobian.T, jacobian))

@@ -26,38 +26,31 @@ class AnalysisBase(ObjBase, metaclass=ABCMeta):
 
     @abstractmethod
     def calculate_theory(self, x: np.ndarray, **kwargs) -> np.ndarray:
-        """Calculate theory."""
         raise NotImplementedError('calculate_theory not implemented')
 
     @abstractmethod
     def fit(self, x: np.ndarray, y: np.ndarray, e: np.ndarray, **kwargs) -> None:
-        """Fit function."""
         raise NotImplementedError('fit not implemented')
 
     @property
     def calculator(self) -> str:
-        """Calculator function."""
         if self._calculator is None:
             self._calculator = self.interface.current_interface_name
         return self._calculator
 
     @calculator.setter
     def calculator(self, value) -> None:
-        """Calculator function."""
         # TODO: check if the calculator is available for the given JobType
         self.interface.switch(value, fitter=self._fitter)
 
     @property
     def minimizer(self) -> MinimizerBase:
-        """Minimizer function."""
         return self._minimizer
 
     @minimizer.setter
     def minimizer(self, minimizer: MinimizerBase) -> None:
-        """Minimizer function."""
         self._minimizer = minimizer
 
     # required dunder methods
     def __str__(self):
-        """Str function."""
         return f'Analysis: {self.name}'

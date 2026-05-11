@@ -91,7 +91,6 @@ class ObjBase(BasedBase):
             )
 
     def _add_component(self, key: str, component: SerializerComponent) -> None:
-        """Add component."""
         """Dynamically add a component to the class. This is an internal
         method, though can be called remotely. The recommended
         alternative is to use typing, i.e.
@@ -122,7 +121,6 @@ class ObjBase(BasedBase):
         )
 
     def __setattr__(self, key: str, value: SerializerComponent) -> None:
-        """Setattr function."""
         # Assume that the annotation is a ClassVar
         old_obj = None
         if (
@@ -151,23 +149,18 @@ class ObjBase(BasedBase):
                 self.generate_bindings()
 
     def __repr__(self) -> str:
-        """Repr function."""
         return f'{self.__class__.__name__} `{getattr(self, "name")}`'
 
     @staticmethod
     def __getter(key: str) -> Callable[[SerializerComponent], SerializerComponent]:
-        """Getter function."""
         def getter(obj: SerializerComponent) -> SerializerComponent:
-            """Getter function."""
             return obj._kwargs[key]
 
         return getter
 
     @staticmethod
     def __setter(key: str) -> Callable[[SerializerComponent], None]:
-        """Setter function."""
         def setter(obj: SerializerComponent, value: float) -> None:
-            """Setter function."""
             if issubclass(obj._kwargs[key].__class__, (DescriptorBase)) and not issubclass(
                 value.__class__, (DescriptorBase)
             ):

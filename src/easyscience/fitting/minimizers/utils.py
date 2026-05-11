@@ -29,7 +29,6 @@ class FitResults:
     ]
 
     def __init__(self):
-        """Init function."""
         self.success = False
         self.minimizer_engine = None
         self.fit_args = {}
@@ -47,7 +46,6 @@ class FitResults:
         self.total_results = None
 
     def __repr__(self) -> str:
-        """Repr function."""
         engine_name = self.minimizer_engine.__name__ if self.minimizer_engine else None
         try:
             chi2_val = self.chi2
@@ -83,32 +81,26 @@ class FitResults:
 
     @property
     def n_pars(self):
-        """N pars."""
         return len(self.p)
 
     @property
     def residual(self):
-        """Residual function."""
         return self.y_obs - self.y_calc
 
     @property
     def chi2(self):
-        """Chi2 function."""
         return ((self.residual / self.y_err) ** 2).sum()
 
     @property
     def reduced_chi2(self):
-        """Reduced chi2."""
         return self.chi2 / (len(self.x) - self.n_pars)
 
 
 class FitError(Exception):
     def __init__(self, e: Exception = None):
-        """Init function."""
         self.e = e
 
     def __str__(self) -> str:
-        """Str function."""
         s = ''
         if self.e is not None:
             s = f'{self.e}\n'

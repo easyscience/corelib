@@ -162,7 +162,6 @@ class DescriptorArray(DescriptorBase):
 
     @full_value.setter
     def full_value(self, full_value: Variable) -> None:
-        """Full value."""
         raise AttributeError(
             f'Full_value is read-only. Change the value and variance separately. Or create a new {self.__class__.__name__}.'
         )
@@ -276,7 +275,6 @@ class DescriptorArray(DescriptorBase):
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
-        """Unit function."""
         raise AttributeError(
             (
                 f'Unit is read-only. Use convert_unit to change the unit between allowed types '
@@ -420,7 +418,6 @@ class DescriptorArray(DescriptorBase):
 
         # Define the setter function for the undo stack
         def set_array(obj, scalar):
-            """Set array."""
             obj._array = scalar
 
         # Push to undo stack
@@ -612,7 +609,6 @@ class DescriptorArray(DescriptorBase):
         """
 
         def reversed_operation(a, b):
-            """Reversed operation."""
             return operation(b, a)
 
         if isinstance(other, DescriptorNumber):

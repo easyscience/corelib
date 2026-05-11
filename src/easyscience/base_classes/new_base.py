@@ -198,9 +198,7 @@ class NewBase:
         return new_obj
 
     def __deepcopy__(self, memo):
-        """Deepcopy function."""
         return self.__copy__()
 
     def __repr__(self) -> str:
-        """Repr function."""
         return f'{self.__class__.__name__} `{self.unique_name}`'

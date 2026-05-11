@@ -84,7 +84,6 @@ class DescriptorAnyType(DescriptorBase):
         self._value = value
 
     def __copy__(self) -> DescriptorAnyType:
-        """Copy function."""
         return super().__copy__()
 
     def __repr__(self) -> str:
@@ -101,7 +100,6 @@ class DescriptorAnyType(DescriptorBase):
         return f"<{self.__class__.__name__} '{self._name}': {value_repr}>"
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        """As dict."""
         raw_dict = super().as_dict(skip=skip)
         raw_dict['value'] = self._value
         return raw_dict

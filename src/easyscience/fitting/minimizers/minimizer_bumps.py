@@ -69,7 +69,6 @@ class Bumps(MinimizerBase):
 
     @staticmethod
     def supported_methods() -> List[str]:
-        """Supported methods."""
         # only a small subset
         methods = ['amoeba', 'newton', 'lm']
         return methods
@@ -252,7 +251,6 @@ class Bumps(MinimizerBase):
 
     @staticmethod
     def _resolve_fitclass(method: str):
-        """Resolve fitclass."""
         for fitclass in FITTERS:
             if fitclass.id == method:
                 return fitclass
@@ -261,7 +259,6 @@ class Bumps(MinimizerBase):
     def _build_progress_payload(
         self, problem, iteration: int, point: np.ndarray, nllf: float
     ) -> dict:
-        """Build progress payload."""
         # Use the nllf already computed by the fitter to avoid a costly
         # model re-evaluation, and let BUMPS apply its own chisq scaling.
         chi2 = float(problem.chisq(nllf=nllf, norm=False))
@@ -279,7 +276,6 @@ class Bumps(MinimizerBase):
         }
 
     def _current_parameter_snapshot(self, problem, point: np.ndarray) -> dict:
-        """Current parameter snapshot."""
         labels = problem.labels()
         values = problem.getp() if point is None else point
         snapshot = {}
@@ -359,10 +355,8 @@ class Bumps(MinimizerBase):
         self._eval_counter = fit_func
 
         def _outer(obj):
-            """Outer function."""
 
             def _make_func(x, y, weights):
-                """Make func."""
                 bumps_pars = {}
                 if not parameters:
                     for name, par in obj._cached_pars.items():

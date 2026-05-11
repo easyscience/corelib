@@ -21,7 +21,6 @@ def singleton(cls):
     instances = {}
 
     def get_instance():
-        """Get instance."""
         if cls not in instances:
             instances[cls] = cls()
         return instances[cls]
@@ -96,7 +95,6 @@ def cached_class(klass):
             return inst
 
         def __init__(self, *args, **kwargs):
-            """Init function."""
             # This will be called every time __new__ is
             # called, so we skip initializing here and do
             # it only when the instance is created above

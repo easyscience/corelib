@@ -34,7 +34,6 @@ class JsonSerializer(BaseEncoderDecoder):
 
     @classmethod
     def decode(cls, data: str) -> ComponentSerializer:
-        """Decode function."""
         return json.loads(data, cls=JsonDecoderTemplate)
 
 
@@ -61,7 +60,6 @@ class JsonDataSerializer(BaseEncoderDecoder):
 
     @classmethod
     def decode(cls, data: str) -> ComponentSerializer:
-        """Decode function."""
         raise NotImplementedError(
             'It is not possible to reconstitute objects from data only objects.'
         )

@@ -288,19 +288,16 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
     # Overwriting methods
 
     def __repr__(self) -> str:
-        """Repr function."""
         return (
             f'{self.__class__.__name__} of length {len(self)} of type(s) {self._protected_types}'
         )
 
     def __contains__(self, item: ProtectedType_ | str) -> bool:
-        """Contains function."""
         if isinstance(item, str):
             return any(self._get_key(r) == item for r in self._data)
         return item in self._data
 
     def __reversed__(self):
-        """Reversed function."""
         return self._data.__reversed__()
 
     def sort(self, key: Callable[[ProtectedType_], Any] = None, reverse: bool = False) -> None:
@@ -317,7 +314,6 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         self._data.sort(reverse=reverse, key=key)
 
     def index(self, value: ProtectedType_ | str, start: int = 0, stop: int = None) -> int:
-        """Index function."""
         if stop is None:
             stop = len(self._data)
         if isinstance(value, str):

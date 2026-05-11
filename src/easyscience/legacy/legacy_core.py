@@ -33,7 +33,6 @@ class ComponentSerializer:
     _CORE = True
 
     def __deepcopy__(self, memo):
-        """Deepcopy function."""
         return self.from_dict(self.as_dict())
 
     def encode(
@@ -196,7 +195,6 @@ class ComponentSerializer:
         """
 
         def flatten(obj, seperator='.'):
-            """Flatten function."""
             # Flattens a dictionary
 
             flat_dict = {}

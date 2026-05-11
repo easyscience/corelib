@@ -316,7 +316,6 @@ class CollectionBase(BasedBase, MutableSequence):
         return tuple(self._kwargs.values())
 
     def __repr__(self) -> str:
-        """Repr function."""
         return f'{self.__class__.__name__} `{getattr(self, "name")}` of length {len(self)}'
 
     def sort(

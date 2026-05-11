@@ -21,11 +21,9 @@ class BumpsProgressMonitor(Monitor):
         self._payload_builder = payload_builder
 
     def config_history(self, history):
-        """Config history."""
         history.requires(step=1, point=1, value=1)
 
     def __call__(self, history):
-        """Call function."""
         payload = self._payload_builder(
             problem=self._problem,
             iteration=int(history.step[0]),

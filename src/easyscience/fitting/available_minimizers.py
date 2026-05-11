@@ -78,7 +78,6 @@ class AvailableMinimizers(AvailableMinimizer, Enum):
 
 # Temporary solution to convert string to enum
 def from_string_to_enum(minimizer_name: str) -> AvailableMinimizers:
-    """From string to enum."""
     if minimizer_name == 'LMFit':
         minmizer_enum = AvailableMinimizers.LMFit
     elif minimizer_name == 'LMFit_leastsq':

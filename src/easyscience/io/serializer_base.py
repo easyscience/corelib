@@ -178,7 +178,6 @@ class SerializerBase:
         redirect = getattr(obj, '_REDIRECT', {})
 
         def runner(o):
-            """Runner function."""
             if full_encode:
                 return SerializerBase._encode_objs(o)
             else:

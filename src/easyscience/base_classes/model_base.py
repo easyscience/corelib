@@ -44,7 +44,6 @@ class ModelBase(NewBase):
     """
 
     def __init__(self, unique_name: Optional[str] = None, display_name: Optional[str] = None):
-        """Init function."""
         super().__init__(unique_name=unique_name, display_name=display_name)
 
     def get_all_variables(self) -> List[DescriptorBase]:

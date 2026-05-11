@@ -33,10 +33,8 @@ class LoggedProperty(property):
 
     @staticmethod
     def _caller_class(test_class, skip: int = 1):
-        """Caller class."""
 
         def stack_(frame):
-            """Stack function."""
             frame_list = []
             while frame:
                 frame_list.append(frame)
@@ -54,14 +52,12 @@ class LoggedProperty(property):
         return test
 
     def __get__(self, instance, owner=None):
-        """Get function."""
         if not global_object.script.enabled:
             return super(LoggedProperty, self).__get__(instance, owner)
         test = self._caller_class(self.test_class)
         res = super(LoggedProperty, self).__get__(instance, owner)
 
         def result_item(item_to_be_resulted):
-            """Result item."""
             if item_to_be_resulted is None:
                 return None
             if global_object.map.is_known(item_to_be_resulted):
@@ -81,7 +77,6 @@ class LoggedProperty(property):
         return res
 
     def __set__(self, instance, value):
-        """Set function."""
         if not global_object.script.enabled:
             return super().__set__(instance, value)
         test = self._caller_class(self.test_class)
@@ -94,7 +89,6 @@ class LoggedProperty(property):
         return super().__set__(instance, value)
 
     def makeEntry(self, log_type, returns, *args, **kwargs) -> str:
-        """Makeentry function."""
         temp = ''
         if returns is None:
             returns = []
@@ -149,7 +143,6 @@ class PropertyHugger(PatcherFactory):
     _global_object = global_object
 
     def __init__(self, klass, prop_name):
-        """Init function."""
         super().__init__()
         self.klass = klass
         if isinstance(prop_name, tuple):
@@ -165,7 +158,6 @@ class PropertyHugger(PatcherFactory):
         }
 
     def patch(self):
-        """Patch function."""
         option = {}
         for key, item in self.__patch_ref.items():
             func = getattr(self.property, key)
@@ -178,17 +170,14 @@ class PropertyHugger(PatcherFactory):
         setattr(self.klass, self.prop_name, property(**option))
 
     def restore(self):
-        """Restore function."""
         if global_object.debug:
             print(f'Restoring property {self.klass.__name__}.{self.prop_name}')
         setattr(self.klass, self.prop_name, self.property)
 
     def patch_get(self, func: Callable) -> Callable:
-        """Patch get."""
 
         @wraps(func)
         def inner(*args, **kwargs):
-            """Inner function."""
             if global_object.debug:
                 print(
                     f'{self.klass.__name__}.{self.prop_name} has been called with {args[1:]}, {kwargs}'
@@ -202,11 +191,9 @@ class PropertyHugger(PatcherFactory):
         return inner
 
     def patch_set(self, func: Callable) -> Callable:
-        """Patch set."""
 
         @wraps(func)
         def inner(*args, **kwargs):
-            """Inner function."""
             if global_object.debug:
                 print(
                     f'{self.klass.__name__}.{self.prop_name} has been set with {args[1:]}, {kwargs}'
@@ -218,11 +205,9 @@ class PropertyHugger(PatcherFactory):
         return inner
 
     def patch_del(self, func: Callable) -> Callable:
-        """Patch del."""
 
         @wraps(func)
         def inner(*args, **kwargs):
-            """Inner function."""
             if global_object.debug:
                 print(f'{self.klass.__name__}.{self.prop_name} has been deleted.')
             self._append_log(self.makeEntry('del', None, *args, **kwargs))
@@ -231,7 +216,6 @@ class PropertyHugger(PatcherFactory):
         return inner
 
     def makeEntry(self, log_type, returns, *args, **kwargs) -> str:
-        """Makeentry function."""
         temp = ''
         if returns is None:
             returns = []

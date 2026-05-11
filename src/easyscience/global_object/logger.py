@@ -6,7 +6,6 @@ import logging
 
 class Logger:
     def __init__(self, log_level: int = logging.INFO):
-        """Init function."""
         self.logger = logging.getLogger(__name__)
         self.level = log_level
         self.logger.setLevel(self.level)

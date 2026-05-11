@@ -33,7 +33,6 @@ class BasedBase(SerializerComponent):
         interface: Optional[InterfaceFactoryTemplate] = None,
         unique_name: Optional[str] = None,
     ):
-        """Init function."""
         self._global_object = global_object
         if unique_name is None:
             unique_name = self._global_object.generate_unique_name(self.__class__.__name__)
@@ -45,7 +44,6 @@ class BasedBase(SerializerComponent):
 
     @property
     def _arg_spec(self) -> Set[str]:
-        """Arg spec."""
         base_cls = getattr(self, '__old_class__', self.__class__)
         sign = signature(base_cls.__init__)
         names = [

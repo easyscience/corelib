@@ -41,7 +41,6 @@ def notify_observers(func: Callable[..., Any]) -> Callable[..., Any]:
     """
 
     def wrapper(self, *args, **kwargs):
-        """Wrapper function."""
         result = func(self, *args, **kwargs)
         self._notify_observers()
         return result
@@ -211,7 +210,6 @@ class DescriptorNumber(DescriptorBase):
 
     @full_value.setter
     def full_value(self, full_value: Variable) -> None:
-        """Full value."""
         raise AttributeError(
             f'Full_value is read-only. Change the value and variance seperately. Or create a new {self.__class__.__name__}.'
         )
@@ -269,7 +267,6 @@ class DescriptorNumber(DescriptorBase):
 
     @unit.setter
     def unit(self, unit_str: str) -> None:
-        """Unit function."""
         raise AttributeError(
             (
                 f'Unit is read-only. Use convert_unit to change the unit between allowed types '
@@ -392,7 +389,6 @@ class DescriptorNumber(DescriptorBase):
 
         # Define the setter function for the undo stack
         def set_scalar(obj, scalar):
-            """Set scalar."""
             obj._scalar = scalar
 
         # Push to undo stack
@@ -420,7 +416,6 @@ class DescriptorNumber(DescriptorBase):
 
     # Just to get return type right
     def __copy__(self) -> DescriptorNumber:
-        """Copy function."""
         return super().__copy__()
 
     def __repr__(self) -> str:
@@ -450,7 +445,6 @@ class DescriptorNumber(DescriptorBase):
         # return f"<{class_name} '{obj_name}': {obj_value:0.04f}{obj_unit}>"
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        """As dict."""
         raw_dict = super().as_dict(skip=skip)
         raw_dict['value'] = self._scalar.value
         raw_dict['unit'] = str(self._scalar.unit)
@@ -460,7 +454,6 @@ class DescriptorNumber(DescriptorBase):
         return raw_dict
 
     def __add__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
-        """Add function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -482,7 +475,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __radd__(self, other: numbers.Number) -> DescriptorNumber:
-        """Radd function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -494,7 +486,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __sub__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
-        """Sub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -516,7 +507,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rsub__(self, other: numbers.Number) -> DescriptorNumber:
-        """Rsub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -528,7 +518,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor
 
     def __mul__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
-        """Mul function."""
         if isinstance(other, numbers.Number):
             new_value = self.full_value * other
         elif type(other) is DescriptorNumber:
@@ -541,7 +530,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rmul__(self, other: numbers.Number) -> DescriptorNumber:
-        """Rmul function."""
         if isinstance(other, numbers.Number):
             new_value = other * self.full_value
         else:
@@ -551,7 +539,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __truediv__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
-        """Truediv function."""
         if isinstance(other, numbers.Number):
             if other == 0:
                 raise ZeroDivisionError('Cannot divide by zero')
@@ -568,7 +555,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rtruediv__(self, other: numbers.Number) -> DescriptorNumber:
-        """Rtruediv function."""
         if isinstance(other, numbers.Number):
             if self.value == 0:
                 raise ZeroDivisionError('Cannot divide by zero')
@@ -580,7 +566,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __pow__(self, other: Union[DescriptorNumber, numbers.Number]) -> DescriptorNumber:
-        """Pow function."""
         if isinstance(other, numbers.Number):
             exponent = other
         elif type(other) is DescriptorNumber:
@@ -602,7 +587,6 @@ class DescriptorNumber(DescriptorBase):
         return descriptor_number
 
     def __rpow__(self, other: numbers.Number) -> numbers.Number:
-        """Rpow function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Exponents must be dimensionless')
@@ -614,14 +598,12 @@ class DescriptorNumber(DescriptorBase):
         return new_value
 
     def __neg__(self) -> DescriptorNumber:
-        """Neg function."""
         new_value = -self.full_value
         descriptor_number = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
         descriptor_number.name = descriptor_number.unique_name
         return descriptor_number
 
     def __abs__(self) -> DescriptorNumber:
-        """Abs function."""
         new_value = abs(self.full_value)
         descriptor_number = DescriptorNumber.from_scipp(name=self.name, full_value=new_value)
         descriptor_number.name = descriptor_number.unique_name

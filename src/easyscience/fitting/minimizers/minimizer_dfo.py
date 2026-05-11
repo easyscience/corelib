@@ -72,7 +72,6 @@ class DFO(MinimizerBase):
 
     @staticmethod
     def all_methods() -> List[str]:
-        """All methods."""
         return ['leastsq']
 
     def fit(
@@ -223,10 +222,8 @@ class DFO(MinimizerBase):
         fit_func = self._generate_fit_function()
 
         def _outer(obj: DFO):
-            """Outer function."""
 
             def _make_func(x, y, weights):
-                """Make func."""
                 dfo_pars = {}
                 if not parameters:
                     for name, par in obj._cached_pars.items():
@@ -236,7 +233,6 @@ class DFO(MinimizerBase):
                         dfo_pars[MINIMIZER_PARAMETER_PREFIX + par.unique_name] = par.value
 
                 def _residuals(pars_values: List[float]) -> np.ndarray:
-                    """Residuals function."""
                     for idx, par_name in enumerate(dfo_pars.keys()):
                         dfo_pars[par_name] = pars_values[idx]
                     return (y - fit_func(x, **dfo_pars)) * weights
@@ -254,7 +250,6 @@ class DFO(MinimizerBase):
     def _get_callback_parameter_names(
         self, parameters: List[Parameter] | None = None
     ) -> list[str]:
-        """Get callback parameter names."""
         if parameters is not None:
             return [MINIMIZER_PARAMETER_PREFIX + parameter.unique_name for parameter in parameters]
         return [MINIMIZER_PARAMETER_PREFIX + name for name in self._cached_pars.keys()]
@@ -265,7 +260,6 @@ class DFO(MinimizerBase):
         parameter_names: list[str],
         callback: Callable[[DFOCallbackState], None] | None,
     ) -> Callable:
-        """Wrap model with callback."""
         if callback is None:
             return model
 
@@ -275,7 +269,6 @@ class DFO(MinimizerBase):
         best_parameters: dict[str, float] = {}
 
         def wrapped_model(pars_values: List[float]) -> np.ndarray:
-            """Wrapped model."""
             nonlocal evaluation, best_objective, best_xk, best_parameters
 
             residuals = np.asarray(model(pars_values), dtype=float)
@@ -328,7 +321,6 @@ class DFO(MinimizerBase):
         """
 
         def adapter(state: 'DFOCallbackState') -> None:
-            """Adapter function."""
             chi2 = state.best_objective
             dof = max(np.asarray(state.residuals).size - len(state.best_parameters), 1)
             reduced_chi2 = chi2 / dof if dof > 0 else chi2
@@ -440,7 +432,6 @@ class DFO(MinimizerBase):
 
     @staticmethod
     def _extract_iterations(fit_results) -> int | None:
-        """Extract iterations."""
         diagnostic_info = getattr(fit_results, 'diagnostic_info', None)
         if diagnostic_info is None:
             return None
@@ -516,7 +507,6 @@ class DFO(MinimizerBase):
         max_evaluations: int | None = None,
         **kwargs,
     ) -> dict[str:str]:
-        """Prepare kwargs."""
         if max_evaluations is not None:
             kwargs['maxfun'] = max_evaluations  # max number of function evaluations
         if tolerance is not None:

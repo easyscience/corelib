@@ -65,7 +65,6 @@ class MultiFitter(Fitter):
             wrapped_fns.append(Fitter._fit_function_wrapper(self, this_x, flatten=flatten))
 
         def wrapped_fun(x, **kwargs):
-            """Wrapped fun."""
             # Generate an empty Y based on x
             y = np.zeros_like(x)
             i = 0

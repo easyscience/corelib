@@ -82,5 +82,4 @@ class DescriptorStr(DescriptorBase):
 
     # To get return type right
     def __copy__(self) -> DescriptorStr:
-        """Copy function."""
         return super().__copy__()

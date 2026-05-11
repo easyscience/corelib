@@ -16,5 +16,4 @@ class ExperimentBase(ObjBase):
 
     # required dunder methods
     def __str__(self):
-        """Str function."""
         return f'Experiment: {self._name}'

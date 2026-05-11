@@ -466,7 +466,6 @@ class Parameter(DescriptorNumber):
 
     @independent.setter
     def independent(self, value: bool) -> None:
-        """Independent function."""
         raise AttributeError(
             'This property is read-only. Use `make_independent` and  `make_dependent_on` to change the state of the parameter.'
         )  # noqa: E501
@@ -493,7 +492,6 @@ class Parameter(DescriptorNumber):
 
     @dependency_expression.setter
     def dependency_expression(self, new_expression: str) -> None:
-        """Dependency expression."""
         raise AttributeError(
             'Dependency expression is read-only. Use `make_dependent_on` to change the dependency expression.'
         )  # noqa: E501
@@ -520,7 +518,6 @@ class Parameter(DescriptorNumber):
 
     @dependency_map.setter
     def dependency_map(self, new_map: Dict[str, DescriptorNumber]) -> None:
-        """Dependency map."""
         raise AttributeError(
             'Dependency map is read-only. Use `make_dependent_on` to change the dependency map.'
         )
@@ -555,7 +552,6 @@ class Parameter(DescriptorNumber):
 
     @full_value.setter
     def full_value(self, scalar: Variable) -> None:
-        """Full value."""
         raise AttributeError(
             f'Full_value is read-only. Change the value and variance seperately. Or create a new {self.__class__.__name__}.'
         )  # noqa: E501
@@ -897,12 +893,10 @@ class Parameter(DescriptorNumber):
     # Is this alias really needed?
     @property
     def free(self) -> bool:
-        """Free function."""
         return not self.fixed
 
     @free.setter
     def free(self, value: bool) -> None:
-        """Free function."""
         self.fixed = not value
 
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -1022,7 +1016,6 @@ class Parameter(DescriptorNumber):
         return param
 
     def __copy__(self) -> Parameter:
-        """Copy function."""
         new_obj = super().__copy__()
         new_obj._callback = property()
         return new_obj
@@ -1043,7 +1036,6 @@ class Parameter(DescriptorNumber):
     #     return float(self._scalar.value)
 
     def __add__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
-        """Add function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -1077,7 +1069,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __radd__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
-        """Radd function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be added to dimensionless values')
@@ -1107,7 +1098,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __sub__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
-        """Sub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -1141,7 +1131,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __rsub__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
-        """Rsub function."""
         if isinstance(other, numbers.Number):
             if self.unit != 'dimensionless':
                 raise UnitError('Numbers can only be subtracted from dimensionless values')
@@ -1171,7 +1160,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __mul__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
-        """Mul function."""
         if isinstance(other, numbers.Number):
             new_full_value = self.full_value * other
             if other == 0:
@@ -1221,7 +1209,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __rmul__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
-        """Rmul function."""
         if isinstance(other, numbers.Number):
             new_full_value = other * self.full_value
             if other == 0:
@@ -1254,7 +1241,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __truediv__(self, other: Union[DescriptorNumber, Parameter, numbers.Number]) -> Parameter:
-        """Truediv function."""
         if isinstance(other, numbers.Number):
             if other == 0:
                 raise ZeroDivisionError('Cannot divide by zero')
@@ -1305,7 +1291,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __rtruediv__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
-        """Rtruediv function."""
         original_self = self.value
         if original_self == 0:
             raise ZeroDivisionError('Cannot divide by zero')
@@ -1355,7 +1340,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __pow__(self, other: Union[DescriptorNumber, numbers.Number]) -> Parameter:
-        """Pow function."""
         if isinstance(other, numbers.Number):
             exponent = other
         elif (
@@ -1410,7 +1394,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __neg__(self) -> Parameter:
-        """Neg function."""
         new_full_value = -self.full_value
         min_value = -self.max
         max_value = -self.min
@@ -1421,7 +1404,6 @@ class Parameter(DescriptorNumber):
         return parameter
 
     def __abs__(self) -> Parameter:
-        """Abs function."""
         new_full_value = abs(self.full_value)
         combinations = [abs(self.min), abs(self.max)]
         if self.min < 0 and self.max > 0:

@@ -36,15 +36,12 @@ class Fitter:
         self._update_minimizer(DEFAULT_MINIMIZER)
 
     def make_model(self, pars=None) -> Callable:
-        """Make model."""
         return self._minimizer.make_model(pars)
 
     def evaluate(self, pars=None) -> np.ndarray:
-        """Evaluate function."""
         return self._minimizer.evaluate(pars)
 
     def convert_to_pars_obj(self, pars) -> object:
-        """Convert to pars obj."""
         return self._minimizer.convert_to_pars_obj(pars)
 
     # TODO: remove this method when we are ready to adjust the dependent products
@@ -95,7 +92,6 @@ class Fitter:
         self._update_minimizer(minimizer_enum)
 
     def _update_minimizer(self, minimizer_enum: AvailableMinimizers) -> None:
-        """Update minimizer."""
         self._minimizer = factory(
             minimizer_enum=minimizer_enum,
             fit_object=self._fit_object,
@@ -254,7 +250,6 @@ class Fitter:
 
         @functools.wraps(fun)
         def wrapped_fit_function(x, **kwargs):
-            """Wrapped fit function."""
             if real_x is not None:
                 x = real_x
             dependent = fun(x, **kwargs)

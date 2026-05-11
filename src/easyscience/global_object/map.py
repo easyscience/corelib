@@ -10,7 +10,6 @@ from typing import Optional
 
 class _EntryList(list):
     def __init__(self, *args, my_type=None, **kwargs):
-        """Init function."""
         super(_EntryList, self).__init__(*args, **kwargs)
         self.__known_types = {'argument', 'created', 'created_internal', 'returned'}
         self.finalizer = None
@@ -19,7 +18,6 @@ class _EntryList(list):
             self._type.append(my_type)
 
     def __repr__(self) -> str:
-        """Repr function."""
         s = 'Map entry of type: '
         if self._type:
             s += ', '.join(self._type)
@@ -32,54 +30,44 @@ class _EntryList(list):
         return s
 
     def __delitem__(self, key):
-        """Delitem function."""
         super(_EntryList, self).__delitem__(key)
 
     def remove_type(self, old_type: str):
-        """Remove type."""
         if old_type in self.__known_types and old_type in self._type:
             self._type.remove(old_type)
 
     def reset_type(self, default_type: str = None):
-        """Reset type."""
         self._type = []
         self.type = default_type
 
     @property
     def type(self) -> List[str]:
-        """Type function."""
         return self._type
 
     @type.setter
     def type(self, value: str):
-        """Type function."""
         if value in self.__known_types and value not in self._type:
             self._type.append(value)
 
     @property
     def is_argument(self) -> bool:
-        """Is argument."""
         return 'argument' in self._type
 
     @property
     def is_created(self) -> bool:
-        """Is created."""
         return 'created' in self._type
 
     @property
     def is_created_internal(self) -> bool:
-        """Is created internal."""
         return 'created_internal' in self._type
 
     @property
     def is_returned(self) -> bool:
-        """Is returned."""
         return 'returned' in self._type
 
 
 class Map:
     def __init__(self):
-        """Init function."""
         # A dictionary of object names and their corresponding objects
         self._store = weakref.WeakValueDictionary()
         # A dict with object names as keys and a list of their object types as values, with weak references
@@ -122,22 +110,18 @@ class Map:
 
     @property
     def argument_objs(self) -> List[str]:
-        """Argument objs."""
         return self._nested_get('argument')
 
     @property
     def created_objs(self) -> List[str]:
-        """Created objs."""
         return self._nested_get('created')
 
     @property
     def created_internal(self) -> List[str]:
-        """Created internal."""
         return self._nested_get('created_internal')
 
     @property
     def returned_objs(self) -> List[str]:
-        """Returned objs."""
         return self._nested_get('returned')
 
     def _nested_get(self, obj_type: str) -> List[str]:
@@ -153,7 +137,6 @@ class Map:
                 continue
 
     def get_item_by_key(self, item_id: str) -> object:
-        """Get item by key."""
         if item_id in self._store:
             return self._store[item_id]
         raise ValueError('Item not in map.')
@@ -167,22 +150,18 @@ class Map:
         return vertex.unique_name in self._store
 
     def find_type(self, vertex: object) -> List[str]:
-        """Find type."""
         if self.is_known(vertex):
             return self.__type_dict[vertex.unique_name].type
 
     def reset_type(self, obj, default_type: str):
-        """Reset type."""
         if obj.unique_name in self.__type_dict:
             self.__type_dict[obj.unique_name].reset_type(default_type)
 
     def change_type(self, obj, new_type: str):
-        """Change type."""
         if obj.unique_name in self.__type_dict:
             self.__type_dict[obj.unique_name].type = new_type
 
     def add_vertex(self, obj: object, obj_type: str = None):
-        """Add vertex."""
         name = obj.unique_name
         if name in self._store:
             raise ValueError(f'Object name {name} already exists in the graph.')
@@ -199,14 +178,12 @@ class Map:
         self.__type_dict[name] = entry_list  # Add objects type to the list of types
 
     def add_edge(self, start_obj: object, end_obj: object):
-        """Add edge."""
         if start_obj.unique_name in self.__type_dict:
             self.__type_dict[start_obj.unique_name].append(end_obj.unique_name)
         else:
             raise AttributeError('Start object not in map.')
 
     def get_edges(self, start_obj) -> List[str]:
-        """Get edges."""
         if start_obj.unique_name in self.__type_dict:
             return list(self.__type_dict[start_obj.unique_name])
         else:
@@ -230,7 +207,6 @@ class Map:
         return edges
 
     def prune_vertex_from_edge(self, parent_obj, child_obj):
-        """Prune vertex from edge."""
         vertex1 = parent_obj.unique_name
         if child_obj is None:
             return
@@ -240,12 +216,10 @@ class Map:
             del self.__type_dict[vertex1][self.__type_dict[vertex1].index(vertex2)]
 
     def prune_type_dict(self, key: str):
-        """Prune type dict."""
         if key in self.__type_dict:
             del self.__type_dict[key]
 
     def prune(self, key: str):
-        """Prune function."""
         if key in self.__type_dict:
             del self.__type_dict[key]
             if key in self._store:
@@ -360,5 +334,4 @@ class Map:
         gc.collect()
 
     def __repr__(self) -> str:
-        """Repr function."""
         return f'Map object of {len(self._store)} vertices.'

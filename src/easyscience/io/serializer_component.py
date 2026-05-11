@@ -26,7 +26,6 @@ class SerializerComponent:
     """
 
     def __deepcopy__(self, memo):
-        """Deepcopy function."""
         return self.from_dict(self.as_dict())
 
     def encode(

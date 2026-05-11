@@ -34,12 +34,10 @@ class UndoCommand(metaclass=abc.ABCMeta):
 
     @property
     def text(self) -> str:
-        """Text function."""
         return self._text
 
     @text.setter
     def text(self, text: str) -> NoReturn:
-        """Text function."""
         self._text = text
 
 
@@ -47,10 +45,8 @@ T_ = TypeVar('T_', bound=UndoCommand)
 
 
 def dict_stack_deco(func: Callable) -> Callable:
-    """Dict stack deco."""
 
     def inner(obj, *args, **kwargs):
-        """Inner function."""
         from easyscience import global_object  # Local import to avoid circular dependency
 
         # Only do the work to a NotarizedDict.
@@ -81,27 +77,22 @@ class NotarizedDict(UserDict):
 
     @classmethod
     def _classname(cls):
-        """Classname function."""
         # This method just returns the name of the class
         return cls.__name__
 
     @dict_stack_deco
     def __setitem__(self, key, value):
-        """Setitem function."""
         super(NotarizedDict, self).__setitem__(key, value)
 
     @dict_stack_deco
     def __delitem__(self, key):
-        """Delitem function."""
         super(NotarizedDict, self).__delitem__(key)
 
     def __repr__(self):
-        """Repr function."""
         return f'{self._classname()}({self.data})'
 
     @dict_stack_deco
     def reorder(self, **kwargs):
-        """Reorder function."""
         self.data = kwargs.copy()
 
 
@@ -116,15 +107,12 @@ class CommandHolder:
         self.__index = 0
 
     def append(self, command: T_):
-        """Append function."""
         self._commands.appendleft(command)
 
     def pop(self):
-        """Pop function."""
         return self._commands.popleft()
 
     def __iter__(self) -> T_:
-        """Iter function."""
         while self.__index < len(self):
             index = self.__index
             self.__index += 1
@@ -132,22 +120,18 @@ class CommandHolder:
         self.__index = 0
 
     def __len__(self) -> int:
-        """Len function."""
         return len(self._commands)
 
     @property
     def is_macro(self) -> bool:
-        """Is macro."""
         return len(self) > 1
 
     @property
     def current(self) -> T_:
-        """Current function."""
         return self._commands[0]
 
     @property
     def text(self) -> str:
-        """Text function."""
         text = ''
         if self._commands:
             text = self._commands[-1].text
@@ -157,7 +141,6 @@ class CommandHolder:
 
     @text.setter
     def text(self, text: str):
-        """Text function."""
         self._text = text
 
 
@@ -174,28 +157,23 @@ class UndoStack:
 
     @property
     def enabled(self) -> bool:
-        """Enabled function."""
         return self._enabled
 
     @enabled.setter
     def enabled(self, state: bool):
-        """Enabled function."""
         if self.enabled and self._macro_running:
             self.endMacro()
         self._enabled = state
 
     def force_state(self, state: bool):
-        """Force state."""
         self._enabled = state
 
     @property
     def history(self) -> deque:
-        """History function."""
         return self._history
 
     @property
     def future(self) -> deque:
-        """Future function."""
         return self._future
 
     def push(self, command: T_) -> NoReturn:
@@ -335,17 +313,14 @@ class PropertyStack(UndoCommand):
             self.text = text
 
     def undo(self) -> NoReturn:
-        """Undo function."""
         self._set_func(self._parent, self._old_value)
 
     def redo(self) -> NoReturn:
-        """Redo function."""
         self._set_func(self._parent, self._new_value)
 
 
 class FunctionStack(UndoCommand):
     def __init__(self, parent, set_func: Callable, unset_func: Callable, text: str = None):
-        """Init function."""
         super().__init__(self)
         self._parent = parent
         self._old_fn = set_func
@@ -355,17 +330,14 @@ class FunctionStack(UndoCommand):
             self.text = text
 
     def undo(self):
-        """Undo function."""
         self._new_fn()
 
     def redo(self):
-        """Redo function."""
         self._old_fn()
 
 
 class DictStack(UndoCommand):
     def __init__(self, in_dict: NotarizedDict, *args):
-        """Init function."""
         super().__init__(self)
         self._parent = in_dict
 
@@ -400,7 +372,6 @@ class DictStack(UndoCommand):
             raise ValueError
 
     def undo(self) -> NoReturn:
-        """Undo function."""
         if self._creation:
             # Now we delete
             self._parent.data.__delitem__(self._key)
@@ -417,7 +388,6 @@ class DictStack(UndoCommand):
                 self._parent.reorder(**{k: v for k, v in zip(keys, values)})
 
     def redo(self) -> NoReturn:
-        """Redo function."""
         if self._deletion:
             # Now we delete
             self._parent.data.__delitem__(self._key)
@@ -427,7 +397,6 @@ class DictStack(UndoCommand):
 
 class DictStackReCreate(UndoCommand):
     def __init__(self, in_dict: NotarizedDict, **kwargs):
-        """Init function."""
         super().__init__(self)
         self._parent = in_dict
         self._old_value = in_dict.data.copy()
@@ -435,48 +404,36 @@ class DictStackReCreate(UndoCommand):
         self.text = 'Updating dictionary'
 
     def undo(self) -> NoReturn:
-        """Undo function."""
         self._parent.data = self._old_value
 
     def redo(self) -> NoReturn:
-        """Redo function."""
         self._parent.data = self._new_value
 
 
 def property_stack(arg: Union[str, Callable], begin_macro: bool = False) -> Callable:
-    """Property stack."""
     """
-    Decorate a `property` setter with undo/redo functionality
-    This decorator can be used as:
+    Decorate a ``property`` setter with undo/redo functionality This
+    decorator can be used as:
 
-    @property_stack
-    def func()
-    ....
+    @property_stack def func() ....
 
     or
 
-    @property_stack("This is the undo/redo text)
-    def func()
-    ....
+    @property_stack("This is the undo/redo text) def func() ....
 
-    In the latter case the argument is a string which might be evaluated.
-    The possible markups for this string are;
+    In the latter case the argument is a string which might be
+    evaluated. The possible markups for this string are;
 
-    `obj` - The thing being operated on
-    `func` - The function being called
-    `name` - The name of the function being called.
-    `old_value` - The pre-set value
-    `new_value` - The post-set value
+    ``obj`` - The thing being operated on ``func`` - The function being
+    called ``name`` - The name of the function being called.
+    ``old_value`` - The pre-set value ``new_value`` - The post-set value
 
-    An example would be `Function {name}: Set from {old_value} to {new_value}`
-
+    An example would be ``Function {name}: Set from {old_value} to
+    {new_value}``
     """
 
     def make_wrapper(func: Callable, name: str, **kwargs) -> Callable:
-        """Func function."""
-
         def wrapper(obj, *args) -> NoReturn:
-            """Wrapper function."""
             from easyscience import global_object  # Local import to avoid circular dependency
 
             old_value = getattr(obj, name)
@@ -504,7 +461,6 @@ def property_stack(arg: Union[str, Callable], begin_macro: bool = False) -> Call
         txt = arg
 
         def wrapper(func: Callable) -> Callable:
-            """Wrapper function."""
             name = func.__name__
             inner_wrapper = make_wrapper(func, name, text=txt.format(**locals()))
             setattr(inner_wrapper, 'func', func)

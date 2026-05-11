@@ -73,7 +73,6 @@ class LMFit(MinimizerBase):  # noqa: S101
 
     @staticmethod
     def supported_methods() -> List[str]:
-        """Supported methods."""
         return [
             'least_squares',
             'leastsq',
@@ -198,10 +197,8 @@ class LMFit(MinimizerBase):  # noqa: S101
         self,
         progress_callback: Callable[[dict], bool | None] | None,
     ) -> Callable | None:
-        """Create iter callback."""
 
         def iter_cb(params, iteration: int, residuals: np.ndarray, *args, **kwargs) -> bool:
-            """Iter cb."""
             if iteration >= 0:
                 self._last_iteration = int(iteration)
             if progress_callback is None:
@@ -213,7 +210,6 @@ class LMFit(MinimizerBase):  # noqa: S101
         return iter_cb
 
     def _build_progress_payload(self, params, iteration: int, residuals: np.ndarray) -> dict:
-        """Build progress payload."""
         residual_array = np.asarray(residuals)
         chi2 = float(np.square(residual_array).sum())
         varied_parameter_count = sum(
@@ -244,7 +240,6 @@ class LMFit(MinimizerBase):  # noqa: S101
     def _get_fit_kws(
         self, method: str, tolerance: float, minimizer_kwargs: dict[str:str]
     ) -> dict[str:str]:
-        """Get fit kws."""
         if minimizer_kwargs is None:
             minimizer_kwargs = {}
         if tolerance is not None:
