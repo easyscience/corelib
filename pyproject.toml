@@ -33,7 +33,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  'uncertainties',                   # Propagation of uncertainties in calculations
   'pooch',                           # Data downloader
   'matplotlib',                      # Plotting library
   'jupyterlab',                      # Jupyter notebooks
