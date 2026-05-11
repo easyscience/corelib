@@ -4174,8 +4174,8 @@ packages:
   requires_python: '>=3.11'
 - pypi: ./
   name: easyscience
-  version: 2.3.1+devdirty13
-  sha256: fbb911c9ccd0ae750de7dba69a1746e3077c762886308450c09186f6125c49ab
+  version: 2.3.1+devdirty14
+  sha256: 2ba022666c36196227d184db00fff5994f958fc76bde98c416f0bc37aa184c98
   requires_dist:
   - asteval
   - bumps
