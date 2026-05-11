@@ -54,7 +54,7 @@ pixi-kernel = '*' # Pixi Jupyter kernel
 
 [feature.user.pypi-dependencies]
 pip = '*'
-easydiffraction = '*'
+easyscience = '*'
 
 ##############
 # ENVIRONMENTS
