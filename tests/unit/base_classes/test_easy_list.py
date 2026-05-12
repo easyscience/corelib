@@ -7,7 +7,10 @@ import pytest
 
 from easyscience import global_object
 from easyscience.base_classes.easy_list import EasyList
+from easyscience.base_classes.model_base import ModelBase
 from easyscience.base_classes.new_base import NewBase
+from easyscience.variable import DescriptorNumber
+from easyscience.variable import Parameter
 
 
 class Alpha(NewBase):
@@ -22,6 +25,52 @@ class Beta(NewBase):
 
     def __init__(self, unique_name=None, display_name=None):
         super().__init__(unique_name=unique_name, display_name=display_name)
+
+
+class MockModel(ModelBase):
+    """A ModelBase subclass with a Parameter and a DescriptorNumber for testing get_all_variables."""
+
+    def __init__(self, unique_name=None, display_name=None, temperature=25, volume=1.0):
+        super().__init__(unique_name=unique_name, display_name=display_name)
+        self._temperature = Parameter(name='temperature', value=temperature)
+        self._volume = DescriptorNumber(name='volume', value=volume)
+
+    @property
+    def temperature(self):
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        self._temperature.value = value
+
+    @property
+    def volume(self):
+        return self._volume
+
+    @volume.setter
+    def volume(self, value):
+        self._volume.value = value
+
+
+class MockModelNested(ModelBase):
+    """A ModelBase subclass that contains another ModelBase to test nested variable collection."""
+
+    def __init__(self, unique_name=None, display_name=None, component=None, pressure=0):
+        super().__init__(unique_name=unique_name, display_name=display_name)
+        self._pressure = Parameter(name='pressure', value=pressure)
+        self._component = component or MockModel(unique_name='inner', temperature=30, volume=2.0)
+
+    @property
+    def pressure(self):
+        return self._pressure
+
+    @pressure.setter
+    def pressure(self, value):
+        self._pressure.value = value
+
+    @property
+    def component(self):
+        return self._component
 
 
 class TestEasyList:
@@ -524,3 +573,111 @@ class TestEasyList:
         assert el2[0].unique_name == 'a1'
         assert el2[1].unique_name == 'a2'
         assert d == el2.to_dict()  # The dicts should be the same after round trip
+
+    # --- get_all_variables ---
+
+    def test_get_all_variables_empty_list(self):
+        """An empty EasyList should return an empty list of variables."""
+        el = EasyList(protected_types=ModelBase)
+        assert el.get_all_variables() == []
+
+    def test_get_all_variables_no_modelbase_elements(self):
+        """An EasyList with only plain NewBase elements (not ModelBase) should return an empty list."""
+        a1 = Alpha(unique_name='a1')
+        a2 = NewBase(unique_name='nb1')
+        el = EasyList(a1, a2)
+        assert el.get_all_variables() == []
+
+    def test_get_all_variables_single_modelbase(self):
+        """A single ModelBase element should return its Parameter and DescriptorNumber."""
+        m1 = MockModel(unique_name='m1', temperature=10, volume=5.0)
+        el = EasyList(m1, protected_types=ModelBase)
+        vars = el.get_all_variables()
+        assert len(vars) == 2
+        names = {v.name for v in vars}
+        assert 'temperature' in names
+        assert 'volume' in names
+        # Verify specific values
+        temp_var = next(v for v in vars if v.name == 'temperature')
+        assert temp_var.value == 10
+        vol_var = next(v for v in vars if v.name == 'volume')
+        assert vol_var.value == 5.0
+
+    def test_get_all_variables_multiple_modelbase(self):
+        """Multiple ModelBase elements should return all their combined variables."""
+        m1 = MockModel(unique_name='m1', temperature=10, volume=5.0)
+        m2 = MockModel(unique_name='m2', temperature=99, volume=1.5)
+        el = EasyList(m1, m2, protected_types=ModelBase)
+        vars = el.get_all_variables()
+        assert len(vars) == 4
+        names = {v.name for v in vars}
+        assert names == {'temperature', 'volume'}
+
+    def test_get_all_variables_mixed_elements(self):
+        """Only ModelBase-derived elements contribute variables; plain NewBase elements are skipped."""
+        m1 = MockModel(unique_name='m1', temperature=10, volume=5.0)
+        a1 = Alpha(unique_name='a1')
+        el = EasyList(m1, a1)
+        vars = el.get_all_variables()
+        assert len(vars) == 2
+        names = {v.name for v in vars}
+        assert names == {'temperature', 'volume'}
+
+    def test_get_all_variables_nested_model(self):
+        """A ModelBase containing another ModelBase should recursively collect all variables."""
+        inner = MockModel(unique_name='inner', temperature=30, volume=2.0)
+        parent = MockModelNested(unique_name='parent', component=inner, pressure=100)
+        el = EasyList(parent, protected_types=ModelBase)
+        vars = el.get_all_variables()
+        # parent: pressure (Parameter), inner: temperature (Parameter), volume (DescriptorNumber)
+        assert len(vars) == 3
+        names = {v.name for v in vars}
+        assert names == {'pressure', 'temperature', 'volume'}
+
+    def test_get_all_variables_returns_descriptorbase_instances(self):
+        """All returned items should be instances of DescriptorBase."""
+        m1 = MockModel(unique_name='m1', temperature=10, volume=5.0)
+        m2 = MockModel(unique_name='m2', temperature=99, volume=1.5)
+        el = EasyList(m1, m2, protected_types=ModelBase)
+        for v in el.get_all_variables():
+            from easyscience.variable.descriptor_base import DescriptorBase
+
+            assert isinstance(v, DescriptorBase)
+
+    def test_get_all_variables_nested_easylist(self):
+        """An EasyList containing another EasyList with mixed NewBase/ModelBase elements
+        should collect variables from the inner EasyList's ModelBase items,
+        skipping plain NewBase items."""
+        inner_model = MockModel(unique_name='inner_m', temperature=50, volume=3.0)
+        inner_plain = Alpha(unique_name='inner_a')
+        inner_list = EasyList(inner_model, inner_plain)
+        outer_model = MockModel(unique_name='outer_m', temperature=70, volume=4.0)
+        outer_list = EasyList(inner_list, outer_model)
+
+        # --- outer_list structure ---
+        assert len(outer_list) == 2
+        assert outer_list[0] is inner_list
+        assert outer_list[1] is outer_model
+
+        # --- inner_list structure ---
+        assert len(inner_list) == 2
+        assert inner_list[0] is inner_model
+        assert inner_list[1] is inner_plain
+        # inner_list own get_all_variables should only see inner_model (skip Alpha)
+        inner_vars = inner_list.get_all_variables()
+        assert len(inner_vars) == 2
+
+        # --- outer_list.get_all_variables ---
+        vars = outer_list.get_all_variables()
+        # inner_model: temperature (50), volume (3.0); outer_model: temperature (70), volume (4.0)
+        assert len(vars) == 4
+
+        # Verify all returned items are DescriptorBase instances
+        for v in vars:
+            assert isinstance(v, DescriptorNumber)
+
+        # Collect temperatures and volumes from both models
+        temps = {v.value for v in vars if v.name == 'temperature'}
+        vols = {v.value for v in vars if v.name == 'volume'}
+        assert temps == {50, 70}
+        assert vols == {3.0, 4.0}

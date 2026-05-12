@@ -145,8 +145,10 @@ plugins:
         python:
           paths: ['src'] # Change 'src' to your actual sources directory
           options:
-            docstring_style: google
-            group_by_category: false
+            annotations_path: source
+            docstring_style: numpy
+            group_by_category: true
+            members_order: source
             heading_level: 1
             show_root_heading: true
             show_root_full_path: false

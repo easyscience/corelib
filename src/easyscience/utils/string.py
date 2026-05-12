@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from fractions import Fraction
+from typing import Any
 
 """
 This module provides utility classes for string operations.
@@ -9,16 +10,36 @@ This module provides utility classes for string operations.
 
 
 def transformation_to_string(
-    matrix, translation_vec=(0, 0, 0), components=('x', 'y', 'z'), c='', delim=','
-):
-    """Convenience method.
+    matrix: Any,
+    translation_vec: tuple[Any, Any, Any] = (0, 0, 0),
+    components: tuple[str, str, str] = ('x', 'y', 'z'),
+    c: str = '',
+    delim: str = ',',
+) -> str:
+    """
+    Convenience method.
 
     Given matrix returns string, e.g. x+2y+1/4
-    :param matrix : param translation_vec
-    :param components: either ('x', 'y', 'z') or ('a', 'b', 'c')
-    :param c: optional additional character to print (used for magmoms)
-    :param delim: delimiter
-    :return: xyz string
+
+    Parameters
+    ----------
+    matrix : Any
+        Transformation matrix.
+    translation_vec : tuple[Any, Any, Any], default=(0, 0, 0)
+        By default, (0, 0, 0).
+    components : tuple[str, str, str], default=('x', 'y', 'z')
+        Either ('x', 'y', 'z') or ('a', 'b', 'c'). By default, ('x',
+        'y', 'z').
+    c : str, default=''
+        Optional additional character to print (used for magmoms). By
+        default, ''.
+    delim : str, default=','
+        Delimiter. By default, ','.
+
+    Returns
+    -------
+    str
+        Xyz string.
     """
     parts = []
     for i in range(3):

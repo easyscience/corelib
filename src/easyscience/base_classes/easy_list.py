@@ -17,13 +17,15 @@ from typing import TypeVar
 from typing import overload
 
 from easyscience.io.serializer_base import SerializerBase
+from easyscience.variable.descriptor_base import DescriptorBase
 
+from .model_base import ModelBase
 from .new_base import NewBase
 
 ProtectedType_ = TypeVar('ProtectedType', bound=NewBase)
 
 
-class EasyList(NewBase, MutableSequence[ProtectedType_]):
+class EasyList(ModelBase, MutableSequence[ProtectedType_]):
     # If we were to inherit from List instead of MutableSequence,
     # we would have to overwrite "extend", "remove", "__iadd__", "count", "append", "__iter__" and "clear"
     def __init__(
@@ -34,14 +36,28 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
         display_name: Optional[str] = None,
         **kwargs: Any,
     ):
-        """Initialize the EasyList.
+        """
+        Initialize the EasyList.
 
-        :param args: Initial items to add to the list
-        :param protected_types: Types that are allowed in the list. Can
-            be a single NewBase subclass or a list of them. If None,
-            defaults to [NewBase].
-        :param unique_name: Optional unique name for the list
-        :param display_name: Optional display name for the list
+        Parameters
+        ----------
+        *args : ProtectedType_ | list[ProtectedType_]
+            Initial items to add to the list.
+        protected_types : list[Type[NewBase]] | Type[NewBase] | None, default=None
+            Types that are allowed in the list. Can be a single NewBase
+            subclass or a list of them. If None,. By default, None.
+        unique_name : Optional[str], default=None
+            Optional unique name for the list. By default, None.
+        display_name : Optional[str], default=None
+            Optional display name for the list. By default, None.
+        **kwargs : Any
+            Additional keyword arguments used during deserialization.
+
+        Raises
+        ------
+        TypeError
+            If ``protected_types`` is not a supported NewBase type or
+            iterable of supported types.
         """
         super().__init__(unique_name=unique_name, display_name=display_name)
         if protected_types is None:
@@ -82,10 +98,25 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
     @overload
     def __getitem__(self, idx: str) -> ProtectedType_: ...
     def __getitem__(self, idx: int | slice | str) -> ProtectedType_ | 'EasyList[ProtectedType_]':
-        """Get an item by index, slice, or unique_name.
+        """
+        Get an item by index, slice, or unique_name.
 
-        :param idx: Index, slice, or unique_name of the item
-        :return: The item or a new EasyList for slices
+        Parameters
+        ----------
+        idx : int | slice | str
+            Index, slice, or unique_name of the item.
+
+        Returns
+        -------
+        ProtectedType_ | 'EasyList[ProtectedType_]'
+            The item or a new EasyList for slices.
+
+        Raises
+        ------
+        KeyError
+            If ``idx`` is a string that does not match any item.
+        TypeError
+            If ``idx`` is not an int, slice, or string.
         """
         if isinstance(idx, int):
             return self._data[idx]
@@ -107,10 +138,22 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
     def __setitem__(
         self, idx: int | slice, value: ProtectedType_ | Iterable[ProtectedType_]
     ) -> None:
-        """Set an item at an index.
+        """
+        Set an item at an index.
 
-        :param idx: Index to set
-        :param value: New value
+        Parameters
+        ----------
+        idx : int | slice
+            Index to set.
+        value : ProtectedType_ | Iterable[ProtectedType_]
+            New value.
+
+        Raises
+        ------
+        TypeError
+            If ``idx`` or ``value`` has an invalid type.
+        ValueError
+            If slice assignment changes the slice length.
         """
         if isinstance(idx, int):
             if not isinstance(value, tuple(self._protected_types)):
@@ -145,9 +188,20 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
             raise TypeError('Index must be an int or slice')
 
     def __delitem__(self, idx: int | slice | str) -> None:
-        """Delete an item by index, slice, or name.
+        """
+        Delete an item by index, slice, or name.
 
-        :param idx: Index, slice, or name of item to delete
+        Parameters
+        ----------
+        idx : int | slice | str
+            Index, slice, or name of item to delete.
+
+        Raises
+        ------
+        KeyError
+            If ``idx`` is a string that does not match any item.
+        TypeError
+            If ``idx`` is not an int, slice, or string.
         """
         if isinstance(idx, (int, slice)):
             del self._data[idx]
@@ -165,10 +219,21 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
         return len(self._data)
 
     def insert(self, index: int, value: ProtectedType_) -> None:
-        """Insert an item at an index.
+        """
+        Insert an item at an index.
 
-        :param index: Index to insert at
-        :param value: Item to insert
+        Parameters
+        ----------
+        index : int
+            Index to insert at.
+        value : ProtectedType_
+            Item to insert.
+
+        Raises
+        ------
+        TypeError
+            If ``index`` is not an integer or ``value`` is of a
+            protected type mismatch.
         """
         if not isinstance(index, int):
             raise TypeError('Index must be an integer')
@@ -181,15 +246,44 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
             return
         self._data.insert(index, value)
 
-    def _get_key(self, obj) -> str:
-        """Get the unique name of an object.
+    def _get_key(self, obj: ProtectedType_) -> str:
+        """
+        Get the unique name of an object.
 
         Can be overridden to use a different attribute as the key.
-        :param object: Object to get the key for
-        :return: The key of the object
-        :rtype: str
+
+        Parameters
+        ----------
+        obj : ProtectedType_
+            Object to get the key for.
+
+        Returns
+        -------
+        str
+            The key of the object.
         """
         return obj.unique_name
+
+    def get_all_variables(self) -> List[DescriptorBase]:
+        """
+        Get all ``Descriptor`` and ``Parameter`` objects from all
+        elements that are derived from ``ModelBase``.
+
+        For each element that is a ``ModelBase`` instance, the element's
+        own ``get_all_variables()`` method is called and the results are
+        collected into a single flat list.
+
+        Returns
+        -------
+        List[DescriptorBase]
+            Flat list of all ``DescriptorBase`` objects from all
+            ``ModelBase`` elements.
+        """
+        all_vars: List[DescriptorBase] = []
+        for item in self._data:
+            if isinstance(item, ModelBase):
+                all_vars.extend(item.get_all_variables())
+        return all_vars
 
     # Overwriting methods
 
@@ -207,10 +301,15 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
         return self._data.__reversed__()
 
     def sort(self, key: Callable[[ProtectedType_], Any] = None, reverse: bool = False) -> None:
-        """Sort the collection according to the given key function.
+        """
+        Sort the collection according to the given key function.
 
-        :param key: Mapping function to sort by
-        :param reverse: Whether to reverse the sort
+        Parameters
+        ----------
+        key : Callable[[ProtectedType_], Any], default=None
+            Mapping function to sort by. By default, None.
+        reverse : bool, default=False
+            Whether to reverse the sort. By default, False.
         """
         self._data.sort(reverse=reverse, key=key)
 
@@ -225,10 +324,25 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
         return self._data.index(value, start, stop)
 
     def pop(self, index: int | str = -1) -> ProtectedType_:
-        """Remove and return an item at the given index or unique_name.
+        """
+        Remove and return an item at the given index or unique_name.
 
-        :param index: Index or unique_name of the item to remove
-        :return: The removed item
+        Parameters
+        ----------
+        index : int | str, default=-1
+            Index or unique_name of the item to remove. By default, -1.
+
+        Returns
+        -------
+        ProtectedType_
+            The removed item.
+
+        Raises
+        ------
+        KeyError
+            If ``index`` is a string that does not match any item.
+        TypeError
+            If ``index`` is not an int or string.
         """
         if isinstance(index, int):
             return self._data.pop(index)
@@ -243,9 +357,13 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
     # Serialization support
 
     def to_dict(self) -> dict:
-        """Convert the EasyList to a dictionary for serialization.
+        """
+        Convert the EasyList to a dictionary for serialization.
 
-        :return: Dictionary representation of the EasyList
+        Returns
+        -------
+        dict
+            Dictionary representation of the EasyList.
         """
         dict_repr = super().to_dict()
         if self._protected_types != [NewBase]:
@@ -258,11 +376,26 @@ class EasyList(NewBase, MutableSequence[ProtectedType_]):
 
     @classmethod
     def from_dict(cls, obj_dict: Dict[str, Any]) -> NewBase:
-        """Re-create an EasyScience object from a full encoded
-        dictionary.
+        """
+        Re-create an EasyScience object from a full encoded dictionary.
 
-        :param obj_dict: dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        obj_dict : Dict[str, Any]
+            Dictionary containing the serialized contents (from
+            ``SerializerDict``) of an EasyScience object.
+
+        Returns
+        -------
+        NewBase
+            Reformed EasyScience object.
+
+        Raises
+        ------
+        ImportError
+            If a protected type cannot be imported.
+        ValueError
+            If the input dictionary does not describe an EasyList.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError(

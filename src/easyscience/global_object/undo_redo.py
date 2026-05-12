@@ -45,6 +45,7 @@ T_ = TypeVar('T_', bound=UndoCommand)
 
 
 def dict_stack_deco(func: Callable) -> Callable:
+
     def inner(obj, *args, **kwargs):
         from easyscience import global_object  # Local import to avoid circular dependency
 
@@ -61,7 +62,8 @@ def dict_stack_deco(func: Callable) -> Callable:
 
 
 class NotarizedDict(UserDict):
-    """A simple dict drop in for EasyScience group classes.
+    """
+    A simple dict drop in for EasyScience group classes.
 
     This is used as it wraps the get/set methods
     """
@@ -95,8 +97,8 @@ class NotarizedDict(UserDict):
 
 
 class CommandHolder:
-    """A holder for one or more commands which are added to the
-    stack.
+    """
+    A holder for one or more commands which are added to the stack.
     """
 
     def __init__(self, text: str = None):
@@ -196,12 +198,15 @@ class UndoStack:
 
     def pop(self) -> T_:
         """
-        !! WARNING - TO BE USED WITH EXTREME CAUTION !!
-        !! THIS IS PROBABLY NOT THE FN YOU'RE LOOKING FOR, IT CAN BREAK A LOT OF STUFF !!
-        Sometimes you really don't want the last command. Remove it from the stack
+        !! WARNING - TO BE USED WITH EXTREME CAUTION !! !! THIS IS
+        PROBABLY NOT THE FN YOU'RE LOOKING FOR, IT CAN BREAK A LOT OF
+        STUFF !! Sometimes you really don't want the last command.
+        Remove it from the stack
 
-        :return: None
-        :rtype: None
+        Returns
+        -------
+        T_
+            None.
         """
         pop_it = self._history.popleft()
         popped = pop_it.pop()
@@ -233,7 +238,7 @@ class UndoStack:
                     self._command_running = False
 
     def redo(self) -> NoReturn:
-        """Redo the last `undo` command on the stack."""
+        """Redo the last ``undo`` command on the stack."""
         if self.canRedo():
             # Move from the future to the past
             this_command_stack = self._future.popleft()
@@ -251,8 +256,9 @@ class UndoStack:
                     self._command_running = False
 
     def beginMacro(self, text: str) -> NoReturn:
-        """Start a bulk update i.e. multiple commands under one
-        undo/redo command.
+        """
+        Start a bulk update i.e. multiple commands under one undo/redo
+        command.
         """
         if self._macro_running:
             raise AssertionError('Cannot start a macro when one is already running')
@@ -261,7 +267,8 @@ class UndoStack:
         self._macro_running = True
 
     def endMacro(self) -> NoReturn:
-        """End a bulk update i.e. multiple commands under one undo/redo
+        """
+        End a bulk update i.e. multiple commands under one undo/redo
         command.
         """
         if not self._macro_running:
@@ -405,30 +412,24 @@ class DictStackReCreate(UndoCommand):
 
 def property_stack(arg: Union[str, Callable], begin_macro: bool = False) -> Callable:
     """
-    Decorate a `property` setter with undo/redo functionality
-    This decorator can be used as:
+    Decorate a ``property`` setter with undo/redo functionality This
+    decorator can be used as:
 
-    @property_stack
-    def func()
-    ....
+    @property_stack def func() ....
 
     or
 
-    @property_stack("This is the undo/redo text)
-    def func()
-    ....
+    @property_stack("This is the undo/redo text) def func() ....
 
-    In the latter case the argument is a string which might be evaluated.
-    The possible markups for this string are;
+    In the latter case the argument is a string which might be
+    evaluated. The possible markups for this string are;
 
-    `obj` - The thing being operated on
-    `func` - The function being called
-    `name` - The name of the function being called.
-    `old_value` - The pre-set value
-    `new_value` - The post-set value
+    ``obj`` - The thing being operated on ``func`` - The function being
+    called ``name`` - The name of the function being called.
+    ``old_value`` - The pre-set value ``new_value`` - The post-set value
 
-    An example would be `Function {name}: Set from {old_value} to {new_value}`
-
+    An example would be ``Function {name}: Set from {old_value} to
+    {new_value}``
     """
 
     def make_wrapper(func: Callable, name: str, **kwargs) -> Callable:

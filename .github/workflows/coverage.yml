@@ -1,10 +1,10 @@
 name: Coverage checks
 
 on:
-  # Trigger the workflow on push
+  # Trigger the workflow on push to develop
   push:
-    # Do not run on version tags (those are handled by other workflows)
-    tags-ignore: ['v*']
+    branches:
+      - develop
   # Trigger the workflow on pull request
   pull_request:
   # Allows you to run this workflow manually from the Actions tab
@@ -15,11 +15,11 @@ permissions:
   actions: write
   contents: read
 
-# Allow only one concurrent workflow, skipping runs queued between the run
-# in-progress and latest queued. And cancel in-progress runs.
+# Allow only one concurrent workflow per PR or branch ref.
+# Cancel in-progress runs only for pull requests, but let branch push runs finish.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Set the environment variables to be used in all jobs defined in this workflow
 env:
@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Check-out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Check-out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Check-out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi

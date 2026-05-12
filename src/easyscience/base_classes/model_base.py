@@ -20,22 +20,25 @@ from .new_base import NewBase
 
 
 class ModelBase(NewBase):
-    """This is the base class for all model classes in EasyScience. It
+    """
+    This is the base class for all model classes in EasyScience. It
     provides methods to get parameters for fitting and analysis as well
     as proper serialization/deserialization for
     DescriptorNumber/Parameter attributes.
 
-    It assumes that Parameters/DescriptorNumbers are assigned as properties with the getters returning the parameter
-    but the setter only setting the value of the parameter.
-    e.g.
+    It assumes that Parameters/DescriptorNumbers are assigned as
+    properties with the getters returning the parameter but the setter
+    only setting the value of the parameter. e.g.
     ```python
     @property
     def my_param(self) -> Parameter:
+        '''My param.'''
         return self._my_param
 
 
     @my_param.setter
     def my_param(self, new_value: float) -> None:
+        '''My param.'''
         self._my_param.value = new_value
     ```
     """
@@ -44,9 +47,13 @@ class ModelBase(NewBase):
         super().__init__(unique_name=unique_name, display_name=display_name)
 
     def get_all_variables(self) -> List[DescriptorBase]:
-        """Get all `Descriptor` and `Parameter` objects as a list.
+        """
+        Get all ``Descriptor`` and ``Parameter`` objects as a list.
 
-        :return: List of `Descriptor` and `Parameter` objects.
+        Returns
+        -------
+        List[DescriptorBase]
+            List of ``Descriptor`` and ``Parameter`` objects.
         """
         vars = []
         for attr_name in dir(self):
@@ -58,29 +65,42 @@ class ModelBase(NewBase):
         return vars
 
     def get_all_parameters(self) -> List[Parameter]:
-        """Get all `Parameter` objects as a list.
+        """
+        Get all ``Parameter`` objects as a list.
 
-        :return: List of `Parameter` objects.
+        Returns
+        -------
+        List[Parameter]
+            List of ``Parameter`` objects.
         """
         return [param for param in self.get_all_variables() if isinstance(param, Parameter)]
 
     def get_fittable_parameters(self) -> List[Parameter]:
-        """Get all parameters which can be fitted as a list.
+        """
+        Get all parameters which can be fitted as a list.
 
-        :return: List of `Parameter` objects.
+        Returns
+        -------
+        List[Parameter]
+            List of ``Parameter`` objects.
         """
         return [param for param in self.get_all_parameters() if param.independent]
 
     def get_free_parameters(self) -> List[Parameter]:
-        """Get all parameters which are currently free to be fitted as a
+        """
+        Get all parameters which are currently free to be fitted as a
         list.
 
-        :return: List of `Parameter` objects.
+        Returns
+        -------
+        List[Parameter]
+            List of ``Parameter`` objects.
         """
         return [param for param in self.get_fittable_parameters() if not param.fixed]
 
     def get_fit_parameters(self) -> List[Parameter]:
-        """This is an alias for `get_free_parameters`.
+        """
+        This is an alias for ``get_free_parameters``.
 
         To be removed when fully moved to new base classes and minimizer
         can be changed.
@@ -89,11 +109,29 @@ class ModelBase(NewBase):
 
     @classmethod
     def from_dict(cls, obj_dict: Dict[str, Any]) -> ModelBase:
-        """Re-create an EasyScience object with DescriptorNumber
-        attributes from a full encoded dictionary.
+        """
+        Re-create an EasyScience object with DescriptorNumber attributes
+        from a full encoded dictionary.
 
-        :param obj_dict: dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        obj_dict : Dict[str, Any]
+            Dictionary containing the serialized contents (from
+            ``SerializerDict``) of an EasyScience object.
+
+        Returns
+        -------
+        ModelBase
+            Reformed EasyScience object.
+
+        Raises
+        ------
+        SyntaxError
+            If a deserialized parameter cannot be attached back to the
+            class definition.
+        ValueError
+            If the input dictionary does not describe the expected
+            class.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError('Input must be a dictionary representing an EasyScience object.')

@@ -5,12 +5,15 @@ import collections.abc
 import functools
 import warnings
 from time import time
+from typing import Any
+from typing import Callable
 
 from easyscience import global_object
 
 
 class memoized:
-    """Decorator.
+    """
+    Decorator.
 
     Caches a function's return value each time it is called. If called
     later with the same arguments, the cached value is returned (not
@@ -41,10 +44,19 @@ class memoized:
         return functools.partial(self.__call__, obj)
 
 
-def counted(func):
-    """Counts how many times a function has been called and adds a
-    `func.calls` to it's properties :param func: Function to be counted
-    :return: Results from function call.
+def counted(func: Callable[..., Any]) -> Callable[..., Any]:
+    """
+    Count how many times a function has been called.
+
+    Parameters
+    ----------
+    func : Callable[..., Any]
+        Function to be counted.
+
+    Returns
+    -------
+    Callable[..., Any]
+        Wrapped function with a ``n_calls`` counter attribute.
     """
 
     @functools.wraps(func)
@@ -57,7 +69,8 @@ def counted(func):
 
 
 def time_it(func):
-    """Times a function and reports the time either to the class' log or
+    """
+    Times a function and reports the time either to the class' log or
     the base logger :param func: function to be timed :return: callable
     function with timer.
     """
@@ -77,7 +90,8 @@ def time_it(func):
 
 
 def deprecated(func):
-    """This is a decorator which can be used to mark functions as
+    """
+    This is a decorator which can be used to mark functions as
     deprecated.
 
     It will result in a warning being emitted when the function is used.

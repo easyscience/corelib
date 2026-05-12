@@ -14,8 +14,8 @@ from .minimizers import FitResults
 
 
 class MultiFitter(Fitter):
-    """Extension of Fitter to enable multiple dataset/fit function
-    fitting.
+    """
+    Extension of Fitter to enable multiple dataset/fit function fitting.
 
     We can fit these types of data simultaneously:
     - Multiple models on multiple datasets.
@@ -37,14 +37,27 @@ class MultiFitter(Fitter):
         # not possible to change the fitting engine.
         super().__init__(self._fit_objects, self._fit_functions[0])
 
-    def _fit_function_wrapper(self, real_x=None, flatten: bool = True) -> Callable:
-        """Simple fit function which injects the N real X (independent)
+    def _fit_function_wrapper(
+        self, real_x: Optional[List[np.ndarray]] = None, flatten: bool = True
+    ) -> Callable:
+        """
+        Simple fit function which injects the N real X (independent)
         values into the optimizer function.
 
         This will also flatten the results if needed.
-        :param real_x: List of independent x parameters to be injected
-        :param flatten: Should the result be a flat 1D array?
-        :return: Wrapped optimizer function.
+
+        Parameters
+        ----------
+        real_x : Optional[List[np.ndarray]], default=None
+            List of independent x parameters to be injected. By default,
+            None.
+        flatten : bool, default=True
+            Should the result be a flat 1D array? By default, True.
+
+        Returns
+        -------
+        Callable
+            Wrapped optimizer function.
         """
         # Extract of a list of callable functions
         wrapped_fns = []
@@ -72,15 +85,29 @@ class MultiFitter(Fitter):
         y: List[np.ndarray],
         weights: Optional[List[np.ndarray]],
         vectorized: bool,
-    ):
-        """Convert an array of X's and Y's  to an acceptable shape for
+    ) -> tuple[
+        np.ndarray, List[np.ndarray], np.ndarray, Optional[np.ndarray], List[tuple[int, ...]]
+    ]:
+        """
+        Convert an array of X's and Y's  to an acceptable shape for
         fitting.
 
-        :param x: List of independent variables.
-        :param y: List of dependent variables.
-        :param vectorized: Is the fn input vectorized or point based?
-        :param kwargs: Additional kwy words.
-        :return: Variables for optimization
+        Parameters
+        ----------
+        x : List[np.ndarray]
+            List of independent variables.
+        y : List[np.ndarray]
+            List of dependent variables.
+        weights : Optional[List[np.ndarray]]
+            Optional weights for each dataset.
+        vectorized : bool
+            Is the fn input vectorized or point based?
+
+        Returns
+        -------
+        tuple[np.ndarray, List[np.ndarray], np.ndarray, Optional[np.ndarray], List[tuple[int, ...]]]
+            Reshaped x values, reshaped input data, flattened y values,
+            flattened weights, and stored dependent dimensions.
         """
         if weights is None:
             weights = [None] * len(x)
@@ -113,10 +140,22 @@ class MultiFitter(Fitter):
         x: List[np.ndarray],
         y: List[np.ndarray],
     ) -> List[FitResults]:
-        """Take a fit results object and split it into n chuncks based
-        on the size of the x, y inputs :param fit_result_obj: Result
-        from a multifit :param x: List of X co-ords :param y: List of Y
-        co-ords :return: List of fit results.
+        """
+        Split a multi-fit result object back into per-dataset results.
+
+        Parameters
+        ----------
+        fit_result_obj : FitResults
+            Combined fit result returned by the minimizer.
+        x : List[np.ndarray]
+            Original x coordinates for each dataset.
+        y : List[np.ndarray]
+            Original y coordinates for each dataset.
+
+        Returns
+        -------
+        List[FitResults]
+            One fit result object per dataset.
         """
 
         cls = fit_result_obj.__class__

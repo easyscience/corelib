@@ -6,12 +6,13 @@ from abc import abstractmethod
 
 import numpy as np
 
-from ..base_classes.obj_base import ObjBase
 from ..fitting.minimizers import MinimizerBase
+from ..legacy.obj_base import ObjBase
 
 
 class AnalysisBase(ObjBase, metaclass=ABCMeta):
-    """This virtual class allows for the creation of technique-specific
+    """
+    This virtual class allows for the creation of technique-specific
     Analysis objects.
     """
 

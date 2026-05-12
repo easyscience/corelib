@@ -18,7 +18,8 @@ from .descriptor_base import DescriptorBase
 
 
 class DescriptorAnyType(DescriptorBase):
-    """A `Descriptor` for any type that does not fit the other
+    """
+    A ``Descriptor`` for any type that does not fit the other
     Descriptors.
 
     Should be avoided when possible. It was created to hold the symmetry
@@ -35,15 +36,15 @@ class DescriptorAnyType(DescriptorBase):
         display_name: Optional[str] = None,
         parent: Optional[Any] = None,
     ):
-        """Constructor for the DescriptorAnyType class.
+        """
+        Constructor for the DescriptorAnyType class.
 
-        param name: Name of the descriptor
-        param value: Value of the descriptor
-        param description: Description of the descriptor
-        param url: URL of the descriptor
-        param display_name: Display name of the descriptor
-        param parent: Parent of the descriptor
-        .. note:: Undo/Redo functionality is implemented for the attributes `variance`, `error`, `unit` and `value`.
+        param name: Name of the descriptor param value: Value of the
+        descriptor param description: Description of the descriptor
+        param url: URL of the descriptor param display_name: Display
+        name of the descriptor param parent: Parent of the descriptor ..
+        note:: Undo/Redo functionality is implemented for the attributes
+        ``variance``, ``error``, ``unit`` and ``value``.
         """
 
         self._value = value
@@ -59,18 +60,26 @@ class DescriptorAnyType(DescriptorBase):
 
     @property
     def value(self) -> numbers.Number:
-        """Get the value.
+        """
+        Get the value.
 
-        :return: Value of self.
+        Returns
+        -------
+        numbers.Number
+            Value of self.
         """
         return self._value
 
     @value.setter
     @property_stack
     def value(self, value: Union[list, np.ndarray]) -> None:
-        """Set the value of self.
+        """
+        Set the value of self.
 
-        :param value: New value for the DescriptorAnyType.
+        Parameters
+        ----------
+        value : Union[list, np.ndarray]
+            New value for the DescriptorAnyType.
         """
         self._value = value
 
@@ -78,8 +87,9 @@ class DescriptorAnyType(DescriptorBase):
         return super().__copy__()
 
     def __repr__(self) -> str:
-        """Return a string representation of the DescriptorAnyType,
-        showing its name and value.
+        """
+        Return a string representation of the DescriptorAnyType, showing
+        its name and value.
         """
 
         if hasattr(self._value, '__repr__'):

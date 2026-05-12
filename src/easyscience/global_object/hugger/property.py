@@ -14,12 +14,13 @@ from .hugger import Store
 
 
 class LoggedProperty(property):
-    """Pump up python properties.
+    """
+    Pump up python properties.
 
-    In this case we can see who has called this property and
-    then do something if a criteria is met. In this case if the caller is not a member of
-    the `ObjBase` class. Note that all high level `EasyScience` objects should be built from
-    `ObjBase`.
+    In this case we can see who has called this property and then do
+    something if a criteria is met. In this case if the caller is not a
+    member of the ``ObjBase`` class. Note that all high level
+    ``EasyScience`` objects should be built from ``ObjBase``.
     """
 
     _global_object = global_object
@@ -32,6 +33,7 @@ class LoggedProperty(property):
 
     @staticmethod
     def _caller_class(test_class, skip: int = 1):
+
         def stack_(frame):
             frame_list = []
             while frame:
@@ -173,6 +175,7 @@ class PropertyHugger(PatcherFactory):
         setattr(self.klass, self.prop_name, self.property)
 
     def patch_get(self, func: Callable) -> Callable:
+
         @wraps(func)
         def inner(*args, **kwargs):
             if global_object.debug:
@@ -188,6 +191,7 @@ class PropertyHugger(PatcherFactory):
         return inner
 
     def patch_set(self, func: Callable) -> Callable:
+
         @wraps(func)
         def inner(*args, **kwargs):
             if global_object.debug:
@@ -201,6 +205,7 @@ class PropertyHugger(PatcherFactory):
         return inner
 
     def patch_del(self, func: Callable) -> Callable:
+
         @wraps(func)
         def inner(*args, **kwargs):
             if global_object.debug:

@@ -12,7 +12,7 @@ from .descriptor_base import DescriptorBase
 
 
 class DescriptorStr(DescriptorBase):
-    """A `Descriptor` for string values."""
+    """A ``Descriptor`` for string values."""
 
     def __init__(
         self,
@@ -38,19 +38,36 @@ class DescriptorStr(DescriptorBase):
 
     @property
     def value(self) -> str:
-        """Get the value of self.
+        """
+        Get the value of self.
 
-        :return: Value of self with unit.
+        Returns
+        -------
+        str
+            Value of self with unit.
         """
         return self._string
 
     @value.setter
     @property_stack
     def value(self, value: str) -> None:
-        """Set the value of self.
+        """
+        Set the value of self.
 
-        :param value: New value of self
-        :return: None
+        Parameters
+        ----------
+        value : str
+            New value of self.
+
+        Returns
+        -------
+        None
+            None.
+
+        Raises
+        ------
+        ValueError
+            If ``value`` is not a string.
         """
         if not isinstance(value, str):
             raise ValueError(f'{value=} must be type str')

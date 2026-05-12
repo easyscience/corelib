@@ -61,13 +61,13 @@ jobs:
       # focused on the active dev branch.
       - name: Checkout repository (scheduled → develop)
         if: ${{ github.event_name == 'schedule' }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: develop
 
       - name: Checkout repository
         if: ${{ github.event_name != 'schedule' }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4

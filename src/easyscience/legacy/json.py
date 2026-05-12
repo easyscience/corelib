@@ -9,6 +9,8 @@ __version__ = '3.0.0'
 
 import json
 from typing import TYPE_CHECKING
+from typing import Any
+from typing import Dict
 from typing import List
 
 from .template import BaseEncoderDecoder
@@ -19,8 +21,9 @@ if TYPE_CHECKING:
 
 class JsonSerializer(BaseEncoderDecoder):
     def encode(self, obj: ComponentSerializer, skip: List[str] = []) -> str:
-        """Returns a json string representation of the
-        ComponentSerializer object.
+        """
+        Returns a json string representation of the ComponentSerializer
+        object.
         """
         ENCODER = type(
             JsonEncoderTemplate.__name__,
@@ -36,8 +39,9 @@ class JsonSerializer(BaseEncoderDecoder):
 
 class JsonDataSerializer(BaseEncoderDecoder):
     def encode(self, obj: ComponentSerializer, skip: List[str] = []) -> str:
-        """Returns a json string representation of the
-        ComponentSerializer object.
+        """
+        Returns a json string representation of the ComponentSerializer
+        object.
         """
         from .dict import DataDictSerializer
 
@@ -62,9 +66,10 @@ class JsonDataSerializer(BaseEncoderDecoder):
 
 
 class JsonEncoderTemplate(json.JSONEncoder):
-    """A Json Encoder which supports the ComponentSerializer API, plus
-    adds support for numpy arrays, datetime objects, bson ObjectIds
-    (requires bson).
+    """
+    A Json Encoder which supports the ComponentSerializer API, plus adds
+    support for numpy arrays, datetime objects, bson ObjectIds (requires
+    bson).
 
     Usage::
 
@@ -75,30 +80,38 @@ class JsonEncoderTemplate(json.JSONEncoder):
     skip = []
     _converter = BaseEncoderDecoder._convert_to_dict
 
-    def default(self, o) -> dict:  # pylint: disable=E0202
+    def default(self, o: Any) -> Dict[str, Any]:  # pylint: disable=E0202
         """
-        Overriding default method for JSON encoding. This method does two
-        things: (a) If an object has a to_dict property, return the to_dict
-        output. (b) If the @module and @class keys are not in the to_dict,
-        add them to the output automatically. If the object has no to_dict
-        property, the default Python json encoder default method is called.
+        Overriding default method for JSON encoding.
 
-        Args:
-            o: Python object.
+        This method does two things: (a) If an object has a to_dict
+        property, return the to_dict output. (b) If the @module and
+        @class keys are not in the to_dict, add them to the output
+        automatically. If the object has no to_dict property, the
+        default Python json encoder default method is called.
 
-        Return:
-            Python dict representation.
+        Parameters
+        ----------
+        o : Any
+            Python object.
+
+        Returns
+        -------
+        Dict[str, Any]
+            JSON-serializable dictionary representation of ``o``.
         """
         return self._converter(o, self.skip, full_encode=True)
 
 
 class JsonDecoderTemplate(json.JSONDecoder):
-    """A Json Decoder which supports the ComponentSerializer API. By
-    default, the decoder attempts to find a module and name associated
-    with a dict. If found, the decoder will generate a Pymatgen as a
-    priority.  If that fails, the original decoded dictionary from the
-    string is returned. Note that nested lists and dicts containing
-    pymatgen object will be decoded correctly as well.
+    """
+    A Json Decoder which supports the ComponentSerializer API.
+
+    By default, the decoder attempts to find a module and name
+    associated with a dict. If found, the decoder will generate a
+    Pymatgen as a priority.  If that fails, the original decoded
+    dictionary from the string is returned. Note that nested lists and
+    dicts containing pymatgen object will be decoded correctly as well.
 
     Usage:
 
@@ -108,11 +121,19 @@ class JsonDecoderTemplate(json.JSONDecoder):
 
     _converter = BaseEncoderDecoder._convert_from_dict
 
-    def decode(self, s):
-        """Overrides decode from JSONDecoder.
+    def decode(self, s: str) -> Any:
+        """
+        Overrides decode from JSONDecoder.
 
-        :param s: string
-        :return: Object.
+        Parameters
+        ----------
+        s : str
+            JSON string representation.
+
+        Returns
+        -------
+        Any
+            Decoded object.
         """
         d = json.JSONDecoder.decode(self, s)
         return self.__class__._converter(d)
