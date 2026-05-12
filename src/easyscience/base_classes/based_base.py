@@ -24,9 +24,6 @@ if TYPE_CHECKING:
 
 class BasedBase(SerializerComponent):
     __slots__ = ['_name', '_global_object', 'user_data', '_kwargs']
-
-    _REDIRECT = {}
-
     def __init__(
         self,
         name: str,

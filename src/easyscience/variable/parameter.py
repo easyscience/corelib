@@ -33,11 +33,6 @@ class Parameter(DescriptorNumber):
     It has additional fields to facilitate this.
     """
 
-    # Used by serializer
-    # We copy the parent's _REDIRECT and modify it to avoid altering the parent's class dict
-    _REDIRECT = DescriptorNumber._REDIRECT.copy()
-    _REDIRECT['callback'] = None
-
     def __init__(
         self,
         name: str,
@@ -691,6 +686,9 @@ class Parameter(DescriptorNumber):
                 )
 
         return raw_dict
+
+    def _serializer_skip_fields(self) -> list[str]:
+        return [*super()._serializer_skip_fields(), 'callback']
 
     def _revert_dependency(self, skip_detach=False) -> None:
         """Revert the dependency to the old dependency.

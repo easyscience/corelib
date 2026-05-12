@@ -25,8 +25,6 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
     """
 
     _global_object = global_object
-    # Used by serializer
-    _REDIRECT = {'parent': None}
 
     def __init__(
         self,
@@ -195,6 +193,9 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __repr__(self) -> str:
         """Return printable representation of the object."""
+
+    def _serializer_skip_fields(self) -> list[str]:
+        return ['parent']
 
     def __copy__(self) -> DescriptorBase:
         """Return a copy of the object."""

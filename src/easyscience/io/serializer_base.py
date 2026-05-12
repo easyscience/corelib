@@ -122,6 +122,11 @@ class SerializerBase:
         """A JSON serializable dict representation of an object."""
         if skip is None:
             skip = []
+        serializer_skip_fields: Any = getattr(obj, '_serializer_skip_fields', None)
+        if callable(serializer_skip_fields):
+            extra_skip = serializer_skip_fields()
+            if isinstance(extra_skip, list):
+                skip = [*skip, *extra_skip]
 
         if full_encode:
             new_obj = SerializerBase._encode_objs(obj)
@@ -141,8 +146,6 @@ class SerializerBase:
         if hasattr(obj, '_arg_spec'):
             args = obj._arg_spec
 
-        redirect = getattr(obj, '_REDIRECT', {})
-
         def runner(o):
             if full_encode:
                 return SerializerBase._encode_objs(o)
@@ -151,44 +154,39 @@ class SerializerBase:
 
         for c in args:
             if c not in skip:
-                if c in redirect.keys():
-                    if redirect[c] is None:
-                        continue
-                    a = runner(redirect[c](obj))
-                else:
+                try:
+                    a = runner(obj.__getattribute__(c))
+                except AttributeError:
                     try:
-                        a = runner(obj.__getattribute__(c))
+                        a = runner(obj.__getattribute__('_' + c))
                     except AttributeError:
-                        try:
-                            a = runner(obj.__getattribute__('_' + c))
-                        except AttributeError:
-                            err = True
-                            if hasattr(obj, 'kwargs'):
-                                # type: ignore
-                                option = getattr(obj, 'kwargs')
-                                if hasattr(option, c):
-                                    v = getattr(option, c)
-                                    delattr(option, c)
-                                    d.update(runner(v))  # pylint: disable=E1101
-                                    err = False
-                            if hasattr(obj, '_kwargs'):
-                                # type: ignore
-                                option = getattr(obj, '_kwargs')
-                                if hasattr(option, c):
-                                    v = getattr(option, c)
-                                    delattr(option, c)
-                                    d.update(runner(v))  # pylint: disable=E1101
-                                    err = False
-                            if err:
-                                raise NotImplementedError(
-                                    'Unable to automatically determine as_dict '
-                                    'format from class. MSONAble requires all '
-                                    'args to be present as either self.argname or '
-                                    'self._argname, and kwargs to be present under'
-                                    'a self.kwargs variable to automatically '
-                                    'determine the dict format. Alternatively, '
-                                    'you can implement both as_dict and from_dict.'
-                                )
+                        err = True
+                        if hasattr(obj, 'kwargs'):
+                            # type: ignore
+                            option = getattr(obj, 'kwargs')
+                            if hasattr(option, c):
+                                v = getattr(option, c)
+                                delattr(option, c)
+                                d.update(runner(v))  # pylint: disable=E1101
+                                err = False
+                        if hasattr(obj, '_kwargs'):
+                            # type: ignore
+                            option = getattr(obj, '_kwargs')
+                            if hasattr(option, c):
+                                v = getattr(option, c)
+                                delattr(option, c)
+                                d.update(runner(v))  # pylint: disable=E1101
+                                err = False
+                        if err:
+                            raise NotImplementedError(
+                                'Unable to automatically determine as_dict '
+                                'format from class. MSONAble requires all '
+                                'args to be present as either self.argname or '
+                                'self._argname, and kwargs to be present under'
+                                'a self.kwargs variable to automatically '
+                                'determine the dict format. Alternatively, '
+                                'you can implement both as_dict and from_dict.'
+                            )
                 d[c] = self._recursive_encoder(
                     a, skip=skip, encoder=self, full_encode=full_encode, **kwargs
                 )
@@ -202,12 +200,7 @@ class SerializerBase:
                     if k not in skip and k not in d_k:
                         if k[0] == '_' and k[1:] in d_k:
                             continue
-                        vv = v
-                        if k in redirect.keys():
-                            if redirect[k] is None:
-                                continue
-                            vv = redirect[k](obj)
-                        v_ = runner(vv)
+                        v_ = runner(v)
                         d[k] = self._recursive_encoder(
                             v_,
                             skip=skip,

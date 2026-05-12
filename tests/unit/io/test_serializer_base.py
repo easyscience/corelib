@@ -40,19 +40,6 @@ class MockSerializerComponent(SerializerComponent):
         self._global_object = True
 
 
-class MockSerializerWithRedirect(SerializerComponent):
-    """Mock with _REDIRECT for testing redirect functionality"""
-
-    _REDIRECT = {'special_attr': lambda obj: obj.value * 2, 'none_attr': None}
-
-    def __init__(self, name: str = 'test', value: int = 1, special_attr: int = 5):
-        self.name = name
-        self.value = value
-        self.special_attr = special_attr
-        self.unique_name = f'redirect_{name}'
-        self._global_object = True
-
-
 class MockSerializerWithConvertToDict(SerializerComponent):
     """Mock with custom _convert_to_dict method"""
 
@@ -290,14 +277,6 @@ class TestSerializerBase:
         assert 'value' not in result
         assert 'optional_param' not in result
 
-    def test_convert_to_dict_with_redirect(self, serializer, clear):
-        """Test _convert_to_dict with _REDIRECT"""
-        obj = MockSerializerWithRedirect('redirect_test', 10)
-        result = serializer._convert_to_dict(obj)
-
-        assert result['special_attr'] == 20  # 10 * 2 from redirect
-        assert 'none_attr' not in result  # Should be skipped due to None redirect
-
     def test_convert_to_dict_with_custom_convert_to_dict(self, serializer, clear):
         """Test _convert_to_dict with custom _convert_to_dict method"""
         obj = MockSerializerWithConvertToDict('custom_test', 5)
@@ -306,6 +285,22 @@ class TestSerializerBase:
         assert result['custom_field'] == 'added_by_convert_to_dict'
         assert result['name'] == 'custom_test'
         assert result['value'] == 5
+
+    def test_descriptor_encode_skips_parent(self, clear):
+        """Test DescriptorNumber encode skips parent references."""
+        descriptor = DescriptorNumber('child', 1.0)  # type: ignore
+
+        result = descriptor.encode()
+
+        assert 'parent' not in result
+
+    def test_parameter_encode_skips_callback(self, clear):
+        """Test Parameter encode skips callback properties."""
+        parameter = Parameter('test_parameter', 1.0, callback=property())
+
+        result = parameter.encode()
+
+        assert 'callback' not in result
 
     def test_convert_to_dict_with_enum_object(self, serializer, clear):
         """Test _convert_to_dict when the object itself is an enum"""
