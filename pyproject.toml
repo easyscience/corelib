@@ -96,7 +96,7 @@ requires = ['hatchling', 'versioningit']
 
 [tool.hatch.build.targets.wheel]
 packages = ['src/easyscience']
-exclude = ['src/easyscience/legacy']
+# exclude = ['src/easyscience/legacy']
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -211,8 +211,7 @@ select = [
 # Ignore specific rules globally
 ignore = [
   'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]
-  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
   'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
 ]
