@@ -117,6 +117,9 @@ class Bumps(MinimizerBase):
             Optional callback for progress updates. The payload field
             ``iteration`` carries the BUMPS optimizer step index. By
             default, None.
+        abort_test : Callable[[], bool] | None, default=None
+            Optional callback that returns ``True`` to signal that sampling should be aborted.
+            Called periodically during the DREAM sampling loop.
         minimizer_kwargs : dict | None, default=None
             Additional keyword arguments passed to the BUMPS minimizer.
             By default, None.
@@ -393,28 +396,58 @@ class Bumps(MinimizerBase):
     ) -> dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
-        Builds a BUMPS :class:`~bumps.names.FitProblem` from the current
-        model and runs the DREAM sampler.  This is the public minimizer-level
-        entry point for Bayesian sampling; the higher-level
-        :meth:`easyscience.fitting.multi_fitter.MultiFitter.sample` delegates
-        to this method after flattening multi-dataset arrays.
+        Builds a BUMPS `FitProblem` from the current model and runs the DREAM
+        sampler.  This is the public minimizer-level entry point for Bayesian
+        sampling; the higher-level `MultiFitter.sample` delegates to this
+        method after flattening multi-dataset arrays.
 
-        :param x: Flattened independent variable array.
-        :param y: Flattened dependent variable array.
-        :param weights: Flattened weight array.
-        :param samples: Number of retained DREAM samples requested from BUMPS.
-        :param burn: Burn-in steps.
-        :param thin: Thinning interval.
-        :param chains: User-friendly alias for BUMPS DREAM population count.
-        :param population: BUMPS DREAM population count for advanced users.
-        :param seed: Best-effort random seed.
-        :param sampler_kwargs: Additional keyword arguments forwarded to
-            :func:`bumps.fitters.fit`.
-        :param progress_callback: Optional callback for progress updates during
-            sampling.  The payload dict includes ``iteration`` (DREAM generation
-            number) and ``sampling: True``.
-        :return: Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'`",
+        Parameters
+        ----------
+        x : np.ndarray
+            Flattened independent variable array.
+        y : np.ndarray
+            Flattened dependent variable array.
+        weights : np.ndarray
+            Flattened weight array.
+        samples : int, default=10000
+            Number of retained DREAM samples requested from BUMPS.
+        burn : int, default=2000
+            Burn-in steps.
+        thin : int, default=10
+            Thinning interval.
+        chains : int | None, default=None
+            User-friendly alias for BUMPS DREAM population count.
+        population : int | None, default=None
+            BUMPS DREAM population count for advanced users.
+        seed : int | None, default=None
+            Best-effort random seed.
+        sampler_kwargs : dict | None, default=None
+            Additional keyword arguments forwarded to `bumps.fitters.fit`.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback for progress updates during sampling.  The
+            payload dict includes ``iteration`` (DREAM generation number) and
+            ``sampling: True``.
+        abort_test : Callable[[], bool] | None, default=None
+            Optional callback that returns ``True`` to signal that sampling
+            should be aborted. Called periodically during the DREAM sampling
+            loop.
+
+        Returns
+        -------
+        dict
+            Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
             and ``'logp'``.
+
+        Raises
+        ------
+        ValueError
+            If both ``chains`` and ``population`` are provided with different
+            values, or if ``progress_callback`` is not callable.
+        FitError
+            If DREAM sampling was aborted by the user (via ``abort_test``).
+        Exception
+            Re-raised from DREAM fitting if any unexpected error occurs
+            (parameter values are restored beforehand).
         """
         from bumps.fitters import DreamFit
         from bumps.names import FitProblem

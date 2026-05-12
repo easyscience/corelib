@@ -211,39 +211,56 @@ class MultiFitter(Fitter):
         Requires that the current minimizer is a BUMPS instance (i.e. the
         minimizer was switched to ``AvailableMinimizers.Bumps`` or equivalent).
 
-        :param x: List of independent variable arrays (one per dataset).
-        :type x: List[np.ndarray]
-        :param y: List of dependent variable arrays (one per dataset).
-        :type y: List[np.ndarray]
-        :param weights: List of weight arrays (one per dataset).
-        :type weights: List[np.ndarray]
-        :param samples: Number of retained DREAM samples requested from BUMPS.
-        :type samples: int
-        :param burn: Burn-in steps.
-        :type burn: int
-        :param thin: Thinning interval.
-        :type thin: int
-        :param chains: User-friendly alias for BUMPS DREAM population count.
-        :type chains: int | None
-        :param population: BUMPS DREAM population count (``pop``) for advanced users.
-        :type population: int | None
-        :param seed: Best-effort random seed. BUMPS DREAM may use additional
-            internal RNG state that is not controlled by this seed, so exact
+        Parameters
+        ----------
+        x : List[np.ndarray]
+            List of independent variable arrays (one per dataset).
+        y : List[np.ndarray]
+            List of dependent variable arrays (one per dataset).
+        weights : List[np.ndarray]
+            List of weight arrays (one per dataset).
+        samples : int, default=10000
+            Number of retained DREAM samples requested from BUMPS.
+        burn : int, default=1000
+            Burn-in steps.
+        thin : int, default=10
+            Thinning interval.
+        chains : int | None, default=None
+            User-friendly alias for BUMPS DREAM population count.
+        population : int | None, default=None
+            BUMPS DREAM population count (``pop``) for advanced users.
+        seed : int | None, default=None
+            Best-effort random seed. BUMPS DREAM may use additional internal
+            RNG state that is not controlled by this seed, so exact
             reproducibility is not guaranteed.
-        :type seed: int | None
-        :param vectorized: Whether the fit function expects vectorized
-            (multidimensional) input. Defaults to ``False``.
-        :type vectorized: bool
-        :param sampler_kwargs: Additional keyword arguments forwarded to the
-            BUMPS DREAM sampler via :func:`bumps.fitters.fit`.
-        :type sampler_kwargs: dict | None
-        :param progress_callback: Optional callback for progress updates during
-            sampling.  The payload dict includes ``iteration`` (DREAM generation
-            number) and ``sampling: True``.
-        :return: Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'`",
+        vectorized : bool, default=False
+            Whether the fit function expects vectorized (multidimensional)
+            input.
+        sampler_kwargs : dict | None, default=None
+            Additional keyword arguments forwarded to the BUMPS DREAM sampler
+            via `bumps.fitters.fit`.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback for progress updates during sampling.  The
+            payload dict includes ``iteration`` (DREAM generation number) and
+            ``sampling: True``.
+        abort_test : Callable[[], bool] | None, default=None
+            Optional callback that returns ``True`` to signal that sampling
+            should be aborted. Called periodically during the DREAM sampling
+            loop.
+
+        Returns
+        -------
+        Dict
+            Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
             and ``'logp'``.
-        :rtype: dict
-        :raises RuntimeError: If the current minimizer is not a BUMPS instance.
+
+        Raises
+        ------
+        RuntimeError
+            If the current minimizer is not a BUMPS instance.
+        ValueError
+            If both ``chains`` and ``population`` are provided with different
+            values.
         """
         # --- Alias resolution ---
         if chains is not None and population is not None:
