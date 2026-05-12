@@ -5,7 +5,8 @@ from ..legacy.obj_base import ObjBase
 
 
 class ExperimentBase(ObjBase):
-    """This virtual class allows for the creation of technique-specific
+    """
+    This virtual class allows for the creation of technique-specific
     Experiment objects.
     """
 

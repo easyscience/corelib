@@ -11,9 +11,9 @@ repos:
         pass_filenames: false
         stages: [manual]
 
-      - id: spdx-headers-check
-        name: pixi run spdx-check
-        entry: pixi run spdx-check
+      - id: license-headers-check
+        name: pixi run license-check
+        entry: pixi run license-check
         language: system
         pass_filenames: false
         stages: [manual]
@@ -32,6 +32,13 @@ repos:
         pass_filenames: false
         stages: [manual]
 
+      - id: pixi-docstring-lint-check
+        name: pixi run docstring-lint-check
+        entry: pixi run docstring-lint-check
+        language: system
+        pass_filenames: false
+        stages: [manual]
+
       - id: pixi-nonpy-format-check
         name: pixi run nonpy-format-check
         entry: pixi run nonpy-format-check
@@ -39,16 +46,9 @@ repos:
         pass_filenames: false
         stages: [manual]
 
-      - id: pixi-docs-format-check
-        name: pixi run docs-format-check
-        entry: pixi run docs-format-check
-        language: system
-        pass_filenames: false
-        stages: [manual]
-
-      - id: pixi-notebook-format-check
-        name: pixi run notebook-format-check
-        entry: pixi run notebook-format-check
+      - id: pixi-notebook-lint-check
+        name: pixi run notebook-lint-check
+        entry: pixi run notebook-lint-check
         language: system
         pass_filenames: false
         stages: [manual]

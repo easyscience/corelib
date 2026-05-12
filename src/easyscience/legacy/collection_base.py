@@ -25,16 +25,18 @@ if TYPE_CHECKING:
 
 
 class CollectionBase(BasedBase, MutableSequence):
-    """This is the base class for which all higher level classes are
-    built off of.
+    """
+    This is the base class for which all higher level classes are built
+    off of.
 
     .. deprecated::
-        `CollectionBase` is deprecated and will be removed in a future version.
-        Please migrate to `ModelBase` or `EasyList` instead.
+        ``CollectionBase`` is deprecated and will be removed in a future version.
+        Please migrate to ``ModelBase`` or ``EasyList`` instead.
 
-    NOTE: This object is serializable only if parameters are supplied as:
-    `ObjBase(a=value, b=value)`. For `Parameter` or `Descriptor` objects we can
-    cheat with `ObjBase(*[Descriptor(...), Parameter(...), ...])`.
+    NOTE: This object is serializable only if parameters are supplied
+    as: ``ObjBase(a=value, b=value)``. For ``Parameter`` or
+    ``Descriptor`` objects we can cheat with
+    ``ObjBase(*[Descriptor(...), Parameter(...), ...])``.
     """
 
     def __init__(
@@ -43,15 +45,29 @@ class CollectionBase(BasedBase, MutableSequence):
         *args: Union[BasedBase, DescriptorBase, NewBase],
         interface: Optional[InterfaceFactoryTemplate] = None,
         unique_name: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
-        """Set up the base collection class.
+        """
+        Set up the base collection class.
 
-        :param name: Name of this object
-        :type name: str
-        :param args: selection of
-        :param _kwargs: Fields which this class should contain
-        :type _kwargs: dict
+        Parameters
+        ----------
+        name : str
+            Name of this object.
+        *args : Union[BasedBase, DescriptorBase, NewBase]
+            Initial EasyScience objects to include in the collection.
+        interface : Optional[InterfaceFactoryTemplate], default=None
+            Interface attached to contained objects. By default, None.
+        unique_name : Optional[str], default=None
+            Unique identifier for this collection. By default, None.
+        **kwargs : Any
+            Fields which this class should contain.
+
+        Raises
+        ------
+        AttributeError
+            If a provided item is not an EasyScience object or if a
+            keyword collides with an internal attribute.
         """
         warnings.warn(
             'CollectionBase is deprecated and will be removed in a future version. '
@@ -104,14 +120,25 @@ class CollectionBase(BasedBase, MutableSequence):
         self._kwargs._stack_enabled = True
 
     def insert(self, index: int, value: Union[DescriptorBase, BasedBase, NewBase]) -> None:
-        """Insert an object into the collection at an index.
+        """
+        Insert an object into the collection at an index.
 
-        :param index: Index for EasyScience object to be inserted.
-        :type index: int
-        :param value: Object to be inserted.
-        :type value: Union[BasedBase, DescriptorBase, NewBase]
-        :return: None
-        :rtype: None
+        Parameters
+        ----------
+        index : int
+            Index for EasyScience object to be inserted.
+        value : Union[DescriptorBase, BasedBase, NewBase]
+            Object to be inserted.
+
+        Returns
+        -------
+        None
+            None.
+
+        Raises
+        ------
+        AttributeError
+            If ``value`` is not an EasyScience object.
         """
         t_ = type(value)
         if issubclass(t_, (BasedBase, DescriptorBase, NewBase)):
@@ -130,12 +157,25 @@ class CollectionBase(BasedBase, MutableSequence):
             raise AttributeError('Only EasyScience objects can be put into an EasyScience group')
 
     def __getitem__(self, idx: Union[int, slice]) -> Union[DescriptorBase, BasedBase, NewBase]:
-        """Get an item in the collection based on its index.
+        """
+        Get an item in the collection based on its index.
 
-        :param idx: index or slice of the collection.
-        :type idx: Union[int, slice]
-        :return: Object at index `idx`
-        :rtype: Union[Parameter, Descriptor, ObjBase, 'CollectionBase']
+        Parameters
+        ----------
+        idx : Union[int, slice]
+            Index or slice of the collection.
+
+        Returns
+        -------
+        Union[DescriptorBase, BasedBase, NewBase]
+            Object at index ``idx``.
+
+        Raises
+        ------
+        IndexError
+            If ``idx`` does not resolve to an element.
+        TypeError
+            If boolean indexing is attempted.
         """
         if isinstance(idx, slice):
             start, stop, step = idx.indices(len(self))
@@ -165,12 +205,20 @@ class CollectionBase(BasedBase, MutableSequence):
         return self._kwargs[keys[idx]]
 
     def __setitem__(self, key: int, value: Union[BasedBase, DescriptorBase, NewBase]) -> None:
-        """Set an item via it's index.
+        """
+        Set an item via it's index.
 
-        :param key: Index in self.
-        :type key: int
-        :param value: Value which index key should be set to.
-        :type value: Any
+        Parameters
+        ----------
+        key : int
+            Index in self.
+        value : Union[BasedBase, DescriptorBase, NewBase]
+            Value which index key should be set to.
+
+        Raises
+        ------
+        NotImplementedError
+            If ``value`` is neither numeric nor an EasyScience object.
         """
         if isinstance(value, Number):  # noqa: S3827
             item = self.__getitem__(key)
@@ -194,12 +242,16 @@ class CollectionBase(BasedBase, MutableSequence):
             )
 
     def __delitem__(self, key: int) -> None:
-        """Try to delete  an idem by key.
+        """
+        Try to delete  an idem by key.
 
-        :param key:
-        :type key:
-        :return:
-        :rtype:
+        Parameters
+        ----------
+        key : int
+
+        Returns
+        -------
+        None
         """
         keys = list(self._kwargs.keys())
         item = self._kwargs[keys[key]]
@@ -207,18 +259,37 @@ class CollectionBase(BasedBase, MutableSequence):
         del self._kwargs[keys[key]]
 
     def __len__(self) -> int:
-        """Get the number of items in this collection.
+        """
+        Get the number of items in this collection.
 
-        :return: Number of items in this collection.
-        :rtype: int
+        Returns
+        -------
+        int
+            Number of items in this collection.
         """
         return len(self._kwargs.keys())
 
-    def _convert_to_dict(self, in_dict, encoder, skip: List[str] = [], **kwargs) -> dict:
-        """Convert ones self into a serialized form.
+    def _convert_to_dict(
+        self, in_dict: dict, encoder: Any, skip: List[str] = [], **kwargs: Any
+    ) -> dict:
+        """
+        Convert ones self into a serialized form.
 
-        :return: dictionary of ones self
-        :rtype: dict
+        Parameters
+        ----------
+        in_dict : dict
+            Dictionary being populated during serialization.
+        encoder : Any
+            Serializer used to encode child objects.
+        skip : List[str], default=[]
+            Field names to skip during serialization.
+        **kwargs : Any
+            Additional keyword arguments passed to the serializer.
+
+        Returns
+        -------
+        dict
+            Dictionary of ones self.
         """
         d = {}
         if hasattr(self, '_modify_dict'):
@@ -230,14 +301,17 @@ class CollectionBase(BasedBase, MutableSequence):
 
     @property
     def data(self) -> Tuple:
-        """The data function returns a tuple of the keyword arguments
+        """
+        The data function returns a tuple of the keyword arguments
         passed to the constructor. This is useful for when you need to
         pass in a dictionary of data to other functions, such as with
         matplotlib's plot function.
 
-        :param self: Access attributes of the class within the method
-        :return: The values of the attributes in a tuple :doc-author:
-            Trelent
+        Returns
+        -------
+        Tuple
+            The values of the attributes in a tuple :doc-author:
+            Trelent.
         """
         return tuple(self._kwargs.values())
 
@@ -249,13 +323,16 @@ class CollectionBase(BasedBase, MutableSequence):
         mapping: Callable[[Union[BasedBase, DescriptorBase, NewBase]], Any],
         reverse: bool = False,
     ) -> None:
-        """Sort the collection according to the given mapping.
+        """
+        Sort the collection according to the given mapping.
 
-        :param mapping: mapping function to sort the collection. i.e.
-            lambda parameter: parameter.value
-        :type mapping: Callable
-        :param reverse: Reverse the sorting.
-        :type reverse: bool
+        Parameters
+        ----------
+        mapping : Callable[[Union[BasedBase, DescriptorBase, NewBase]], Any]
+            Mapping function to sort the collection. i.e. lambda
+            parameter: parameter.value.
+        reverse : bool, default=False
+            Reverse the sorting. By default, False.
         """
         i = list(self._kwargs.items())
         i.sort(key=lambda x: mapping(x[1]), reverse=reverse)

@@ -1,8 +1,9 @@
-# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
+
 """
 .. deprecated::
-    This module has been moved to `easyscience.legacy.obj_base`.
+    This module has been moved to ``easyscience.legacy.obj_base``.
     Please update your imports.
 """
 

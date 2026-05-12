@@ -1,9 +1,12 @@
-# The workflow is divided into several steps:
-#   - Check the validity of pyproject.toml
-#   - Check code linting
-#   - Check code formatting
-#   - Check formatting of docstrings in the code
-#   - Check formatting of Markdown, YAML, TOML, etc. files
+# The workflow checks
+#  - the validity of pyproject.toml,
+#  - the presence and correctness of SPDX license headers,
+#  - linting and formatting of Python code,
+#  - linting and formatting of docstrings in Python code,
+#  - formatting of non-Python files (like markdown and toml).
+#  - linting of Python code in Jupyter notebooks (for library template).
+#
+# A summary of the checks is added to the GitHub Actions summary.
 
 name: Lint and format checks
 
@@ -38,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
@@ -46,56 +49,47 @@ jobs:
       - name: Run post-install developer steps
         run: pixi run post-install
 
-      # Check the validity of pyproject.toml
       - name: Check validity of pyproject.toml
-        id: check_pyproject
+        id: pyproject
         continue-on-error: true
         shell: bash
         run: pixi run pyproject-check
 
-      # Check the presence and correctness of SPDX license headers in
-      # the code files
       - name: Check SPDX license headers
-        id: check_spdx_headers
+        id: license_headers
         continue-on-error: true
         shell: bash
-        run: pixi run spdx-check
+        run: pixi run license-check
 
-      # Check code linting with Ruff in the project root
-      - name: Check code linting
-        id: check_code_linting
+      - name: Check linting of Python code
+        id: py_lint
         continue-on-error: true
         shell: bash
         run: pixi run py-lint-check
 
-      # Check code formatting with Ruff in the project root
-      - name: Check code formatting
-        id: check_code_formatting
+      - name: Check formatting of Python code
+        id: py_format
         continue-on-error: true
         shell: bash
         run: pixi run py-format-check
 
-      # Check formatting of docstrings in the code with docformatter
-      - name: Check formatting of docstrings in the code
-        id: check_docs_formatting
+      - name: Check linting of docstrings in Python code
+        id: docstring_lint
         continue-on-error: true
         shell: bash
-        run: pixi run docs-format-check
+        run: pixi run docstring-lint-check
 
-      # Check formatting of MD, YAML, TOML, etc. files with Prettier in
-      # the project root
-      - name: Check formatting of MD, YAML, TOML, etc. files
-        id: check_others_formatting
+      - name: Check formatting of non-Python files (md, toml, etc.)
+        id: nonpy_format
         continue-on-error: true
         shell: bash
         run: pixi run nonpy-format-check
 
-      # Check formatting of Jupyter Notebooks in the tutorials folder
-      - name: Prepare notebooks and check formatting
-        id: check_notebooks_formatting
+      - name: Check linting of Python code in Jupyter notebooks (ipynb)
+        id: notebook_lint
         continue-on-error: true
         shell: bash
-        run: pixi run notebook-format-check
+        run: pixi run notebook-lint-check
 
       # Add summary
       - name: Add quality checks summary
@@ -107,24 +101,24 @@ jobs:
             echo ""
             echo "| Check | Status |"
             echo "|-------|--------|"
-            echo "| pyproject.toml   | ${{ steps.check_pyproject.outcome == 'success' && '✅' || '❌' }} |"
-            echo "| SPDX headers     | ${{ steps.check_spdx_headers.outcome == 'success' && '✅' || '❌' }} |"
-            echo "| py lint          | ${{ steps.check_code_linting.outcome == 'success' && '✅' || '❌' }} |"
-            echo "| py format        | ${{ steps.check_code_formatting.outcome == 'success' && '✅' || '❌' }} |"
-            echo "| docstring format | ${{ steps.check_docs_formatting.outcome == 'success' && '✅' || '❌' }} |"
-            echo "| nonpy format     | ${{ steps.check_others_formatting.outcome == 'success' && '✅' || '❌' }} |"
-            echo "| notebooks format | ${{ steps.check_notebooks_formatting.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| pyproject.toml   | ${{ steps.pyproject.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| license headers  | ${{ steps.license_headers.outcome == 'success' && '✅'  || '❌' }} |"
+            echo "| py lint          | ${{ steps.py_lint.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| py format        | ${{ steps.py_format.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| docstring lint   | ${{ steps.docstring_lint.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| nonpy format     | ${{ steps.nonpy_format.outcome == 'success' && '✅' || '❌' }} |"
+            echo "| notebooks lint   | ${{ steps.notebook_lint.outcome == 'success' && '✅' || '❌' }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Fail job if any check failed
       - name: Fail job if any check failed
         if: |
-          steps.check_pyproject.outcome == 'failure'
-          || steps.check_spdx_headers.outcome == 'failure'
-          || steps.check_code_linting.outcome == 'failure'
-          || steps.check_code_formatting.outcome == 'failure'
-          || steps.check_docs_formatting.outcome == 'failure'
-          || steps.check_others_formatting.outcome == 'failure'
-          || steps.check_notebooks_formatting.outcome == 'failure'
+          steps.pyproject.outcome == 'failure'
+          || steps.license_headers.outcome == 'failure'
+          || steps.py_lint.outcome == 'failure'
+          || steps.py_format.outcome == 'failure'
+          || steps.docstring_lint.outcome == 'failure'
+          || steps.nonpy_format.outcome == 'failure'
+          || steps.notebook_lint.outcome == 'failure'
         shell: bash
         run: exit 1

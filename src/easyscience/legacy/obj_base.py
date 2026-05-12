@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 EasyScience contributors <https://github.com/easyscience>
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
@@ -17,16 +17,18 @@ if TYPE_CHECKING:
 
 
 class ObjBase(BasedBase):
-    """This is the base class for which all higher level classes are
-    built off of.
+    """
+    This is the base class for which all higher level classes are built
+    off of.
 
     .. deprecated::
-        `ObjBase` is deprecated and will be removed in a future version.
-        Please migrate to `ModelBase` instead.
+        ``ObjBase`` is deprecated and will be removed in a future version.
+        Please migrate to ``ModelBase`` instead.
 
-    NOTE: This object is serializable only if parameters are supplied as:
-    `ObjBase(a=value, b=value)`. For `Parameter` or `Descriptor` objects we can
-    cheat with `ObjBase(*[Descriptor(...), Parameter(...), ...])`.
+    NOTE: This object is serializable only if parameters are supplied
+    as: ``ObjBase(a=value, b=value)``. For ``Parameter`` or
+    ``Descriptor`` objects we can cheat with
+    ``ObjBase(*[Descriptor(...), Parameter(...), ...])``.
     """
 
     def __init__(
@@ -36,11 +38,25 @@ class ObjBase(BasedBase):
         *args: Optional[SerializerComponent],
         **kwargs: Optional[SerializerComponent],
     ):
-        """Set up the base class.
+        """
+        Set up the base class.
 
-        :param name: Name of this object
-        :param args: Any arguments?
-        :param kwargs: Fields which this class should contain
+        Parameters
+        ----------
+        name : str
+            Name of this object.
+        unique_name : Optional[str], default=None
+            Unique identifier for this object. By default, None.
+        *args : Optional[SerializerComponent]
+            Positional serializer components to attach to this object.
+        **kwargs : Optional[SerializerComponent]
+            Fields which this class should contain.
+
+        Raises
+        ------
+        AttributeError
+            If a keyword component name would overwrite an existing
+            class attribute.
         """
         warnings.warn(
             'ObjBase is deprecated and will be removed in a future version. '
@@ -83,6 +99,7 @@ class ObjBase(BasedBase):
 
             class Foo(Bar):
                 def __init__(self, foo: Parameter, bar: Parameter):
+                    '''Init function.'''
                     super(Foo, self).__init__(bar=bar)
                     self._add_component('foo', foo)
 

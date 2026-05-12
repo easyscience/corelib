@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: dashboard-publish-${{ github.repository }}
+  cancel-in-progress: false
+
 # Set the environment variables to be used in all jobs defined in this workflow
 env:
   CI_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -21,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -81,22 +85,25 @@ jobs:
             ${{ github.event.repository.name }}
             dashboard
 
-      # Publish to external dashboard repository with retry logic.
+      # Push to external dashboard repository with retry logic.
       # Retry is needed to handle transient GitHub API/authentication issues
       # that occasionally cause 403 errors when multiple workflows push concurrently.
       # Uses personal_token (not github_token) as GITHUB_TOKEN cannot access external repos.
-      - name: Publish to main branch of ${{ github.repository }}
-        uses: Wandalen/wretry.action@v3.8.0
-        with:
-          attempt_limit: 3
-          attempt_delay: 15000 # 15 seconds between retries
-          action: peaceiris/actions-gh-pages@v4
-          with: |
-            publish_dir: ./_dashboard_publish
-            keep_files: true
-            external_repository: ${{ env.REPO_OWNER }}/dashboard
-            publish_branch: master
-            personal_token: ${{ steps.bot.outputs.token }}
+      - name:
+          Push to ${{ env.REPO_OWNER }}/dashboard/${{ env.REPO_NAME }}/${{ env.CI_BRANCH
+          }}
+        shell: bash
+        env:
+          DASHBOARD_COMMIT_MESSAGE: ${{ env.CI_BRANCH }}
+          DASHBOARD_GIT_USER_EMAIL:
+            ${{ vars.EASYSCIENCE_APP_ID }}+easyscience[bot]@users.noreply.github.com
+          DASHBOARD_PUSH_ATTEMPTS: '3'
+          DASHBOARD_PUSH_DELAY_SECONDS: '15'
+          DASHBOARD_PUBLISH_BRANCH: master
+          DASHBOARD_REMOTE_REPOSITORY: ${{ env.REPO_OWNER }}/dashboard
+          DASHBOARD_SOURCE_DIR: ./_dashboard_publish
+          DASHBOARD_TOKEN: ${{ steps.bot.outputs.token }}
+        run: bash ./.github/scripts/publish-dashboard.sh
 
       - name: Add dashboard link to summary
         run: |

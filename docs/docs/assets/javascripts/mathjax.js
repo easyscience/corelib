@@ -3,21 +3,27 @@ window.MathJax = {
     //inlineMath: [['\\(', '\\)']],
     //displayMath: [['\\[', '\\]']],
     // Add support for $...$ and \(...\) delimiters
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    inlineMath: [
+      ['$', '$'],
+      ['\\(', '\\)'],
+    ],
     // Add support for $$...$$ and \[...]\ delimiters
-    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    displayMath: [
+      ['$$', '$$'],
+      ['\\[', '\\]'],
+    ],
     processEscapes: true,
-    processEnvironments: true
+    processEnvironments: true,
   },
   options: {
     //ignoreHtmlClass: ".*|",
     //processHtmlClass: "arithmatex"
     // Skip code blocks only
-    skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
     // Only ignore explicit opt-out
     ignoreHtmlClass: 'no-mathjax|tex2jax_ignore',
-  }
-};
+  },
+}
 
 document$.subscribe(() => {
   MathJax.startup.output.clearCache()

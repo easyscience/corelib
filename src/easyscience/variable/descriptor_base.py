@@ -13,15 +13,18 @@ from easyscience.io import SerializerComponent
 
 
 class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
-    """This is the base of all variable descriptions for models. It
-    contains all information to describe a single unique property of an
-    object. This description includes a name and value as well as
+    """
+    This is the base of all variable descriptions for models.
+
+    It contains all information to describe a single unique property of
+    an object. This description includes a name and value as well as
     optionally a unit, description and url (for reference material).
     Also implemented is a callback so that the value can be read/set
     from a linked library object.
 
-    A `Descriptor` is typically something which describes part of a model and is non-fittable and generally changes the
-    state of an object.
+    A ``Descriptor`` is typically something which describes part of a
+    model and is non-fittable and generally changes the state of an
+    object.
     """
 
     _global_object = global_object
@@ -37,21 +40,38 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
         display_name: Optional[str] = None,
         parent: Optional[Any] = None,
     ):
-        """This is the base of variables for models. It contains all
-        information to describe a single unique property of an object.
-        This description includes a name, description and url (for
-        reference material).
+        """
+        This is the base of variables for models.
 
-        A `Descriptor` is typically something which describes part of a model and is non-fittable and generally changes
-        the state of an object.
+        It contains all information to describe a single unique property
+        of an object. This description includes a name, description and
+        url (for reference material).
 
-        :param name: Name of this object
-        :param description: A brief summary of what this object is
-        :param url: Lookup url for documentation/information
-        :param display_name: A pretty name for the object
-        :param parent: The object which this descriptor is attached to
+        A ``Descriptor`` is typically something which describes part of
+        a model and is non-fittable and generally changes the state of
+        an object.
 
-        .. note:: Undo/Redo functionality is implemented for the attributes `name` and `display name`.
+        Parameters
+        ----------
+        name : str
+            Name of this object.
+        unique_name : Optional[str], default=None
+            Unique identifier for this object. By default, None.
+        description : Optional[str], default=None
+            A brief summary of what this object is. By default, None.
+        url : Optional[str], default=None
+            Lookup url for documentation/information. By default, None.
+        display_name : Optional[str], default=None
+            A pretty name for the object. By default, None.
+        parent : Optional[Any], default=None
+            The object which this descriptor is attached to. By default,
+            None.
+
+        Raises
+        ------
+        TypeError
+            If ``name`` is not a string or if any optional string field
+            has an invalid type.
         """
 
         if unique_name is None:
@@ -87,18 +107,31 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
     @property
     def name(self) -> str:
-        """Get the name of the object.
+        """
+        Get the name of the object.
 
-        :return: name of the object.
+        Returns
+        -------
+        str
+            Name of the object.
         """
         return self._name
 
     @name.setter
     @property_stack
     def name(self, new_name: str) -> None:
-        """Set the name.
+        """
+        Set the name.
 
-        :param new_name: name of the object.
+        Parameters
+        ----------
+        new_name : str
+            Name of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``new_name`` is not a string.
         """
         if not isinstance(new_name, str):
             raise TypeError('Name must be a string')
@@ -106,9 +139,13 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
     @property
     def display_name(self) -> str:
-        """Get a pretty display name.
+        """
+        Get a pretty display name.
 
-        :return: The pretty display name.
+        Returns
+        -------
+        str
+            The pretty display name.
         """
         display_name = self._display_name
         if display_name is None:
@@ -117,10 +154,19 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
     @display_name.setter
     @property_stack
-    def display_name(self, name: str) -> None:
-        """Set the pretty display name.
+    def display_name(self, name: Optional[str]) -> None:
+        """
+        Set the pretty display name.
 
-        :param name: Pretty display name of the object.
+        Parameters
+        ----------
+        name : Optional[str]
+            Pretty display name of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``name`` is neither a string nor ``None``.
         """
         if name is not None and not isinstance(name, str):
             raise TypeError('Display name must be a string or None')
@@ -128,17 +174,30 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
     @property
     def description(self) -> str:
-        """Get the description of the object.
+        """
+        Get the description of the object.
 
-        :return: description of the object.
+        Returns
+        -------
+        str
+            Description of the object.
         """
         return self._description
 
     @description.setter
-    def description(self, description: str) -> None:
-        """Set the description of the object.
+    def description(self, description: Optional[str]) -> None:
+        """
+        Set the description of the object.
 
-        :param description: description of the object.
+        Parameters
+        ----------
+        description : Optional[str]
+            Description of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``description`` is neither a string nor ``None``.
         """
         if description is not None and not isinstance(description, str):
             raise TypeError('Description must be a string or None')
@@ -146,17 +205,30 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
     @property
     def url(self) -> str:
-        """Get the url of the object.
+        """
+        Get the url of the object.
 
-        :return: url of the object.
+        Returns
+        -------
+        str
+            Url of the object.
         """
         return self._url
 
     @url.setter
-    def url(self, url: str) -> None:
-        """Set the url of the object.
+    def url(self, url: Optional[str]) -> None:
+        """
+        Set the url of the object.
 
-        :param url: url of the object.
+        Parameters
+        ----------
+        url : Optional[str]
+            Url of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``url`` is neither a string nor ``None``.
         """
         if url is not None and not isinstance(url, str):
             raise TypeError('url must be a string')
@@ -164,18 +236,32 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
 
     @property
     def unique_name(self) -> str:
-        """Get the unique name of this object.
+        """
+        Get the unique name of this object.
 
-        :return: Unique name of this object
+        Returns
+        -------
+        str
+            Unique name of this object.
         """
         return self._unique_name
 
     @unique_name.setter
     def unique_name(self, new_unique_name: str):
-        """Set a new unique name for the object. The old name is still
-        kept in the map.
+        """
+        Set a new unique name for the object.
 
-        :param new_unique_name: New unique name for the object
+        The old name is still kept in the map.
+
+        Parameters
+        ----------
+        new_unique_name : str
+            New unique name for the object.
+
+        Raises
+        ------
+        TypeError
+            If ``new_unique_name`` is not a string.
         """
         if not isinstance(new_unique_name, str):
             raise TypeError('Unique name has to be a string.')

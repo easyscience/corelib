@@ -1,14 +1,9 @@
 # Verifies if a pull request has at least one label from a set of valid
 # labels before it can be merged.
 #
-# NOTE:
-# This workflow may be triggered twice in quick succession when a PR is
-# created:
-#   1) `opened`  — when the pull request is initially created
-#   2) `labeled` — if labels are added immediately after creation
-# (e.g. by manual labeling, another workflow, or GitHub App).
-#
-# These are separate GitHub events, so two workflow runs can be started.
+# The label validation is delegated to `mheap/github-action-required-labels`,
+# which checks the current PR labels via the GitHub API and can add or update a
+# PR comment when the required label set is missing.
 
 name: PR labels check
 
@@ -17,40 +12,34 @@ on:
     types: [opened, labeled, unlabeled, synchronize]
 
 permissions:
-  pull-requests: read
+  issues: write
+  pull-requests: write
 
 jobs:
   check-labels:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check for valid labels
-        run: |
-          PR_LABELS=$(echo '${{ toJson(github.event.pull_request.labels.*.name) }}' | jq -r '.[]')
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-          echo "Current PR labels: $PR_LABELS"
-          VALID_LABELS=(
-            "[bot] release"
-            "[scope] bug"
-            "[scope] documentation"
-            "[scope] enhancement"
-            "[scope] maintenance"
-            "[scope] significant"
-          )
+      - name: Setup easyscience[bot]
+        id: bot
+        uses: ./.github/actions/setup-easyscience-bot
+        with:
+          app-id: ${{ vars.EASYSCIENCE_APP_ID }}
+          private-key: ${{ secrets.EASYSCIENCE_APP_KEY }}
 
-          found=false
-          for label in "${VALID_LABELS[@]}"; do
-            if echo "$PR_LABELS" | grep -Fxq "$label"; then
-              echo "✅ Found valid label: $label"
-              found=true
-              break
-            fi
-          done
-
-          if [ "$found" = false ]; then
-            echo "ERROR: PR must have at least one of the following labels:"
-            for label in "${VALID_LABELS[@]}"; do
-              echo "       - $label"
-            done
-            exit 1
-          fi
+      - uses: mheap/github-action-required-labels@v5
+        with:
+          token: ${{ steps.bot.outputs.token }}
+          add_comment: true
+          mode: minimum
+          count: 1
+          labels: |
+            [bot] release
+            [scope] bug
+            [scope] documentation
+            [scope] enhancement
+            [scope] maintenance
+            [scope] significant

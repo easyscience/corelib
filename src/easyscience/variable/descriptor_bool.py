@@ -12,7 +12,7 @@ from .descriptor_base import DescriptorBase
 
 
 class DescriptorBool(DescriptorBase):
-    """A `Descriptor` for boolean values."""
+    """A ``Descriptor`` for boolean values."""
 
     def __init__(
         self,
@@ -40,19 +40,36 @@ class DescriptorBool(DescriptorBase):
 
     @property
     def value(self) -> bool:
-        """Get the value of self.
+        """
+        Get the value of self.
 
-        :return: Value of self
+        Returns
+        -------
+        bool
+            Value of self.
         """
         return self._bool_value
 
     @value.setter
     @property_stack
     def value(self, value: bool) -> None:
-        """Set the value of self.
+        """
+        Set the value of self.
 
-        :param value: New value of self
-        :return: None
+        Parameters
+        ----------
+        value : bool
+            New value of self.
+
+        Returns
+        -------
+        None
+            None.
+
+        Raises
+        ------
+        TypeError
+            If ``value`` is not a boolean.
         """
         if not isinstance(value, bool):
             raise TypeError(f'{value=} must be type bool')

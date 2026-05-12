@@ -92,9 +92,10 @@ class PatcherFactory(Hugger, metaclass=ABCMeta):
 
     @staticmethod
     def _caller_name(skip: int = 2):
-        """Get a name of a caller in the format module.class.method
-        `skip` specifies how many levels of stack to skip while getting
-        caller name.
+        """
+        Get a name of a caller in the format module.class.method
+        ``skip`` specifies how many levels of stack to skip while
+        getting caller name.
 
         skip=1 means "who calls me", skip=2 "who calls my caller" etc.
         An empty string is returned if skipped levels exceed stack
@@ -134,6 +135,7 @@ class PatcherFactory(Hugger, metaclass=ABCMeta):
         return '.'.join(name)
 
     def _append_args(self, *args, **kwargs):
+
         def check(res):
             return (
                 id(res) not in self._store.unique_rets

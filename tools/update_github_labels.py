@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
+# SPDX-License-Identifier: BSD-3-Clause
 """Set/update GitHub labels for current or specified easyscience
 repository.
 
@@ -17,7 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import shlex
-import subprocess
+import subprocess  # noqa: S404
 import sys
 from dataclasses import dataclass
 
