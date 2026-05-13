@@ -33,7 +33,7 @@ macos = '14.0'
 python = '3.11.*'
 
 [feature.py-max.dependencies]
-python = '3.13.*'
+python = '3.14.*'
 
 # Development dependencies for local development and testing with
 # editable installations.
@@ -67,7 +67,7 @@ easyscience = '*'
 
 # Specific environments for CI testing with different Python versions.
 py-311-env = { features = ['py-min', 'dev'] }
-py-313-env = { features = ['py-max', 'dev'] }
+py-314-env = { features = ['py-max', 'dev'] }
 
 # The `default` environment is developer-oriented for local development
 # and testing with editable installation of the current package.

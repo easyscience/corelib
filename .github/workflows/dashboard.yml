@@ -32,9 +32,13 @@ jobs:
       - name: Set up pixi
         uses: ./.github/actions/setup-pixi
 
+      # Install badgery into the active Pixi environment without modifying
+      # pixi.toml/pixi.lock. Using `pixi add` here re-solves the whole project
+      # and rebuilds the local editable package, which can cause intermittent
+      # Linux CI failures (`Text file busy`, os error 26).
       - name: Install badgery
         shell: bash
-        run: pixi add --pypi --git https://github.com/enhantica/badgery badgery
+        run: pixi run python -m pip install git+https://github.com/enhantica/badgery
 
       - name: Run docstring coverage and code complexity/maintainability checks
         run: |

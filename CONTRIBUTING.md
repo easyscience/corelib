@@ -248,6 +248,12 @@ or to run only Python linting checks:
 pixi run py-lint-check
 ```
 
+To add missing license headers:
+
+```bash
+pixi run spdx-add
+```
+
 Some formatting issues can be fixed automatically:
 
 ```bash
