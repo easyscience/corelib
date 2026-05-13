@@ -278,7 +278,7 @@ class MultiFitter(Fitter):
             pop = None
 
         # Flatten multi-dataset arrays
-        _, x_new, y_new, w_new, _dims = self._precompute_reshaping(
+        x_fit, x_new, y_new, w_new, _dims = self._precompute_reshaping(
             x, y, weights, vectorized=vectorized
         )
         self._dependent_dims = _dims
@@ -302,7 +302,7 @@ class MultiFitter(Fitter):
 
             # Delegate to the BUMPS minimizer's public sample method
             result = minimizer.sample(
-                x=x_new,
+                x=x_fit,
                 y=y_new,
                 weights=w_new,
                 samples=samples,

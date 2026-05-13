@@ -118,8 +118,9 @@ class Bumps(MinimizerBase):
             ``iteration`` carries the BUMPS optimizer step index. By
             default, None.
         abort_test : Callable[[], bool] | None, default=None
-            Optional callback that returns ``True`` to signal that sampling should be aborted.
-            Called periodically during the DREAM sampling loop.
+            Optional callback that returns ``True`` to signal that the fit
+            should be aborted.  Called periodically during the
+            BUMPS optimizer iteration loop.
         minimizer_kwargs : dict | None, default=None
             Additional keyword arguments passed to the BUMPS minimizer.
             By default, None.
@@ -441,8 +442,9 @@ class Bumps(MinimizerBase):
         Raises
         ------
         ValueError
-            If both ``chains`` and ``population`` are provided with different
-            values, or if ``progress_callback`` is not callable.
+            If the input shapes or weights are invalid, if both ``chains``
+            and ``population`` are provided with different values, or if
+            ``progress_callback`` is not callable.
         FitError
             If DREAM sampling was aborted by the user (via ``abort_test``).
         Exception
@@ -452,10 +454,23 @@ class Bumps(MinimizerBase):
         from bumps.fitters import DreamFit
         from bumps.names import FitProblem
 
+        x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
+
+        if y.shape != x.shape:
+            raise ValueError('x and y must have the same shape.')
+
+        if weights.shape != x.shape:
+            raise ValueError('Weights must have the same shape as x and y.')
+
+        if not np.isfinite(weights).all():
+            raise ValueError('Weights cannot be NaN or infinite.')
+
+        if (weights <= 0).any():
+            raise ValueError('Weights must be strictly positive and non-zero.')
+
         # Build the BUMPS Curve model using the minimizer's existing machinery
         model_func = self._make_model()
-        x_flat = np.linspace(0, y.size - 1, y.size)
-        curve = model_func(x_flat, y, weights)
+        curve = model_func(x, y, weights)
         problem = FitProblem(curve)
 
         # Best-effort seed: sets numpy's global RNG state just before DREAM starts.
