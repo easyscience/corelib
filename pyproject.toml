@@ -96,7 +96,6 @@ requires = ['hatchling', 'versioningit']
 
 [tool.hatch.build.targets.wheel]
 packages = ['src/easyscience']
-exclude = ['src/easyscience/legacy']
 
 [tool.hatch.metadata]
 allow-direct-references = true
