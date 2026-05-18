@@ -5,7 +5,7 @@ icon: material/cog-box
 # :material-cog-box: Installation & Setup
 
 **EasyScience** is a cross-platform Python library compatible with
-**Python 3.11** through **3.13**.
+**Python 3.11** through **3.14**.
 
 To install and set up EasyScience, we recommend using
 [**Pixi**](https://pixi.prefix.dev), a modern package manager for
@@ -62,9 +62,9 @@ This section describes the simplest way to set up EasyScience using
   pixi init easyscience
   cd easyscience
   ```
-- Set the Python version for the Pixi environment (e.g., 3.13):
+- Set the Python version for the Pixi environment (e.g., 3.14):
   ```txt
-  pixi add python=3.13
+  pixi add python=3.14
   ```
 - Add EasyScience to the Pixi environment from PyPI:
   ```txt

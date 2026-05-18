@@ -44,8 +44,8 @@ concurrency:
 # Set the environment variables to be used in all jobs defined in this workflow
 env:
   CI_BRANCH: ${{ github.head_ref || github.ref_name }}
-  PY_VERSIONS: '3.11 3.13'
-  PIXI_ENVS: 'py-311-env py-313-env'
+  PY_VERSIONS: '3.11 3.14'
+  PIXI_ENVS: 'py-311-env py-314-env'
 
 jobs:
   # Job 1: Set up environment variables

@@ -49,9 +49,9 @@ jobs:
         working-directory: easyscience
         run: pixi project system-requirements add macos 14.0
 
-      - name: Add Python 3.13 from Conda
+      - name: Add Python 3.14 from Conda
         working-directory: easyscience
-        run: pixi add "python=3.13"
+        run: pixi add "python=3.14"
 
       - name: Add other Conda dependencies
         working-directory: easyscience
