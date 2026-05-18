@@ -849,6 +849,38 @@ class TestBumpsSample:
 
 
 # ===================================================================
+# _resolve_population_alias (static helper)
+# ===================================================================
+
+
+class TestResolvePopulationAlias:
+    """Tests for ``Bumps._resolve_population_alias``."""
+
+    def test_both_none_returns_none(self) -> None:
+        assert Bumps._resolve_population_alias(None, None) is None
+
+    def test_chains_only_returns_chains(self) -> None:
+        assert Bumps._resolve_population_alias(5, None) == 5
+
+    def test_population_only_returns_population(self) -> None:
+        assert Bumps._resolve_population_alias(None, 7) == 7
+
+    def test_both_equal_returns_value(self) -> None:
+        assert Bumps._resolve_population_alias(5, 5) == 5
+
+    def test_both_different_raises(self) -> None:
+        with pytest.raises(ValueError, match='Conflicting population'):
+            Bumps._resolve_population_alias(3, 10)
+
+    def test_chains_zero_is_valid(self) -> None:
+        """Zero is a valid (though unusual) population value."""
+        assert Bumps._resolve_population_alias(0, None) == 0
+
+    def test_population_zero_is_valid(self) -> None:
+        assert Bumps._resolve_population_alias(None, 0) == 0
+
+
+# ===================================================================
 # _build_sample_progress_payload
 # ===================================================================
 
@@ -901,6 +933,29 @@ class TestBuildSampleProgressPayload:
             'sampling',
         }
         assert set(payload.keys()) == expected_keys
+
+    def test_delegates_to_build_progress_payload(self, minimizer: Bumps) -> None:
+        """_build_sample_progress_payload calls _build_progress_payload and adds sampling."""
+        mock_problem = MagicMock()
+
+        # Patch _build_progress_payload to track calls
+        base_payload = {
+            'iteration': 3,
+            'chi2': 42.0,
+            'reduced_chi2': 21.0,
+            'parameter_values': {'x': 7.0},
+            'refresh_plots': False,
+            'finished': False,
+        }
+        with patch.object(
+            minimizer, '_build_progress_payload', return_value=base_payload
+        ) as mock_bpp:
+            result = minimizer._build_sample_progress_payload(
+                mock_problem, 3, np.array([7.0]), 21.0
+            )
+
+        mock_bpp.assert_called_once_with(mock_problem, 3, np.array([7.0]), 21.0)
+        assert result == {**base_payload, 'sampling': True}
 
 
 # ===================================================================

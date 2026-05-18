@@ -196,7 +196,7 @@ class MultiFitter(Fitter):
         y: List[np.ndarray],
         weights: List[np.ndarray],
         samples: int = 10000,
-        burn: int = 1000,
+        burn: int = 2000,
         thin: int = 10,
         chains: int | None = None,
         population: int | None = None,
@@ -221,7 +221,7 @@ class MultiFitter(Fitter):
             List of weight arrays (one per dataset).
         samples : int, default=10000
             Number of retained DREAM samples requested from BUMPS.
-        burn : int, default=1000
+        burn : int, default=2000
             Burn-in steps.
         thin : int, default=10
             Thinning interval.
@@ -258,24 +258,13 @@ class MultiFitter(Fitter):
         ------
         RuntimeError
             If the current minimizer is not a BUMPS instance.
-        ValueError
-            If both ``chains`` and ``population`` are provided with different
-            values.
         """
         # --- Alias resolution ---
-        if chains is not None and population is not None:
-            if chains != population:
-                raise ValueError(
-                    f'Conflicting population arguments: chains={chains}, population={population}. '
-                    'Only provide one.'
-                )
-            pop = chains
-        elif chains is not None:
-            pop = chains
-        elif population is not None:
-            pop = population
-        else:
-            pop = None
+        # Delegate to the BUMPS minimizer's static helper so the logic
+        # stays in one place.
+        from easyscience.fitting.minimizers.minimizer_bumps import Bumps
+
+        pop = Bumps._resolve_population_alias(chains, population)
 
         # Flatten multi-dataset arrays
         x_fit, x_new, y_new, w_new, _dims = self._precompute_reshaping(

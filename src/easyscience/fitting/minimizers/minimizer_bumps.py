@@ -262,6 +262,43 @@ class Bumps(MinimizerBase):
                 return fitclass
         raise FitError(f'Unknown BUMPS fitting method: {method}')
 
+    @staticmethod
+    def _resolve_population_alias(chains: int | None, population: int | None) -> int | None:
+        """Resolve the DREAM population count from the ``chains`` alias.
+
+        Both ``chains`` (user-friendly name) and ``population`` (BUMPS
+        native name) refer to the same DREAM ``pop`` parameter.  This
+        helper enforces that at most one is provided and returns the
+        resolved value.
+
+        Parameters
+        ----------
+        chains : int | None
+            User-friendly alias for the DREAM population count.
+        population : int | None
+            BUMPS-native DREAM population count.
+
+        Returns
+        -------
+        int | None
+            The resolved population count, or ``None`` if neither was
+            provided.
+
+        Raises
+        ------
+        ValueError
+            If both ``chains`` and ``population`` are provided with
+            different values.
+        """
+        if chains is not None and population is not None:
+            if chains != population:
+                raise ValueError(
+                    f'Conflicting population arguments: chains={chains}, '
+                    f'population={population}. Only provide one.'
+                )
+            return chains
+        return chains if chains is not None else population
+
     def _build_progress_payload(
         self, problem, iteration: int, point: np.ndarray, nllf: float
     ) -> dict:
@@ -421,7 +458,12 @@ class Bumps(MinimizerBase):
         population : int | None, default=None
             BUMPS DREAM population count for advanced users.
         seed : int | None, default=None
-            Best-effort random seed.
+            Best-effort random seed.  Calls ``numpy.random.seed(seed)``
+            before DREAM starts, which affects the *global* NumPy RNG
+            state and may interact with other code in the process.
+            BUMPS DREAM uses additional internal RNG state that is
+            **not** controlled by this seed, so exact reproducibility
+            across runs is **not** guaranteed.
         sampler_kwargs : dict | None, default=None
             Additional keyword arguments forwarded to `bumps.fitters.fit`.
         progress_callback : Callable[[dict], bool | None] | None, default=None
@@ -478,19 +520,7 @@ class Bumps(MinimizerBase):
             np.random.seed(seed)
 
         # Resolve population parameter
-        if chains is not None and population is not None:
-            if chains != population:
-                raise ValueError(
-                    f'Conflicting population arguments: chains={chains}, population={population}. '
-                    'Only provide one.'
-                )
-            pop = chains
-        elif chains is not None:
-            pop = chains
-        elif population is not None:
-            pop = population
-        else:
-            pop = None
+        pop = self._resolve_population_alias(chains, population)
 
         # Build DREAM kwargs
         dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
@@ -563,16 +593,9 @@ class Bumps(MinimizerBase):
         The payload includes ``sampling: True`` so downstream consumers can
         distinguish sampling progress from classical fitting progress.
         """
-        parameter_values = self._current_parameter_snapshot(problem, point)
-        return {
-            'iteration': iteration,
-            'chi2': float(problem.chisq(nllf=nllf, norm=False)),
-            'reduced_chi2': float(problem.chisq(nllf=nllf, norm=True)),
-            'parameter_values': parameter_values,
-            'refresh_plots': False,
-            'finished': False,
-            'sampling': True,
-        }
+        payload = self._build_progress_payload(problem, iteration, point, nllf)
+        payload['sampling'] = True
+        return payload
 
     def _set_parameter_fit_result(
         self,
