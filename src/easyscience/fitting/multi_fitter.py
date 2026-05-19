@@ -203,6 +203,7 @@ class MultiFitter(Fitter):
         seed: int | None = None,
         vectorized: bool = False,
         sampler_kwargs: dict | None = None,
+        n_workers: int | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
     ) -> Dict:
@@ -239,6 +240,11 @@ class MultiFitter(Fitter):
         sampler_kwargs : dict | None, default=None
             Additional keyword arguments forwarded to the BUMPS DREAM sampler
             via `bumps.fitters.fit`.
+        n_workers : int | None, default=None
+            Number of worker processes used to evaluate the DREAM population.
+            Values of ``None`` and ``1`` use BUMPS' sequential mapper. Values
+            greater than ``1`` require the BUMPS problem and fit function to be
+            pickleable.
         progress_callback : Callable[[dict], bool | None] | None, default=None
             Optional callback for progress updates during sampling.  The
             payload dict includes ``iteration`` (DREAM generation number) and
@@ -301,6 +307,7 @@ class MultiFitter(Fitter):
                 population=pop,
                 seed=seed,
                 sampler_kwargs=sampler_kwargs,
+                n_workers=n_workers,
                 progress_callback=progress_callback,
                 abort_test=abort_test,
             )

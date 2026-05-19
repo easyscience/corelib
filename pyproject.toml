@@ -24,12 +24,13 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'asteval', # Safely evaluate Python expressions from strings
-  'lmfit',   # Non-linear least squares fitting
-  'bumps',   # Bayesian uncertainty estimation
-  'dfo-ls',  # Derivative-free optimization
-  'numpy',   # Numerical computing
-  'scipp',   # Handling and analysis of scientific data
+  'asteval',     # Safely evaluate Python expressions from strings
+  'lmfit',       # Non-linear least squares fitting
+  'bumps',       # Bayesian uncertainty estimation
+  'cloudpickle', # Serialize fitting closures for multiprocessing
+  'dfo-ls',      # Derivative-free optimization
+  'numpy',       # Numerical computing
+  'scipp',       # Handling and analysis of scientific data
 ]
 
 [project.optional-dependencies]

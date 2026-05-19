@@ -2,7 +2,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import copy
+import copyreg
+import multiprocessing as mp
+import pickle
 import warnings
+import weakref
 from typing import Any
 from typing import Callable
 from typing import List
@@ -30,6 +34,210 @@ from .utils import FitResults
 FIT_AVAILABLE_IDS_FILTERED = copy.copy(FIT_AVAILABLE_IDS)
 # Considered experimental
 FIT_AVAILABLE_IDS_FILTERED.remove('pt')
+
+
+_WORKER_PROBLEM = None
+
+_SCIPP_VARIABLE_KEY = '__easyscience_scipp_variable__'
+
+
+def _serialize_worker_value(value: Any) -> Any:
+    try:
+        import scipp as sc
+    except ImportError:
+        sc = None
+
+    if sc is not None and isinstance(value, sc.Variable):
+        return {
+            _SCIPP_VARIABLE_KEY: True,
+            'value': value.value,
+            'variance': value.variance,
+            'unit': str(value.unit),
+        }
+    if isinstance(value, (weakref.ReferenceType, weakref.KeyedRef)):
+        return None
+    if isinstance(value, dict):
+        return {key: _serialize_worker_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_serialize_worker_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_serialize_worker_value(item) for item in value)
+    if isinstance(value, set):
+        return {_serialize_worker_value(item) for item in value}
+    return value
+
+
+def _deserialize_worker_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        if value.get(_SCIPP_VARIABLE_KEY):
+            import scipp as sc
+
+            return sc.scalar(
+                value['value'],
+                unit=value['unit'],
+                variance=value['variance'],
+            )
+        return {key: _deserialize_worker_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_deserialize_worker_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_deserialize_worker_value(item) for item in value)
+    if isinstance(value, set):
+        return {_deserialize_worker_value(item) for item in value}
+    return value
+
+
+def _collect_object_state(obj: object) -> dict:
+    state = {}
+    if hasattr(obj, '__dict__'):
+        state['__dict__'] = {
+            key: _serialize_worker_value(value)
+            for key, value in obj.__dict__.items()
+            if key != '__old_class__'
+        }
+
+    slots = {}
+    for cls in type(obj).mro():
+        cls_slots = getattr(cls, '__slots__', ())
+        if isinstance(cls_slots, str):
+            cls_slots = (cls_slots,)
+        for slot in cls_slots:
+            if slot in ('__dict__', '__weakref__', '_global_object'):
+                continue
+            if hasattr(obj, slot):
+                slots[slot] = _serialize_worker_value(getattr(obj, slot))
+    state['__slots__'] = slots
+    return state
+
+
+def _restore_object_state(cls: type, state: dict) -> object:
+    obj = cls.__new__(cls)
+    if hasattr(obj, '__dict__'):
+        obj.__dict__.update(_deserialize_worker_value(state.get('__dict__', {})))
+    for slot, value in _deserialize_worker_value(state.get('__slots__', {})).items():
+        object.__setattr__(obj, slot, value)
+
+    for key, value in getattr(obj, '_kwargs', {}).items():
+        object.__setattr__(obj, key, value)
+
+    from easyscience import global_object
+
+    if hasattr(obj, '_global_object') or any(
+        '_global_object' in getattr(base, '__slots__', ()) for base in cls.mro()
+    ):
+        object.__setattr__(obj, '_global_object', global_object)
+    return obj
+
+
+def _reduce_object_state(obj: object) -> tuple:
+    cls = getattr(obj, '__old_class__', obj.__class__)
+    return _restore_object_state, (cls, _collect_object_state(obj))
+
+
+def _restore_none() -> None:
+    return None
+
+
+def _reduce_weakref(obj: weakref.ReferenceType) -> tuple:
+    return _restore_none, ()
+
+
+def _problem_serializer():
+    try:
+        import cloudpickle
+    except ImportError:
+        return pickle
+    return cloudpickle
+
+
+def _init_bumps_worker(problem_bytes: bytes) -> None:
+    global _WORKER_PROBLEM
+    _WORKER_PROBLEM = pickle.loads(problem_bytes)
+
+    from easyscience import global_object
+
+    global_object.stack.enabled = False
+
+
+def _evaluate_bumps_point(point: np.ndarray) -> float:
+    if _WORKER_PROBLEM is None:
+        raise RuntimeError('BUMPS worker problem was not initialized')
+    return float(_WORKER_PROBLEM.nllf(point))
+
+
+class BumpsPoolMapper:
+    """Multiprocessing mapper for BUMPS DREAM population evaluation."""
+
+    def __init__(self, problem: FitProblem, n_workers: int):
+        self._pool = None
+        self.n_workers = n_workers
+        serializer = _problem_serializer()
+        try:
+            from easyscience.base_classes.based_base import BasedBase
+            from easyscience.variable.descriptor_base import DescriptorBase
+
+            original_reduce = BasedBase.__reduce__
+            original_descriptor_reduce = getattr(DescriptorBase, '__reduce__', None)
+            original_weakref_reduce = copyreg.dispatch_table.get(weakref.ReferenceType)
+            original_keyedref_reduce = copyreg.dispatch_table.get(weakref.KeyedRef)
+            BasedBase.__reduce__ = _reduce_object_state
+            DescriptorBase.__reduce__ = _reduce_object_state
+            copyreg.pickle(weakref.ReferenceType, _reduce_weakref)
+            copyreg.pickle(weakref.KeyedRef, _reduce_weakref)
+            try:
+                problem_bytes = serializer.dumps(problem)
+            finally:
+                BasedBase.__reduce__ = original_reduce
+                if original_descriptor_reduce is None:
+                    delattr(DescriptorBase, '__reduce__')
+                else:
+                    DescriptorBase.__reduce__ = original_descriptor_reduce
+                if original_weakref_reduce is None:
+                    copyreg.dispatch_table.pop(weakref.ReferenceType, None)
+                else:
+                    copyreg.pickle(weakref.ReferenceType, original_weakref_reduce)
+                if original_keyedref_reduce is None:
+                    copyreg.dispatch_table.pop(weakref.KeyedRef, None)
+                else:
+                    copyreg.pickle(weakref.KeyedRef, original_keyedref_reduce)
+        except Exception as exc:
+            raise FitError(
+                'BUMPS multiprocessing requires the FitProblem and fit function to be '
+                'serializable. Install cloudpickle for closure support, or use '
+                'n_workers=1 for sequential sampling.'
+            ) from exc
+
+        context = mp.get_context('spawn')
+        self._pool = context.Pool(
+            processes=n_workers,
+            initializer=_init_bumps_worker,
+            initargs=(problem_bytes,),
+        )
+
+    def __call__(self, population: np.ndarray) -> list[float]:
+        # BUMPS may pass either a single point (1D) or a population (2D).
+        # Always reshape to 2D so list() produces one element per chain member.
+        pop = np.atleast_2d(np.asarray(population))
+        n_points = pop.shape[0]
+        results = self._pool.map(_evaluate_bumps_point, list(pop), chunksize=1)
+
+        # Safety check: BUMPS DREAM state corruption can occur if the
+        # mapper returns a different number of values than expected.
+        if len(results) != n_points:
+            raise RuntimeError(
+                f'Mapper returned {len(results)} results for {n_points} population points'
+            )
+        return results
+
+    def close(self) -> None:
+        self.terminate()
+
+    def terminate(self) -> None:
+        if self._pool is None:
+            return
+        self._pool.terminate()
+        self._pool.join()
+        self._pool = None
 
 
 class Bumps(MinimizerBase):
@@ -431,6 +639,7 @@ class Bumps(MinimizerBase):
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
+        n_workers: int | None = None,
     ) -> dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
@@ -474,6 +683,11 @@ class Bumps(MinimizerBase):
             Optional callback that returns ``True`` to signal that sampling
             should be aborted. Called periodically during the DREAM sampling
             loop.
+        n_workers : int | None, default=None
+            Number of worker processes used to evaluate the DREAM population.
+            Values of ``None`` and ``1`` use BUMPS' sequential mapper. Values
+            greater than ``1`` require the BUMPS problem and fit function to be
+            pickleable.
 
         Returns
         -------
@@ -488,7 +702,9 @@ class Bumps(MinimizerBase):
             and ``population`` are provided with different values, or if
             ``progress_callback`` is not callable.
         FitError
-            If DREAM sampling was aborted by the user (via ``abort_test``).
+            If DREAM sampling was aborted by the user (via ``abort_test``), or
+            if multiprocessing was requested for a problem that cannot be
+            serialized for worker processes.
         Exception
             Re-raised from DREAM fitting if any unexpected error occurs
             (parameter values are restored beforehand).
@@ -529,6 +745,17 @@ class Bumps(MinimizerBase):
         if sampler_kwargs:
             dream_kwargs.update(sampler_kwargs)
 
+        resolved_pop = int(dream_kwargs.get('pop', 10))
+        if resolved_pop <= 0:
+            raise ValueError('DREAM population must be a positive integer.')
+
+        mapper = None
+        if n_workers is not None:
+            if n_workers < 1:
+                raise ValueError('n_workers must be at least 1.')
+            if n_workers > 1:
+                mapper = BumpsPoolMapper(problem, n_workers=min(n_workers, resolved_pop))
+
         # Build monitors (same pattern as classical Bumps.fit())
         monitors = []
         if progress_callback is not None:
@@ -553,6 +780,7 @@ class Bumps(MinimizerBase):
             problem=problem,
             monitors=monitors,
             abort_test=abort_test or (lambda: False),
+            mapper=mapper,
             **dream_kwargs,
         )
         driver.clip()
@@ -568,9 +796,14 @@ class Bumps(MinimizerBase):
             if result_state is None:
                 raise FitError('Sampling aborted by user')
         except Exception:
+            if mapper is not None:
+                mapper.terminate()
+                mapper = None
             self._restore_parameter_values()
             raise
         finally:
+            if mapper is not None:
+                mapper.close()
             global_object.stack.enabled = stack_status
 
         draws = result_state.draw().points

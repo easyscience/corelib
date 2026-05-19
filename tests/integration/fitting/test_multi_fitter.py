@@ -1,6 +1,11 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import subprocess
+import sys
+import textwrap
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -586,3 +591,122 @@ class TestSampleSamplerKwargs:
 
         assert result['draws'].ndim == 2
         assert result['draws'].shape[0] > 0
+
+
+class TestSampleMultiprocessing:
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_n_workers_one_uses_sequential_mapper(self):
+        """n_workers=1 should behave like the default sequential DREAM mapper."""
+        ref_sin = AbsSin(0.2, np.pi)
+        sp = AbsSin(0.354, 3.05)
+
+        x = np.linspace(0, 5, 50)
+        y = ref_sin(x)
+        weights = np.ones_like(x)
+
+        sp.offset.fixed = False
+        sp.phase.fixed = False
+
+        f = MultiFitter([sp], [sp])
+        try:
+            f.switch_minimizer('Bumps')
+        except AttributeError:
+            pytest.skip('BUMPS is not installed')
+
+        result = f.sample(
+            x=[x], y=[y], weights=[weights], samples=50, burn=10, thin=2, n_workers=2
+        )
+
+        assert result['draws'].ndim == 2
+        assert result['draws'].shape[0] > 0
+        assert result['draws'].shape[1] == len(result['param_names'])
+
+    def test_n_workers_must_be_positive(self):
+        """n_workers must be positive when explicitly provided."""
+        sp = AbsSin(0.354, 3.05)
+        sp.offset.fixed = False
+        sp.phase.fixed = False
+
+        f = MultiFitter([sp], [sp])
+        try:
+            f.switch_minimizer('Bumps')
+        except AttributeError:
+            pytest.skip('BUMPS is not installed')
+
+        x = np.linspace(0, 5, 50)
+        y = np.sin(x)
+        weights = np.ones_like(x)
+
+        with pytest.raises(ValueError, match='n_workers must be at least 1'):
+            f.sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1, n_workers=0)
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_n_workers_two_produces_valid_draws(self, tmp_path):
+        """n_workers>1 should evaluate DREAM populations through process workers."""
+        repo_root = str(Path(__file__).resolve().parents[3])
+        script = tmp_path / 'run_bumps_multiprocessing_sample.py'
+        script.write_text(
+            textwrap.dedent(
+                f"""
+                import multiprocessing as mp
+                import sys
+
+                sys.path.insert(0, {repo_root!r})
+                sys.path.insert(0, {repo_root + '/src'!r})
+
+                import numpy as np
+
+                from tests.integration.fitting.test_multi_fitter import AbsSin
+                from easyscience.fitting.multi_fitter import MultiFitter
+
+
+                def main():
+                    ref_sin = AbsSin(0.2, np.pi)
+                    sp = AbsSin(0.354, 3.05)
+
+                    x = np.linspace(0, 5, 40)
+                    y = ref_sin(x)
+                    weights = np.ones_like(x)
+
+                    sp.offset.fixed = False
+                    sp.phase.fixed = False
+
+                    f = MultiFitter([sp], [sp])
+                    f.switch_minimizer('Bumps')
+                    result = f.sample(
+                        x=[x],
+                        y=[y],
+                        weights=[weights],
+                        samples=50,
+                        burn=10,
+                        thin=2,
+                        population=5,
+                        n_workers=2,
+                    )
+
+                    assert result['draws'].ndim == 2
+                    assert result['draws'].shape[0] > 0
+                    assert result['draws'].shape[1] == len(result['param_names'])
+
+
+                if __name__ == '__main__':
+                    mp.freeze_support()
+                    main()
+                """
+            ),
+            encoding='utf-8',
+        )
+
+        try:
+            completed = subprocess.run(
+                [sys.executable, str(script)],
+                cwd=repo_root,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            pytest.fail('n_workers=2 sampling subprocess timed out after 60 seconds')
+
+        assert completed.returncode == 0, completed.stdout + completed.stderr
