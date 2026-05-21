@@ -100,7 +100,8 @@ def deprecated(func):
     @functools.wraps(func)
     def new_func(*args, **kwargs):
         logging.getLogger('easyscience.deprecated').warning(
-            'Call to deprecated function %s.', func.__name__,
+            'Call to deprecated function %s.',
+            func.__name__,
             stacklevel=3,
         )
         return func(*args, **kwargs)

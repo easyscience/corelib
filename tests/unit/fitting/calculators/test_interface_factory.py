@@ -206,7 +206,7 @@ class TestInterfaceFactoryTemplate:
         mock_fitter.generate_bindings.assert_called_once()
 
     def test_switch_with_fitter_exception_handling(
-        self, factory_single_interface, caplog: "pytest.LogCaptureFixture"
+        self, factory_single_interface, caplog: 'pytest.LogCaptureFixture'
     ):
         """Test switch handles exceptions in fitter binding updates gracefully"""
         # Given
@@ -366,7 +366,7 @@ class TestInterfaceFactoryTemplate:
         assert name == 'MockInterface1'
 
     def test_switch_with_fitter_generate_bindings_exception(
-        self, factory_single_interface, caplog: "pytest.LogCaptureFixture"
+        self, factory_single_interface, caplog: 'pytest.LogCaptureFixture'
     ):
         """Test switch handles exceptions in fitter.generate_bindings gracefully"""
         # Given

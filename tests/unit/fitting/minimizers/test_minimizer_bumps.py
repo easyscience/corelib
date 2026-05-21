@@ -195,7 +195,9 @@ class TestBumpsFit:
         assert minimizer._cached_pars['b'].value == 2.0
         assert minimizer._cached_pars['b'].error == 0.2
 
-    def test_gen_fit_results(self, minimizer: Bumps, monkeypatch, caplog: "pytest.LogCaptureFixture"):
+    def test_gen_fit_results(
+        self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ):
         # When
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
@@ -638,7 +640,9 @@ class TestBumpsFit:
 
         assert parameter.value == 1.0
 
-    def test_gen_fit_results_uses_nit_for_budget_check(self, minimizer: Bumps, monkeypatch, caplog: "pytest.LogCaptureFixture"):
+    def test_gen_fit_results_uses_nit_for_budget_check(
+        self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ):
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
         monkeypatch.setattr(

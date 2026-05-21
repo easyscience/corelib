@@ -219,7 +219,7 @@ class TestEasyList:
         assert el[0].unique_name == 'a3'
         assert el[1].unique_name == 'a4'
 
-    def test_setitem_self_replacement_int(self, caplog: "pytest.LogCaptureFixture"):
+    def test_setitem_self_replacement_int(self, caplog: 'pytest.LogCaptureFixture'):
         """e[0] = e[0] should work without warning."""
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
@@ -230,7 +230,7 @@ class TestEasyList:
         assert el[0].unique_name == 'a1'
         assert len(el) == 2
 
-    def test_setitem_self_replacement_slice(self, caplog: "pytest.LogCaptureFixture"):
+    def test_setitem_self_replacement_slice(self, caplog: 'pytest.LogCaptureFixture'):
         """e[0:2] = e[0:2] should work without warning."""
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
@@ -304,7 +304,7 @@ class TestEasyList:
 
     # --- Uniqueness ---
 
-    def test_append_duplicate_warns(self, caplog: "pytest.LogCaptureFixture"):
+    def test_append_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         el = EasyList(a1, protected_types=Alpha)
         with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
@@ -313,7 +313,7 @@ class TestEasyList:
             assert 'already in EasyList' in caplog.records[0].message
         assert len(el) == 1
 
-    def test_insert_duplicate_warns(self, caplog: "pytest.LogCaptureFixture"):
+    def test_insert_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         el = EasyList(a1, protected_types=Alpha)
         with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
@@ -322,7 +322,7 @@ class TestEasyList:
             assert 'already in EasyList' in caplog.records[0].message
         assert len(el) == 1
 
-    def test_setitem_duplicate_warns(self, caplog: "pytest.LogCaptureFixture"):
+    def test_setitem_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
         el = EasyList(a1, a2, protected_types=Alpha)
@@ -333,7 +333,7 @@ class TestEasyList:
         # Original value should remain unchanged
         assert el[0].unique_name == 'a1'
 
-    def test_setitem_slice_duplicate_warns(self, caplog: "pytest.LogCaptureFixture"):
+    def test_setitem_slice_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
         a3 = Alpha(unique_name='a3')

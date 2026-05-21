@@ -19,7 +19,8 @@ _LEVEL_NAME_MAP = {
 
 
 def _resolve_log_level(
-    raw: Optional[str], default: int = logging.WARNING,
+    raw: Optional[str],
+    default: int = logging.WARNING,
 ) -> int:
     """Parse an environment-variable string into a logging level."""
     if raw is None:
@@ -104,7 +105,10 @@ class Logger:
         self.logger.setLevel(level)
 
     def getLogger(
-        self, logger_name: str, color: str = '32', defaults: bool = True,
+        self,
+        logger_name: str,
+        color: str = '32',
+        defaults: bool = True,
     ) -> logging.Logger:
         """
         Create or retrieve a child logger under *easyscience*.

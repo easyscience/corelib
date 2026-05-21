@@ -386,7 +386,7 @@ class TestDFOFit:
         )
 
     def test_gen_fit_results_maxfun_warning_sets_success_false_and_warns(
-        self, minimizer: DFO, monkeypatch, caplog: "pytest.LogCaptureFixture"
+        self, minimizer: DFO, monkeypatch, caplog: 'pytest.LogCaptureFixture'
     ):
         """When DFO returns EXIT_MAXFUN_WARNING, _gen_fit_results must warn and set success=False."""
         mock_domain_fit_results = MagicMock()
@@ -422,8 +422,9 @@ class TestDFOFit:
 
         assert DFO._extract_iterations(fit_results) == 5
 
-    def test_gen_fit_results_success_does_not_warn(self, minimizer: DFO, monkeypatch,
-                                                   caplog: "pytest.LogCaptureFixture"):
+    def test_gen_fit_results_success_does_not_warn(
+        self, minimizer: DFO, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ):
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
         monkeypatch.setattr(
@@ -467,7 +468,9 @@ class TestDFOFit:
             easyscience.fitting.minimizers.minimizer_dfo.dfols, 'solve', mock_solve
         )
 
-    def test_gen_fit_results_success_does_not_warn(self, minimizer: DFO, monkeypatch, caplog: "pytest.LogCaptureFixture"):
+    def test_gen_fit_results_success_does_not_warn(
+        self, minimizer: DFO, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ):
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
         monkeypatch.setattr(

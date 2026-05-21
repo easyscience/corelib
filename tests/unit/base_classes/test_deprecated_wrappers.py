@@ -29,7 +29,7 @@ def _clear_map():
 # ---------------------------------------------------------------------------
 
 
-def test_import_collection_base_warns(caplog: "pytest.LogCaptureFixture"):
+def test_import_collection_base_warns(caplog: 'pytest.LogCaptureFixture'):
     """Importing easyscience.base_classes.collection_base logs a WARNING."""
     import easyscience.base_classes.collection_base
 
@@ -43,7 +43,7 @@ def test_import_collection_base_warns(caplog: "pytest.LogCaptureFixture"):
     assert 'legacy.collection_base' in combined
 
 
-def test_collection_base_still_works_from_deprecated(caplog: "pytest.LogCaptureFixture"):
+def test_collection_base_still_works_from_deprecated(caplog: 'pytest.LogCaptureFixture'):
     """The class imported from the deprecated wrapper still works."""
     with caplog.at_level(logging.ERROR, logger='easyscience'):
         from easyscience.base_classes.collection_base import CollectionBase  # noqa: F811
@@ -61,7 +61,7 @@ def test_collection_base_still_works_from_deprecated(caplog: "pytest.LogCaptureF
 # ---------------------------------------------------------------------------
 
 
-def test_import_obj_base_warns(caplog: "pytest.LogCaptureFixture"):
+def test_import_obj_base_warns(caplog: 'pytest.LogCaptureFixture'):
     """Importing easyscience.base_classes.obj_base logs a WARNING."""
     import easyscience.base_classes.obj_base
 
@@ -75,7 +75,7 @@ def test_import_obj_base_warns(caplog: "pytest.LogCaptureFixture"):
     assert 'legacy.obj_base' in combined
 
 
-def test_obj_base_still_works_from_deprecated(caplog: "pytest.LogCaptureFixture"):
+def test_obj_base_still_works_from_deprecated(caplog: 'pytest.LogCaptureFixture'):
     """The class imported from the deprecated wrapper still works."""
     with caplog.at_level(logging.ERROR, logger='easyscience'):
         from easyscience.base_classes.obj_base import ObjBase  # noqa: F811

@@ -88,7 +88,9 @@ class LoggedProperty(property):
             if global_object.debug:  # noqa: S1006
                 logging.getLogger('easyscience.global_object.hugger').debug(
                     "I'm %s and %s has been set to %s from the outside!",
-                    self._my_self, self._get_id, value
+                    self._my_self,
+                    self._get_id,
+                    value,
                 )
         return super().__set__(instance, value)
 
@@ -191,7 +193,10 @@ class PropertyHugger(PatcherFactory):
             if global_object.debug:
                 logging.getLogger('easyscience.global_object.hugger').debug(
                     '%s.%s has been called with %s, %s',
-                    self.klass.__name__, self.prop_name, args[1:], kwargs
+                    self.klass.__name__,
+                    self.prop_name,
+                    args[1:],
+                    kwargs,
                 )
             res = func(*args, **kwargs)
             self._append_args(*args, **kwargs)
@@ -208,7 +213,10 @@ class PropertyHugger(PatcherFactory):
             if global_object.debug:
                 logging.getLogger('easyscience.global_object.hugger').debug(
                     '%s.%s has been set with %s, %s',
-                    self.klass.__name__, self.prop_name, args[1:], kwargs
+                    self.klass.__name__,
+                    self.prop_name,
+                    args[1:],
+                    kwargs,
                 )
             self._append_args(*args, **kwargs)
             self._append_log(self.makeEntry('set', None, *args, **kwargs))

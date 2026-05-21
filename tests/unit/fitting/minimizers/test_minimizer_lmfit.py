@@ -341,7 +341,7 @@ class TestLMFit:
             minimizer.fit(x=1.0, y=2.0, weights=1)
 
     def test_gen_fit_results_populates_evaluation_metadata(
-        self, minimizer: LMFit, caplog: "pytest.LogCaptureFixture"
+        self, minimizer: LMFit, caplog: 'pytest.LogCaptureFixture'
     ) -> None:
         fit_results = MagicMock()
         fit_results.success = False
@@ -366,7 +366,7 @@ class TestLMFit:
         assert result.engine_result == fit_results
 
     def test_gen_fit_results_success_does_not_warn(
-        self, minimizer: LMFit, caplog: "pytest.LogCaptureFixture"
+        self, minimizer: LMFit, caplog: 'pytest.LogCaptureFixture'
     ) -> None:
         fit_results = MagicMock()
         fit_results.success = True
