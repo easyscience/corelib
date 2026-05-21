@@ -6493,6 +6493,7 @@ packages:
   requires_dist:
   - asteval
   - bumps
+  - cloudpickle
   - dfo-ls
   - lmfit
   - numpy

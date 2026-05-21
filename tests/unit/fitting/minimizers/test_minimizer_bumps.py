@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import io
+import pickle
+import weakref
 from unittest.mock import ANY
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -9,8 +12,14 @@ import numpy as np
 import pytest
 
 import easyscience.fitting.minimizers.minimizer_bumps
+import easyscience.fitting.minimizers.minimizer_bumps as _bumps_mod
 from easyscience.fitting.minimizers.bumps_utils import BumpsProgressMonitor
 from easyscience.fitting.minimizers.minimizer_bumps import Bumps
+from easyscience.fitting.minimizers.minimizer_bumps import BumpsPoolMapper
+from easyscience.fitting.minimizers.minimizer_bumps import _evaluate_bumps_point
+from easyscience.fitting.minimizers.minimizer_bumps import _init_bumps_worker
+from easyscience.fitting.minimizers.minimizer_bumps import _problem_pickler_class
+from easyscience.fitting.minimizers.minimizer_bumps import _restore_none
 from easyscience.fitting.minimizers.utils import FitError
 
 
@@ -1086,3 +1095,348 @@ class TestFitWithAbortTest:
         call_kwargs = mock_FitDriver.call_args.kwargs
         assert callable(call_kwargs['abort_test'])
         assert call_kwargs['abort_test'] is not (lambda: False)
+
+
+# ===================================================================
+# Worker helper functions: _evaluate_bumps_point, _init_bumps_worker
+# ===================================================================
+
+
+class TestWorkerFunctions:
+    def test_evaluate_raises_when_problem_not_initialized(self, monkeypatch):
+        monkeypatch.setattr(_bumps_mod, '_WORKER_PROBLEM', None)
+        with pytest.raises(RuntimeError, match='not initialized'):
+            _evaluate_bumps_point(np.array([1.0]))
+
+    def test_evaluate_calls_nllf_and_returns_python_float(self, monkeypatch):
+        mock_problem = MagicMock()
+        mock_problem.nllf.return_value = np.float64(3.5)
+        monkeypatch.setattr(_bumps_mod, '_WORKER_PROBLEM', mock_problem)
+
+        result = _evaluate_bumps_point(np.array([1.0, 2.0]))
+
+        assert isinstance(result, float)
+        assert result == 3.5
+        mock_problem.nllf.assert_called_once()
+        np.testing.assert_array_equal(mock_problem.nllf.call_args[0][0], np.array([1.0, 2.0]))
+
+    def test_init_worker_populates_global_problem(self, monkeypatch):
+        monkeypatch.setattr(_bumps_mod, '_WORKER_PROBLEM', None)
+        _init_bumps_worker(pickle.dumps({'sentinel': True}))
+        assert _bumps_mod._WORKER_PROBLEM == {'sentinel': True}
+
+    def test_init_worker_disables_global_stack(self, monkeypatch):
+        from easyscience import global_object
+
+        monkeypatch.setattr(_bumps_mod, '_WORKER_PROBLEM', None)
+        global_object.stack.enabled = True
+        _init_bumps_worker(pickle.dumps(42))
+        assert global_object.stack.enabled is False
+
+
+# ===================================================================
+# _problem_pickler_class
+# ===================================================================
+
+
+class TestProblemPicklerClass:
+    def test_returns_cloudpickler_subclass(self):
+        from cloudpickle import CloudPickler
+
+        assert issubclass(_problem_pickler_class(), CloudPickler)
+
+    def test_reducer_override_replaces_weakref_with_none_restorer(self):
+        cls = _problem_pickler_class()
+
+        class _Dummy:
+            pass
+
+        obj = _Dummy()
+        ref = weakref.ref(obj)
+
+        result = cls(io.BytesIO()).reducer_override(ref)
+        assert result == (_restore_none, ())
+
+    def test_reducer_override_falls_through_for_plain_dict(self):
+        cls = _problem_pickler_class()
+        result = cls(io.BytesIO()).reducer_override({'key': 'val'})
+        assert result is NotImplemented
+
+    def test_weakref_survives_round_trip_as_none(self):
+        cls = _problem_pickler_class()
+
+        class _Dummy:
+            pass
+
+        obj = _Dummy()
+
+        class _Container:
+            ref = weakref.ref(obj)
+
+        buf = io.BytesIO()
+        cls(buf).dump(_Container())
+        buf.seek(0)
+        restored = pickle.load(buf)
+        assert restored.ref is None
+
+
+# ===================================================================
+# BumpsPoolMapper — lifecycle (terminate / close)
+# ===================================================================
+
+
+class TestBumpsPoolMapperLifecycle:
+    def _mapper(self):
+        m = BumpsPoolMapper.__new__(BumpsPoolMapper)
+        m._pool = MagicMock()
+        m.n_workers = 2
+        return m
+
+    def test_terminate_shuts_down_pool(self):
+        mapper = self._mapper()
+        pool = mapper._pool
+        mapper.terminate()
+        pool.terminate.assert_called_once()
+        pool.join.assert_called_once()
+        assert mapper._pool is None
+
+    def test_terminate_is_idempotent_when_pool_is_none(self):
+        mapper = BumpsPoolMapper.__new__(BumpsPoolMapper)
+        mapper._pool = None
+        mapper.terminate()  # must not raise
+
+    def test_close_delegates_to_terminate(self):
+        mapper = self._mapper()
+        pool = mapper._pool
+        mapper.close()
+        pool.terminate.assert_called_once()
+        assert mapper._pool is None
+
+
+# ===================================================================
+# BumpsPoolMapper — __call__
+# ===================================================================
+
+
+class TestBumpsPoolMapperCall:
+    def _mapper(self, map_return):
+        m = BumpsPoolMapper.__new__(BumpsPoolMapper)
+        m._pool = MagicMock()
+        m._pool.map.return_value = map_return
+        m.n_workers = 2
+        return m
+
+    def test_maps_2d_population_and_passes_chunksize_one(self):
+        pop = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        mapper = self._mapper([1.0, 2.0, 3.0])
+
+        result = mapper(pop)
+
+        assert result == [1.0, 2.0, 3.0]
+        assert mapper._pool.map.call_args.kwargs.get('chunksize') == 1
+
+    def test_reshapes_1d_point_to_single_row(self):
+        mapper = self._mapper([7.0])
+
+        result = mapper(np.array([1.0, 2.0]))
+
+        assert result == [7.0]
+        points_arg = mapper._pool.map.call_args[0][1]
+        assert len(points_arg) == 1
+        # list(atleast_2d([1., 2.])) produces 1D rows, one per chain member
+        np.testing.assert_array_equal(points_arg[0], np.array([1.0, 2.0]))
+
+    def test_raises_on_result_count_mismatch(self):
+        mapper = self._mapper([42.0])  # one result for two points
+        with pytest.raises(
+            RuntimeError, match='Mapper returned 1 results for 2 population points'
+        ):
+            mapper(np.array([[1.0], [2.0]]))
+
+
+# ===================================================================
+# BumpsPoolMapper — __init__ (serialization + pool creation)
+# ===================================================================
+
+
+class TestBumpsPoolMapperInit:
+    @staticmethod
+    def _patch_pickler(monkeypatch, written_bytes=b'fake_problem'):
+        class _FakePickler:
+            def __init__(self, buf):
+                self._buf = buf
+
+            def dump(self, obj):
+                self._buf.write(written_bytes)
+
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            '_problem_pickler_class',
+            lambda: _FakePickler,
+        )
+
+    def test_creates_spawn_pool_with_correct_args(self, monkeypatch):
+        self._patch_pickler(monkeypatch)
+        mock_pool = MagicMock()
+        mock_context = MagicMock()
+        mock_context.Pool.return_value = mock_pool
+        monkeypatch.setattr(_bumps_mod.mp, 'get_context', lambda _: mock_context)
+
+        mapper = BumpsPoolMapper(MagicMock(), n_workers=3)
+
+        assert mapper._pool is mock_pool
+        mock_context.Pool.assert_called_once_with(
+            processes=3,
+            initializer=_bumps_mod._init_bumps_worker,
+            initargs=(b'fake_problem',),
+        )
+
+    def test_serialization_failure_raises_fit_error(self, monkeypatch):
+        class _BadPickler:
+            def __init__(self, buf):
+                pass
+
+            def dump(self, obj):
+                raise TypeError('not serializable')
+
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            '_problem_pickler_class',
+            lambda: _BadPickler,
+        )
+        with pytest.raises(FitError, match='serializable'):
+            BumpsPoolMapper(MagicMock(), n_workers=2)
+
+
+# ===================================================================
+# Bumps.sample() — n_workers wiring
+# ===================================================================
+
+
+class TestBumpsSampleNWorkers:
+    @pytest.fixture
+    def minimizer(self) -> Bumps:
+        return Bumps(
+            obj='obj',
+            fit_function='fit_function',
+            minimizer_enum=MagicMock(package='bumps', method='amoeba'),
+        )
+
+    @pytest.fixture(autouse=True)
+    def _mock_bumps_internals(self, monkeypatch):
+        import bumps.fitters
+        import bumps.names
+
+        monkeypatch.setattr(bumps.fitters, 'DreamFit', MagicMock())
+        monkeypatch.setattr(bumps.names, 'FitProblem', MagicMock(return_value=MagicMock()))
+        monkeypatch.setattr(
+            Bumps, '_make_model', MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        )
+
+    def _setup_driver(self, monkeypatch):
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+
+        mock_state = MagicMock()
+        mock_state.draw.return_value.points = np.array([[1.0]])
+        mock_state.logp = None
+        mock_driver = MagicMock()
+        mock_driver.clip = MagicMock()
+        mock_driver.fit.return_value = (np.array([1.0]), 0.0)
+        mock_driver.fitter.state = mock_state
+
+        mock_FitDriver = MagicMock(return_value=mock_driver)
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps, 'FitDriver', mock_FitDriver
+        )
+        return mock_FitDriver, mock_driver
+
+    def _patch_mapper(self, monkeypatch):
+        mock_mapper = MagicMock()
+        mock_cls = MagicMock(return_value=mock_mapper)
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps, 'BumpsPoolMapper', mock_cls
+        )
+        return mock_cls, mock_mapper
+
+    def test_n_workers_zero_raises(self, minimizer, monkeypatch):
+        self._setup_driver(monkeypatch)
+        with pytest.raises(ValueError, match='n_workers must be at least 1'):
+            minimizer.sample(
+                x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]), n_workers=0
+            )
+
+    def test_n_workers_one_does_not_create_mapper(self, minimizer, monkeypatch):
+        mock_FitDriver, _ = self._setup_driver(monkeypatch)
+        mock_cls, _ = self._patch_mapper(monkeypatch)
+
+        minimizer.sample(
+            x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]), n_workers=1
+        )
+
+        mock_cls.assert_not_called()
+        assert mock_FitDriver.call_args.kwargs['mapper'] is None
+
+    def test_n_workers_two_creates_mapper_and_passes_to_driver(self, minimizer, monkeypatch):
+        mock_FitDriver, _ = self._setup_driver(monkeypatch)
+        mock_cls, mock_mapper = self._patch_mapper(monkeypatch)
+
+        minimizer.sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            n_workers=2,
+            population=5,
+        )
+
+        mock_cls.assert_called_once()
+        assert mock_FitDriver.call_args.kwargs['mapper'] is mock_mapper
+        mock_mapper.close.assert_called_once()
+
+    def test_n_workers_clipped_to_population_size(self, minimizer, monkeypatch):
+        self._setup_driver(monkeypatch)
+        mock_cls, _ = self._patch_mapper(monkeypatch)
+
+        minimizer.sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            n_workers=8,
+            population=3,
+        )
+
+        assert mock_cls.call_args.kwargs['n_workers'] == 3
+
+    def test_mapper_terminated_on_driver_exception(self, minimizer, monkeypatch):
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+        mock_driver = MagicMock()
+        mock_driver.clip = MagicMock()
+        mock_driver.fit.side_effect = RuntimeError('driver failed')
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            'FitDriver',
+            MagicMock(return_value=mock_driver),
+        )
+        mock_cls, mock_mapper = self._patch_mapper(monkeypatch)
+
+        with pytest.raises(RuntimeError, match='driver failed'):
+            minimizer.sample(
+                x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]), n_workers=2
+            )
+
+        mock_mapper.terminate.assert_called_once()
+        mock_mapper.close.assert_not_called()
+
+    def test_mapper_closed_on_success(self, minimizer, monkeypatch):
+        self._setup_driver(monkeypatch)
+        mock_cls, mock_mapper = self._patch_mapper(monkeypatch)
+
+        minimizer.sample(
+            x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]), n_workers=2
+        )
+
+        mock_mapper.close.assert_called_once()
+        mock_mapper.terminate.assert_not_called()

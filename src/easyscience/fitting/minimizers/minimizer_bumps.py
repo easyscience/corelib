@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import copy
-import copyreg
+import io
 import multiprocessing as mp
 import pickle
 import warnings
@@ -142,12 +142,29 @@ def _reduce_weakref(obj: weakref.ReferenceType) -> tuple:
     return _restore_none, ()
 
 
-def _problem_serializer():
-    try:
-        import cloudpickle
-    except ImportError:
-        return pickle
-    return cloudpickle
+def _problem_pickler_class():
+    """Build a Pickler subclass that handles BUMPS problem reduction locally.
+
+    Uses ``reducer_override`` (instance-scoped) instead of mutating
+    ``__reduce__`` on shared classes or ``copyreg.dispatch_table`` — those
+    globals would race with any concurrent pickle on another thread.
+    """
+    from cloudpickle import CloudPickler
+
+    from easyscience.base_classes.based_base import BasedBase
+    from easyscience.variable.descriptor_base import DescriptorBase
+
+    _parent_reducer = CloudPickler.reducer_override
+
+    class _BumpsProblemPickler(CloudPickler):
+        def reducer_override(self, obj):
+            if isinstance(obj, (weakref.ReferenceType, weakref.KeyedRef)):
+                return _restore_none, ()
+            if isinstance(obj, (BasedBase, DescriptorBase)):
+                return _reduce_object_state(obj)
+            return _parent_reducer(self, obj)
+
+    return _BumpsProblemPickler
 
 
 def _init_bumps_worker(problem_bytes: bytes) -> None:
@@ -171,40 +188,15 @@ class BumpsPoolMapper:
     def __init__(self, problem: FitProblem, n_workers: int):
         self._pool = None
         self.n_workers = n_workers
-        serializer = _problem_serializer()
         try:
-            from easyscience.base_classes.based_base import BasedBase
-            from easyscience.variable.descriptor_base import DescriptorBase
-
-            original_reduce = BasedBase.__reduce__
-            original_descriptor_reduce = getattr(DescriptorBase, '__reduce__', None)
-            original_weakref_reduce = copyreg.dispatch_table.get(weakref.ReferenceType)
-            original_keyedref_reduce = copyreg.dispatch_table.get(weakref.KeyedRef)
-            BasedBase.__reduce__ = _reduce_object_state
-            DescriptorBase.__reduce__ = _reduce_object_state
-            copyreg.pickle(weakref.ReferenceType, _reduce_weakref)
-            copyreg.pickle(weakref.KeyedRef, _reduce_weakref)
-            try:
-                problem_bytes = serializer.dumps(problem)
-            finally:
-                BasedBase.__reduce__ = original_reduce
-                if original_descriptor_reduce is None:
-                    delattr(DescriptorBase, '__reduce__')
-                else:
-                    DescriptorBase.__reduce__ = original_descriptor_reduce
-                if original_weakref_reduce is None:
-                    copyreg.dispatch_table.pop(weakref.ReferenceType, None)
-                else:
-                    copyreg.pickle(weakref.ReferenceType, original_weakref_reduce)
-                if original_keyedref_reduce is None:
-                    copyreg.dispatch_table.pop(weakref.KeyedRef, None)
-                else:
-                    copyreg.pickle(weakref.KeyedRef, original_keyedref_reduce)
+            pickler_cls = _problem_pickler_class()
+            buffer = io.BytesIO()
+            pickler_cls(buffer).dump(problem)
+            problem_bytes = buffer.getvalue()
         except Exception as exc:
             raise FitError(
                 'BUMPS multiprocessing requires the FitProblem and fit function to be '
-                'serializable. Install cloudpickle for closure support, or use '
-                'n_workers=1 for sequential sampling.'
+                'serializable. Use n_workers=1 for sequential sampling.'
             ) from exc
 
         context = mp.get_context('spawn')

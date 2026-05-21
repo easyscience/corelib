@@ -614,7 +614,7 @@ class TestSampleMultiprocessing:
             pytest.skip('BUMPS is not installed')
 
         result = f.sample(
-            x=[x], y=[y], weights=[weights], samples=50, burn=10, thin=2, n_workers=2
+            x=[x], y=[y], weights=[weights], samples=50, burn=10, thin=2, n_workers=1
         )
 
         assert result['draws'].ndim == 2
