@@ -56,8 +56,9 @@ class Logger:
     """
 
     def __init__(self, log_level: int = logging.WARNING):
-        env_level = _resolve_log_level(os.environ.get(_LOG_LEVEL_ENV_VAR))
-        self._effective_default = env_level if env_level is not None else log_level
+        self._effective_default = _resolve_log_level(
+            os.environ.get(_LOG_LEVEL_ENV_VAR), default=log_level
+        )
         self.logger = logging.getLogger(PACKAGE_LOGGER_NAME)
         self.logger.setLevel(self._effective_default)
         self.level = self._effective_default
@@ -104,12 +105,7 @@ class Logger:
         self.level = level
         self.logger.setLevel(level)
 
-    def getLogger(
-        self,
-        logger_name: str,
-        color: str = '32',
-        defaults: bool = True,
-    ) -> logging.Logger:
+    def getLogger(self, logger_name: str) -> logging.Logger:
         """
         Create or retrieve a child logger under *easyscience*.
 
@@ -120,12 +116,6 @@ class Logger:
         ----------
         logger_name : str
             Logger name. Usually ``__name__`` of the calling module.
-        color : str, default='32'
-            Historical color parameter (currently unused, preserved for
-            compatibility).
-        defaults : bool, default=True
-            Historical defaults flag (currently unused, preserved for
-            compatibility).
 
         Returns
         -------
@@ -152,10 +142,12 @@ class Logger:
         previous = self.level
         if isinstance(level, str):
             level = _resolve_log_level(level)
+        self.level = level
         self.logger.setLevel(level)
         try:
             yield
         finally:
+            self.level = previous
             self.logger.setLevel(previous)
 
     # -- deprecated helpers (compatibility shims) -------------------------
