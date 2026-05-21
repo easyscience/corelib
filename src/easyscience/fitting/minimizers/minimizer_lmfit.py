@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
+import logging
 from typing import Any
 from typing import Callable
 from typing import List
@@ -413,7 +413,7 @@ class LMFit(MinimizerBase):  # noqa: S101
         results.iterations = kwargs.get('iterations')
         results.message = fit_results.message
         if fit_results.success is False and fit_results.message:
-            warnings.warn(str(fit_results.message), UserWarning)
+            logging.getLogger('easyscience.fitting.lmfit').warning(str(fit_results.message))
         results.minimizer_engine = self.__class__
         results.fit_args = None
 

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 from typing import Dict
 from typing import List
@@ -56,8 +57,9 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
                             attr_value = getattr(item, attr_name)
                             _collect_parameters(attr_value, parameters)
                         except (AttributeError, Exception):
-                            # log the exception
-                            print(f"Error accessing property '{attr_name}' of {item}")
+                            logging.getLogger('easyscience.variable.dependencies').debug(
+                                "Error accessing property '%s' of %s", attr_name, item
+                            )
                             # Skip properties that can't be accessed
                             continue
 
@@ -85,7 +87,9 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
 
     # Report results
     if resolved_count > 0:
-        print(f'Successfully resolved dependencies for {resolved_count} parameter(s).')
+        logging.getLogger('easyscience.variable.dependencies').debug(
+            'Successfully resolved dependencies for %d parameter(s).', resolved_count
+        )
 
     if error_count > 0:
         error_message = (
@@ -140,8 +144,9 @@ def get_parameters_with_pending_dependencies(obj: Any) -> List[Parameter]:
                             attr_value = getattr(item, attr_name)
                             _collect_pending_parameters(attr_value)
                         except (AttributeError, Exception):
-                            # log the exception
-                            print(f"Error accessing property '{attr_name}' of {item}")
+                            logging.getLogger('easyscience.variable.dependencies').debug(
+                                "Error accessing property '%s' of %s", attr_name, item
+                            )
                             # Skip properties that can't be accessed
                             continue
 

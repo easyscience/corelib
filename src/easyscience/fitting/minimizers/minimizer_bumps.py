@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import copy
-import warnings
+import logging
 from typing import Any
 from typing import Callable
 from typing import List
@@ -485,18 +485,16 @@ class Bumps(MinimizerBase):
             )
         if stopped_on_budget:
             if tolerance is None:
-                warnings.warn(
+                logging.getLogger('easyscience.fitting.bumps').warning(
                     f'Fit did not converge within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.',
-                    UserWarning,
+                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
                 )
             else:
-                warnings.warn(
+                logging.getLogger('easyscience.fitting.bumps').warning(
                     f'Fit did not reach the desired tolerance of {tolerance} within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.',
-                    UserWarning,
+                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
                 )
 
         # results.residual = results.y_obs - results.y_calc

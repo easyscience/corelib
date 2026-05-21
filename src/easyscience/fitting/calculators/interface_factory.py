@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
@@ -96,12 +97,16 @@ class InterfaceFactoryTemplate:
                     if hasattr(obj, 'update_bindings'):
                         obj.update_bindings()
                 except Exception as e:
-                    print(f'Unable to auto generate bindings.\n{e}')
+                    logging.getLogger('easyscience.fitting.calculators').warning(
+                        'Unable to auto generate bindings.\n%s', e
+                    )
             elif hasattr(fitter, 'generate_bindings'):
                 try:
                     fitter.generate_bindings()
                 except Exception as e:
-                    print(f'Unable to auto generate bindings.\n{e}')
+                    logging.getLogger('easyscience.fitting.calculators').warning(
+                        'Unable to auto generate bindings.\n%s', e
+                    )
 
     @property
     def available_interfaces(self) -> List[str]:

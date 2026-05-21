@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 import xml.etree.ElementTree as ET
 from numbers import Number
@@ -191,5 +192,5 @@ class XMLSerializer(BaseEncoderDecoder):
         elif issubclass(T_, np.ndarray):
             element.text = str(value.tolist())
         else:
-            print(f'Cannot encode {T_} to XML')
+            logging.getLogger('easyscience.legacy.xml').error('Cannot encode %s to XML', T_)
             raise NotImplementedError

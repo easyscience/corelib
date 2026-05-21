@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import logging
 import sys
 from functools import wraps
 from typing import Any
@@ -73,7 +74,9 @@ class LoggedProperty(property):
                     result_item(item)
             Store().append_log(self.makeEntry('get', res))
             if global_object.debug:  # noqa: S1006
-                print(f"I'm {self._my_self} and {self._get_id} has been called from the outside!")
+                logging.getLogger('easyscience.global_object.hugger').debug(
+                    "I'm %s and %s has been called from the outside!", self._my_self, self._get_id
+                )
         return res
 
     def __set__(self, instance, value):
@@ -83,8 +86,9 @@ class LoggedProperty(property):
         if not test and self._get_id is not None and self._my_self is not None:
             Store().append_log(self.makeEntry('set', value))
             if global_object.debug:  # noqa: S1006
-                print(
-                    f"I'm {self._my_self} and {self._get_id} has been set to {value} from the outside!"
+                logging.getLogger('easyscience.global_object.hugger').debug(
+                    "I'm %s and %s has been set to %s from the outside!",
+                    self._my_self, self._get_id, value
                 )
         return super().__set__(instance, value)
 
@@ -131,7 +135,9 @@ class LoggedProperty(property):
                         var = '"' + var + '"'
                     temp += f'{var}'
         else:
-            print(f'{log_type} is not implemented yet. Sorry')
+            logging.getLogger('easyscience.global_object.hugger').debug(
+                '%s is not implemented yet. Sorry', log_type
+            )
         temp += '\n'
         return temp
 
@@ -163,7 +169,9 @@ class PropertyHugger(PatcherFactory):
             func = getattr(self.property, key)
             if func is not None:
                 if global_object.debug:
-                    print(f'Patching property {self.klass.__name__}.{self.prop_name}')
+                    logging.getLogger('easyscience.global_object.hugger').debug(
+                        'Patching property %s.%s', self.klass.__name__, self.prop_name
+                    )
                 patch_function: Callable = item.get('patcher')
                 new_func = patch_function(func)
                 option[key] = new_func
@@ -171,7 +179,9 @@ class PropertyHugger(PatcherFactory):
 
     def restore(self):
         if global_object.debug:
-            print(f'Restoring property {self.klass.__name__}.{self.prop_name}')
+            logging.getLogger('easyscience.global_object.hugger').debug(
+                'Restoring property %s.%s', self.klass.__name__, self.prop_name
+            )
         setattr(self.klass, self.prop_name, self.property)
 
     def patch_get(self, func: Callable) -> Callable:
@@ -179,8 +189,9 @@ class PropertyHugger(PatcherFactory):
         @wraps(func)
         def inner(*args, **kwargs):
             if global_object.debug:
-                print(
-                    f'{self.klass.__name__}.{self.prop_name} has been called with {args[1:]}, {kwargs}'
+                logging.getLogger('easyscience.global_object.hugger').debug(
+                    '%s.%s has been called with %s, %s',
+                    self.klass.__name__, self.prop_name, args[1:], kwargs
                 )
             res = func(*args, **kwargs)
             self._append_args(*args, **kwargs)
@@ -195,8 +206,9 @@ class PropertyHugger(PatcherFactory):
         @wraps(func)
         def inner(*args, **kwargs):
             if global_object.debug:
-                print(
-                    f'{self.klass.__name__}.{self.prop_name} has been set with {args[1:]}, {kwargs}'
+                logging.getLogger('easyscience.global_object.hugger').debug(
+                    '%s.%s has been set with %s, %s',
+                    self.klass.__name__, self.prop_name, args[1:], kwargs
                 )
             self._append_args(*args, **kwargs)
             self._append_log(self.makeEntry('set', None, *args, **kwargs))
@@ -209,7 +221,9 @@ class PropertyHugger(PatcherFactory):
         @wraps(func)
         def inner(*args, **kwargs):
             if global_object.debug:
-                print(f'{self.klass.__name__}.{self.prop_name} has been deleted.')
+                logging.getLogger('easyscience.global_object.hugger').debug(
+                    '%s.%s has been deleted.', self.klass.__name__, self.prop_name
+                )
             self._append_log(self.makeEntry('del', None, *args, **kwargs))
             return func(*args, **kwargs)
 
@@ -252,6 +266,8 @@ class PropertyHugger(PatcherFactory):
                         var = '"' + var + '"'
                     temp += f'{var}'
         else:
-            print(f'{log_type} is not implemented yet. Sorry')
+            logging.getLogger('easyscience.global_object.hugger').debug(
+                '%s is not implemented yet. Sorry', log_type
+            )
         temp += '\n'
         return temp

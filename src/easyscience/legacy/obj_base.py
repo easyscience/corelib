@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-import warnings
+import logging
 from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Optional
@@ -58,11 +58,9 @@ class ObjBase(BasedBase):
             If a keyword component name would overwrite an existing
             class attribute.
         """
-        warnings.warn(
+        logging.getLogger('easyscience.legacy').warning(
             'ObjBase is deprecated and will be removed in a future version. '
-            'Please migrate to ModelBase.',
-            DeprecationWarning,
-            stacklevel=2,
+            'Please migrate to ModelBase.'
         )
         super(ObjBase, self).__init__(name=name, unique_name=unique_name)
         # If Parameter or Descriptor is given as arguments...

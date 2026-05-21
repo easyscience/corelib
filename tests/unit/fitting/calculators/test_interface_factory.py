@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import logging
 from unittest.mock import MagicMock
 
 import pytest
@@ -204,7 +205,9 @@ class TestInterfaceFactoryTemplate:
         # Then
         mock_fitter.generate_bindings.assert_called_once()
 
-    def test_switch_with_fitter_exception_handling(self, factory_single_interface, capsys):
+    def test_switch_with_fitter_exception_handling(
+        self, factory_single_interface, caplog: "pytest.LogCaptureFixture"
+    ):
         """Test switch handles exceptions in fitter binding updates gracefully"""
         # Given
         mock_fit_object = MagicMock()
@@ -213,12 +216,12 @@ class TestInterfaceFactoryTemplate:
         mock_fitter._fit_object = mock_fit_object
 
         # When
-        factory_single_interface.switch('MockInterface1', fitter=mock_fitter)
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.calculators'):
+            factory_single_interface.switch('MockInterface1', fitter=mock_fitter)
 
         # Then
-        captured = capsys.readouterr()
-        assert 'Unable to auto generate bindings' in captured.out
-        assert 'Test exception' in captured.out
+        assert 'Unable to auto generate bindings' in caplog.text
+        assert 'Test exception' in caplog.text
 
     def test_fit_func_property_returns_callable(self, factory_single_interface):
         """Test fit_func property returns a callable"""
@@ -363,7 +366,7 @@ class TestInterfaceFactoryTemplate:
         assert name == 'MockInterface1'
 
     def test_switch_with_fitter_generate_bindings_exception(
-        self, factory_single_interface, capsys
+        self, factory_single_interface, caplog: "pytest.LogCaptureFixture"
     ):
         """Test switch handles exceptions in fitter.generate_bindings gracefully"""
         # Given
@@ -374,12 +377,12 @@ class TestInterfaceFactoryTemplate:
             del mock_fitter._fit_object
 
         # When
-        factory_single_interface.switch('MockInterface1', fitter=mock_fitter)
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.calculators'):
+            factory_single_interface.switch('MockInterface1', fitter=mock_fitter)
 
         # Then
-        captured = capsys.readouterr()
-        assert 'Unable to auto generate bindings' in captured.out
-        assert 'Generate bindings test exception' in captured.out
+        assert 'Unable to auto generate bindings' in caplog.text
+        assert 'Generate bindings test exception' in caplog.text
 
     def test_generate_bindings_with_property_without_value_no_call_back(
         self, factory_single_interface

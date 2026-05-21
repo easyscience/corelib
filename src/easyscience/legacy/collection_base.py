@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-import warnings
+import logging
 from collections.abc import MutableSequence
 from numbers import Number
 from typing import TYPE_CHECKING
@@ -69,11 +69,9 @@ class CollectionBase(BasedBase, MutableSequence):
             If a provided item is not an EasyScience object or if a
             keyword collides with an internal attribute.
         """
-        warnings.warn(
+        logging.getLogger('easyscience.legacy').warning(
             'CollectionBase is deprecated and will be removed in a future version. '
-            'Please migrate to ModelBase or EasyList.',
-            DeprecationWarning,
-            stacklevel=2,
+            'Please migrate to ModelBase or EasyList.'
         )
         BasedBase.__init__(self, name, unique_name=unique_name)
         kwargs = {key: kwargs[key] for key in kwargs.keys() if kwargs[key] is not None}

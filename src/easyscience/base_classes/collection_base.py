@@ -7,13 +7,11 @@
     Please update your imports.
 """
 
-import warnings
+import logging
 
 from ..legacy.collection_base import CollectionBase  # noqa: F401
 
-warnings.warn(
+logging.getLogger('easyscience').warning(
     'easyscience.base_classes.collection_base is deprecated. '
-    'Please import from easyscience.legacy.collection_base instead.',
-    DeprecationWarning,
-    stacklevel=2,
+    'Please import from easyscience.legacy.collection_base instead.'
 )

@@ -3,7 +3,7 @@
 
 import collections.abc
 import functools
-import warnings
+import logging
 from time import time
 from typing import Any
 from typing import Callable
@@ -99,11 +99,9 @@ def deprecated(func):
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        warnings.warn_explicit(
-            'Call to deprecated function {}.'.format(func.__name__),
-            category=DeprecationWarning,
-            filename=func.__code__.co_filename,
-            lineno=func.__code__.co_firstlineno + 1,
+        logging.getLogger('easyscience.deprecated').warning(
+            'Call to deprecated function %s.', func.__name__,
+            stacklevel=3,
         )
         return func(*args, **kwargs)
 

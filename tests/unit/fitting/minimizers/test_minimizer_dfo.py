@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
+import logging
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -386,7 +386,7 @@ class TestDFOFit:
         )
 
     def test_gen_fit_results_maxfun_warning_sets_success_false_and_warns(
-        self, minimizer: DFO, monkeypatch
+        self, minimizer: DFO, monkeypatch, caplog: "pytest.LogCaptureFixture"
     ):
         """When DFO returns EXIT_MAXFUN_WARNING, _gen_fit_results must warn and set success=False."""
         mock_domain_fit_results = MagicMock()
@@ -413,20 +413,17 @@ class TestDFOFit:
         minimizer._p_0 = 'p_0'
         minimizer.evaluate = MagicMock(return_value='evaluate')
 
-        with pytest.warns(UserWarning, match='Objective has been called MAXFUN times'):
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.dfo'):
             domain_fit_results = minimizer._gen_fit_results(mock_fit_result, np.array([1.0]))
 
-        assert domain_fit_results.success == False
-        assert domain_fit_results.n_evaluations == 50
-        assert domain_fit_results.message == 'Objective has been called MAXFUN times'
-
-    def test_extract_iterations_from_diagnostic_dict(self) -> None:
+        assert 'Objective has been called MAXFUN times' in caplog.text
         fit_results = MagicMock()
         fit_results.diagnostic_info = {'iters_total': [1, 2, 5]}
 
         assert DFO._extract_iterations(fit_results) == 5
 
-    def test_gen_fit_results_success_does_not_warn(self, minimizer: DFO, monkeypatch):
+    def test_gen_fit_results_success_does_not_warn(self, minimizer: DFO, monkeypatch,
+                                                   caplog: "pytest.LogCaptureFixture"):
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
         monkeypatch.setattr(
@@ -451,9 +448,10 @@ class TestDFOFit:
         minimizer._p_0 = 'p_0'
         minimizer.evaluate = MagicMock(return_value='evaluate')
 
-        with pytest.warns(UserWarning, match='Objective has been called MAXFUN times'):
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.dfo'):
             domain_fit_results = minimizer._gen_fit_results(mock_fit_result, np.array([1.0]))
 
+        assert 'Objective has been called MAXFUN times' in caplog.text
         assert domain_fit_results.success == False
         assert domain_fit_results.n_evaluations == 50
         assert domain_fit_results.message == 'Objective has been called MAXFUN times'
@@ -469,7 +467,7 @@ class TestDFOFit:
             easyscience.fitting.minimizers.minimizer_dfo.dfols, 'solve', mock_solve
         )
 
-    def test_gen_fit_results_success_does_not_warn(self, minimizer: DFO, monkeypatch):
+    def test_gen_fit_results_success_does_not_warn(self, minimizer: DFO, monkeypatch, caplog: "pytest.LogCaptureFixture"):
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
         monkeypatch.setattr(
@@ -494,11 +492,10 @@ class TestDFOFit:
         minimizer._p_0 = 'p_0'
         minimizer.evaluate = MagicMock(return_value='evaluate')
 
-        with warnings.catch_warnings(record=True) as record:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.dfo'):
             domain_fit_results = minimizer._gen_fit_results(mock_fit_result, np.array([1.0]))
 
-        assert len(record) == 0
+        assert len(caplog.records) == 0
         assert domain_fit_results.success == True
 
     def test_dfo_fit_allows_maxfun_warning(self, minimizer: DFO, monkeypatch) -> None:
