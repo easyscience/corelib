@@ -8,27 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://easyscience.github.io/core/dev/">
+        <link rel="canonical" href="https://easyscience.github.io/core/dev/user-guide/controlling-log-output/">
       
       
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../../tutorials/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>EasyScience Library</title>
+        <title>Controlling Log Output - EasyScience Library</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -47,11 +51,11 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="assets/stylesheets/extra.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/extra.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#core-building-blocks-for-easyscience" class="md-skip">
+        <a href="#controlling-log-output" class="md-skip">
           Skip to content
         </a>
       
@@ -96,16 +100,16 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="EasyScience Library" class="md-header__button md-logo" aria-label="EasyScience Library" data-md-component="logo">
+    <a href="../.." title="EasyScience Library" class="md-header__button md-logo" aria-label="EasyScience Library" data-md-component="logo">
       
 <img
   id="logo_light_mode"
-  src="assets/images/logo_light.svg"
+  src="../../assets/images/logo_light.svg"
   alt="logo"
 />
 <img
   id="logo_dark_mode"
-  src="assets/images/logo_dark.svg"
+  src="../../assets/images/logo_dark.svg"
   alt="logo"
 />
 
@@ -124,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Controlling Log Output
             
           </span>
         </div>
@@ -247,16 +251,16 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="EasyScience Library" class="md-nav__button md-logo" aria-label="EasyScience Library" data-md-component="logo">
+    <a href="../.." title="EasyScience Library" class="md-nav__button md-logo" aria-label="EasyScience Library" data-md-component="logo">
       
 <img
   id="logo_light_mode"
-  src="assets/images/logo_light.svg"
+  src="../../assets/images/logo_light.svg"
   alt="logo"
 />
 <img
   id="logo_dark_mode"
-  src="assets/images/logo_dark.svg"
+  src="../../assets/images/logo_dark.svg"
   alt="logo"
 />
 
@@ -303,7 +307,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="introduction/" class="md-nav__link ">
+            <a href="../../introduction/" class="md-nav__link ">
               
   
   
@@ -369,7 +373,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="installation-and-setup/" class="md-nav__link ">
+            <a href="../../installation-and-setup/" class="md-nav__link ">
               
   
   
@@ -414,6 +418,8 @@
       
   
   
+    
+  
   
   
     
@@ -429,15 +435,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="user-guide/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -463,7 +469,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -480,10 +486,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="user-guide/controlling-log-output/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controlling Log Output
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -499,6 +532,153 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logger-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logger Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#temporary-suppression-context-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporary Suppression (Context Manager)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convenience-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Convenience API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recipes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recipe-1-keep-your-test-output-clean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 1: Keep your test output clean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-2-library-author-embedding-easyscience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 2: Library author embedding EasyScience
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-3-debug-mode-for-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 3: Debug mode for development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-4-see-only-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 4: See only error messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#library-safe-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Library-Safe Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -538,7 +718,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="tutorials/" class="md-nav__link ">
+            <a href="../../tutorials/" class="md-nav__link ">
               
   
   
@@ -639,7 +819,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorials/fitting-qens/" class="md-nav__link">
+      <a href="../../tutorials/fitting-qens/" class="md-nav__link">
         
   
   
@@ -667,7 +847,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorials/fitting-sans/" class="md-nav__link">
+      <a href="../../tutorials/fitting-sans/" class="md-nav__link">
         
   
   
@@ -695,7 +875,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorials/progress-callback/" class="md-nav__link">
+      <a href="../../tutorials/progress-callback/" class="md-nav__link">
         
   
   
@@ -772,7 +952,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="api-reference/" class="md-nav__link ">
+            <a href="../../api-reference/" class="md-nav__link ">
               
   
   
@@ -818,7 +998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/base_classes/" class="md-nav__link">
+      <a href="../../api-reference/base_classes/" class="md-nav__link">
         
   
   
@@ -846,7 +1026,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/fitting/" class="md-nav__link">
+      <a href="../../api-reference/fitting/" class="md-nav__link">
         
   
   
@@ -874,7 +1054,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/global_object/" class="md-nav__link">
+      <a href="../../api-reference/global_object/" class="md-nav__link">
         
   
   
@@ -902,7 +1082,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/io/" class="md-nav__link">
+      <a href="../../api-reference/io/" class="md-nav__link">
         
   
   
@@ -930,7 +1110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/job/" class="md-nav__link">
+      <a href="../../api-reference/job/" class="md-nav__link">
         
   
   
@@ -958,7 +1138,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/models/" class="md-nav__link">
+      <a href="../../api-reference/models/" class="md-nav__link">
         
   
   
@@ -986,7 +1166,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/utils/" class="md-nav__link">
+      <a href="../../api-reference/utils/" class="md-nav__link">
         
   
   
@@ -1014,7 +1194,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/variable/" class="md-nav__link">
+      <a href="../../api-reference/variable/" class="md-nav__link">
         
   
   
@@ -1062,6 +1242,141 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logger-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logger Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#temporary-suppression-context-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporary Suppression (Context Manager)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convenience-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Convenience API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recipes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recipe-1-keep-your-test-output-clean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 1: Keep your test output clean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-2-library-author-embedding-easyscience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 2: Library author embedding EasyScience
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-3-debug-mode-for-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 3: Debug mode for development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe-4-see-only-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recipe 4: See only error messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#library-safe-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Library-Safe Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1084,26 +1399,193 @@
   
 
 
-<p><img alt="" src="assets/images/logo_dark.svg#gh-dark-mode-only" /><img alt="" src="assets/images/logo_light.svg#gh-light-mode-only" /></p>
-<h1 id="core-building-blocks-for-easyscience">Core building blocks for EasyScience</h1>
-<p>Here is a brief overview of the main documentation sections:</p>
+<h1 id="controlling-log-output">Controlling Log Output</h1>
+<p>EasyScience uses Python's standard <code>logging</code> module for all
+informational and warning messages. This gives you full control over
+what output the library produces and where it goes.</p>
+<h2 id="quick-start">Quick Start</h2>
+<p>The most common operation is suppressing all EasyScience messages. You
+can do it in one line:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
+
+<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>Or using the standard library directly:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+</code></pre></div>
+<p>Both forms set the package-root logger to <code>ERROR</code>, which suppresses all
+<code>WARNING</code>, <code>INFO</code>, and <code>DEBUG</code> messages from EasyScience.</p>
+<h2 id="logger-hierarchy">Logger Hierarchy</h2>
+<p>EasyScience loggers are named hierarchically under the root
+<code>easyscience</code> logger. This lets you suppress the whole package or
+individual subsystems:</p>
+<div class="language-text highlight"><pre><span></span><code>easyscience                        # root — controls everything
+├── easyscience.base_classes       # EasyList runtime warnings
+├── easyscience.legacy             # ObjBase / CollectionBase deprecations
+├── easyscience.deprecated         # @deprecated decorator messages
+├── easyscience.fitting            # import-availability warnings
+│   ├── easyscience.fitting.bumps  # Bumps fitting runtime messages
+│   ├── easyscience.fitting.lmfit  # LMFit fitting runtime messages
+│   └── easyscience.fitting.dfo    # DFO fitting runtime messages
+├── easyscience.variable           # parameter warnings
+└── easyscience.global_object      # undo/redo, debugging diagnostics
+</code></pre></div>
+<p>Setting the level on a parent logger affects all its children, because
+child loggers inherit the parent's effective level.</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Suppress everything from the fitting subsystem (including bumps/lmfit/dfo)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience.fitting&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+<span class="c1"># Suppress only Bumps runtime messages</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience.fitting.bumps&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+<span class="c1"># Suppress only legacy deprecation notices</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience.legacy&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="environment-variable">Environment Variable</h2>
+<p>You can control the log level <strong>before</strong> importing EasyScience by
+setting the <code>EASYSCIENCE_LOG_LEVEL</code> environment variable. This is useful
+when a downstream library cannot configure logging in code before
+EasyScience is imported.</p>
+<p><strong>Accepted values:</strong> <code>DEBUG</code>, <code>INFO</code>, <code>WARNING</code>, <code>ERROR</code>, <code>CRITICAL</code>, or
+a numeric level (e.g. <code>40</code>).</p>
+<p><strong>Example — suppressing all import-time messages:</strong></p>
+<div class="language-powershell highlight"><pre><span></span><code><span class="c"># Windows PowerShell</span>
+<span class="nv">$env:EASYSCIENCE_LOG_LEVEL</span> <span class="p">=</span> <span class="s1">&#39;ERROR&#39;</span>
+<span class="n">python</span> <span class="n">-c</span> <span class="s2">&quot;import easyscience&quot;</span>  <span class="c"># silent</span>
+</code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Linux / macOS</span>
+<span class="nv">EASYSCIENCE_LOG_LEVEL</span><span class="o">=</span>ERROR<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import easyscience&quot;</span><span class="w">  </span><span class="c1"># silent</span>
+</code></pre></div>
+<p>Or from Python, set the environment variable before the import:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;EASYSCIENCE_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ERROR&#39;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">easyscience</span>  <span class="c1"># now silent</span>
+</code></pre></div>
+<h2 id="temporary-suppression-context-manager">Temporary Suppression (Context Manager)</h2>
+<p>When you only want to silence messages during a specific operation, use
+the <code>at_level</code> context manager:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Messages during the fit are suppressed, then the previous level is restored</span>
+<span class="k">with</span> <span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">at_level</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">):</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+</code></pre></div>
+<p>This is the recommended pattern for technique-specific libraries that
+don't want EasyScience output to leak into their own users' consoles.</p>
+<h2 id="convenience-api">Convenience API</h2>
+<p>The <code>global_object.log</code> object exposes convenience methods that mirror
+<code>logging</code> module-level functions:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.set_level(level)</code></td>
+<td>Set the package-root logger level (<code>'WARNING'</code> or <code>logging.WARNING</code>)</td>
+</tr>
+<tr>
+<td><code>.debug(msg)</code></td>
+<td>Log a <code>DEBUG</code>-level message</td>
+</tr>
+<tr>
+<td><code>.info(msg)</code></td>
+<td>Log an <code>INFO</code>-level message</td>
+</tr>
+<tr>
+<td><code>.warning(msg)</code></td>
+<td>Log a <code>WARNING</code>-level message</td>
+</tr>
+<tr>
+<td><code>.error(msg)</code></td>
+<td>Log an <code>ERROR</code>-level message</td>
+</tr>
+<tr>
+<td><code>.critical(msg)</code></td>
+<td>Log a <code>CRITICAL</code>-level message</td>
+</tr>
+<tr>
+<td><code>.exception(msg)</code></td>
+<td>Log an <code>ERROR</code>-level message with traceback</td>
+</tr>
+<tr>
+<td><code>.getLogger(name)</code></td>
+<td>Get a child logger under <code>easyscience</code></td>
+</tr>
+<tr>
+<td><code>.at_level(level)</code></td>
+<td>Context manager for temporary level change</td>
+</tr>
+<tr>
+<td><code>.suspend()</code></td>
+<td>Suppress all EasyScience output</td>
+</tr>
+<tr>
+<td><code>.resume()</code></td>
+<td>Restore the previously set level</td>
+</tr>
+</tbody>
+</table>
+<h2 id="recipes">Recipes</h2>
+<h3 id="recipe-1-keep-your-test-output-clean">Recipe 1: Keep your test output clean</h3>
+<p>When running tests that exercise EasyScience fitting, suppress the
+library's messages so they don't clutter your test reports:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_quiet_easyscience</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">at_level</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">):</span>
+        <span class="k">yield</span>
+</code></pre></div>
+<h3 id="recipe-2-library-author-embedding-easyscience">Recipe 2: Library author embedding EasyScience</h3>
+<p>If you maintain a library that uses EasyScience internally, prevent
+EasyScience from writing to your users' consoles:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># In your library&#39;s __init__.py, before any EasyScience import:</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;EASYSCIENCE_LOG_LEVEL&#39;</span><span class="p">,</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="recipe-3-debug-mode-for-development">Recipe 3: Debug mode for development</h3>
+<p>When developing or debugging, see all EasyScience internal diagnostics:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">)</span>
+
+<span class="c1"># Your code here — all EasyScience messages will be visible</span>
+</code></pre></div>
+<h3 id="recipe-4-see-only-error-messages">Recipe 4: See only error messages</h3>
+<p>Keep the console clean but still see critical problems:</p>
+<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
+
+<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="library-safe-behaviour">Library-Safe Behaviour</h2>
+<p>EasyScience follows standard library-logging best practices:</p>
 <ul>
-<li><a href="introduction/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10M11 7h2v2h-2zm3 10h-4v-2h1v-2h-1v-2h3v4h1z"/></svg></span> Introduction</a>
-  – Provides a description of EasyScience, including its purpose,
-  licensing, latest release details, and contact information.</li>
-<li><a href="installation-and-setup/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.25 12c0 .23-.02.46-.05.68l1.48 1.16c.13.11.17.29.08.45l-1.4 2.42c-.09.15-.27.21-.43.15l-1.74-.7c-.36.28-.76.51-1.19.69l-.25 1.85c-.03.17-.18.3-.35.3h-2.8c-.17 0-.32-.13-.35-.3L10 16.85c-.44-.18-.83-.41-1.19-.69l-1.74.7c-.16.06-.34 0-.43-.15l-1.4-2.42a.35.35 0 0 1 .08-.45l1.48-1.16c-.03-.22-.05-.45-.05-.68s.02-.46.05-.68l-1.48-1.16a.35.35 0 0 1-.08-.45l1.4-2.42c.09-.16.27-.22.43-.16l1.74.71c.36-.28.75-.52 1.19-.69l.25-1.86c.03-.16.18-.29.35-.29h2.8c.17 0 .32.13.35.29L14 7.15c.43.17.83.41 1.19.69l1.74-.71c.16-.06.34 0 .43.16l1.4 2.42c.09.15.05.34-.08.45l-1.48 1.16c.03.22.05.45.05.68M19 3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-7 7c-1.11 0-2 .89-2 2a2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg></span> Installation &amp; Setup</a>
-  – Guides users through system requirements, environment configuration,
-  and the installation process.</li>
-<li><a href="user-guide/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.5c-1.35-.85-3.8-1.5-5.5-1.5-1.65 0-3.35.3-4.75 1.05-.1.05-.15.05-.25.05-.25 0-.5-.25-.5-.5V6c.6-.45 1.25-.75 2-1 1.11-.35 2.33-.5 3.5-.5 1.95 0 4.05.4 5.5 1.5 1.45-1.1 3.55-1.5 5.5-1.5 1.17 0 2.39.15 3.5.5.75.25 1.4.55 2 1v14.6c0 .25-.25.5-.5.5-.1 0-.15 0-.25-.05-1.4-.75-3.1-1.05-4.75-1.05-1.7 0-4.15.65-5.5 1.5M12 8v11.5c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5V7c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5m1 3.5c1.11-.68 2.6-1 4.5-1 .91 0 1.76.09 2.5.28V9.23c-.87-.15-1.71-.23-2.5-.23q-2.655 0-4.5.84zm4.5.17c-1.71 0-3.21.26-4.5.79v1.69c1.11-.65 2.6-.99 4.5-.99 1.04 0 1.88.08 2.5.24v-1.5c-.87-.16-1.71-.23-2.5-.23m2.5 2.9c-.87-.16-1.71-.24-2.5-.24-1.83 0-3.33.27-4.5.8v1.69c1.11-.66 2.6-.99 4.5-.99 1.04 0 1.88.08 2.5.24z"/></svg></span> User Guide</a> –
-  Covers core concepts, key terminology, workflow steps, and essential
-  parameters for effective use of EasyScience.</li>
-<li><a href="tutorials/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/></svg></span> Tutorials</a> – Offers practical,
-  step-by-step examples demonstrating common workflows and data analysis
-  tasks.</li>
-<li><a href="api-reference/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-8 5H9v2c0 1.1-.9 2-2 2 1.1 0 2 .9 2 2v2h2v2H9c-1.1 0-2-.9-2-2v-1c0-1.1-.9-2-2-2v-2c1.1 0 2-.9 2-2V8c0-1.1.9-2 2-2h2zm8 5c-1.1 0-2 .9-2 2v1c0 1.1-.9 2-2 2h-2v-2h2v-2c0-1.1.9-2 2-2-1.1 0-2-.9-2-2V8h-2V6h2c1.1 0 2 .9 2 2v1c0 1.1.9 2 2 2z"/></svg></span> API Reference</a> –
-  An auto-generated reference detailing the available functions and
-  modules in EasyScience.</li>
+<li><strong>No <code>logging.basicConfig()</code></strong> — EasyScience never reconfigures the
+  global logging setup.</li>
+<li><strong>No default stream handlers</strong> — EasyScience does not attach handlers
+  that write to <code>stdout</code> or <code>stderr</code>. It only creates log records.
+  Applications and test frameworks decide where those records go.</li>
+<li><strong>Child loggers inherit</strong> — Child loggers (e.g.
+  <code>easyscience.fitting.bumps</code>) are left at <code>logging.NOTSET</code> by default,
+  so they inherit level and handler configuration from the <code>easyscience</code>
+  package-root logger. Supressing the root suppresses everything.</li>
 </ul>
+<p>This means you are in full control. If you don't configure any handlers,
+EasyScience messages will not appear. If you do configure handlers (as
+<code>pytest</code> does via its logging plugin, or as an application might via
+<code>basicConfig</code>), you control what is shown and where.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -1138,6 +1620,44 @@
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: User Guide">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                User Guide
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../tutorials/" class="md-footer__link md-footer__link--next" aria-label="Next: Tutorials">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Tutorials
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -1231,14 +1751,14 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="assets/javascripts/extra.js"></script>
+        <script src="../../assets/javascripts/extra.js"></script>
       
-        <script src="assets/javascripts/mathjax.js"></script>
+        <script src="../../assets/javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

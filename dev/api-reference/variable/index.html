@@ -425,6 +425,8 @@
           
         
       
+        
+      
     
     
     
@@ -456,6 +458,11 @@
 
             </a>
             
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
           </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
@@ -469,6 +476,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/controlling-log-output/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controlling Log Output
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
           </ul>
@@ -13033,7 +13068,9 @@ the attributes <code>variance</code>, <code>error</code>, <code>unit</code> and 
 <span class="normal">1467</span>
 <span class="normal">1468</span>
 <span class="normal">1469</span>
-<span class="normal">1470</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Parameter</span><span class="p">(</span><span class="n">DescriptorNumber</span><span class="p">):</span>
+<span class="normal">1470</span>
+<span class="normal">1471</span>
+<span class="normal">1472</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Parameter</span><span class="p">(</span><span class="n">DescriptorNumber</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Parameter is a DescriptorNumber which can be used in fitting.</span>
 
@@ -13244,7 +13281,9 @@ the attributes <code>variance</code>, <code>error</code>, <code>unit</code> and 
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_notify_observers</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;This parameter is not dependent. It cannot be updated.&#39;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience.variable&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;This parameter is not dependent. It cannot be updated.&#39;</span>
+            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">make_dependent_on</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -16081,9 +16120,7 @@ fails.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
@@ -16262,7 +16299,9 @@ fails.</p>
 <span class="normal">421</span>
 <span class="normal">422</span>
 <span class="normal">423</span>
-<span class="normal">424</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_dependent_on</span><span class="p">(</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_dependent_on</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">dependency_expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">dependency_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16523,9 +16562,7 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">428</span>
 <span class="normal">429</span>
 <span class="normal">430</span>
 <span class="normal">431</span>
@@ -16550,7 +16587,9 @@ and the dependency interpreter.</p>
 <span class="normal">450</span>
 <span class="normal">451</span>
 <span class="normal">452</span>
-<span class="normal">453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_independent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_independent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make this parameter independent.</span>
 
@@ -16663,9 +16702,7 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">617</span>
-<span class="normal">618</span>
-<span class="normal">619</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">619</span>
 <span class="normal">620</span>
 <span class="normal">621</span>
 <span class="normal">622</span>
@@ -16683,7 +16720,9 @@ and the dependency interpreter.</p>
 <span class="normal">634</span>
 <span class="normal">635</span>
 <span class="normal">636</span>
-<span class="normal">637</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@DescriptorNumber</span><span class="o">.</span><span class="n">variance</span><span class="o">.</span><span class="n">setter</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@DescriptorNumber</span><span class="o">.</span><span class="n">variance</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variance_float</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the variance.</span>
@@ -16789,9 +16828,7 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">639</span>
-<span class="normal">640</span>
-<span class="normal">641</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">641</span>
 <span class="normal">642</span>
 <span class="normal">643</span>
 <span class="normal">644</span>
@@ -16809,7 +16846,9 @@ and the dependency interpreter.</p>
 <span class="normal">656</span>
 <span class="normal">657</span>
 <span class="normal">658</span>
-<span class="normal">659</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@DescriptorNumber</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">setter</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@DescriptorNumber</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the standard deviation for the parameter.</span>
@@ -16890,9 +16929,7 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">677</span>
-<span class="normal">678</span>
-<span class="normal">679</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">679</span>
 <span class="normal">680</span>
 <span class="normal">681</span>
 <span class="normal">682</span>
@@ -16902,7 +16939,9 @@ and the dependency interpreter.</p>
 <span class="normal">686</span>
 <span class="normal">687</span>
 <span class="normal">688</span>
-<span class="normal">689</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@notify_observers</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@notify_observers</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform unit conversion.</span>
@@ -17027,9 +17066,7 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">693</span>
 <span class="normal">694</span>
 <span class="normal">695</span>
 <span class="normal">696</span>
@@ -17065,7 +17102,9 @@ and the dependency interpreter.</p>
 <span class="normal">726</span>
 <span class="normal">727</span>
 <span class="normal">728</span>
-<span class="normal">729</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_desired_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_desired_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the desired unit for a dependent Parameter.</span>
 
@@ -17129,9 +17168,7 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">902</span>
-<span class="normal">903</span>
-<span class="normal">904</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">904</span>
 <span class="normal">905</span>
 <span class="normal">906</span>
 <span class="normal">907</span>
@@ -17153,7 +17190,9 @@ and the dependency interpreter.</p>
 <span class="normal">923</span>
 <span class="normal">924</span>
 <span class="normal">925</span>
-<span class="normal">926</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="normal">926</span>
+<span class="normal">927</span>
+<span class="normal">928</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Overwrite the as_dict method to handle dependency information.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -17208,9 +17247,7 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 990</span>
-<span class="normal"> 991</span>
-<span class="normal"> 992</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 992</span>
 <span class="normal"> 993</span>
 <span class="normal"> 994</span>
 <span class="normal"> 995</span>
@@ -17234,7 +17271,9 @@ and the dependency interpreter.</p>
 <span class="normal">1013</span>
 <span class="normal">1014</span>
 <span class="normal">1015</span>
-<span class="normal">1016</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Custom deserialization to handle parameter dependencies.</span>
@@ -17286,16 +17325,16 @@ and the dependency interpreter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1023</span>
-<span class="normal">1024</span>
-<span class="normal">1025</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1025</span>
 <span class="normal">1026</span>
 <span class="normal">1027</span>
 <span class="normal">1028</span>
 <span class="normal">1029</span>
 <span class="normal">1030</span>
 <span class="normal">1031</span>
-<span class="normal">1032</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return printable representation of a Parameter object.&quot;&quot;&quot;</span>
     <span class="n">super_str</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
     <span class="n">super_str</span> <span class="o">=</span> <span class="n">super_str</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -17333,9 +17372,7 @@ serializer_ids.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1419</span>
-<span class="normal">1420</span>
-<span class="normal">1421</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1421</span>
 <span class="normal">1422</span>
 <span class="normal">1423</span>
 <span class="normal">1424</span>
@@ -17371,7 +17408,9 @@ serializer_ids.</p>
 <span class="normal">1454</span>
 <span class="normal">1455</span>
 <span class="normal">1456</span>
-<span class="normal">1457</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_pending_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1457</span>
+<span class="normal">1458</span>
+<span class="normal">1459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_pending_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resolve pending dependencies after deserialization.</span>
 
@@ -17549,8 +17588,7 @@ list, dict, or complex object).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter_dependency_resolver.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
-<span class="normal">14</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
@@ -17630,7 +17668,11 @@ list, dict, or complex object).</p>
 <span class="normal">91</span>
 <span class="normal">92</span>
 <span class="normal">93</span>
-<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_all_parameter_dependencies</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_all_parameter_dependencies</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Recursively find all Parameter objects in an object hierarchy and</span>
 <span class="sd">    resolve their pending dependencies.</span>
@@ -17676,8 +17718,9 @@ list, dict, or complex object).</p>
                             <span class="n">attr_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
                             <span class="n">_collect_parameters</span><span class="p">(</span><span class="n">attr_value</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
                         <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
-                            <span class="c1"># log the exception</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error accessing property &#39;</span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2">&#39; of </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience.variable.dependencies&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                                <span class="s2">&quot;Error accessing property &#39;</span><span class="si">%s</span><span class="s2">&#39; of </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">item</span>
+                            <span class="p">)</span>
                             <span class="c1"># Skip properties that can&#39;t be accessed</span>
                             <span class="k">continue</span>
 
@@ -17705,7 +17748,9 @@ list, dict, or complex object).</p>
 
     <span class="c1"># Report results</span>
     <span class="k">if</span> <span class="n">resolved_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Successfully resolved dependencies for </span><span class="si">{</span><span class="n">resolved_count</span><span class="si">}</span><span class="s1"> parameter(s).&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience.variable.dependencies&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;Successfully resolved dependencies for </span><span class="si">%d</span><span class="s1"> parameter(s).&#39;</span><span class="p">,</span> <span class="n">resolved_count</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">error_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">error_message</span> <span class="o">=</span> <span class="p">(</span>
@@ -17798,11 +17843,7 @@ dependencies.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter_dependency_resolver.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
@@ -17850,7 +17891,12 @@ dependencies.</p>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
-<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_parameters_with_pending_dependencies</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_parameters_with_pending_dependencies</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find all Parameter objects in an object hierarchy that have pending</span>
 <span class="sd">    dependencies.</span>
@@ -17896,8 +17942,9 @@ dependencies.</p>
                             <span class="n">attr_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
                             <span class="n">_collect_pending_parameters</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span>
                         <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
-                            <span class="c1"># log the exception</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error accessing property &#39;</span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2">&#39; of </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;easyscience.variable.dependencies&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                                <span class="s2">&quot;Error accessing property &#39;</span><span class="si">%s</span><span class="s2">&#39; of </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">item</span>
+                            <span class="p">)</span>
                             <span class="c1"># Skip properties that can&#39;t be accessed</span>
                             <span class="k">continue</span>
 
@@ -17992,12 +18039,7 @@ with resolved dependencies.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/variable/parameter_dependency_resolver.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
@@ -18021,7 +18063,12 @@ with resolved dependencies.</p>
 <span class="normal">178</span>
 <span class="normal">179</span>
 <span class="normal">180</span>
-<span class="normal">181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_and_resolve_parameters</span><span class="p">(</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_and_resolve_parameters</span><span class="p">(</span>
     <span class="n">params_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
