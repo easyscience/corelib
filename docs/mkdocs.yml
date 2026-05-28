@@ -179,6 +179,7 @@ nav:
       - Workshops & Schools:
           - Fitting QENS: tutorials/fitting-qens.ipynb
           - Fitting SANS: tutorials/fitting-sans.ipynb
+          - Bayesian analysis: tutorials/fitting-bayesian.ipynb
           - Progress Callback: tutorials/progress-callback.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
