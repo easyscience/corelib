@@ -675,12 +675,12 @@ class TestBumpsFit:
 
 
 # ===================================================================
-# Bumps.sample() — Bayesian DREAM sampling
+# Bumps.mcmc_sample() — Bayesian DREAM sampling
 # ===================================================================
 
 
 class TestBumpsSample:
-    """Tests for the ``Bumps.sample()`` method and its helpers."""
+    """Tests for the ``Bumps.mcmc_sample()`` method and its helpers."""
 
     # Sentinel value to signal "set fitter.state = None" in _setup_driver_mock
     ABORT = object()
@@ -753,11 +753,11 @@ class TestBumpsSample:
         return mock_FitDriver, mock_driver
 
     def test_sample_basic(self, minimizer: Bumps, monkeypatch) -> None:
-        """Verify that sample() returns a dict with expected keys."""
+        """Verify that mcmc_sample() returns a dict with expected keys."""
         mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
         minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
 
-        result = minimizer.sample(
+        result = minimizer.mcmc_sample(
             x=np.array([1.0, 2.0]),
             y=np.array([0.1, 0.2]),
             weights=np.array([1.0, 1.0]),
@@ -770,7 +770,7 @@ class TestBumpsSample:
         assert isinstance(result, dict)
         assert 'draws' in result
         assert 'param_names' in result
-        assert 'state' in result
+        assert 'internal_bumps_object' in result
         assert 'logp' in result
         mock_FitDriver.assert_called_once()
 
@@ -780,7 +780,7 @@ class TestBumpsSample:
         minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
         progress_callback = MagicMock()
 
-        result = minimizer.sample(
+        result = minimizer.mcmc_sample(
             x=np.array([1.0]),
             y=np.array([0.1]),
             weights=np.array([1.0]),
@@ -802,7 +802,7 @@ class TestBumpsSample:
         minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
 
         with pytest.raises(FitError, match='Sampling aborted by user'):
-            minimizer.sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+            minimizer.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
 
     def test_sample_driver_exception_restores_parameters(
         self, minimizer: Bumps, monkeypatch
@@ -813,22 +813,27 @@ class TestBumpsSample:
         minimizer._restore_parameter_values = MagicMock()
 
         with pytest.raises(RuntimeError, match='driver failed'):
-            minimizer.sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+            minimizer.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
 
         minimizer._restore_parameter_values.assert_called_once()
 
-    def test_sample_conflicting_population_raises(self, minimizer: Bumps) -> None:
-        with pytest.raises(ValueError, match='Conflicting population'):
-            minimizer.sample(
-                x=np.array([1.0]),
-                y=np.array([0.1]),
-                weights=np.array([1.0]),
-                chains=5,
-                population=10,
-                samples=10,
-                burn=0,
-                thin=1,
-            )
+    def test_sample_population_param(self, minimizer: Bumps, monkeypatch) -> None:
+        """population kwarg is forwarded to DREAM as pop."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+
+        minimizer.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            samples=10,
+            burn=0,
+            thin=1,
+            population=7,
+        )
+
+        call_kwargs = mock_FitDriver.call_args.kwargs
+        assert call_kwargs['pop'] == 7
 
     def test_sample_rejects_non_callable_callback(self, minimizer: Bumps, monkeypatch) -> None:
         import bumps.names
@@ -837,7 +842,7 @@ class TestBumpsSample:
         minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
 
         with pytest.raises(ValueError, match='progress_callback must be callable'):
-            minimizer.sample(
+            minimizer.mcmc_sample(
                 x=np.array([1.0]),
                 y=np.array([0.1]),
                 weights=np.array([1.0]),
@@ -846,38 +851,6 @@ class TestBumpsSample:
                 thin=1,
                 progress_callback='not-callable',
             )
-
-
-# ===================================================================
-# _resolve_population_alias (static helper)
-# ===================================================================
-
-
-class TestResolvePopulationAlias:
-    """Tests for ``Bumps._resolve_population_alias``."""
-
-    def test_both_none_returns_none(self) -> None:
-        assert Bumps._resolve_population_alias(None, None) is None
-
-    def test_chains_only_returns_chains(self) -> None:
-        assert Bumps._resolve_population_alias(5, None) == 5
-
-    def test_population_only_returns_population(self) -> None:
-        assert Bumps._resolve_population_alias(None, 7) == 7
-
-    def test_both_equal_returns_value(self) -> None:
-        assert Bumps._resolve_population_alias(5, 5) == 5
-
-    def test_both_different_raises(self) -> None:
-        with pytest.raises(ValueError, match='Conflicting population'):
-            Bumps._resolve_population_alias(3, 10)
-
-    def test_chains_zero_is_valid(self) -> None:
-        """Zero is a valid (though unusual) population value."""
-        assert Bumps._resolve_population_alias(0, None) == 0
-
-    def test_population_zero_is_valid(self) -> None:
-        assert Bumps._resolve_population_alias(None, 0) == 0
 
 
 # ===================================================================

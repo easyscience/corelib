@@ -65,7 +65,7 @@ class TestMultiFitter:
 
 
 # ===================================================================
-# MultiFitter.sample() — Bayesian DREAM sampling
+# MultiFitter.mcmc_sample() — Bayesian DREAM sampling
 # ===================================================================
 
 
@@ -78,7 +78,7 @@ class TestMultiFitterSample:
         return MultiFitter([fit_object_1, fit_object_2], [fit_object_1, fit_object_2])
 
     def test_sample_basic(self, multi_fitter: MultiFitter):
-        """Verify sample() calls the minimizer's sample() and returns its result."""
+        """Verify mcmc_sample() calls the minimizer's mcmc_sample() and returns its result."""
         import numpy as np
 
         multi_fitter._precompute_reshaping = MagicMock(
@@ -90,12 +90,12 @@ class TestMultiFitterSample:
         expected_result = {
             'draws': np.array([[1.0]]),
             'param_names': ['a'],
-            'state': 'stub',
+            'internal_bumps_object': 'stub',
             'logp': None,
         }
-        multi_fitter._minimizer.sample = MagicMock(return_value=expected_result)
+        multi_fitter._minimizer.mcmc_sample = MagicMock(return_value=expected_result)
 
-        result = multi_fitter.sample(
+        result = multi_fitter.mcmc_sample(
             x=[np.array([1.0]), np.array([2.0])],
             y=[np.array([0.1]), np.array([0.2])],
             weights=[np.array([1.0]), np.array([1.0])],
@@ -106,16 +106,17 @@ class TestMultiFitterSample:
         )
 
         assert result == expected_result
-        multi_fitter._minimizer.sample.assert_called_once()
-        call_kwargs = multi_fitter._minimizer.sample.call_args.kwargs
+        multi_fitter._minimizer.mcmc_sample.assert_called_once()
+        call_kwargs = multi_fitter._minimizer.mcmc_sample.call_args.kwargs
         assert call_kwargs['samples'] == 100
         assert call_kwargs['burn'] == 20
         assert call_kwargs['thin'] == 2
         assert call_kwargs['population'] == 5
         assert call_kwargs['progress_callback'] is None
+        assert 'chains' not in call_kwargs
 
     def test_sample_raises_if_not_bumps(self, multi_fitter: MultiFitter):
-        """sample() should raise RuntimeError if minimizer is not BUMPS."""
+        """mcmc_sample() should raise RuntimeError if minimizer is not BUMPS."""
         multi_fitter._precompute_reshaping = MagicMock(
             return_value=('x_fit', 'x_new', 'y_new', 'weights', 'dims')
         )
@@ -124,78 +125,43 @@ class TestMultiFitterSample:
         multi_fitter._minimizer.package = 'lmfit'  # Not bumps
 
         with pytest.raises(RuntimeError, match='Bayesian sampling requires a BUMPS minimizer'):
-            multi_fitter.sample(
+            multi_fitter.mcmc_sample(
                 x=[np.array([1.0])],
                 y=[np.array([0.1])],
                 weights=[np.array([1.0])],
             )
 
     def test_sample_with_progress_callback(self, multi_fitter: MultiFitter):
-        """Progress callback should be forwarded to minimizer.sample()."""
+        """Progress callback should be forwarded to minimizer.mcmc_sample()."""
         multi_fitter._precompute_reshaping = MagicMock(
             return_value=('x_fit', 'x_new', 'y_new', 'weights', 'dims')
         )
         multi_fitter._fit_function_wrapper = MagicMock(return_value='wrapped_fit_function')
         multi_fitter._minimizer = MagicMock()
         multi_fitter._minimizer.package = 'bumps'
-        multi_fitter._minimizer.sample = MagicMock(
-            return_value={'draws': [], 'param_names': [], 'state': None, 'logp': None}
+        multi_fitter._minimizer.mcmc_sample = MagicMock(
+            return_value={
+                'draws': [],
+                'param_names': [],
+                'internal_bumps_object': None,
+                'logp': None,
+            }
         )
 
         progress_callback = MagicMock()
 
-        multi_fitter.sample(
+        multi_fitter.mcmc_sample(
             x=[np.array([1.0])],
             y=[np.array([0.1])],
             weights=[np.array([1.0])],
             progress_callback=progress_callback,
         )
 
-        kwargs = multi_fitter._minimizer.sample.call_args.kwargs
+        kwargs = multi_fitter._minimizer.mcmc_sample.call_args.kwargs
         assert kwargs['progress_callback'] is progress_callback
 
-    def test_sample_population_alias(self, multi_fitter: MultiFitter):
-        """chains parameter is aliased to population."""
-        multi_fitter._precompute_reshaping = MagicMock(
-            return_value=('x_fit', 'x_new', 'y_new', 'weights', 'dims')
-        )
-        multi_fitter._fit_function_wrapper = MagicMock(return_value='wrapped_fit_function')
-        multi_fitter._minimizer = MagicMock()
-        multi_fitter._minimizer.package = 'bumps'
-        multi_fitter._minimizer.sample = MagicMock(
-            return_value={'draws': [], 'param_names': [], 'state': None, 'logp': None}
-        )
-
-        multi_fitter.sample(
-            x=[np.array([1.0])],
-            y=[np.array([0.1])],
-            weights=[np.array([1.0])],
-            chains=7,  # Should be forwarded as population=7
-        )
-
-        kwargs = multi_fitter._minimizer.sample.call_args.kwargs
-        assert kwargs['population'] == 7
-        assert kwargs['chains'] is None
-
-    def test_sample_conflicting_population_raises(self, multi_fitter: MultiFitter):
-        multi_fitter._precompute_reshaping = MagicMock(
-            return_value=('x_fit', 'x_new', 'y_new', 'weights', 'dims')
-        )
-        multi_fitter._fit_function_wrapper = MagicMock(return_value='wrapped_fit_function')
-        multi_fitter._minimizer = MagicMock()
-        multi_fitter._minimizer.package = 'bumps'
-
-        with pytest.raises(ValueError, match='Conflicting population'):
-            multi_fitter.sample(
-                x=[np.array([1.0])],
-                y=[np.array([0.1])],
-                weights=[np.array([1.0])],
-                chains=5,
-                population=10,
-            )
-
     def test_sample_restores_original_fit_function(self, multi_fitter: MultiFitter):
-        """After sample() completes (even on error) the original fit_function is restored."""
+        """After mcmc_sample() completes (even on error) the original fit_function is restored."""
         original_ff = multi_fitter.fit_function
         multi_fitter._precompute_reshaping = MagicMock(
             return_value=('x_fit', 'x_new', 'y_new', 'weights', 'dims')
@@ -203,10 +169,10 @@ class TestMultiFitterSample:
         multi_fitter._fit_function_wrapper = MagicMock(return_value='wrapped_fit_function')
         multi_fitter._minimizer = MagicMock()
         multi_fitter._minimizer.package = 'bumps'
-        multi_fitter._minimizer.sample = MagicMock(side_effect=RuntimeError('boom'))
+        multi_fitter._minimizer.mcmc_sample = MagicMock(side_effect=RuntimeError('boom'))
 
         with pytest.raises(RuntimeError):
-            multi_fitter.sample(
+            multi_fitter.mcmc_sample(
                 x=[np.array([1.0])],
                 y=[np.array([0.1])],
                 weights=[np.array([1.0])],

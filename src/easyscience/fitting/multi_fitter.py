@@ -1,10 +1,9 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from __future__ import annotations
+
 from typing import Callable
-from typing import Dict
-from typing import List
-from typing import Optional
 
 import numpy as np
 
@@ -27,8 +26,8 @@ class MultiFitter(Fitter):
 
     def __init__(
         self,
-        fit_objects: Optional[List] = None,
-        fit_functions: Optional[List[Callable]] = None,
+        fit_objects: list | None = None,
+        fit_functions: list[Callable] | None = None,
     ):
         # Create a dummy core object to hold all the fit objects.
         self._fit_objects = CollectionBase('multi', *fit_objects)
@@ -38,7 +37,7 @@ class MultiFitter(Fitter):
         super().__init__(self._fit_objects, self._fit_functions[0])
 
     def _fit_function_wrapper(
-        self, real_x: Optional[List[np.ndarray]] = None, flatten: bool = True
+        self, real_x: list[np.ndarray] | None = None, flatten: bool = True
     ) -> Callable:
         """
         Simple fit function which injects the N real X (independent)
@@ -48,7 +47,7 @@ class MultiFitter(Fitter):
 
         Parameters
         ----------
-        real_x : Optional[List[np.ndarray]], default=None
+        real_x : list[np.ndarray] | None, default=None
             List of independent x parameters to be injected. By default,
             None.
         flatten : bool, default=True
@@ -81,31 +80,29 @@ class MultiFitter(Fitter):
 
     @staticmethod
     def _precompute_reshaping(
-        x: List[np.ndarray],
-        y: List[np.ndarray],
-        weights: Optional[List[np.ndarray]],
+        x: list[np.ndarray],
+        y: list[np.ndarray],
+        weights: list[np.ndarray] | None,
         vectorized: bool,
-    ) -> tuple[
-        np.ndarray, List[np.ndarray], np.ndarray, Optional[np.ndarray], List[tuple[int, ...]]
-    ]:
+    ) -> tuple[np.ndarray, list[np.ndarray], np.ndarray, np.ndarray | None, list[tuple[int, ...]]]:
         """
         Convert an array of X's and Y's  to an acceptable shape for
         fitting.
 
         Parameters
         ----------
-        x : List[np.ndarray]
+        x : list[np.ndarray]
             List of independent variables.
-        y : List[np.ndarray]
+        y : list[np.ndarray]
             List of dependent variables.
-        weights : Optional[List[np.ndarray]]
+        weights : list[np.ndarray] | None
             Optional weights for each dataset.
         vectorized : bool
             Is the fn input vectorized or point based?
 
         Returns
         -------
-        tuple[np.ndarray, List[np.ndarray], np.ndarray, Optional[np.ndarray], List[tuple[int, ...]]]
+        tuple[np.ndarray, list[np.ndarray], np.ndarray, np.ndarray | None, list[tuple[int, ...]]]
             Reshaped x values, reshaped input data, flattened y values,
             flattened weights, and stored dependent dimensions.
         """
@@ -137,9 +134,9 @@ class MultiFitter(Fitter):
     def _post_compute_reshaping(
         self,
         fit_result_obj: FitResults,
-        x: List[np.ndarray],
-        y: List[np.ndarray],
-    ) -> List[FitResults]:
+        x: list[np.ndarray],
+        y: list[np.ndarray],
+    ) -> list[FitResults]:
         """
         Split a multi-fit result object back into per-dataset results.
 
@@ -147,14 +144,14 @@ class MultiFitter(Fitter):
         ----------
         fit_result_obj : FitResults
             Combined fit result returned by the minimizer.
-        x : List[np.ndarray]
+        x : list[np.ndarray]
             Original x coordinates for each dataset.
-        y : List[np.ndarray]
+        y : list[np.ndarray]
             Original y coordinates for each dataset.
 
         Returns
         -------
-        List[FitResults]
+        list[FitResults]
             One fit result object per dataset.
         """
 
@@ -190,22 +187,21 @@ class MultiFitter(Fitter):
             sp = ep
         return fit_results_list
 
-    def sample(
+    def mcmc_sample(
         self,
-        x: List[np.ndarray],
-        y: List[np.ndarray],
-        weights: List[np.ndarray],
+        x: list[np.ndarray],
+        y: list[np.ndarray],
+        weights: list[np.ndarray],
         samples: int = 10000,
         burn: int = 2000,
         thin: int = 10,
-        chains: int | None = None,
         population: int | None = None,
         seed: int | None = None,
         vectorized: bool = False,
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
-    ) -> Dict:
+    ) -> dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
         Requires that the current minimizer is a BUMPS instance (i.e. the
@@ -213,11 +209,11 @@ class MultiFitter(Fitter):
 
         Parameters
         ----------
-        x : List[np.ndarray]
+        x : list[np.ndarray]
             List of independent variable arrays (one per dataset).
-        y : List[np.ndarray]
+        y : list[np.ndarray]
             List of dependent variable arrays (one per dataset).
-        weights : List[np.ndarray]
+        weights : list[np.ndarray]
             List of weight arrays (one per dataset).
         samples : int, default=10000
             Number of retained DREAM samples requested from BUMPS.
@@ -225,10 +221,8 @@ class MultiFitter(Fitter):
             Burn-in steps.
         thin : int, default=10
             Thinning interval.
-        chains : int | None, default=None
-            User-friendly alias for BUMPS DREAM population count.
         population : int | None, default=None
-            BUMPS DREAM population count (``pop``) for advanced users.
+            BUMPS DREAM population count (number of parallel chains).
         seed : int | None, default=None
             Best-effort random seed. BUMPS DREAM may use additional internal
             RNG state that is not controlled by this seed, so exact
@@ -250,21 +244,23 @@ class MultiFitter(Fitter):
 
         Returns
         -------
-        Dict
-            Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
-            and ``'logp'``.
+        dict
+            Dictionary with keys ``'draws'``, ``'param_names'``,
+            ``'internal_bumps_object'``, and ``'logp'``.
 
         Raises
         ------
+        ValueError
+            If ``samples``, ``burn``, or ``thin`` are invalid types or values.
         RuntimeError
             If the current minimizer is not a BUMPS instance.
         """
-        # --- Alias resolution ---
-        # Delegate to the BUMPS minimizer's static helper so the logic
-        # stays in one place.
-        from easyscience.fitting.minimizers.minimizer_bumps import Bumps
-
-        pop = Bumps._resolve_population_alias(chains, population)
+        if not isinstance(samples, int) or samples <= 0:
+            raise ValueError('samples must be a positive integer.')
+        if not isinstance(burn, int) or burn < 0:
+            raise ValueError('burn must be a non-negative integer.')
+        if not isinstance(thin, int) or thin < 1:
+            raise ValueError('thin must be a positive integer.')
 
         # Flatten multi-dataset arrays
         x_fit, x_new, y_new, w_new, _dims = self._precompute_reshaping(
@@ -289,16 +285,15 @@ class MultiFitter(Fitter):
                     'Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.'
                 )
 
-            # Delegate to the BUMPS minimizer's public sample method
-            result = minimizer.sample(
+            # Delegate to the BUMPS minimizer's public mcmc_sample method
+            result = minimizer.mcmc_sample(
                 x=x_fit,
                 y=y_new,
                 weights=w_new,
                 samples=samples,
                 burn=burn,
                 thin=thin,
-                chains=None,  # alias already resolved into `pop`
-                population=pop,
+                population=population,
                 seed=seed,
                 sampler_kwargs=sampler_kwargs,
                 progress_callback=progress_callback,
