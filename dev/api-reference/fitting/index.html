@@ -3334,7 +3334,109 @@ utilizing one of the supported minimizers.</p>
 <span class="normal">411</span>
 <span class="normal">412</span>
 <span class="normal">413</span>
-<span class="normal">414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Fitter</span><span class="p">:</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Fitter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fitter is a class which makes it possible to undertake fitting</span>
 <span class="sd">    utilizing one of the supported minimizers.</span>
@@ -3728,6 +3830,108 @@ utilizing one of the supported minimizers.</p>
         <span class="n">fit_result</span><span class="o">.</span><span class="n">y_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fit_result</span><span class="o">.</span><span class="n">y_calc</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="n">fit_result</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fit_result</span><span class="o">.</span><span class="n">y_err</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fit_result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+        <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+        <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">population</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">abort_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run Bayesian MCMC sampling using the BUMPS DREAM sampler.</span>
+
+<span class="sd">        Works with both a plain ``Fitter`` (single dataset) and a</span>
+<span class="sd">        ``MultiFitter`` (multiple datasets) via polymorphic dispatch:</span>
+<span class="sd">        ``_precompute_reshaping`` and ``_fit_function_wrapper`` are resolved</span>
+<span class="sd">        on the concrete subclass at call time, so multi-dataset flattening</span>
+<span class="sd">        is handled automatically when called on a ``MultiFitter`` instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : np.ndarray</span>
+<span class="sd">            Independent variable array (or list of arrays for ``MultiFitter``).</span>
+<span class="sd">        y : np.ndarray</span>
+<span class="sd">            Dependent variable array (or list of arrays for ``MultiFitter``).</span>
+<span class="sd">        weights : np.ndarray</span>
+<span class="sd">            Weight array (or list of arrays for ``MultiFitter``).</span>
+<span class="sd">        samples : int, default=10000</span>
+<span class="sd">            Number of retained DREAM samples requested from BUMPS.</span>
+<span class="sd">        burn : int, default=2000</span>
+<span class="sd">            Burn-in steps to discard before collecting samples.</span>
+<span class="sd">        thin : int, default=10</span>
+<span class="sd">            Thinning interval — only every ``thin``-th sample is kept,</span>
+<span class="sd">            which reduces autocorrelation between consecutive draws.</span>
+<span class="sd">        population : Optional[int], default=None</span>
+<span class="sd">            BUMPS DREAM population count (number of parallel chains).</span>
+<span class="sd">        vectorized : bool, default=False</span>
+<span class="sd">            When ``True``, each x array may be multi-dimensional (e.g. an</span>
+<span class="sd">            ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When</span>
+<span class="sd">            ``False`` (default), each x array is expected to be 1-D.</span>
+<span class="sd">        sampler_kwargs : Optional[dict], default=None</span>
+<span class="sd">            Additional keyword arguments forwarded to the BUMPS DREAM sampler.</span>
+<span class="sd">        progress_callback : Optional[Callable[[dict], Optional[bool]]], default=None</span>
+<span class="sd">            Optional callback invoked at each DREAM generation.  The payload</span>
+<span class="sd">            dict includes ``iteration`` and ``sampling: True``.</span>
+<span class="sd">        abort_test : Optional[Callable[[], bool]], default=None</span>
+<span class="sd">            Optional callable that returns ``True`` to abort sampling early.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Dictionary with keys ``&#39;draws&#39;``, ``&#39;param_names&#39;``,</span>
+<span class="sd">            ``&#39;internal_bumps_object&#39;``, and ``&#39;logp&#39;``.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If ``samples``, ``burn``, or ``thin`` are invalid.</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the active minimizer is not a BUMPS instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">samples</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;samples must be a positive integer.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">burn</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">burn</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;burn must be a non-negative integer.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thin</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">thin</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;thin must be a positive integer.&#39;</span><span class="p">)</span>
+
+        <span class="n">minimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">minimizer</span><span class="p">,</span> <span class="s1">&#39;package&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;bumps&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s1">&#39;Bayesian sampling requires a BUMPS minimizer. &#39;</span>
+                <span class="s1">&#39;Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">x_fit</span><span class="p">,</span> <span class="n">x_new</span><span class="p">,</span> <span class="n">y_new</span><span class="p">,</span> <span class="n">w_new</span><span class="p">,</span> <span class="n">dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precompute_reshaping</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">vectorized</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_dims</span> <span class="o">=</span> <span class="n">dims</span>
+
+        <span class="n">original_fit_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_wrapper</span><span class="p">(</span><span class="n">x_new</span><span class="p">,</span> <span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">mcmc_sample</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">x_fit</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">y_new</span><span class="p">,</span>
+                <span class="n">weights</span><span class="o">=</span><span class="n">w_new</span><span class="p">,</span>
+                <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span>
+                <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
+                <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
+                <span class="n">population</span><span class="o">=</span><span class="n">population</span><span class="p">,</span>
+                <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
+                <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
+                <span class="n">abort_test</span><span class="o">=</span><span class="n">abort_test</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="n">original_fit_func</span>
+
+        <span class="k">return</span> <span class="n">result</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -4353,6 +4557,531 @@ DEFAULT_MINIMIZER.</p>
         <span class="n">minimizer_enum</span> <span class="o">=</span> <span class="n">from_string_to_enum</span><span class="p">(</span><span class="n">minimizer_enum</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_update_minimizer</span><span class="p">(</span><span class="n">minimizer_enum</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easyscience.fitting.fitter.Fitter.mcmc_sample" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Run Bayesian MCMC sampling using the BUMPS DREAM sampler.</p>
+<p>Works with both a plain <code>Fitter</code> (single dataset) and a
+<code>MultiFitter</code> (multiple datasets) via polymorphic dispatch:
+<code>_precompute_reshaping</code> and <code>_fit_function_wrapper</code> are resolved
+on the concrete subclass at call time, so multi-dataset flattening
+is handled automatically when called on a <code>MultiFitter</code> instance.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Independent variable array (or list of arrays for <code>MultiFitter</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dependent variable array (or list of arrays for <code>MultiFitter</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>weights</code>
+            </td>
+            <td>
+                  <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Weight array (or list of arrays for <code>MultiFitter</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>samples</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of retained DREAM samples requested from BUMPS.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>10000</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>burn</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Burn-in steps to discard before collecting samples.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>2000</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>thin</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thinning interval — only every <code>thin</code>-th sample is kept,
+which reduces autocorrelation between consecutive draws.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>10</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>population</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>BUMPS DREAM population count (number of parallel chains).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vectorized</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>When <code>True</code>, each x array may be multi-dimensional (e.g. an
+<code>(N, M, 2)</code> grid for a 2D model) and is left as-is.  When
+<code>False</code> (default), each x array is expected to be 1-D.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sampler_kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="dict">dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the BUMPS DREAM sampler.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>progress_callback</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="typing.Optional">Optional</span>[<span title="bool">bool</span>]]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional callback invoked at each DREAM generation.  The payload
+dict includes <code>iteration</code> and <code>sampling: True</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>abort_test</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="typing.Callable">Callable</span>[[], <span title="bool">bool</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional callable that returns <code>True</code> to abort sampling early.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionary with keys <code>'draws'</code>, <code>'param_names'</code>,
+<code>'internal_bumps_object'</code>, and <code>'logp'</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>samples</code>, <code>burn</code>, or <code>thin</code> are invalid.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the active minimizer is not a BUMPS instance.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easyscience/fitting/fitter.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
+    <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">population</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">abort_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run Bayesian MCMC sampling using the BUMPS DREAM sampler.</span>
+
+<span class="sd">    Works with both a plain ``Fitter`` (single dataset) and a</span>
+<span class="sd">    ``MultiFitter`` (multiple datasets) via polymorphic dispatch:</span>
+<span class="sd">    ``_precompute_reshaping`` and ``_fit_function_wrapper`` are resolved</span>
+<span class="sd">    on the concrete subclass at call time, so multi-dataset flattening</span>
+<span class="sd">    is handled automatically when called on a ``MultiFitter`` instance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : np.ndarray</span>
+<span class="sd">        Independent variable array (or list of arrays for ``MultiFitter``).</span>
+<span class="sd">    y : np.ndarray</span>
+<span class="sd">        Dependent variable array (or list of arrays for ``MultiFitter``).</span>
+<span class="sd">    weights : np.ndarray</span>
+<span class="sd">        Weight array (or list of arrays for ``MultiFitter``).</span>
+<span class="sd">    samples : int, default=10000</span>
+<span class="sd">        Number of retained DREAM samples requested from BUMPS.</span>
+<span class="sd">    burn : int, default=2000</span>
+<span class="sd">        Burn-in steps to discard before collecting samples.</span>
+<span class="sd">    thin : int, default=10</span>
+<span class="sd">        Thinning interval — only every ``thin``-th sample is kept,</span>
+<span class="sd">        which reduces autocorrelation between consecutive draws.</span>
+<span class="sd">    population : Optional[int], default=None</span>
+<span class="sd">        BUMPS DREAM population count (number of parallel chains).</span>
+<span class="sd">    vectorized : bool, default=False</span>
+<span class="sd">        When ``True``, each x array may be multi-dimensional (e.g. an</span>
+<span class="sd">        ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When</span>
+<span class="sd">        ``False`` (default), each x array is expected to be 1-D.</span>
+<span class="sd">    sampler_kwargs : Optional[dict], default=None</span>
+<span class="sd">        Additional keyword arguments forwarded to the BUMPS DREAM sampler.</span>
+<span class="sd">    progress_callback : Optional[Callable[[dict], Optional[bool]]], default=None</span>
+<span class="sd">        Optional callback invoked at each DREAM generation.  The payload</span>
+<span class="sd">        dict includes ``iteration`` and ``sampling: True``.</span>
+<span class="sd">    abort_test : Optional[Callable[[], bool]], default=None</span>
+<span class="sd">        Optional callable that returns ``True`` to abort sampling early.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary with keys ``&#39;draws&#39;``, ``&#39;param_names&#39;``,</span>
+<span class="sd">        ``&#39;internal_bumps_object&#39;``, and ``&#39;logp&#39;``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``samples``, ``burn``, or ``thin`` are invalid.</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        If the active minimizer is not a BUMPS instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">samples</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;samples must be a positive integer.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">burn</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">burn</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;burn must be a non-negative integer.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thin</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">thin</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;thin must be a positive integer.&#39;</span><span class="p">)</span>
+
+    <span class="n">minimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">minimizer</span><span class="p">,</span> <span class="s1">&#39;package&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;bumps&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s1">&#39;Bayesian sampling requires a BUMPS minimizer. &#39;</span>
+            <span class="s1">&#39;Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">x_fit</span><span class="p">,</span> <span class="n">x_new</span><span class="p">,</span> <span class="n">y_new</span><span class="p">,</span> <span class="n">w_new</span><span class="p">,</span> <span class="n">dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precompute_reshaping</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">vectorized</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_dims</span> <span class="o">=</span> <span class="n">dims</span>
+
+    <span class="n">original_fit_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_wrapper</span><span class="p">(</span><span class="n">x_new</span><span class="p">,</span> <span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">mcmc_sample</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">x_fit</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y_new</span><span class="p">,</span>
+            <span class="n">weights</span><span class="o">=</span><span class="n">w_new</span><span class="p">,</span>
+            <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span>
+            <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
+            <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
+            <span class="n">population</span><span class="o">=</span><span class="n">population</span><span class="p">,</span>
+            <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
+            <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
+            <span class="n">abort_test</span><span class="o">=</span><span class="n">abort_test</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="n">original_fit_func</span>
+
+    <span class="k">return</span> <span class="n">result</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7283,19 +8012,7 @@ for the Bumps fitting engine to use parameters declared in an
 <span class="normal">686</span>
 <span class="normal">687</span>
 <span class="normal">688</span>
-<span class="normal">689</span>
-<span class="normal">690</span>
-<span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
-<span class="normal">701</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bumps</span><span class="p">(</span><span class="n">MinimizerBase</span><span class="p">):</span>
+<span class="normal">689</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bumps</span><span class="p">(</span><span class="n">MinimizerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a wrapper to Bumps: https://bumps.readthedocs.io/ It allows</span>
 <span class="sd">    for the Bumps fitting engine to use parameters declared in an</span>
@@ -7652,7 +8369,6 @@ for the Bumps fitting engine to use parameters declared in an
         <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
         <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">abort_test</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7680,13 +8396,6 @@ for the Bumps fitting engine to use parameters declared in an
 <span class="sd">            Thinning interval.</span>
 <span class="sd">        population : int | None, default=None</span>
 <span class="sd">            BUMPS DREAM population count (number of parallel chains).</span>
-<span class="sd">        seed : int | None, default=None</span>
-<span class="sd">            Best-effort random seed.  Calls ``numpy.random.seed(seed)``</span>
-<span class="sd">            before DREAM starts, which affects the *global* NumPy RNG</span>
-<span class="sd">            state and may interact with other code in the process.</span>
-<span class="sd">            BUMPS DREAM uses additional internal RNG state that is</span>
-<span class="sd">            **not** controlled by this seed, so exact reproducibility</span>
-<span class="sd">            across runs is **not** guaranteed.</span>
 <span class="sd">        sampler_kwargs : dict | None, default=None</span>
 <span class="sd">            Additional keyword arguments forwarded to `bumps.fitters.fit`.</span>
 <span class="sd">        progress_callback : Callable[[dict], bool | None] | None, default=None</span>
@@ -7748,10 +8457,6 @@ for the Bumps fitting engine to use parameters declared in an
         <span class="n">model_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_model</span><span class="p">()</span>
         <span class="n">curve</span> <span class="o">=</span> <span class="n">model_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
         <span class="n">problem</span> <span class="o">=</span> <span class="n">FitProblem</span><span class="p">(</span><span class="n">curve</span><span class="p">)</span>
-
-        <span class="c1"># Best-effort seed: sets numpy&#39;s global RNG state just before DREAM starts.</span>
-        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="c1"># Build DREAM kwargs</span>
         <span class="n">dream_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;samples&#39;</span><span class="p">:</span> <span class="n">samples</span><span class="p">,</span> <span class="s1">&#39;burn&#39;</span><span class="p">:</span> <span class="n">burn</span><span class="p">,</span> <span class="s1">&#39;thin&#39;</span><span class="p">:</span> <span class="n">thin</span><span class="p">}</span>
@@ -9107,7 +9812,7 @@ Parameter object.</p>
 
 
 <h5 id="easyscience.fitting.minimizers.minimizer_bumps.Bumps.mcmc_sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -9259,30 +9964,6 @@ method after flattening multi-dataset arrays.</p>
             <td>
               <div class="doc-md-description">
                 <p>BUMPS DREAM population count (number of parallel chains).</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>seed</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Best-effort random seed.  Calls <code>numpy.random.seed(seed)</code>
-before DREAM starts, which affects the <em>global</em> NumPy RNG
-state and may interact with other code in the process.
-BUMPS DREAM uses additional internal RNG state that is
-<strong>not</strong> controlled by this seed, so exact reproducibility
-across runs is <strong>not</strong> guaranteed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9600,19 +10281,7 @@ loop.</p>
 <span class="normal">541</span>
 <span class="normal">542</span>
 <span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
+<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -9621,7 +10290,6 @@ loop.</p>
     <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
     <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">abort_test</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -9649,13 +10317,6 @@ loop.</p>
 <span class="sd">        Thinning interval.</span>
 <span class="sd">    population : int | None, default=None</span>
 <span class="sd">        BUMPS DREAM population count (number of parallel chains).</span>
-<span class="sd">    seed : int | None, default=None</span>
-<span class="sd">        Best-effort random seed.  Calls ``numpy.random.seed(seed)``</span>
-<span class="sd">        before DREAM starts, which affects the *global* NumPy RNG</span>
-<span class="sd">        state and may interact with other code in the process.</span>
-<span class="sd">        BUMPS DREAM uses additional internal RNG state that is</span>
-<span class="sd">        **not** controlled by this seed, so exact reproducibility</span>
-<span class="sd">        across runs is **not** guaranteed.</span>
 <span class="sd">    sampler_kwargs : dict | None, default=None</span>
 <span class="sd">        Additional keyword arguments forwarded to `bumps.fitters.fit`.</span>
 <span class="sd">    progress_callback : Callable[[dict], bool | None] | None, default=None</span>
@@ -9717,10 +10378,6 @@ loop.</p>
     <span class="n">model_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_model</span><span class="p">()</span>
     <span class="n">curve</span> <span class="o">=</span> <span class="n">model_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
     <span class="n">problem</span> <span class="o">=</span> <span class="n">FitProblem</span><span class="p">(</span><span class="n">curve</span><span class="p">)</span>
-
-    <span class="c1"># Best-effort seed: sets numpy&#39;s global RNG state just before DREAM starts.</span>
-    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="c1"># Build DREAM kwargs</span>
     <span class="n">dream_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;samples&#39;</span><span class="p">:</span> <span class="n">samples</span><span class="p">,</span> <span class="s1">&#39;burn&#39;</span><span class="p">:</span> <span class="n">burn</span><span class="p">,</span> <span class="s1">&#39;thin&#39;</span><span class="p">:</span> <span class="n">thin</span><span class="p">}</span>
@@ -14072,122 +14729,7 @@ minimizer.</p>
 <span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiFitter</span><span class="p">(</span><span class="n">Fitter</span><span class="p">):</span>
+<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiFitter</span><span class="p">(</span><span class="n">Fitter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extension of Fitter to enable multiple dataset/fit function fitting.</span>
 
@@ -14273,7 +14815,9 @@ minimizer.</p>
 <span class="sd">        weights : list[np.ndarray] | None</span>
 <span class="sd">            Optional weights for each dataset.</span>
 <span class="sd">        vectorized : bool</span>
-<span class="sd">            Is the fn input vectorized or point based?</span>
+<span class="sd">            When ``True``, each x array may be multi-dimensional (e.g. an</span>
+<span class="sd">            ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When</span>
+<span class="sd">            ``False`` (default), each x array is expected to be 1-D.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -14361,123 +14905,6 @@ minimizer.</p>
             <span class="n">fit_results_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_results</span><span class="p">)</span>
             <span class="n">sp</span> <span class="o">=</span> <span class="n">ep</span>
         <span class="k">return</span> <span class="n">fit_results_list</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
-        <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
-        <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">abort_test</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run Bayesian MCMC sampling using the BUMPS DREAM sampler.</span>
-
-<span class="sd">        Requires that the current minimizer is a BUMPS instance (i.e. the</span>
-<span class="sd">        minimizer was switched to ``AvailableMinimizers.Bumps`` or equivalent).</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        x : list[np.ndarray]</span>
-<span class="sd">            List of independent variable arrays (one per dataset).</span>
-<span class="sd">        y : list[np.ndarray]</span>
-<span class="sd">            List of dependent variable arrays (one per dataset).</span>
-<span class="sd">        weights : list[np.ndarray]</span>
-<span class="sd">            List of weight arrays (one per dataset).</span>
-<span class="sd">        samples : int, default=10000</span>
-<span class="sd">            Number of retained DREAM samples requested from BUMPS.</span>
-<span class="sd">        burn : int, default=2000</span>
-<span class="sd">            Burn-in steps.</span>
-<span class="sd">        thin : int, default=10</span>
-<span class="sd">            Thinning interval.</span>
-<span class="sd">        population : int | None, default=None</span>
-<span class="sd">            BUMPS DREAM population count (number of parallel chains).</span>
-<span class="sd">        seed : int | None, default=None</span>
-<span class="sd">            Best-effort random seed. BUMPS DREAM may use additional internal</span>
-<span class="sd">            RNG state that is not controlled by this seed, so exact</span>
-<span class="sd">            reproducibility is not guaranteed.</span>
-<span class="sd">        vectorized : bool, default=False</span>
-<span class="sd">            Whether the fit function expects vectorized (multidimensional)</span>
-<span class="sd">            input.</span>
-<span class="sd">        sampler_kwargs : dict | None, default=None</span>
-<span class="sd">            Additional keyword arguments forwarded to the BUMPS DREAM sampler</span>
-<span class="sd">            via `bumps.fitters.fit`.</span>
-<span class="sd">        progress_callback : Callable[[dict], bool | None] | None, default=None</span>
-<span class="sd">            Optional callback for progress updates during sampling.  The</span>
-<span class="sd">            payload dict includes ``iteration`` (DREAM generation number) and</span>
-<span class="sd">            ``sampling: True``.</span>
-<span class="sd">        abort_test : Callable[[], bool] | None, default=None</span>
-<span class="sd">            Optional callback that returns ``True`` to signal that sampling</span>
-<span class="sd">            should be aborted. Called periodically during the DREAM sampling</span>
-<span class="sd">            loop.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            Dictionary with keys ``&#39;draws&#39;``, ``&#39;param_names&#39;``,</span>
-<span class="sd">            ``&#39;internal_bumps_object&#39;``, and ``&#39;logp&#39;``.</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            If ``samples``, ``burn``, or ``thin`` are invalid types or values.</span>
-<span class="sd">        RuntimeError</span>
-<span class="sd">            If the current minimizer is not a BUMPS instance.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">samples</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;samples must be a positive integer.&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">burn</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">burn</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;burn must be a non-negative integer.&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thin</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">thin</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;thin must be a positive integer.&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Flatten multi-dataset arrays</span>
-        <span class="n">x_fit</span><span class="p">,</span> <span class="n">x_new</span><span class="p">,</span> <span class="n">y_new</span><span class="p">,</span> <span class="n">w_new</span><span class="p">,</span> <span class="n">_dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precompute_reshaping</span><span class="p">(</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_dims</span> <span class="o">=</span> <span class="n">_dims</span>
-
-        <span class="c1"># Wrap fit functions for multi-dataset flattening, mirroring the</span>
-        <span class="c1"># ``Fitter.fit`` lifecycle: use the property setter so the minimizer</span>
-        <span class="c1"># is re-created with the wrapped fit function.</span>
-        <span class="n">original_fit_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span>
-        <span class="n">fit_fun_wrap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_wrapper</span><span class="p">(</span><span class="n">x_new</span><span class="p">,</span> <span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="n">fit_fun_wrap</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">minimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span>
-
-            <span class="c1"># Verify it&#39;s a BUMPS minimizer (sampling only works with BUMPS/DREAM)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">minimizer</span><span class="p">,</span> <span class="s1">&#39;package&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;bumps&#39;</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s1">&#39;Bayesian sampling requires a BUMPS minimizer. &#39;</span>
-                    <span class="s1">&#39;Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.&#39;</span>
-                <span class="p">)</span>
-
-            <span class="c1"># Delegate to the BUMPS minimizer&#39;s public mcmc_sample method</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">mcmc_sample</span><span class="p">(</span>
-                <span class="n">x</span><span class="o">=</span><span class="n">x_fit</span><span class="p">,</span>
-                <span class="n">y</span><span class="o">=</span><span class="n">y_new</span><span class="p">,</span>
-                <span class="n">weights</span><span class="o">=</span><span class="n">w_new</span><span class="p">,</span>
-                <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span>
-                <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
-                <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
-                <span class="n">population</span><span class="o">=</span><span class="n">population</span><span class="p">,</span>
-                <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
-                <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
-                <span class="n">abort_test</span><span class="o">=</span><span class="n">abort_test</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="n">original_fit_func</span>
-
-        <span class="k">return</span> <span class="n">result</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -14493,581 +14920,6 @@ minimizer.</p>
 
 
 
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="easyscience.fitting.multi_fitter.MultiFitter.mcmc_sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-
-</h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Run Bayesian MCMC sampling using the BUMPS DREAM sampler.</p>
-<p>Requires that the current minimizer is a BUMPS instance (i.e. the
-minimizer was switched to <code>AvailableMinimizers.Bumps</code> or equivalent).</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>x</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of independent variable arrays (one per dataset).</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>y</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of dependent variable arrays (one per dataset).</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>weights</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of weight arrays (one per dataset).</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>samples</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Number of retained DREAM samples requested from BUMPS.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>10000</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>burn</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Burn-in steps.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>2000</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>thin</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Thinning interval.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>10</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>population</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>BUMPS DREAM population count (number of parallel chains).</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>seed</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Best-effort random seed. BUMPS DREAM may use additional internal
-RNG state that is not controlled by this seed, so exact
-reproducibility is not guaranteed.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>vectorized</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Whether the fit function expects vectorized (multidimensional)
-input.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>sampler_kwargs</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Additional keyword arguments forwarded to the BUMPS DREAM sampler
-via <code>bumps.fitters.fit</code>.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>progress_callback</code>
-            </td>
-            <td>
-                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="bool">bool</span> | None] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional callback for progress updates during sampling.  The
-payload dict includes <code>iteration</code> (DREAM generation number) and
-<code>sampling: True</code>.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>abort_test</code>
-            </td>
-            <td>
-                  <code><span title="typing.Callable">Callable</span>[[], <span title="bool">bool</span>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional callback that returns <code>True</code> to signal that sampling
-should be aborted. Called periodically during the DREAM sampling
-loop.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Dictionary with keys <code>'draws'</code>, <code>'param_names'</code>,
-<code>'internal_bumps_object'</code>, and <code>'logp'</code>.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If <code>samples</code>, <code>burn</code>, or <code>thin</code> are invalid types or values.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="RuntimeError">RuntimeError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the current minimizer is not a BUMPS instance.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/easyscience/fitting/multi_fitter.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
-    <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
-    <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">abort_test</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run Bayesian MCMC sampling using the BUMPS DREAM sampler.</span>
-
-<span class="sd">    Requires that the current minimizer is a BUMPS instance (i.e. the</span>
-<span class="sd">    minimizer was switched to ``AvailableMinimizers.Bumps`` or equivalent).</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    x : list[np.ndarray]</span>
-<span class="sd">        List of independent variable arrays (one per dataset).</span>
-<span class="sd">    y : list[np.ndarray]</span>
-<span class="sd">        List of dependent variable arrays (one per dataset).</span>
-<span class="sd">    weights : list[np.ndarray]</span>
-<span class="sd">        List of weight arrays (one per dataset).</span>
-<span class="sd">    samples : int, default=10000</span>
-<span class="sd">        Number of retained DREAM samples requested from BUMPS.</span>
-<span class="sd">    burn : int, default=2000</span>
-<span class="sd">        Burn-in steps.</span>
-<span class="sd">    thin : int, default=10</span>
-<span class="sd">        Thinning interval.</span>
-<span class="sd">    population : int | None, default=None</span>
-<span class="sd">        BUMPS DREAM population count (number of parallel chains).</span>
-<span class="sd">    seed : int | None, default=None</span>
-<span class="sd">        Best-effort random seed. BUMPS DREAM may use additional internal</span>
-<span class="sd">        RNG state that is not controlled by this seed, so exact</span>
-<span class="sd">        reproducibility is not guaranteed.</span>
-<span class="sd">    vectorized : bool, default=False</span>
-<span class="sd">        Whether the fit function expects vectorized (multidimensional)</span>
-<span class="sd">        input.</span>
-<span class="sd">    sampler_kwargs : dict | None, default=None</span>
-<span class="sd">        Additional keyword arguments forwarded to the BUMPS DREAM sampler</span>
-<span class="sd">        via `bumps.fitters.fit`.</span>
-<span class="sd">    progress_callback : Callable[[dict], bool | None] | None, default=None</span>
-<span class="sd">        Optional callback for progress updates during sampling.  The</span>
-<span class="sd">        payload dict includes ``iteration`` (DREAM generation number) and</span>
-<span class="sd">        ``sampling: True``.</span>
-<span class="sd">    abort_test : Callable[[], bool] | None, default=None</span>
-<span class="sd">        Optional callback that returns ``True`` to signal that sampling</span>
-<span class="sd">        should be aborted. Called periodically during the DREAM sampling</span>
-<span class="sd">        loop.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    dict</span>
-<span class="sd">        Dictionary with keys ``&#39;draws&#39;``, ``&#39;param_names&#39;``,</span>
-<span class="sd">        ``&#39;internal_bumps_object&#39;``, and ``&#39;logp&#39;``.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``samples``, ``burn``, or ``thin`` are invalid types or values.</span>
-<span class="sd">    RuntimeError</span>
-<span class="sd">        If the current minimizer is not a BUMPS instance.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">samples</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;samples must be a positive integer.&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">burn</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">burn</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;burn must be a non-negative integer.&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thin</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">thin</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;thin must be a positive integer.&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Flatten multi-dataset arrays</span>
-    <span class="n">x_fit</span><span class="p">,</span> <span class="n">x_new</span><span class="p">,</span> <span class="n">y_new</span><span class="p">,</span> <span class="n">w_new</span><span class="p">,</span> <span class="n">_dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precompute_reshaping</span><span class="p">(</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span>
-    <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_dims</span> <span class="o">=</span> <span class="n">_dims</span>
-
-    <span class="c1"># Wrap fit functions for multi-dataset flattening, mirroring the</span>
-    <span class="c1"># ``Fitter.fit`` lifecycle: use the property setter so the minimizer</span>
-    <span class="c1"># is re-created with the wrapped fit function.</span>
-    <span class="n">original_fit_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span>
-    <span class="n">fit_fun_wrap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_function_wrapper</span><span class="p">(</span><span class="n">x_new</span><span class="p">,</span> <span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="n">fit_fun_wrap</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">minimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span>
-
-        <span class="c1"># Verify it&#39;s a BUMPS minimizer (sampling only works with BUMPS/DREAM)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">minimizer</span><span class="p">,</span> <span class="s1">&#39;package&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;bumps&#39;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s1">&#39;Bayesian sampling requires a BUMPS minimizer. &#39;</span>
-                <span class="s1">&#39;Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.&#39;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Delegate to the BUMPS minimizer&#39;s public mcmc_sample method</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">mcmc_sample</span><span class="p">(</span>
-            <span class="n">x</span><span class="o">=</span><span class="n">x_fit</span><span class="p">,</span>
-            <span class="n">y</span><span class="o">=</span><span class="n">y_new</span><span class="p">,</span>
-            <span class="n">weights</span><span class="o">=</span><span class="n">w_new</span><span class="p">,</span>
-            <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span>
-            <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
-            <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
-            <span class="n">population</span><span class="o">=</span><span class="n">population</span><span class="p">,</span>
-            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-            <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
-            <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
-            <span class="n">abort_test</span><span class="o">=</span><span class="n">abort_test</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="n">original_fit_func</span>
-
-    <span class="k">return</span> <span class="n">result</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
 
 
 
