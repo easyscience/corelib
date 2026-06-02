@@ -401,65 +401,6 @@ class TestMultiFitterMcmcSample:
         assert 'draws' in result
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_seed_produces_valid_draws(self):
-        """Running mcmc_sample() with a seed must produce valid draws."""
-        ref_sin = AbsSin(0.2, np.pi)
-        sp = AbsSin(0.354, 3.05)
-
-        x = np.linspace(0, 5, 50)
-        y = ref_sin(x)
-        weights = np.ones_like(x)
-
-        sp.offset.fixed = False
-        sp.phase.fixed = False
-
-        f = MultiFitter([sp], [sp])
-        try:
-            f.switch_minimizer('Bumps')
-        except AttributeError:
-            pytest.skip('BUMPS is not installed')
-
-        result = f.mcmc_sample(
-            x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42
-        )
-
-        assert result['draws'].ndim == 2
-        assert result['draws'].shape[0] > 0
-        assert result['draws'].shape[1] == len(result['param_names'])
-        assert 'logp' in result
-
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_different_seeds_both_produce_valid_draws(self):
-        """Running mcmc_sample() with different seeds should each produce valid draws."""
-        ref_sin = AbsSin(0.2, np.pi)
-        sp = AbsSin(0.354, 3.05)
-
-        x = np.linspace(0, 5, 50)
-        y = ref_sin(x)
-        weights = np.ones_like(x)
-
-        sp.offset.fixed = False
-        sp.phase.fixed = False
-
-        f = MultiFitter([sp], [sp])
-        try:
-            f.switch_minimizer('Bumps')
-        except AttributeError:
-            pytest.skip('BUMPS is not installed')
-
-        result1 = f.mcmc_sample(
-            x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42
-        )
-        result2 = f.mcmc_sample(
-            x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=12345
-        )
-
-        assert result1['draws'].shape[0] > 0
-        assert result2['draws'].shape[0] > 0
-        assert result1['draws'].ndim == 2
-        assert result2['draws'].ndim == 2
-
-    @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_vectorized_2d_input_produces_valid_draws(self):
         """mcmc_sample() with vectorized=True and 2D input should produce valid draws."""
         sp = AbsSin2D(0.1, 1.75)

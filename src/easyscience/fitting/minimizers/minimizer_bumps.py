@@ -390,7 +390,6 @@ class Bumps(MinimizerBase):
         burn: int = 2000,
         thin: int = 10,
         population: int | None = None,
-        seed: int | None = None,
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
@@ -418,13 +417,6 @@ class Bumps(MinimizerBase):
             Thinning interval.
         population : int | None, default=None
             BUMPS DREAM population count (number of parallel chains).
-        seed : int | None, default=None
-            Best-effort random seed.  Calls ``numpy.random.seed(seed)``
-            before DREAM starts, which affects the *global* NumPy RNG
-            state and may interact with other code in the process.
-            BUMPS DREAM uses additional internal RNG state that is
-            **not** controlled by this seed, so exact reproducibility
-            across runs is **not** guaranteed.
         sampler_kwargs : dict | None, default=None
             Additional keyword arguments forwarded to `bumps.fitters.fit`.
         progress_callback : Callable[[dict], bool | None] | None, default=None
@@ -486,10 +478,6 @@ class Bumps(MinimizerBase):
         model_func = self._make_model()
         curve = model_func(x, y, weights)
         problem = FitProblem(curve)
-
-        # Best-effort seed: sets numpy's global RNG state just before DREAM starts.
-        if seed is not None:
-            np.random.seed(seed)
 
         # Build DREAM kwargs
         dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
