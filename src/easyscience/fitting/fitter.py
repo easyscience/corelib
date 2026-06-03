@@ -484,13 +484,6 @@ class Fitter:
         if not isinstance(thin, int) or thin < 1:
             raise ValueError('thin must be a positive integer.')
 
-        minimizer = self.minimizer
-        if not (hasattr(minimizer, 'package') and minimizer.package == 'bumps'):
-            raise RuntimeError(
-                'Bayesian sampling requires a BUMPS minimizer. '
-                'Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.'
-            )
-
         x_fit, x_new, y_new, w_new, dims = self._precompute_reshaping(x, y, weights, vectorized)
         self._dependent_dims = dims
 
@@ -498,6 +491,13 @@ class Fitter:
         self.fit_function = self._fit_function_wrapper(x_new, flatten=True)
 
         try:
+            minimizer = self.minimizer
+            if not (hasattr(minimizer, 'package') and minimizer.package == 'bumps'):
+                raise RuntimeError(
+                    'Bayesian sampling requires a BUMPS minimizer. '
+                    'Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.'
+                )
+
             result = minimizer.mcmc_sample(
                 x=x_fit,
                 y=y_new,
