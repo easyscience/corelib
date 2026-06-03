@@ -3,6 +3,7 @@
 
 from unittest.mock import MagicMock
 
+import numpy as np
 import pytest
 
 from easyscience import ObjBase
@@ -61,3 +62,106 @@ class TestMultiFitter:
             max_evaluations=None,
             progress_callback=progress_callback,
         )
+
+
+# ===================================================================
+# MultiFitter._post_compute_reshaping
+# ===================================================================
+
+
+class TestPostComputeReshaping:
+    def test_splits_single_result_into_two(self):
+        """Verify _post_compute_reshaping splits combined result by dataset."""
+        import numpy as np
+
+        from easyscience.fitting.minimizers import FitResults
+
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+        mf = MultiFitter(fit_objects, fit_objects)
+
+        # Simulate a combined result
+        combined = FitResults()
+        combined.success = True
+        combined.x = np.array([0, 1, 2])
+        combined.y_obs = np.array([0.5, 1.0, 1.5])
+        combined.y_calc = np.array([0.51, 0.99, 1.51])
+        combined.y_err = np.array([0.01, 0.02, 0.03])
+        combined.p = {'pm': 1.0, 'pc': 0.5}
+        combined.p0 = {'pm': 0.0, 'pc': 0.0}
+        combined.n_evaluations = 100
+        combined.iterations = 50
+        combined.message = 'success'
+        combined.minimizer_engine = 'bumps'
+        combined.engine_result = 'engine_result'
+
+        # Set dependent_dims as _precompute_reshaping would
+        mf._dependent_dims = [(2,), (1,)]
+
+        x_input = [np.array([0.0, 1.0]), np.array([2.0])]
+        y_input = [np.array([0.5, 1.0]), np.array([1.5])]
+
+        results = mf._post_compute_reshaping(combined, x_input, y_input)
+
+        assert len(results) == 2
+        assert results[0].success is True
+        assert results[1].success is True
+        assert len(results[0].y_obs) == 2
+        assert len(results[1].y_obs) == 1
+        assert results[0].total_results is combined
+        assert results[1].total_results is combined
+        assert np.allclose(results[0].y_calc, [0.51, 0.99])
+
+    def test_handles_single_dataset(self):
+        import numpy as np
+
+        from easyscience.fitting.minimizers import FitResults
+
+        fit_objects = [Line(1.0, 0.5)]
+        mf = MultiFitter(fit_objects, fit_objects)
+
+        combined = FitResults()
+        combined.success = True
+        combined.y_obs = np.array([1.0, 2.0, 3.0])
+        combined.y_calc = np.array([1.1, 2.1, 3.1])
+        combined.y_err = np.array([0.1, 0.1, 0.1])
+        combined.p = {'pm': 1.0}
+        combined.p0 = {'pm': 0.0}
+        combined.n_evaluations = 50
+        combined.iterations = 25
+        combined.message = 'ok'
+        combined.minimizer_engine = 'bumps'
+        combined.engine_result = 'er'
+
+        mf._dependent_dims = [(3,)]
+        x_input = [np.array([0.0, 1.0, 2.0])]
+        y_input = [np.array([1.0, 2.0, 3.0])]
+
+        results = mf._post_compute_reshaping(combined, x_input, y_input)
+
+        assert len(results) == 1
+        assert np.allclose(results[0].y_calc, [1.1, 2.1, 3.1])
+
+
+# ===================================================================
+# MultiFitter._precompute_reshaping with weights=None
+# ===================================================================
+
+
+class TestPrecomputeReshaping:
+    def test_weights_all_none_returns_none(self):
+        """When all weights are None, _precompute_reshaping should return None for weights."""
+        import numpy as np
+
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+        mf = MultiFitter(fit_objects, fit_objects)
+
+        x = [np.array([1.0, 2.0]), np.array([3.0])]
+        y = [np.array([1.5, 2.5]), np.array([4.5])]
+        weights = [None, None]
+
+        x_fit, x_new, y_new, w_new, dims = MultiFitter._precompute_reshaping(
+            x, y, weights, vectorized=False
+        )
+
+        assert w_new is None
+        assert len(dims) == 2

@@ -672,3 +672,390 @@ class TestBumpsFit:
             domain_fit_results.message
             == 'Fit stopped: reached maximum optimizer steps (3); objective evaluated 2 times'
         )
+
+
+# ===================================================================
+# Bumps.mcmc_sample() — Bayesian DREAM sampling
+# ===================================================================
+
+
+class TestBumpsSample:
+    """Tests for the ``Bumps.mcmc_sample()`` method and its helpers."""
+
+    # Sentinel value to signal "set fitter.state = None" in _setup_driver_mock
+    ABORT = object()
+
+    @pytest.fixture
+    def minimizer(self) -> Bumps:
+        return Bumps(
+            obj='obj',
+            fit_function='fit_function',
+            minimizer_enum=MagicMock(package='bumps', method='amoeba'),
+        )
+
+    @pytest.fixture(autouse=True)
+    def _mock_bumps_internals(self, monkeypatch):
+        """Prevent sample() from constructing real BUMPS objects.
+
+        ``sample()`` imports ``DreamFit`` and ``FitProblem`` from the real
+        ``bumps`` package internally, which would try to build real model
+        objects.  We redirect those to mocks and also mock ``FitDriver``
+        (which *is* a module-level import) so the whole flow stays under
+        test control.
+
+        Also mock ``_make_model`` on the class so that the ``minimizer``
+        fixture (which uses ``obj='obj'``) doesn't fail inside ``sample()``.
+        """
+        import bumps.fitters
+        import bumps.names
+
+        monkeypatch.setattr(bumps.fitters, 'DreamFit', MagicMock())
+        monkeypatch.setattr(bumps.names, 'FitProblem', MagicMock(return_value=MagicMock()))
+        monkeypatch.setattr(
+            Bumps, '_make_model', MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        )
+
+    def _setup_driver_mock(
+        self, monkeypatch, fitter_state_value=None, fit_result=None, fit_side_effect=None
+    ):
+        """Helper to create a mocked FitDriver with configurable behavior.
+
+        :param fitter_state_value: If ``None``, ``driver.fitter.state`` will be
+            a regular MagicMock (non-None).  Pass ``ABORT`` to set it to ``None``
+            and simulate user abort.
+        """
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+
+        mock_driver = MagicMock()
+        mock_driver.clip = MagicMock()
+
+        if fit_side_effect is not None:
+            mock_driver.fit.side_effect = fit_side_effect
+        else:
+            mock_driver.fit.return_value = fit_result or (np.array([1.0]), 0.0)
+
+        mock_driver.stderr = MagicMock(return_value=np.array([0.1]))
+
+        if fitter_state_value is TestBumpsSample.ABORT:
+            mock_driver.fitter.state = None
+        else:
+            mock_state = MagicMock()
+            mock_state.draw.return_value.points = np.array([[1.0]])
+            mock_state.logp = None
+            mock_driver.fitter.state = mock_state
+
+        mock_FitDriver = MagicMock(return_value=mock_driver)
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps, 'FitDriver', mock_FitDriver
+        )
+        return mock_FitDriver, mock_driver
+
+    def test_sample_basic(self, minimizer: Bumps, monkeypatch) -> None:
+        """Verify that mcmc_sample() returns a dict with expected keys."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+
+        result = minimizer.mcmc_sample(
+            x=np.array([1.0, 2.0]),
+            y=np.array([0.1, 0.2]),
+            weights=np.array([1.0, 1.0]),
+            samples=100,
+            burn=20,
+            thin=2,
+            population=5,
+        )
+
+        assert isinstance(result, dict)
+        assert 'draws' in result
+        assert 'param_names' in result
+        assert 'internal_bumps_object' in result
+        assert 'logp' in result
+        mock_FitDriver.assert_called_once()
+
+    def test_sample_with_progress_callback(self, minimizer: Bumps, monkeypatch) -> None:
+        """Verify progress callback is wired up as a monitor."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        progress_callback = MagicMock()
+
+        result = minimizer.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            samples=10,
+            burn=5,
+            thin=1,
+            progress_callback=progress_callback,
+        )
+
+        assert result is not None
+        call_kwargs = mock_FitDriver.call_args.kwargs
+        assert 'monitors' in call_kwargs
+        assert len(call_kwargs['monitors']) == 1
+        assert isinstance(call_kwargs['monitors'][0], BumpsProgressMonitor)
+
+    def test_sample_aborted_by_user_raises_fit_error(self, minimizer: Bumps, monkeypatch) -> None:
+        """Verify that sampling abortion raises FitError."""
+        self._setup_driver_mock(monkeypatch, fitter_state_value=TestBumpsSample.ABORT)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+
+        with pytest.raises(FitError, match='Sampling aborted by user'):
+            minimizer.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+
+    def test_sample_driver_exception_restores_parameters(
+        self, minimizer: Bumps, monkeypatch
+    ) -> None:
+        """Verify that a driver exception during sampling restores parameter values."""
+        self._setup_driver_mock(monkeypatch, fit_side_effect=RuntimeError('driver failed'))
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        minimizer._restore_parameter_values = MagicMock()
+
+        with pytest.raises(RuntimeError, match='driver failed'):
+            minimizer.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+
+        minimizer._restore_parameter_values.assert_called_once()
+
+    def test_sample_population_param(self, minimizer: Bumps, monkeypatch) -> None:
+        """population kwarg is forwarded to DREAM as pop."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+
+        minimizer.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            samples=10,
+            burn=0,
+            thin=1,
+            population=7,
+        )
+
+        call_kwargs = mock_FitDriver.call_args.kwargs
+        assert call_kwargs['pop'] == 7
+
+    def test_sample_rejects_non_callable_callback(self, minimizer: Bumps, monkeypatch) -> None:
+        import bumps.names
+
+        monkeypatch.setattr(bumps.names, 'FitProblem', MagicMock(return_value=MagicMock()))
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+
+        with pytest.raises(ValueError, match='progress_callback must be callable'):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=5,
+                thin=1,
+                progress_callback='not-callable',
+            )
+
+
+# ===================================================================
+# _build_sample_progress_payload
+# ===================================================================
+
+
+class TestBuildSampleProgressPayload:
+    @pytest.fixture
+    def minimizer(self) -> Bumps:
+        return Bumps(
+            obj='obj',
+            fit_function='fit_function',
+            minimizer_enum=MagicMock(package='bumps', method='amoeba'),
+        )
+
+    def test_payload_structure_and_sampling_flag(self, minimizer: Bumps) -> None:
+        b = minimizer
+
+        mock_problem = MagicMock()
+        mock_problem.chisq.side_effect = [25.0, 12.5]
+        mock_problem.labels.return_value = ['palpha']
+        mock_problem.getp.return_value = np.array([1.0])
+        b._cached_pars = {'alpha': MagicMock(value=1.0)}
+
+        payload = b._build_sample_progress_payload(mock_problem, 7, np.array([1.0]), 12.5)
+
+        assert payload['iteration'] == 7
+        assert payload['chi2'] == 25.0
+        assert payload['reduced_chi2'] == 12.5
+        assert payload['parameter_values'] == {'alpha': 1.0}
+        assert payload['sampling'] is True
+        assert payload['finished'] is False
+        assert payload['refresh_plots'] is False
+
+    def test_payload_keys(self, minimizer: Bumps) -> None:
+        b = minimizer
+        mock_problem = MagicMock()
+        mock_problem.chisq.side_effect = [10.0, 5.0]
+        mock_problem.labels.return_value = ['pa']
+        mock_problem.getp.return_value = np.array([5.0])
+        b._cached_pars = {'a': MagicMock(value=5.0)}
+
+        payload = b._build_sample_progress_payload(mock_problem, 1, np.array([5.0]), nllf=5.0)
+
+        expected_keys = {
+            'iteration',
+            'chi2',
+            'reduced_chi2',
+            'parameter_values',
+            'refresh_plots',
+            'finished',
+            'sampling',
+        }
+        assert set(payload.keys()) == expected_keys
+
+    def test_delegates_to_build_progress_payload(self, minimizer: Bumps) -> None:
+        """_build_sample_progress_payload calls _build_progress_payload and adds sampling."""
+        mock_problem = MagicMock()
+
+        # Patch _build_progress_payload to track calls
+        base_payload = {
+            'iteration': 3,
+            'chi2': 42.0,
+            'reduced_chi2': 21.0,
+            'parameter_values': {'x': 7.0},
+            'refresh_plots': False,
+            'finished': False,
+        }
+        with patch.object(
+            minimizer, '_build_progress_payload', return_value=base_payload
+        ) as mock_bpp:
+            result = minimizer._build_sample_progress_payload(
+                mock_problem, 3, np.array([7.0]), 21.0
+            )
+
+        mock_bpp.assert_called_once_with(mock_problem, 3, np.array([7.0]), 21.0)
+        assert result == {**base_payload, 'sampling': True}
+
+
+# ===================================================================
+# _set_parameter_fit_result with stack_status=True
+# ===================================================================
+
+
+class TestSetParameterFitResultWithStack:
+    @pytest.fixture
+    def minimizer(self) -> Bumps:
+        return Bumps(
+            obj='obj',
+            fit_function='fit_function',
+            minimizer_enum=MagicMock(package='bumps', method='amoeba'),
+        )
+
+    def test_stack_status_true_calls_begin_end_macro(self, minimizer: Bumps) -> None:
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+
+        minimizer._cached_pars = {'a': MagicMock(), 'b': MagicMock()}
+        minimizer._cached_pars['a'].value = 'old_a'
+        minimizer._cached_pars['b'].value = 'old_b'
+        minimizer._restore_parameter_values = MagicMock()
+
+        mock_fit_result = MagicMock()
+        mock_fit_result.x = np.array([1.0, 2.0])
+        mock_fit_result.dx = np.array([0.1, 0.2])
+
+        mock_par_a = MagicMock()
+        mock_par_a.name = 'pa'
+        mock_par_b = MagicMock()
+        mock_par_b.name = 'pb'
+        par_list = [mock_par_a, mock_par_b]
+
+        minimizer._set_parameter_fit_result(mock_fit_result, True, par_list)
+
+        assert minimizer._cached_pars['a'].value == 1.0
+        assert minimizer._cached_pars['a'].error == 0.1
+        assert minimizer._cached_pars['b'].value == 2.0
+        assert minimizer._cached_pars['b'].error == 0.2
+        minimizer._restore_parameter_values.assert_called_once()
+
+
+# ===================================================================
+# convert_to_par_object
+# ===================================================================
+
+
+class TestConvertToParObject:
+    def test_convert_parameter_object(self) -> None:
+        from easyscience.variable import Parameter
+
+        param = Parameter('thickness', 42.0, min=0.0, max=100.0)
+        param.fixed = False
+
+        result = Bumps.convert_to_par_object(param)
+
+        # convert_to_par_object uses obj.unique_name which is auto-assigned
+        assert result.name.startswith('p')
+        assert result.value == 42.0
+        assert result.bounds == (0.0, 100.0)
+        assert result.fixed is False
+
+    def test_convert_fixed_parameter(self) -> None:
+        from easyscience.variable import Parameter
+
+        param = Parameter('roughness', 5.0, min=0.0, max=20.0)
+        param.fixed = True
+
+        result = Bumps.convert_to_par_object(param)
+
+        assert result.name.startswith('p')
+        assert result.fixed is True
+
+
+# ===================================================================
+# fit() with abort_test
+# ===================================================================
+
+
+class TestFitWithAbortTest:
+    @pytest.fixture
+    def minimizer(self) -> Bumps:
+        return Bumps(
+            obj='obj',
+            fit_function='fit_function',
+            minimizer_enum=MagicMock(package='bumps', method='amoeba'),
+        )
+
+    def test_abort_test_passed_to_fit_driver(self, minimizer: Bumps, monkeypatch) -> None:
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+
+        mock_driver = MagicMock()
+        mock_driver.clip = MagicMock()
+        mock_driver.fit = MagicMock(return_value=(np.array([42.0]), 0.0))
+        mock_driver.stderr = MagicMock(return_value=np.array([0.1]))
+        mock_driver.monitor_runner.history.step = [0]
+        mock_FitDriver = MagicMock(return_value=mock_driver)
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps, 'FitDriver', mock_FitDriver
+        )
+
+        mock_problem = MagicMock()
+        mock_problem._parameters = []
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            'FitProblem',
+            MagicMock(return_value=mock_problem),
+        )
+
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        minimizer._gen_fit_results = MagicMock(return_value='result')
+        minimizer._resolve_fitclass = MagicMock(return_value=MagicMock(id='amoeba'))
+        minimizer._set_parameter_fit_result = MagicMock()
+        minimizer._cached_pars = {'a': MagicMock(value=1.0)}
+        minimizer._cached_pars_vals = {'a': (1.0, 0.0)}
+
+        abort_test = MagicMock(return_value=False)
+
+        minimizer.fit(
+            x=np.array([1.0]), y=np.array([2.0]), weights=np.array([1.0]), abort_test=abort_test
+        )
+
+        call_kwargs = mock_FitDriver.call_args.kwargs
+        assert callable(call_kwargs['abort_test'])
+        assert call_kwargs['abort_test'] is not (lambda: False)

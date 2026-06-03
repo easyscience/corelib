@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from __future__ import annotations
+
 from typing import Callable
-from typing import List
-from typing import Optional
 
 import numpy as np
 
@@ -26,8 +26,8 @@ class MultiFitter(Fitter):
 
     def __init__(
         self,
-        fit_objects: Optional[List] = None,
-        fit_functions: Optional[List[Callable]] = None,
+        fit_objects: list | None = None,
+        fit_functions: list[Callable] | None = None,
     ):
         # Create a dummy core object to hold all the fit objects.
         self._fit_objects = CollectionBase('multi', *fit_objects)
@@ -37,7 +37,7 @@ class MultiFitter(Fitter):
         super().__init__(self._fit_objects, self._fit_functions[0])
 
     def _fit_function_wrapper(
-        self, real_x: Optional[List[np.ndarray]] = None, flatten: bool = True
+        self, real_x: list[np.ndarray] | None = None, flatten: bool = True
     ) -> Callable:
         """
         Simple fit function which injects the N real X (independent)
@@ -47,7 +47,7 @@ class MultiFitter(Fitter):
 
         Parameters
         ----------
-        real_x : Optional[List[np.ndarray]], default=None
+        real_x : list[np.ndarray] | None, default=None
             List of independent x parameters to be injected. By default,
             None.
         flatten : bool, default=True
@@ -80,31 +80,31 @@ class MultiFitter(Fitter):
 
     @staticmethod
     def _precompute_reshaping(
-        x: List[np.ndarray],
-        y: List[np.ndarray],
-        weights: Optional[List[np.ndarray]],
+        x: list[np.ndarray],
+        y: list[np.ndarray],
+        weights: list[np.ndarray] | None,
         vectorized: bool,
-    ) -> tuple[
-        np.ndarray, List[np.ndarray], np.ndarray, Optional[np.ndarray], List[tuple[int, ...]]
-    ]:
+    ) -> tuple[np.ndarray, list[np.ndarray], np.ndarray, np.ndarray | None, list[tuple[int, ...]]]:
         """
         Convert an array of X's and Y's  to an acceptable shape for
         fitting.
 
         Parameters
         ----------
-        x : List[np.ndarray]
+        x : list[np.ndarray]
             List of independent variables.
-        y : List[np.ndarray]
+        y : list[np.ndarray]
             List of dependent variables.
-        weights : Optional[List[np.ndarray]]
+        weights : list[np.ndarray] | None
             Optional weights for each dataset.
         vectorized : bool
-            Is the fn input vectorized or point based?
+            When ``True``, each x array may be multi-dimensional (e.g. an
+            ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When
+            ``False`` (default), each x array is expected to be 1-D.
 
         Returns
         -------
-        tuple[np.ndarray, List[np.ndarray], np.ndarray, Optional[np.ndarray], List[tuple[int, ...]]]
+        tuple[np.ndarray, list[np.ndarray], np.ndarray, np.ndarray | None, list[tuple[int, ...]]]
             Reshaped x values, reshaped input data, flattened y values,
             flattened weights, and stored dependent dimensions.
         """
@@ -136,9 +136,9 @@ class MultiFitter(Fitter):
     def _post_compute_reshaping(
         self,
         fit_result_obj: FitResults,
-        x: List[np.ndarray],
-        y: List[np.ndarray],
-    ) -> List[FitResults]:
+        x: list[np.ndarray],
+        y: list[np.ndarray],
+    ) -> list[FitResults]:
         """
         Split a multi-fit result object back into per-dataset results.
 
@@ -146,14 +146,14 @@ class MultiFitter(Fitter):
         ----------
         fit_result_obj : FitResults
             Combined fit result returned by the minimizer.
-        x : List[np.ndarray]
+        x : list[np.ndarray]
             Original x coordinates for each dataset.
-        y : List[np.ndarray]
+        y : list[np.ndarray]
             Original y coordinates for each dataset.
 
         Returns
         -------
-        List[FitResults]
+        list[FitResults]
             One fit result object per dataset.
         """
 

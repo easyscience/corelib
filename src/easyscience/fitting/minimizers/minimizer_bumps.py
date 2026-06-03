@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from __future__ import annotations
+
 import copy
 import warnings
 from typing import Any
 from typing import Callable
-from typing import List
 
 import numpy as np
 from bumps.fitters import FIT_AVAILABLE_IDS
@@ -64,11 +65,11 @@ class Bumps(MinimizerBase):
         self._eval_counter: EvalCounter | None = None
 
     @staticmethod
-    def all_methods() -> List[str]:
+    def all_methods() -> list[str]:
         return FIT_AVAILABLE_IDS_FILTERED
 
     @staticmethod
-    def supported_methods() -> List[str]:
+    def supported_methods() -> list[str]:
         # only a small subset
         methods = ['amoeba', 'newton', 'lm']
         return methods
@@ -79,11 +80,12 @@ class Bumps(MinimizerBase):
         y: np.ndarray,
         weights: np.ndarray,
         model: Callable | None = None,
-        parameters: List[Parameter] | None = None,
+        parameters: list[Parameter] | None = None,
         method: str | None = None,
         tolerance: float | None = None,
         max_evaluations: int | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
+        abort_test: Callable[[], bool] | None = None,
         minimizer_kwargs: dict | None = None,
         engine_kwargs: dict | None = None,
         **kwargs: Any,
@@ -101,7 +103,7 @@ class Bumps(MinimizerBase):
             Weights for supplied measured points.
         model : Callable | None, default=None
             Optional Model which is being fitted to. By default, None.
-        parameters : List[Parameter] | None, default=None
+        parameters : list[Parameter] | None, default=None
             Optional parameters for the fit. By default, None.
         method : str | None, default=None
             Method for minimization. By default, None.
@@ -116,6 +118,10 @@ class Bumps(MinimizerBase):
             Optional callback for progress updates. The payload field
             ``iteration`` carries the BUMPS optimizer step index. By
             default, None.
+        abort_test : Callable[[], bool] | None, default=None
+            Optional callback that returns ``True`` to signal that the fit
+            should be aborted.  Called periodically during the
+            BUMPS optimizer iteration loop.
         minimizer_kwargs : dict | None, default=None
             Additional keyword arguments passed to the BUMPS minimizer.
             By default, None.
@@ -203,6 +209,7 @@ class Bumps(MinimizerBase):
             fitclass=fitclass,
             problem=problem,
             monitors=monitors,
+            abort_test=abort_test if abort_test is not None else (lambda: False),
             **minimizer_kwargs,
             **kwargs,
         )
@@ -284,20 +291,20 @@ class Bumps(MinimizerBase):
             snapshot[dict_name] = float(value)
         return snapshot
 
-    def convert_to_pars_obj(self, par_list: List[Parameter] | None = None) -> List[BumpsParameter]:
+    def convert_to_pars_obj(self, par_list: list[Parameter] | None = None) -> list[BumpsParameter]:
         """
         Create a container with the ``Parameters`` converted from the
         base object.
 
         Parameters
         ----------
-        par_list : List[Parameter] | None, default=None
+        par_list : list[Parameter] | None, default=None
             If only a single/selection of parameter is required. Specify
             as a list. By default, None.
 
         Returns
         -------
-        List[BumpsParameter]
+        list[BumpsParameter]
             Bumps Parameters list.
         """
         if par_list is None:
@@ -333,7 +340,7 @@ class Bumps(MinimizerBase):
             fixed=obj.fixed,
         )
 
-    def _make_model(self, parameters: List[BumpsParameter] | None = None) -> Callable:
+    def _make_model(self, parameters: list[BumpsParameter] | None = None) -> Callable:
         """
         Generate a bumps model from the supplied ``fit_function`` and
         parameters in the base object. Note that this makes a callable
@@ -343,7 +350,7 @@ class Bumps(MinimizerBase):
 
         Parameters
         ----------
-        parameters : List[BumpsParameter] | None, default=None
+        parameters : list[BumpsParameter] | None, default=None
             Optional BUMPS parameters to bind into the model.
 
         Returns
@@ -374,11 +381,186 @@ class Bumps(MinimizerBase):
 
         return _outer(self)
 
+    def mcmc_sample(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        weights: np.ndarray,
+        samples: int = 10000,
+        burn: int = 2000,
+        thin: int = 10,
+        population: int | None = None,
+        sampler_kwargs: dict | None = None,
+        progress_callback: Callable[[dict], bool | None] | None = None,
+        abort_test: Callable[[], bool] | None = None,
+    ) -> dict:
+        """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
+
+        Builds a BUMPS `FitProblem` from the current model and runs the DREAM
+        sampler.  This is the public minimizer-level entry point for Bayesian
+        sampling; the higher-level `MultiFitter.mcmc_sample` delegates to this
+        method after flattening multi-dataset arrays.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Flattened independent variable array.
+        y : np.ndarray
+            Flattened dependent variable array.
+        weights : np.ndarray
+            Flattened weight array.
+        samples : int, default=10000
+            Number of retained DREAM samples requested from BUMPS.
+        burn : int, default=2000
+            Burn-in steps.
+        thin : int, default=10
+            Thinning interval.
+        population : int | None, default=None
+            BUMPS DREAM population count (number of parallel chains).
+        sampler_kwargs : dict | None, default=None
+            Additional keyword arguments forwarded to `bumps.fitters.fit`.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback for progress updates during sampling.  The
+            payload dict includes ``iteration`` (DREAM generation number) and
+            ``sampling: True``.
+        abort_test : Callable[[], bool] | None, default=None
+            Optional callback that returns ``True`` to signal that sampling
+            should be aborted. Called periodically during the DREAM sampling
+            loop.
+
+        Returns
+        -------
+        dict
+            Dictionary with keys ``'draws'``, ``'param_names'``,
+            ``'internal_bumps_object'``, and ``'logp'``.
+
+        Raises
+        ------
+        ValueError
+            If the input shapes or weights are invalid, or if
+            ``progress_callback`` is not callable.
+        FitError
+            If DREAM sampling was aborted by the user (via ``abort_test``).
+        Exception
+            Re-raised from DREAM fitting if any unexpected error occurs
+            (parameter values are restored beforehand).
+        """
+        from bumps.fitters import DreamFit
+        from bumps.names import FitProblem
+
+        x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
+
+        if not isinstance(samples, int) or samples <= 0:
+            raise ValueError('samples must be a positive integer.')
+        if not isinstance(burn, int) or burn < 0:
+            raise ValueError('burn must be a non-negative integer.')
+        if not isinstance(thin, int) or thin < 1:
+            raise ValueError('thin must be a positive integer.')
+
+        if y.shape != x.shape:
+            raise ValueError('x and y must have the same shape.')
+
+        if not np.isfinite(x).all():
+            raise ValueError('x cannot contain NaN or infinite values.')
+        if not np.isfinite(y).all():
+            raise ValueError('y cannot contain NaN or infinite values.')
+
+        if weights.shape != x.shape:
+            raise ValueError('Weights must have the same shape as x and y.')
+
+        if not np.isfinite(weights).all():
+            raise ValueError('Weights cannot be NaN or infinite.')
+
+        if (weights <= 0).any():
+            raise ValueError('Weights must be strictly positive and non-zero.')
+
+        # Build the BUMPS Curve model using the minimizer's existing machinery
+        model_func = self._make_model()
+        curve = model_func(x, y, weights)
+        problem = FitProblem(curve)
+
+        # Build DREAM kwargs
+        dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
+        if population is not None:
+            dream_kwargs['pop'] = population
+        if sampler_kwargs:
+            dream_kwargs.update(sampler_kwargs)
+
+        # Build monitors (same pattern as classical Bumps.fit())
+        monitors = []
+        if progress_callback is not None:
+            if not callable(progress_callback):
+                raise ValueError('progress_callback must be callable')
+            # Compute total DREAM steps for progress display (burn + sampling generations).
+            # BUMPS DREAM default population count is 10 when not specified by the user.
+            _dream_default_pop = 10
+            pop_val = population if population is not None else _dream_default_pop
+            _total_steps = burn + (samples + pop_val - 1) // pop_val
+            monitors.append(
+                BumpsProgressMonitor(
+                    problem,
+                    progress_callback,
+                    lambda problem, iteration, point, nllf: {
+                        **self._build_sample_progress_payload(problem, iteration, point, nllf),
+                        'total_steps': _total_steps,
+                    },
+                )
+            )
+
+        driver = FitDriver(
+            fitclass=DreamFit,
+            problem=problem,
+            monitors=monitors,
+            abort_test=abort_test if abort_test is not None else (lambda: False),
+            **dream_kwargs,
+        )
+        driver.clip()
+
+        from easyscience import global_object
+
+        stack_status = global_object.stack.enabled
+        global_object.stack.enabled = False
+
+        try:
+            x_opt, fx = driver.fit()
+            result_state = getattr(driver.fitter, 'state', None)
+            if result_state is None:
+                raise FitError('Sampling aborted by user')
+        except Exception:
+            self._restore_parameter_values()
+            raise
+        finally:
+            global_object.stack.enabled = stack_status
+
+        draws = result_state.draw().points
+        param_names = [p.name[len(MINIMIZER_PARAMETER_PREFIX) :] for p in problem._parameters]
+        logp = getattr(result_state, 'logp', None)
+
+        return {
+            'draws': draws,
+            'param_names': param_names,
+            'internal_bumps_object': result_state,
+            'logp': logp,
+        }
+
+    def _build_sample_progress_payload(
+        self, problem, iteration: int, point: np.ndarray, nllf: float
+    ) -> dict:
+        """Build a progress payload for Bayesian DREAM sampling steps.
+
+        Called by :class:`BumpsProgressMonitor` at each DREAM generation.
+        The payload includes ``sampling: True`` so downstream consumers can
+        distinguish sampling progress from classical fitting progress.
+        """
+        payload = self._build_progress_payload(problem, iteration, point, nllf)
+        payload['sampling'] = True
+        return payload
+
     def _set_parameter_fit_result(
         self,
         fit_result: Any,
         stack_status: bool,
-        par_list: List[BumpsParameter],
+        par_list: list[BumpsParameter],
     ) -> None:
         """
         Update parameters to their final values and assign a std error
@@ -390,7 +572,7 @@ class Bumps(MinimizerBase):
             BUMPS OptimizeResult containing best-fit values and errors.
         stack_status : bool
             Whether the undo stack was enabled.
-        par_list : List[BumpsParameter]
+        par_list : list[BumpsParameter]
             List of BUMPS parameter objects.
         """
         from easyscience import global_object

@@ -23,6 +23,9 @@ The tutorials are organized into the following categories:
 - [Fitting SANS](fitting-sans.ipynb) – A tutorial demonstrating how to
   fit a small-angle neutron scattering (SANS) data using EasyScience
   framework.
+- [Bayesian analysis](fitting-bayesian.ipynb) – A tutorial showing how
+  to run Bayesian MCMC sampling on a model with EasyScience to obtain
+  full posterior distributions for the parameters.
 - [Progress Callback](progress-callback.ipynb) – A tutorial showing how
   to monitor fitting progress across minimizer backends and update a
   notebook UI while a fit is running.
