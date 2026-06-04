@@ -12038,6 +12038,307 @@ names/order, or population mismatch).</p>
 </div>
 
 
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easyscience.fitting.minimizers.minimizer_bumps.save_sampler_state" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">save_sampler_state</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Persist a DREAM sampler state to disk.</p>
+<p>Thin wrapper around BUMPS <code>save_state</code>. <code>state</code> is the
+<code>internal_bumps_object</code> returned by :meth:<code>Bumps.mcmc_sample</code> (or by
+<code>MultiFitter.mcmc_sample</code>). Three gzipped text files are written:
+<code>&lt;filename&gt;-chain.mc.gz</code>, <code>&lt;filename&gt;-point.mc.gz</code> and
+<code>&lt;filename&gt;-stats.mc.gz</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>state</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The BUMPS <code>MCMCDraw</code> object to persist.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path prefix for the saved files.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">961</span>
+<span class="normal">962</span>
+<span class="normal">963</span>
+<span class="normal">964</span>
+<span class="normal">965</span>
+<span class="normal">966</span>
+<span class="normal">967</span>
+<span class="normal">968</span>
+<span class="normal">969</span>
+<span class="normal">970</span>
+<span class="normal">971</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span>
+<span class="normal">975</span>
+<span class="normal">976</span>
+<span class="normal">977</span>
+<span class="normal">978</span>
+<span class="normal">979</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_sampler_state</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Persist a DREAM sampler state to disk.</span>
+
+<span class="sd">    Thin wrapper around BUMPS ``save_state``. ``state`` is the</span>
+<span class="sd">    ``internal_bumps_object`` returned by :meth:`Bumps.mcmc_sample` (or by</span>
+<span class="sd">    ``MultiFitter.mcmc_sample``). Three gzipped text files are written:</span>
+<span class="sd">    ``&lt;filename&gt;-chain.mc.gz``, ``&lt;filename&gt;-point.mc.gz`` and</span>
+<span class="sd">    ``&lt;filename&gt;-stats.mc.gz``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    state : Any</span>
+<span class="sd">        The BUMPS ``MCMCDraw`` object to persist.</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        Path prefix for the saved files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">bumps.dream.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_state</span>
+
+    <span class="n">save_state</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="easyscience.fitting.minimizers.minimizer_bumps.load_sampler_state" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load_sampler_state</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Load a DREAM sampler state saved by :func:<code>save_sampler_state</code>.</p>
+<p>The returned object can be passed as <code>resume_state</code> to
+:meth:<code>Bumps.mcmc_sample</code> (or <code>MultiFitter.mcmc_sample</code>) to extend a
+previously saved chain.</p>
+<p>Works around a regression introduced in BUMPS 1.0.4: <code>load_state</code> reads
+the saved buffers with <code>numpy.loadtxt</code>, which collapses a single-row
+file to a 1-D array. A short chain stores a single CR-weight update row,
+so the subsequent <code>stats[:, 0]</code> indexing in <code>load_state</code> raises
+<code>IndexError: too many indices for array: array is 1-dimensional, but 2
+were indexed</code>. We coerce each buffer read back to 2-D before
+<code>load_state</code> consumes it. Older BUMPS releases (&lt; 1.0.4) used a custom
+2-D-safe parser and are loaded unchanged.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path prefix that was passed to :func:<code>save_sampler_state</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The reloaded BUMPS <code>MCMCDraw</code> object.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 982</span>
+<span class="normal"> 983</span>
+<span class="normal"> 984</span>
+<span class="normal"> 985</span>
+<span class="normal"> 986</span>
+<span class="normal"> 987</span>
+<span class="normal"> 988</span>
+<span class="normal"> 989</span>
+<span class="normal"> 990</span>
+<span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
+<span class="normal"> 994</span>
+<span class="normal"> 995</span>
+<span class="normal"> 996</span>
+<span class="normal"> 997</span>
+<span class="normal"> 998</span>
+<span class="normal"> 999</span>
+<span class="normal">1000</span>
+<span class="normal">1001</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span>
+<span class="normal">1005</span>
+<span class="normal">1006</span>
+<span class="normal">1007</span>
+<span class="normal">1008</span>
+<span class="normal">1009</span>
+<span class="normal">1010</span>
+<span class="normal">1011</span>
+<span class="normal">1012</span>
+<span class="normal">1013</span>
+<span class="normal">1014</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span>
+<span class="normal">1023</span>
+<span class="normal">1024</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_sampler_state</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a DREAM sampler state saved by :func:`save_sampler_state`.</span>
+
+<span class="sd">    The returned object can be passed as ``resume_state`` to</span>
+<span class="sd">    :meth:`Bumps.mcmc_sample` (or ``MultiFitter.mcmc_sample``) to extend a</span>
+<span class="sd">    previously saved chain.</span>
+
+<span class="sd">    Works around a regression introduced in BUMPS 1.0.4: ``load_state`` reads</span>
+<span class="sd">    the saved buffers with ``numpy.loadtxt``, which collapses a single-row</span>
+<span class="sd">    file to a 1-D array. A short chain stores a single CR-weight update row,</span>
+<span class="sd">    so the subsequent ``stats[:, 0]`` indexing in ``load_state`` raises</span>
+<span class="sd">    ``IndexError: too many indices for array: array is 1-dimensional, but 2</span>
+<span class="sd">    were indexed``. We coerce each buffer read back to 2-D before</span>
+<span class="sd">    ``load_state`` consumes it. Older BUMPS releases (&lt; 1.0.4) used a custom</span>
+<span class="sd">    2-D-safe parser and are loaded unchanged.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        Path prefix that was passed to :func:`save_sampler_state`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Any</span>
+<span class="sd">        The reloaded BUMPS ``MCMCDraw`` object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">bumps.dream</span><span class="w"> </span><span class="kn">import</span> <span class="n">state</span> <span class="k">as</span> <span class="n">_bumps_state</span>
+
+    <span class="n">loader</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_bumps_state</span><span class="p">,</span> <span class="s1">&#39;loadtxt_with_fallback&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">loader</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># BUMPS &lt; 1.0.4: load_state uses a custom parser that is already 2-D safe.</span>
+        <span class="k">return</span> <span class="n">_bumps_state</span><span class="o">.</span><span class="n">load_state</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_loadtxt_2d</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">report</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">loader</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">report</span><span class="o">=</span><span class="n">report</span><span class="p">)</span>
+        <span class="c1"># A single saved row is read back as 1-D; restore it to a (1, N) row.</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="s1">&#39;ndim&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">arr</span>
+
+    <span class="n">_bumps_state</span><span class="o">.</span><span class="n">loadtxt_with_fallback</span> <span class="o">=</span> <span class="n">_loadtxt_2d</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_bumps_state</span><span class="o">.</span><span class="n">load_state</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">_bumps_state</span><span class="o">.</span><span class="n">loadtxt_with_fallback</span> <span class="o">=</span> <span class="n">loader</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
 
 
   </div>
