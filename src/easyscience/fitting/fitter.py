@@ -454,7 +454,8 @@ class Fitter:
             Thinning interval — only every ``thin``-th sample is kept,
             which reduces autocorrelation between consecutive draws.
         population : Optional[int], default=None
-            BUMPS DREAM population count (number of parallel chains).
+            DREAM population **scale factor** (not an absolute chain count):
+            BUMPS creates ``ceil(population * n_parameters)`` parallel chains.
         seed : Optional[int], default=None
             Best-effort random seed.  Calls ``numpy.random.seed(seed)``
             before DREAM starts, which affects the *global* NumPy RNG

@@ -498,3 +498,69 @@ class TestMultiFitterMcmcSample:
 
         assert result['draws'].ndim == 2
         assert result['draws'].shape[0] > 0
+
+    def _bumps_sampler(self):
+        """Build a 2-parameter BUMPS sampler over a small QENS-like model."""
+        ref_sin = AbsSin(0.2, np.pi)
+        sp = AbsSin(0.354, 3.05)
+        sp.offset.fixed = False
+        sp.phase.fixed = False
+        x = np.linspace(0, 5, 50)
+        y = ref_sin(x)
+        weights = np.ones_like(x)
+        f = MultiFitter([sp], [sp])
+        try:
+            f.switch_minimizer('Bumps')
+        except AttributeError:
+            pytest.skip('BUMPS is not installed')
+        return f, x, y, weights
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_resume_nondefault_population(self):
+        """Resuming a chain that used a non-default population must not fail.
+
+        Regression test: the recovered population scale factor must be used
+        when configuring the resumed sampler, otherwise BUMPS regenerates the
+        default population and raises ``Cannot change Nvar, Npop or Ncr on
+        resize``.
+        """
+        f, x, y, weights = self._bumps_sampler()
+        first = f.mcmc_sample(
+            x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=1, population=5
+        )
+        first_state = first['internal_bumps_object']
+
+        extended = f.mcmc_sample(
+            x=[x], y=[y], weights=[weights], samples=200, burn=0, thin=1, resume_state=first_state
+        )
+
+        assert extended['draws'].shape[1] == first['draws'].shape[1]
+        assert extended['draws'].shape[0] > 0
+        # Population must be preserved across the resume.
+        assert extended['internal_bumps_object'].Npop == first_state.Npop
+
+    def test_resume_after_save_load_roundtrip(self, tmp_path):
+        """A chain saved and reloaded from disk must resume.
+
+        Regression test: BUMPS ``load_state`` does not preserve parameter
+        labels (they come back as ``['P0', 'P1', ...]``), so name-based
+        validation must not reject a reloaded state. Resume should proceed
+        (matching by parameter order) with a warning instead of raising.
+        """
+        from bumps.dream.state import load_state
+        from bumps.dream.state import save_state
+
+        f, x, y, weights = self._bumps_sampler()
+        first = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=1)
+
+        prefix = str(tmp_path / 'chain')
+        save_state(first['internal_bumps_object'], prefix)
+        reloaded = load_state(prefix)
+
+        with pytest.warns(UserWarning, match='does not carry parameter names'):
+            extended = f.mcmc_sample(
+                x=[x], y=[y], weights=[weights], samples=200, burn=0, thin=1, resume_state=reloaded
+            )
+
+        assert extended['draws'].shape[1] == first['draws'].shape[1]
+        assert extended['draws'].shape[0] > 0

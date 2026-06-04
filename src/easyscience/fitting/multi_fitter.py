@@ -225,9 +225,13 @@ class MultiFitter(Fitter):
         thin : int, default=10
             Thinning interval.
         chains : int | None, default=None
-            User-friendly alias for BUMPS DREAM population count.
+            User-friendly alias for ``population`` (see below). Provide one or
+            the other, not both.
         population : int | None, default=None
-            BUMPS DREAM population count (``pop``) for advanced users.
+            DREAM population **scale factor**, not an absolute chain count.
+            BUMPS creates ``ceil(population * n_parameters)`` parallel chains,
+            so for a 4-parameter model the default scale of 10 yields 40
+            chains. ``None`` uses the BUMPS default.
         seed : int | None, default=None
             Best-effort random seed. BUMPS DREAM may use additional internal
             RNG state that is not controlled by this seed, so exact
@@ -235,14 +239,15 @@ class MultiFitter(Fitter):
             is provided.
         resume_state : Any | None, default=None
             A sampler state object from a previous ``sample()`` call (the
-            ``'state'`` value of the returned dict). When provided, DREAM
-            **continues** the saved chain instead of starting cold. The
-            population, parameter count, and parameter names must match the
-            current model. **Ring-buffer contract:** DREAM retains only the
-            last *samples* draws, so to extend an existing chain of M draws
-            by N pass ``samples=M + N, burn=0``. ``chains``/``population``
-            and the initializer have no effect on resume (they come from the
-            saved state). See ``Bumps.sample`` for the full contract.
+            ``'internal_bumps_object'`` value of the returned dict). When
+            provided, DREAM **continues** the saved chain instead of starting
+            cold. The parameter count (and, for in-memory states, the
+            parameter names/order) must match the current model.
+            **Ring-buffer contract:** DREAM retains only the last *samples*
+            draws, so to extend an existing chain of M draws by N pass
+            ``samples=M + N, burn=0``. ``chains``/``population`` and the
+            initializer have no effect on resume (they come from the saved
+            state). See ``Bumps.mcmc_sample`` for the full contract.
         vectorized : bool, default=False
             Whether the fit function expects vectorized (multidimensional)
             input.
@@ -261,8 +266,8 @@ class MultiFitter(Fitter):
         Returns
         -------
         dict
-            Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
-            and ``'logp'``.
+            Dictionary with keys ``'draws'``, ``'param_names'``,
+            ``'internal_bumps_object'``, and ``'logp'``.
 
         Raises
         ------

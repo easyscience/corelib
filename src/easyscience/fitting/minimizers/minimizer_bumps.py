@@ -455,9 +455,10 @@ class Bumps(MinimizerBase):
         thin : int, default=10
             Thinning interval.
         chains : int | None, default=None
-            User-friendly alias for DREAM population count.
+            User-friendly alias for ``population``. Provide one or the other.
         population : int | None, default=None
-            BUMPS DREAM population count.
+            DREAM population **scale factor** (not an absolute chain count):
+            BUMPS creates ``ceil(population * n_parameters)`` parallel chains.
         seed : int | None, default=None
             Best-effort random seed.
         resume_state : Any | None, default=None
@@ -530,7 +531,9 @@ class Bumps(MinimizerBase):
         thin : int, default=10
             Thinning interval.
         population : int | None, default=None
-            BUMPS DREAM population count for advanced users.
+            DREAM population **scale factor** (not an absolute chain count):
+            BUMPS creates ``ceil(population * n_parameters)`` parallel chains,
+            so the default scale of 10 yields ``10 * n_parameters`` chains.
         seed : int | None, default=None
             Best-effort random seed.  Calls ``numpy.random.seed(seed)``
             before DREAM starts, which affects the *global* NumPy RNG
@@ -650,20 +653,41 @@ class Bumps(MinimizerBase):
                     f'number of fitted parameters as when the saved chain was created.'
                 )
 
-            # Parameter names / order
+            # Parameter names / order.
+            #
+            # BUMPS ``save_state``/``load_state`` does **not** preserve the
+            # original parameter labels: a reloaded ``MCMCDraw`` comes back
+            # with default labels like ``['P0', 'P1', ...]``. We can therefore
+            # only validate names when the state still carries our prefixed
+            # labels, i.e. an in-memory state from the current session. For a
+            # reloaded state we fall back to the parameter-count check (done
+            # above) plus an order-based warning, because BUMPS resumes
+            # positionally by column order, not by name.
             fresh_names = [p.name[len(MINIMIZER_PARAMETER_PREFIX) :] for p in problem._parameters]
             state_labels = list(resume_state.labels)
             state_prefix = MINIMIZER_PARAMETER_PREFIX
-            state_stripped = [
-                lbl[len(state_prefix) :] if lbl.startswith(state_prefix) else lbl
-                for lbl in state_labels
-            ]
-            if fresh_names != state_stripped:
-                raise ValueError(
-                    f'Parameter names/order mismatch between the current model '
-                    f'and resume_state.\n'
-                    f'  Current model : {fresh_names}\n'
-                    f'  resume_state  : {state_stripped}'
+            labels_carry_our_names = bool(state_labels) and all(
+                lbl.startswith(state_prefix) for lbl in state_labels
+            )
+            if labels_carry_our_names:
+                state_stripped = [lbl[len(state_prefix) :] for lbl in state_labels]
+                if fresh_names != state_stripped:
+                    raise ValueError(
+                        f'Parameter names/order mismatch between the current model '
+                        f'and resume_state.\n'
+                        f'  Current model : {fresh_names}\n'
+                        f'  resume_state  : {state_stripped}'
+                    )
+            else:
+                warnings.warn(
+                    'resume_state does not carry parameter names (it was most '
+                    'likely reloaded from disk, where BUMPS does not preserve '
+                    'labels). Parameter-name validation is skipped; the saved '
+                    'chain is matched to the current model by parameter order. '
+                    'Ensure this is the same model, with parameters in the same '
+                    'order, used to create the chain.',
+                    UserWarning,
+                    stacklevel=2,
                 )
 
             # Population: BUMPS interprets ``pop`` as a **scale factor**.
@@ -709,14 +733,21 @@ class Bumps(MinimizerBase):
                     stacklevel=2,
                 )
 
-        # Best-effort seed: sets numpy's global RNG state just before DREAM starts.
-        if seed is not None:
+        # Best-effort seed: sets numpy's global RNG state just before DREAM
+        # starts. Skipped on resume — the saved chain has already advanced the
+        # RNG, so a seed cannot make a resumed run reproducible (see warning
+        # above).
+        if seed is not None and resume_state is None:
             np.random.seed(seed)
 
-        # Build DREAM kwargs
+        # Build DREAM kwargs. Use the resolved ``pop`` (the alias result, or
+        # the value recovered from the saved state on resume), not the raw
+        # ``population`` argument — on resume ``population`` is ``None`` while
+        # ``pop`` holds the scale factor that reproduces the saved state's
+        # population, which BUMPS requires to match.
         dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
-        if population is not None:
-            dream_kwargs['pop'] = population
+        if pop is not None:
+            dream_kwargs['pop'] = pop
         if sampler_kwargs:
             dream_kwargs.update(sampler_kwargs)
 
@@ -728,7 +759,7 @@ class Bumps(MinimizerBase):
             # Compute total DREAM steps for progress display (burn + sampling generations).
             # BUMPS DREAM default population count is 10 when not specified by the user.
             _dream_default_pop = 10
-            pop_val = population if population is not None else _dream_default_pop
+            pop_val = pop if pop is not None else _dream_default_pop
             _total_steps = burn + (samples + pop_val - 1) // pop_val
             monitors.append(
                 BumpsProgressMonitor(
