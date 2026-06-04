@@ -417,6 +417,82 @@ class Bumps(MinimizerBase):
 
         return _outer(self)
 
+    def sample(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        weights: np.ndarray,
+        samples: int = 10000,
+        burn: int = 2000,
+        thin: int = 10,
+        chains: int | None = None,
+        population: int | None = None,
+        seed: int | None = None,
+        resume_state: Any | None = None,
+        sampler_kwargs: dict | None = None,
+        progress_callback: Callable[[dict], bool | None] | None = None,
+        abort_test: Callable[[], bool] | None = None,
+    ) -> dict:
+        """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
+
+        This is the public minimizer-level entry point with the wider
+        ``MultiFitter``-compatible signature.  It resolves the
+        ``chains``/``population`` alias and delegates to ``mcmc_sample``
+        for the core sampling logic.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Flattened independent variable array.
+        y : np.ndarray
+            Flattened dependent variable array.
+        weights : np.ndarray
+            Flattened weight array.
+        samples : int, default=10000
+            Number of retained DREAM samples requested from BUMPS.
+        burn : int, default=2000
+            Burn-in steps.
+        thin : int, default=10
+            Thinning interval.
+        chains : int | None, default=None
+            User-friendly alias for DREAM population count.
+        population : int | None, default=None
+            BUMPS DREAM population count.
+        seed : int | None, default=None
+            Best-effort random seed.
+        resume_state : Any | None, default=None
+            A BUMPS ``MCMCDraw`` state object from a previous run.
+        sampler_kwargs : dict | None, default=None
+            Additional keyword arguments forwarded to the BUMPS DREAM sampler.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback for progress updates during sampling.
+        abort_test : Callable[[], bool] | None, default=None
+            Optional callback that returns ``True`` to abort sampling early.
+
+        Returns
+        -------
+        dict
+            Dictionary with keys ``'draws'``, ``'param_names'``,
+            ``'internal_bumps_object'``, and ``'logp'``.
+        """
+        # Resolve chains/population alias
+        pop = self._resolve_population_alias(chains=chains, population=population)
+
+        return self.mcmc_sample(
+            x=x,
+            y=y,
+            weights=weights,
+            samples=samples,
+            burn=burn,
+            thin=thin,
+            population=pop,
+            seed=seed,
+            resume_state=resume_state,
+            sampler_kwargs=sampler_kwargs,
+            progress_callback=progress_callback,
+            abort_test=abort_test,
+        )
+
     def mcmc_sample(
         self,
         x: np.ndarray,
@@ -477,8 +553,7 @@ class Bumps(MinimizerBase):
             ``samples=N`` retains only the **last N** draws.  To extend an
             existing chain of M draws by N without losing any::
 
-                fitter.sample(data, samples=M + N, burn=0,
-                              resume_state=old_state)
+                fitter.sample(data, samples=M + N, burn=0, resume_state=old_state)
 
             The ``burn`` parameter controls burn-in for the *new* draws
             only; passing ``burn=0`` (strongly recommended on resume)
@@ -576,14 +651,11 @@ class Bumps(MinimizerBase):
                 )
 
             # Parameter names / order
-            fresh_names = [
-                p.name[len(MINIMIZER_PARAMETER_PREFIX):]
-                for p in problem._parameters
-            ]
+            fresh_names = [p.name[len(MINIMIZER_PARAMETER_PREFIX) :] for p in problem._parameters]
             state_labels = list(resume_state.labels)
             state_prefix = MINIMIZER_PARAMETER_PREFIX
             state_stripped = [
-                lbl[len(state_prefix):] if lbl.startswith(state_prefix) else lbl
+                lbl[len(state_prefix) :] if lbl.startswith(state_prefix) else lbl
                 for lbl in state_labels
             ]
             if fresh_names != state_stripped:

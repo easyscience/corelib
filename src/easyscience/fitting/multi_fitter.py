@@ -190,9 +190,9 @@ class MultiFitter(Fitter):
 
     def sample(
         self,
-        x: List[np.ndarray],
-        y: List[np.ndarray],
-        weights: List[np.ndarray],
+        x: list[np.ndarray],
+        y: list[np.ndarray],
+        weights: list[np.ndarray],
         samples: int = 10000,
         burn: int = 2000,
         thin: int = 10,
@@ -204,7 +204,7 @@ class MultiFitter(Fitter):
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
-    ) -> Dict:
+    ) -> dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
         Requires that the current minimizer is a BUMPS instance (i.e. the
@@ -212,11 +212,11 @@ class MultiFitter(Fitter):
 
         Parameters
         ----------
-        x : List[np.ndarray]
+        x : list[np.ndarray]
             List of independent variable arrays (one per dataset).
-        y : List[np.ndarray]
+        y : list[np.ndarray]
             List of dependent variable arrays (one per dataset).
-        weights : List[np.ndarray]
+        weights : list[np.ndarray]
             List of weight arrays (one per dataset).
         samples : int, default=10000
             Number of retained DREAM samples requested from BUMPS.
@@ -260,7 +260,7 @@ class MultiFitter(Fitter):
 
         Returns
         -------
-        Dict
+        dict
             Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
             and ``'logp'``.
 

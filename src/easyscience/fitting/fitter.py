@@ -455,6 +455,34 @@ class Fitter:
             which reduces autocorrelation between consecutive draws.
         population : Optional[int], default=None
             BUMPS DREAM population count (number of parallel chains).
+        seed : Optional[int], default=None
+            Best-effort random seed.  Calls ``numpy.random.seed(seed)``
+            before DREAM starts, which affects the *global* NumPy RNG
+            state.  Ignored when ``resume_state`` is provided (the saved
+            chain has already advanced the RNG state).
+        resume_state : Optional[Any], default=None
+            A BUMPS ``MCMCDraw`` state object from a previous
+            ``mcmc_sample()`` call (the ``'internal_bumps_object'`` value
+            of the returned dict).  When provided, DREAM **continues** the
+            saved chain instead of starting cold.  The population, parameter
+            count, and parameter names must match the current model.
+
+            **Ring-buffer contract:** DREAM stores draws in a fixed-size
+            ring buffer sized to *samples*.  Resuming with ``samples=N``
+            retains only the last N draws.  To extend an existing chain of
+            M draws by N without losing any::
+
+                fitter.mcmc_sample(
+                    data, samples=M + N, burn=0, resume_state=previous_state
+                )
+
+            The ``burn`` parameter controls burn-in for the *new* draws
+            only; passing ``burn=0`` (strongly recommended on resume)
+            skips additional burn-in.  A non-zero ``burn`` on a
+            previously-converged chain is usually a mistake.
+
+            Resuming against *different* data is undefined behaviour (the
+            chain's likelihood changes underneath it).
         vectorized : bool, default=False
             When ``True``, each x array may be multi-dimensional (e.g. an
             ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When
