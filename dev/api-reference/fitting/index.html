@@ -3462,14 +3462,7 @@ utilizing one of the supported minimizers.</p>
 <span class="normal">540</span>
 <span class="normal">541</span>
 <span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Fitter</span><span class="p">:</span>
+<span class="normal">543</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Fitter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fitter is a class which makes it possible to undertake fitting</span>
 <span class="sd">    utilizing one of the supported minimizers.</span>
@@ -3873,7 +3866,6 @@ utilizing one of the supported minimizers.</p>
         <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
         <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">population</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resume_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3906,11 +3898,6 @@ utilizing one of the supported minimizers.</p>
 <span class="sd">        population : Optional[int], default=None</span>
 <span class="sd">            DREAM population **scale factor** (not an absolute chain count):</span>
 <span class="sd">            BUMPS creates ``ceil(population * n_parameters)`` parallel chains.</span>
-<span class="sd">        seed : Optional[int], default=None</span>
-<span class="sd">            Best-effort random seed.  Calls ``numpy.random.seed(seed)``</span>
-<span class="sd">            before DREAM starts, which affects the *global* NumPy RNG</span>
-<span class="sd">            state.  Ignored when ``resume_state`` is provided (the saved</span>
-<span class="sd">            chain has already advanced the RNG state).</span>
 <span class="sd">        resume_state : Optional[Any], default=None</span>
 <span class="sd">            A BUMPS ``MCMCDraw`` state object from a previous</span>
 <span class="sd">            ``mcmc_sample()`` call (the ``&#39;internal_bumps_object&#39;`` value</span>
@@ -3988,7 +3975,6 @@ utilizing one of the supported minimizers.</p>
                 <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
                 <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
                 <span class="n">population</span><span class="o">=</span><span class="n">population</span><span class="p">,</span>
-                <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
                 <span class="n">resume_state</span><span class="o">=</span><span class="n">resume_state</span><span class="p">,</span>
                 <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
                 <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
@@ -4633,7 +4619,7 @@ DEFAULT_MINIMIZER.</p>
 
 
 <h4 id="easyscience.fitting.fitter.Fitter.mcmc_sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -4788,28 +4774,6 @@ which reduces autocorrelation between consecutive draws.</p>
               <div class="doc-md-description">
                 <p>DREAM population <strong>scale factor</strong> (not an absolute chain count):
 BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>seed</code>
-            </td>
-            <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="int">int</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Best-effort random seed.  Calls <code>numpy.random.seed(seed)</code>
-before DREAM starts, which affects the <em>global</em> NumPy RNG
-state.  Ignored when <code>resume_state</code> is provided (the saved
-chain has already advanced the RNG state).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5133,14 +5097,7 @@ dict includes <code>iteration</code> and <code>sampling: True</code>.</p>
 <span class="normal">540</span>
 <span class="normal">541</span>
 <span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
+<span class="normal">543</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -5149,7 +5106,6 @@ dict includes <code>iteration</code> and <code>sampling: True</code>.</p>
     <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
     <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">population</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resume_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5182,11 +5138,6 @@ dict includes <code>iteration</code> and <code>sampling: True</code>.</p>
 <span class="sd">    population : Optional[int], default=None</span>
 <span class="sd">        DREAM population **scale factor** (not an absolute chain count):</span>
 <span class="sd">        BUMPS creates ``ceil(population * n_parameters)`` parallel chains.</span>
-<span class="sd">    seed : Optional[int], default=None</span>
-<span class="sd">        Best-effort random seed.  Calls ``numpy.random.seed(seed)``</span>
-<span class="sd">        before DREAM starts, which affects the *global* NumPy RNG</span>
-<span class="sd">        state.  Ignored when ``resume_state`` is provided (the saved</span>
-<span class="sd">        chain has already advanced the RNG state).</span>
 <span class="sd">    resume_state : Optional[Any], default=None</span>
 <span class="sd">        A BUMPS ``MCMCDraw`` state object from a previous</span>
 <span class="sd">        ``mcmc_sample()`` call (the ``&#39;internal_bumps_object&#39;`` value</span>
@@ -5264,7 +5215,6 @@ dict includes <code>iteration</code> and <code>sampling: True</code>.</p>
             <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
             <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
             <span class="n">population</span><span class="o">=</span><span class="n">population</span><span class="p">,</span>
-            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">resume_state</span><span class="o">=</span><span class="n">resume_state</span><span class="p">,</span>
             <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
@@ -8451,28 +8401,7 @@ for the Bumps fitting engine to use parameters declared in an
 <span class="normal">934</span>
 <span class="normal">935</span>
 <span class="normal">936</span>
-<span class="normal">937</span>
-<span class="normal">938</span>
-<span class="normal">939</span>
-<span class="normal">940</span>
-<span class="normal">941</span>
-<span class="normal">942</span>
-<span class="normal">943</span>
-<span class="normal">944</span>
-<span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span>
-<span class="normal">948</span>
-<span class="normal">949</span>
-<span class="normal">950</span>
-<span class="normal">951</span>
-<span class="normal">952</span>
-<span class="normal">953</span>
-<span class="normal">954</span>
-<span class="normal">955</span>
-<span class="normal">956</span>
-<span class="normal">957</span>
-<span class="normal">958</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bumps</span><span class="p">(</span><span class="n">MinimizerBase</span><span class="p">):</span>
+<span class="normal">937</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bumps</span><span class="p">(</span><span class="n">MinimizerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a wrapper to Bumps: https://bumps.readthedocs.io/ It allows</span>
 <span class="sd">    for the Bumps fitting engine to use parameters declared in an</span>
@@ -8865,7 +8794,6 @@ for the Bumps fitting engine to use parameters declared in an
         <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">chains</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resume_state</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8897,8 +8825,6 @@ for the Bumps fitting engine to use parameters declared in an
 <span class="sd">        population : int | None, default=None</span>
 <span class="sd">            DREAM population **scale factor** (not an absolute chain count):</span>
 <span class="sd">            BUMPS creates ``ceil(population * n_parameters)`` parallel chains.</span>
-<span class="sd">        seed : int | None, default=None</span>
-<span class="sd">            Best-effort random seed.</span>
 <span class="sd">        resume_state : Any | None, default=None</span>
 <span class="sd">            A BUMPS ``MCMCDraw`` state object from a previous run.</span>
 <span class="sd">        sampler_kwargs : dict | None, default=None</span>
@@ -8925,7 +8851,6 @@ for the Bumps fitting engine to use parameters declared in an
             <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
             <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
             <span class="n">population</span><span class="o">=</span><span class="n">pop</span><span class="p">,</span>
-            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">resume_state</span><span class="o">=</span><span class="n">resume_state</span><span class="p">,</span>
             <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
@@ -8941,7 +8866,6 @@ for the Bumps fitting engine to use parameters declared in an
         <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
         <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resume_state</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8972,15 +8896,6 @@ for the Bumps fitting engine to use parameters declared in an
 <span class="sd">            DREAM population **scale factor** (not an absolute chain count):</span>
 <span class="sd">            BUMPS creates ``ceil(population * n_parameters)`` parallel chains,</span>
 <span class="sd">            so the default scale of 10 yields ``10 * n_parameters`` chains.</span>
-<span class="sd">        seed : int | None, default=None</span>
-<span class="sd">            Best-effort random seed.  Calls ``numpy.random.seed(seed)``</span>
-<span class="sd">            before DREAM starts, which affects the *global* NumPy RNG</span>
-<span class="sd">            state and may interact with other code in the process.</span>
-<span class="sd">            BUMPS DREAM uses additional internal RNG state that is</span>
-<span class="sd">            **not** controlled by this seed, so exact reproducibility</span>
-<span class="sd">            across runs is **not** guaranteed.  Ignored when</span>
-<span class="sd">            ``resume_state`` is provided (the saved chain has already</span>
-<span class="sd">            advanced the RNG).</span>
 <span class="sd">        resume_state : Any | None, default=None</span>
 <span class="sd">            A BUMPS ``MCMCDraw`` state object from a previous</span>
 <span class="sd">            ``sample()`` call (e.g. ``PosteriorResults.sampler_state``).</span>
@@ -9162,21 +9077,6 @@ for the Bumps fitting engine to use parameters declared in an
                     <span class="ne">UserWarning</span><span class="p">,</span>
                     <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="s1">&#39;seed is ignored when resume_state is provided: the &#39;</span>
-                    <span class="s1">&#39;saved chain has already advanced the RNG state, so &#39;</span>
-                    <span class="s1">&#39;the resumed run cannot be made reproducible via seed.&#39;</span><span class="p">,</span>
-                    <span class="ne">UserWarning</span><span class="p">,</span>
-                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                <span class="p">)</span>
-
-        <span class="c1"># Best-effort seed: sets numpy&#39;s global RNG state just before DREAM</span>
-        <span class="c1"># starts. Skipped on resume — the saved chain has already advanced the</span>
-        <span class="c1"># RNG, so a seed cannot make a resumed run reproducible (see warning</span>
-        <span class="c1"># above).</span>
-        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">resume_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="c1"># Build DREAM kwargs. Use the resolved ``pop`` (the alias result, or</span>
         <span class="c1"># the value recovered from the saved state on resume), not the raw</span>
@@ -9227,7 +9127,15 @@ for the Bumps fitting engine to use parameters declared in an
         <span class="k">try</span><span class="p">:</span>
             <span class="n">fit_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">resume_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">fit_kwargs</span><span class="p">[</span><span class="s1">&#39;fit_state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resume_state</span>
+                <span class="c1"># Defensive copy: BUMPS mutates the state object in-place</span>
+                <span class="c1"># (via MCMCDraw.resize() — see bumps/dream/core.py allocate_state)</span>
+                <span class="c1"># during resume.  Without a copy, the caller&#39;s original state</span>
+                <span class="c1"># object is silently altered, making it impossible to compare</span>
+                <span class="c1"># pre- and post-resume state (shape mismatch).  See</span>
+                <span class="c1"># https://github.com/easyscience/core/pull/257</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+                <span class="n">fit_kwargs</span><span class="p">[</span><span class="s1">&#39;fit_state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">resume_state</span><span class="p">)</span>
             <span class="n">x_opt</span><span class="p">,</span> <span class="n">fx</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="o">**</span><span class="n">fit_kwargs</span><span class="p">)</span>
             <span class="n">result_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">fitter</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">result_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -10540,7 +10448,7 @@ Parameter object.</p>
 
 
 <h5 id="easyscience.fitting.minimizers.minimizer_bumps.Bumps.sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -10712,25 +10620,6 @@ for the core sampling logic.</p>
               <div class="doc-md-description">
                 <p>DREAM population <strong>scale factor</strong> (not an absolute chain count):
 BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>seed</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Best-effort random seed.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10920,11 +10809,7 @@ BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
 <span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span>
-<span class="normal">493</span>
-<span class="normal">494</span>
-<span class="normal">495</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span>
+<span class="normal">491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -10934,7 +10819,6 @@ BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
     <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">chains</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resume_state</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -10966,8 +10850,6 @@ BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
 <span class="sd">    population : int | None, default=None</span>
 <span class="sd">        DREAM population **scale factor** (not an absolute chain count):</span>
 <span class="sd">        BUMPS creates ``ceil(population * n_parameters)`` parallel chains.</span>
-<span class="sd">    seed : int | None, default=None</span>
-<span class="sd">        Best-effort random seed.</span>
 <span class="sd">    resume_state : Any | None, default=None</span>
 <span class="sd">        A BUMPS ``MCMCDraw`` state object from a previous run.</span>
 <span class="sd">    sampler_kwargs : dict | None, default=None</span>
@@ -10994,7 +10876,6 @@ BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
         <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span>
         <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
         <span class="n">population</span><span class="o">=</span><span class="n">pop</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
         <span class="n">resume_state</span><span class="o">=</span><span class="n">resume_state</span><span class="p">,</span>
         <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
         <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
@@ -11010,7 +10891,7 @@ BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
 
 
 <h5 id="easyscience.fitting.minimizers.minimizer_bumps.Bumps.mcmc_sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h5>
 
@@ -11164,32 +11045,6 @@ method after flattening multi-dataset arrays.</p>
                 <p>DREAM population <strong>scale factor</strong> (not an absolute chain count):
 BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains,
 so the default scale of 10 yields <code>10 * n_parameters</code> chains.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>seed</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Best-effort random seed.  Calls <code>numpy.random.seed(seed)</code>
-before DREAM starts, which affects the <em>global</em> NumPy RNG
-state and may interact with other code in the process.
-BUMPS DREAM uses additional internal RNG state that is
-<strong>not</strong> controlled by this seed, so exact reproducibility
-across runs is <strong>not</strong> guaranteed.  Ignored when
-<code>resume_state</code> is provided (the saved chain has already
-advanced the RNG).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11390,7 +11245,11 @@ names/order, or population mismatch).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">497</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
 <span class="normal">498</span>
 <span class="normal">499</span>
 <span class="normal">500</span>
@@ -11685,28 +11544,7 @@ names/order, or population mismatch).</p>
 <span class="normal">789</span>
 <span class="normal">790</span>
 <span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
-<span class="normal">797</span>
-<span class="normal">798</span>
-<span class="normal">799</span>
-<span class="normal">800</span>
-<span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span>
-<span class="normal">806</span>
-<span class="normal">807</span>
-<span class="normal">808</span>
-<span class="normal">809</span>
-<span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
+<span class="normal">792</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -11715,7 +11553,6 @@ names/order, or population mismatch).</p>
     <span class="n">burn</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span>
     <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resume_state</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -11746,15 +11583,6 @@ names/order, or population mismatch).</p>
 <span class="sd">        DREAM population **scale factor** (not an absolute chain count):</span>
 <span class="sd">        BUMPS creates ``ceil(population * n_parameters)`` parallel chains,</span>
 <span class="sd">        so the default scale of 10 yields ``10 * n_parameters`` chains.</span>
-<span class="sd">    seed : int | None, default=None</span>
-<span class="sd">        Best-effort random seed.  Calls ``numpy.random.seed(seed)``</span>
-<span class="sd">        before DREAM starts, which affects the *global* NumPy RNG</span>
-<span class="sd">        state and may interact with other code in the process.</span>
-<span class="sd">        BUMPS DREAM uses additional internal RNG state that is</span>
-<span class="sd">        **not** controlled by this seed, so exact reproducibility</span>
-<span class="sd">        across runs is **not** guaranteed.  Ignored when</span>
-<span class="sd">        ``resume_state`` is provided (the saved chain has already</span>
-<span class="sd">        advanced the RNG).</span>
 <span class="sd">    resume_state : Any | None, default=None</span>
 <span class="sd">        A BUMPS ``MCMCDraw`` state object from a previous</span>
 <span class="sd">        ``sample()`` call (e.g. ``PosteriorResults.sampler_state``).</span>
@@ -11936,21 +11764,6 @@ names/order, or population mismatch).</p>
                 <span class="ne">UserWarning</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s1">&#39;seed is ignored when resume_state is provided: the &#39;</span>
-                <span class="s1">&#39;saved chain has already advanced the RNG state, so &#39;</span>
-                <span class="s1">&#39;the resumed run cannot be made reproducible via seed.&#39;</span><span class="p">,</span>
-                <span class="ne">UserWarning</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="p">)</span>
-
-    <span class="c1"># Best-effort seed: sets numpy&#39;s global RNG state just before DREAM</span>
-    <span class="c1"># starts. Skipped on resume — the saved chain has already advanced the</span>
-    <span class="c1"># RNG, so a seed cannot make a resumed run reproducible (see warning</span>
-    <span class="c1"># above).</span>
-    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">resume_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="c1"># Build DREAM kwargs. Use the resolved ``pop`` (the alias result, or</span>
     <span class="c1"># the value recovered from the saved state on resume), not the raw</span>
@@ -12001,7 +11814,15 @@ names/order, or population mismatch).</p>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">fit_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">resume_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fit_kwargs</span><span class="p">[</span><span class="s1">&#39;fit_state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resume_state</span>
+            <span class="c1"># Defensive copy: BUMPS mutates the state object in-place</span>
+            <span class="c1"># (via MCMCDraw.resize() — see bumps/dream/core.py allocate_state)</span>
+            <span class="c1"># during resume.  Without a copy, the caller&#39;s original state</span>
+            <span class="c1"># object is silently altered, making it impossible to compare</span>
+            <span class="c1"># pre- and post-resume state (shape mismatch).  See</span>
+            <span class="c1"># https://github.com/easyscience/core/pull/257</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+            <span class="n">fit_kwargs</span><span class="p">[</span><span class="s1">&#39;fit_state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">resume_state</span><span class="p">)</span>
         <span class="n">x_opt</span><span class="p">,</span> <span class="n">fx</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="o">**</span><span class="n">fit_kwargs</span><span class="p">)</span>
         <span class="n">result_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">fitter</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">result_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -12115,25 +11936,25 @@ names/order, or population mismatch).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">961</span>
-<span class="normal">962</span>
-<span class="normal">963</span>
-<span class="normal">964</span>
-<span class="normal">965</span>
-<span class="normal">966</span>
-<span class="normal">967</span>
-<span class="normal">968</span>
-<span class="normal">969</span>
-<span class="normal">970</span>
-<span class="normal">971</span>
-<span class="normal">972</span>
-<span class="normal">973</span>
-<span class="normal">974</span>
-<span class="normal">975</span>
-<span class="normal">976</span>
-<span class="normal">977</span>
-<span class="normal">978</span>
-<span class="normal">979</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_sampler_state</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_sampler_state</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Persist a DREAM sampler state to disk.</span>
 
 <span class="sd">    Thin wrapper around BUMPS ``save_state``. ``state`` is the</span>
@@ -12248,7 +12069,28 @@ were indexed</code>. We coerce each buffer read back to 2-D before
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 982</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 961</span>
+<span class="normal"> 962</span>
+<span class="normal"> 963</span>
+<span class="normal"> 964</span>
+<span class="normal"> 965</span>
+<span class="normal"> 966</span>
+<span class="normal"> 967</span>
+<span class="normal"> 968</span>
+<span class="normal"> 969</span>
+<span class="normal"> 970</span>
+<span class="normal"> 971</span>
+<span class="normal"> 972</span>
+<span class="normal"> 973</span>
+<span class="normal"> 974</span>
+<span class="normal"> 975</span>
+<span class="normal"> 976</span>
+<span class="normal"> 977</span>
+<span class="normal"> 978</span>
+<span class="normal"> 979</span>
+<span class="normal"> 980</span>
+<span class="normal"> 981</span>
+<span class="normal"> 982</span>
 <span class="normal"> 983</span>
 <span class="normal"> 984</span>
 <span class="normal"> 985</span>
@@ -12269,28 +12111,7 @@ were indexed</code>. We coerce each buffer read back to 2-D before
 <span class="normal">1000</span>
 <span class="normal">1001</span>
 <span class="normal">1002</span>
-<span class="normal">1003</span>
-<span class="normal">1004</span>
-<span class="normal">1005</span>
-<span class="normal">1006</span>
-<span class="normal">1007</span>
-<span class="normal">1008</span>
-<span class="normal">1009</span>
-<span class="normal">1010</span>
-<span class="normal">1011</span>
-<span class="normal">1012</span>
-<span class="normal">1013</span>
-<span class="normal">1014</span>
-<span class="normal">1015</span>
-<span class="normal">1016</span>
-<span class="normal">1017</span>
-<span class="normal">1018</span>
-<span class="normal">1019</span>
-<span class="normal">1020</span>
-<span class="normal">1021</span>
-<span class="normal">1022</span>
-<span class="normal">1023</span>
-<span class="normal">1024</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_sampler_state</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="normal">1003</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_sampler_state</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a DREAM sampler state saved by :func:`save_sampler_state`.</span>
 
 <span class="sd">    The returned object can be passed as ``resume_state`` to</span>
@@ -16741,14 +16562,7 @@ minimizer.</p>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiFitter</span><span class="p">(</span><span class="n">Fitter</span><span class="p">):</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MultiFitter</span><span class="p">(</span><span class="n">Fitter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extension of Fitter to enable multiple dataset/fit function fitting.</span>
 
@@ -16935,7 +16749,6 @@ minimizer.</p>
         <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">chains</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resume_state</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16969,11 +16782,6 @@ minimizer.</p>
 <span class="sd">            BUMPS creates ``ceil(population * n_parameters)`` parallel chains,</span>
 <span class="sd">            so for a 4-parameter model the default scale of 10 yields 40</span>
 <span class="sd">            chains. ``None`` uses the BUMPS default.</span>
-<span class="sd">        seed : int | None, default=None</span>
-<span class="sd">            Best-effort random seed. BUMPS DREAM may use additional internal</span>
-<span class="sd">            RNG state that is not controlled by this seed, so exact</span>
-<span class="sd">            reproducibility is not guaranteed. Ignored when ``resume_state``</span>
-<span class="sd">            is provided.</span>
 <span class="sd">        resume_state : Any | None, default=None</span>
 <span class="sd">            A sampler state object from a previous ``sample()`` call (the</span>
 <span class="sd">            ``&#39;internal_bumps_object&#39;`` value of the returned dict). When</span>
@@ -17051,7 +16859,6 @@ minimizer.</p>
                 <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
                 <span class="n">chains</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># alias already resolved into `pop`</span>
                 <span class="n">population</span><span class="o">=</span><span class="n">pop</span><span class="p">,</span>
-                <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
                 <span class="n">resume_state</span><span class="o">=</span><span class="n">resume_state</span><span class="p">,</span>
                 <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
                 <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
@@ -17081,7 +16888,7 @@ minimizer.</p>
 
 
 <h4 id="easyscience.fitting.multi_fitter.MultiFitter.sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -17254,28 +17061,6 @@ the other, not both.</p>
 BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains,
 so for a 4-parameter model the default scale of 10 yields 40
 chains. <code>None</code> uses the BUMPS default.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>seed</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Best-effort random seed. BUMPS DREAM may use additional internal
-RNG state that is not controlled by this seed, so exact
-reproducibility is not guaranteed. Ignored when <code>resume_state</code>
-is provided.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -17582,14 +17367,7 @@ loop.</p>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span>
+<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">y</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
@@ -17599,7 +17377,6 @@ loop.</p>
     <span class="n">thin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">chains</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">population</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resume_state</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vectorized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -17633,11 +17410,6 @@ loop.</p>
 <span class="sd">        BUMPS creates ``ceil(population * n_parameters)`` parallel chains,</span>
 <span class="sd">        so for a 4-parameter model the default scale of 10 yields 40</span>
 <span class="sd">        chains. ``None`` uses the BUMPS default.</span>
-<span class="sd">    seed : int | None, default=None</span>
-<span class="sd">        Best-effort random seed. BUMPS DREAM may use additional internal</span>
-<span class="sd">        RNG state that is not controlled by this seed, so exact</span>
-<span class="sd">        reproducibility is not guaranteed. Ignored when ``resume_state``</span>
-<span class="sd">        is provided.</span>
 <span class="sd">    resume_state : Any | None, default=None</span>
 <span class="sd">        A sampler state object from a previous ``sample()`` call (the</span>
 <span class="sd">        ``&#39;internal_bumps_object&#39;`` value of the returned dict). When</span>
@@ -17715,7 +17487,6 @@ loop.</p>
             <span class="n">thin</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span>
             <span class="n">chains</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># alias already resolved into `pop`</span>
             <span class="n">population</span><span class="o">=</span><span class="n">pop</span><span class="p">,</span>
-            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
             <span class="n">resume_state</span><span class="o">=</span><span class="n">resume_state</span><span class="p">,</span>
             <span class="n">sampler_kwargs</span><span class="o">=</span><span class="n">sampler_kwargs</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
