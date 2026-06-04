@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import functools
+from typing import Any
 from typing import Callable
 from typing import List
 from typing import Optional
@@ -422,6 +423,8 @@ class Fitter:
         burn: int = 2000,
         thin: int = 10,
         population: Optional[int] = None,
+        seed: Optional[int] = None,
+        resume_state: Optional[Any] = None,
         vectorized: bool = False,
         sampler_kwargs: Optional[dict] = None,
         progress_callback: Optional[Callable[[dict], Optional[bool]]] = None,
@@ -506,6 +509,8 @@ class Fitter:
                 burn=burn,
                 thin=thin,
                 population=population,
+                seed=seed,
+                resume_state=resume_state,
                 sampler_kwargs=sampler_kwargs,
                 progress_callback=progress_callback,
                 abort_test=abort_test,

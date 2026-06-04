@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import math
 import warnings
 from typing import Any
 from typing import Callable
@@ -263,6 +264,41 @@ class Bumps(MinimizerBase):
                 return fitclass
         raise FitError(f'Unknown BUMPS fitting method: {method}')
 
+    @staticmethod
+    def _resolve_population_alias(
+        chains: int | None = None,
+        population: int | None = None,
+    ) -> int | None:
+        """Resolve the ``chains`` / ``population`` alias for DREAM.
+
+        ``chains`` is the user-friendly name; ``population`` is the parameter
+        name used by BUMPS.  If both are provided and differ, an error is
+        raised.  Returns the resolved value (or ``None`` if neither is set).
+
+        Parameters
+        ----------
+        chains : int | None, default=None
+            User-friendly alias for DREAM population count.
+        population : int | None, default=None
+            BUMPS DREAM population count.
+
+        Returns
+        -------
+        int | None
+            The resolved population value, or ``None`` if neither is set.
+
+        Raises
+        ------
+        ValueError
+            If both ``chains`` and ``population`` are provided but differ.
+        """
+        if chains is not None and population is not None and chains != population:
+            raise ValueError(
+                f'Conflicting population specifications: chains={chains} '
+                f'and population={population}. Use only one.'
+            )
+        return chains if chains is not None else population
+
     def _build_progress_payload(
         self, problem, iteration: int, point: np.ndarray, nllf: float
     ) -> dict:
@@ -390,6 +426,8 @@ class Bumps(MinimizerBase):
         burn: int = 2000,
         thin: int = 10,
         population: int | None = None,
+        seed: int | None = None,
+        resume_state: Any | None = None,
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
@@ -416,7 +454,44 @@ class Bumps(MinimizerBase):
         thin : int, default=10
             Thinning interval.
         population : int | None, default=None
-            BUMPS DREAM population count (number of parallel chains).
+            BUMPS DREAM population count for advanced users.
+        seed : int | None, default=None
+            Best-effort random seed.  Calls ``numpy.random.seed(seed)``
+            before DREAM starts, which affects the *global* NumPy RNG
+            state and may interact with other code in the process.
+            BUMPS DREAM uses additional internal RNG state that is
+            **not** controlled by this seed, so exact reproducibility
+            across runs is **not** guaranteed.  Ignored when
+            ``resume_state`` is provided (the saved chain has already
+            advanced the RNG).
+        resume_state : Any | None, default=None
+            A BUMPS ``MCMCDraw`` state object from a previous
+            ``sample()`` call (e.g. ``PosteriorResults.sampler_state``).
+            When provided, DREAM **continues** the saved chain instead of
+            starting cold.  The population, parameter count, and parameter
+            names must match the current model — a ``ValueError`` is raised
+            otherwise.
+
+            **Ring-buffer contract (important!):** DREAM stores draws in a
+            fixed-size ring buffer sized to *samples*.  Resuming with
+            ``samples=N`` retains only the **last N** draws.  To extend an
+            existing chain of M draws by N without losing any::
+
+                fitter.sample(data, samples=M + N, burn=0,
+                              resume_state=old_state)
+
+            The ``burn`` parameter controls burn-in for the *new* draws
+            only; passing ``burn=0`` (strongly recommended on resume)
+            skips additional burn-in.  A non-zero ``burn`` on a
+            previously-converged chain is usually a mistake and emits a
+            warning.
+
+            The ``chains``/``population`` and ``initializer`` parameters
+            have **no effect** when ``resume_state`` is provided — they
+            are determined by the saved state.
+
+            Resuming against *different* data is undefined behaviour (the
+            chain's likelihood changes underneath it).
         sampler_kwargs : dict | None, default=None
             Additional keyword arguments forwarded to `bumps.fitters.fit`.
         progress_callback : Callable[[dict], bool | None] | None, default=None
@@ -437,8 +512,11 @@ class Bumps(MinimizerBase):
         Raises
         ------
         ValueError
-            If the input shapes or weights are invalid, or if
-            ``progress_callback`` is not callable.
+            If the input shapes or weights are invalid, if both ``chains``
+            and ``population`` are provided with different values, if
+            ``progress_callback`` is not callable, or if ``resume_state``
+            is incompatible with the current model (parameter count,
+            names/order, or population mismatch).
         FitError
             If DREAM sampling was aborted by the user (via ``abort_test``).
         Exception
@@ -478,6 +556,90 @@ class Bumps(MinimizerBase):
         model_func = self._make_model()
         curve = model_func(x, y, weights)
         problem = FitProblem(curve)
+
+        # Resolve population parameter (before resume validation, since
+        # validation needs the resolved value).
+        # Bumps.mcmc_sample only has ``population`` — ``chains`` is the
+        # user-friendly alias used by ``MultiFitter.sample()``.
+        pop = self._resolve_population_alias(population=population)
+
+        # --- Resume-state compatibility validation ---
+        if resume_state is not None:
+            # Parameter count
+            n_fresh_params = len(problem._parameters)
+            state_nvar = resume_state.Nvar
+            if n_fresh_params != state_nvar:
+                raise ValueError(
+                    f'resume_state has {state_nvar} parameters but the current '
+                    f'model has {n_fresh_params}. The model must have the same '
+                    f'number of fitted parameters as when the saved chain was created.'
+                )
+
+            # Parameter names / order
+            fresh_names = [
+                p.name[len(MINIMIZER_PARAMETER_PREFIX):]
+                for p in problem._parameters
+            ]
+            state_labels = list(resume_state.labels)
+            state_prefix = MINIMIZER_PARAMETER_PREFIX
+            state_stripped = [
+                lbl[len(state_prefix):] if lbl.startswith(state_prefix) else lbl
+                for lbl in state_labels
+            ]
+            if fresh_names != state_stripped:
+                raise ValueError(
+                    f'Parameter names/order mismatch between the current model '
+                    f'and resume_state.\n'
+                    f'  Current model : {fresh_names}\n'
+                    f'  resume_state  : {state_stripped}'
+                )
+
+            # Population: BUMPS interprets ``pop`` as a **scale factor**.
+            # ``initpop.generate(problem, pop=P)`` creates
+            # ``ceil(P * n_params)`` chains, which becomes ``state.Npop``.
+            # On resume we must recover the scale factor from the state.
+            n_params = len(problem._parameters)
+            if pop is not None:
+                # Caller explicitly set chains/population — validate it
+                # produces the same Npop as the saved state.
+                expected_npop = int(math.ceil(pop * n_params))
+                if expected_npop != resume_state.Npop:
+                    raise ValueError(
+                        f'Requested population ({pop}) would produce '
+                        f'{expected_npop} chains but the saved state has '
+                        f'{resume_state.Npop} chains. The population cannot '
+                        f'be changed on resume.'
+                    )
+            else:
+                # Recover the original scale factor from the state's Npop.
+                # Try ceil-division first, then fall back to floor.
+                recovered = int(math.ceil(resume_state.Npop / n_params))
+                if int(math.ceil(recovered * n_params)) != resume_state.Npop:
+                    recovered = int(resume_state.Npop / n_params)
+                pop = recovered
+
+            # Warn about common resume mistakes
+            if burn > 0:
+                warnings.warn(
+                    'burn > 0 with resume_state: re-burning a previously '
+                    'converged chain is usually a mistake. Pass burn=0 to '
+                    'skip additional burn-in unless you specifically intend '
+                    'to re-burn.',
+                    UserWarning,
+                    stacklevel=2,
+                )
+            if seed is not None:
+                warnings.warn(
+                    'seed is ignored when resume_state is provided: the '
+                    'saved chain has already advanced the RNG state, so '
+                    'the resumed run cannot be made reproducible via seed.',
+                    UserWarning,
+                    stacklevel=2,
+                )
+
+        # Best-effort seed: sets numpy's global RNG state just before DREAM starts.
+        if seed is not None:
+            np.random.seed(seed)
 
         # Build DREAM kwargs
         dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
@@ -522,7 +684,10 @@ class Bumps(MinimizerBase):
         global_object.stack.enabled = False
 
         try:
-            x_opt, fx = driver.fit()
+            fit_kwargs = {}
+            if resume_state is not None:
+                fit_kwargs['fit_state'] = resume_state
+            x_opt, fx = driver.fit(**fit_kwargs)
             result_state = getattr(driver.fitter, 'state', None)
             if result_state is None:
                 raise FitError('Sampling aborted by user')
@@ -532,9 +697,10 @@ class Bumps(MinimizerBase):
         finally:
             global_object.stack.enabled = stack_status
 
-        draws = result_state.draw().points
+        _draw = result_state.draw()
+        draws = _draw.points
         param_names = [p.name[len(MINIMIZER_PARAMETER_PREFIX) :] for p in problem._parameters]
-        logp = getattr(result_state, 'logp', None)
+        logp = _draw.logp
 
         return {
             'draws': draws,

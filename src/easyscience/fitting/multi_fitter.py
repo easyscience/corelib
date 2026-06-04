@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from __future__ import annotations
-
+from typing import Any
 from typing import Callable
 
 import numpy as np
@@ -188,3 +187,135 @@ class MultiFitter(Fitter):
             fit_results_list.append(current_results)
             sp = ep
         return fit_results_list
+
+    def sample(
+        self,
+        x: List[np.ndarray],
+        y: List[np.ndarray],
+        weights: List[np.ndarray],
+        samples: int = 10000,
+        burn: int = 2000,
+        thin: int = 10,
+        chains: int | None = None,
+        population: int | None = None,
+        seed: int | None = None,
+        resume_state: Any | None = None,
+        vectorized: bool = False,
+        sampler_kwargs: dict | None = None,
+        progress_callback: Callable[[dict], bool | None] | None = None,
+        abort_test: Callable[[], bool] | None = None,
+    ) -> Dict:
+        """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
+
+        Requires that the current minimizer is a BUMPS instance (i.e. the
+        minimizer was switched to ``AvailableMinimizers.Bumps`` or equivalent).
+
+        Parameters
+        ----------
+        x : List[np.ndarray]
+            List of independent variable arrays (one per dataset).
+        y : List[np.ndarray]
+            List of dependent variable arrays (one per dataset).
+        weights : List[np.ndarray]
+            List of weight arrays (one per dataset).
+        samples : int, default=10000
+            Number of retained DREAM samples requested from BUMPS.
+        burn : int, default=2000
+            Burn-in steps.
+        thin : int, default=10
+            Thinning interval.
+        chains : int | None, default=None
+            User-friendly alias for BUMPS DREAM population count.
+        population : int | None, default=None
+            BUMPS DREAM population count (``pop``) for advanced users.
+        seed : int | None, default=None
+            Best-effort random seed. BUMPS DREAM may use additional internal
+            RNG state that is not controlled by this seed, so exact
+            reproducibility is not guaranteed. Ignored when ``resume_state``
+            is provided.
+        resume_state : Any | None, default=None
+            A sampler state object from a previous ``sample()`` call (the
+            ``'state'`` value of the returned dict). When provided, DREAM
+            **continues** the saved chain instead of starting cold. The
+            population, parameter count, and parameter names must match the
+            current model. **Ring-buffer contract:** DREAM retains only the
+            last *samples* draws, so to extend an existing chain of M draws
+            by N pass ``samples=M + N, burn=0``. ``chains``/``population``
+            and the initializer have no effect on resume (they come from the
+            saved state). See ``Bumps.sample`` for the full contract.
+        vectorized : bool, default=False
+            Whether the fit function expects vectorized (multidimensional)
+            input.
+        sampler_kwargs : dict | None, default=None
+            Additional keyword arguments forwarded to the BUMPS DREAM sampler
+            via `bumps.fitters.fit`.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback for progress updates during sampling.  The
+            payload dict includes ``iteration`` (DREAM generation number) and
+            ``sampling: True``.
+        abort_test : Callable[[], bool] | None, default=None
+            Optional callback that returns ``True`` to signal that sampling
+            should be aborted. Called periodically during the DREAM sampling
+            loop.
+
+        Returns
+        -------
+        Dict
+            Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
+            and ``'logp'``.
+
+        Raises
+        ------
+        RuntimeError
+            If the current minimizer is not a BUMPS instance.
+        """
+        # --- Alias resolution ---
+        # Delegate to the BUMPS minimizer's static helper so the logic
+        # stays in one place.
+        from easyscience.fitting.minimizers.minimizer_bumps import Bumps
+
+        pop = Bumps._resolve_population_alias(chains, population)
+
+        # Flatten multi-dataset arrays
+        x_fit, x_new, y_new, w_new, _dims = self._precompute_reshaping(
+            x, y, weights, vectorized=vectorized
+        )
+        self._dependent_dims = _dims
+
+        # Wrap fit functions for multi-dataset flattening, mirroring the
+        # ``Fitter.fit`` lifecycle: use the property setter so the minimizer
+        # is re-created with the wrapped fit function.
+        original_fit_func = self.fit_function
+        fit_fun_wrap = self._fit_function_wrapper(x_new, flatten=True)
+        self.fit_function = fit_fun_wrap
+
+        try:
+            minimizer = self.minimizer
+
+            # Verify it's a BUMPS minimizer (sampling only works with BUMPS/DREAM)
+            if not (hasattr(minimizer, 'package') and minimizer.package == 'bumps'):
+                raise RuntimeError(
+                    'Bayesian sampling requires a BUMPS minimizer. '
+                    'Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.'
+                )
+
+            # Delegate to the BUMPS minimizer's public sample method
+            result = minimizer.sample(
+                x=x_fit,
+                y=y_new,
+                weights=w_new,
+                samples=samples,
+                burn=burn,
+                thin=thin,
+                chains=None,  # alias already resolved into `pop`
+                population=pop,
+                seed=seed,
+                resume_state=resume_state,
+                sampler_kwargs=sampler_kwargs,
+                progress_callback=progress_callback,
+                abort_test=abort_test,
+            )
+        finally:
+            self.fit_function = original_fit_func
+
+        return result

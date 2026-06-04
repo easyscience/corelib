@@ -742,8 +742,13 @@ class TestBumpsSample:
             mock_driver.fitter.state = None
         else:
             mock_state = MagicMock()
-            mock_state.draw.return_value.points = np.array([[1.0]])
-            mock_state.logp = None
+            mock_state.Nvar = 1
+            mock_state.Npop = 5
+            mock_state.labels = ['p_param_0']
+            mock_draw = MagicMock()
+            mock_draw.points = np.array([[1.0]])
+            mock_draw.logp = np.array([0.5])
+            mock_state.draw.return_value = mock_draw
             mock_driver.fitter.state = mock_state
 
         mock_FitDriver = MagicMock(return_value=mock_driver)
@@ -850,6 +855,196 @@ class TestBumpsSample:
                 burn=5,
                 thin=1,
                 progress_callback='not-callable',
+            )
+
+    # --- Resume-state tests -------------------------------------------------
+
+    def _make_resume_state_mock(self, *, nvar=2, npop=10, labels=None):
+        """Build a mock MCMCDraw for resume tests.
+
+        BUMPS labels follow the pattern ``'p<param_name>'`` (the
+        ``MINIMIZER_PARAMETER_PREFIX`` concatenated with the unique name),
+        e.g. ``'pFilm_thickness'``.
+
+        :param nvar: Number of parameters.
+        :param npop: Population size.
+        :param labels: Parameter labels (defaults to ``['pa', 'pb']``
+            which strip to ``['a', 'b']``).
+        """
+        if labels is None:
+            labels = ['pa', 'pb']
+        mock_state = MagicMock()
+        mock_state.Nvar = nvar
+        mock_state.Npop = npop
+        mock_state.labels = labels
+        mock_draw = MagicMock()
+        mock_draw.points = np.ones((20, nvar))
+        mock_draw.logp = np.ones(20)
+        mock_state.draw.return_value = mock_draw
+        return mock_state
+
+    def _make_problem_with_parameters(self, param_names):
+        """Build a mock FitProblem whose ``_parameters`` yields the given names."""
+        params = []
+        for name in param_names:
+            p = MagicMock()
+            p.name = 'p' + name
+            params.append(p)
+        mock_problem = MagicMock()
+        mock_problem._parameters = params
+        return mock_problem
+
+    def test_sample_resume_state(self, minimizer: Bumps, monkeypatch) -> None:
+        """Verify resume_state is forwarded to driver.fit()."""
+        mock_FitDriver, mock_driver = self._setup_driver_mock(monkeypatch)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock()
+
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+
+        result = minimizer.sample(
+            x=np.array([1.0, 2.0]),
+            y=np.array([0.1, 0.2]),
+            weights=np.array([1.0, 1.0]),
+            samples=10,
+            burn=0,
+            thin=1,
+            resume_state=resume_state,
+        )
+
+        assert result is not None
+        # Verify fit_state was passed to driver.fit()
+        call_kwargs = mock_driver.fit.call_args.kwargs
+        assert call_kwargs.get('fit_state') is resume_state
+
+    def test_sample_resume_param_mismatch_raises(self, minimizer: Bumps, monkeypatch) -> None:
+        """Parameter count mismatch raises ValueError before driver.fit()."""
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        # resume_state has 2 params, model has 1
+        resume_state = self._make_resume_state_mock(nvar=2)
+
+        with pytest.raises(ValueError, match='resume_state has 2 parameters'):
+            minimizer.sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                resume_state=resume_state,
+            )
+
+    def test_sample_resume_param_name_mismatch_raises(self, minimizer: Bumps, monkeypatch) -> None:
+        """Parameter name/order mismatch raises ValueError before driver.fit()."""
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        # resume_state has labels ['px', 'py'] → stripped to ['x', 'y']
+        # Current model has params ['pa', 'pb'] → stripped to ['a', 'b']
+        # → mismatch
+        resume_state = self._make_resume_state_mock(nvar=2, labels=['px', 'py'])
+
+        with pytest.raises(ValueError, match='Parameter names/order mismatch'):
+            minimizer.sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                resume_state=resume_state,
+            )
+
+    def test_sample_resume_population_mismatch_raises(self, minimizer: Bumps, monkeypatch) -> None:
+        """Explicit population differing from state.Npop raises ValueError."""
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock(nvar=2, npop=10)
+
+        with pytest.raises(ValueError, match='would produce'):
+            minimizer.sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                population=3,  # ceil(3*2)=6 ≠ 10
+                resume_state=resume_state,
+            )
+
+    def test_sample_resume_warns_on_nonzero_burn(self, minimizer: Bumps, monkeypatch) -> None:
+        """burn>0 with resume_state emits UserWarning."""
+        self._setup_driver_mock(monkeypatch)
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock()
+
+        with pytest.warns(UserWarning, match='re-burning'):
+            minimizer.sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=5,
+                thin=1,
+                resume_state=resume_state,
+            )
+
+    def test_sample_resume_warns_on_seed(self, minimizer: Bumps, monkeypatch) -> None:
+        """seed with resume_state emits UserWarning."""
+        self._setup_driver_mock(monkeypatch)
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock()
+
+        with pytest.warns(UserWarning, match='seed is ignored'):
+            minimizer.sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                population=5,
+                seed=42,
+                resume_state=resume_state,
             )
 
 
