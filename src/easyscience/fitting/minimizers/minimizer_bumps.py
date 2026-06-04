@@ -956,3 +956,69 @@ class Bumps(MinimizerBase):
         results.fit_args = None
         results.engine_result = fit_results
         return results
+
+
+def save_sampler_state(state: Any, filename: str) -> None:
+    """Persist a DREAM sampler state to disk.
+
+    Thin wrapper around BUMPS ``save_state``. ``state`` is the
+    ``internal_bumps_object`` returned by :meth:`Bumps.mcmc_sample` (or by
+    ``MultiFitter.mcmc_sample``). Three gzipped text files are written:
+    ``<filename>-chain.mc.gz``, ``<filename>-point.mc.gz`` and
+    ``<filename>-stats.mc.gz``.
+
+    Parameters
+    ----------
+    state : Any
+        The BUMPS ``MCMCDraw`` object to persist.
+    filename : str
+        Path prefix for the saved files.
+    """
+    from bumps.dream.state import save_state
+
+    save_state(state, str(filename))
+
+
+def load_sampler_state(filename: str) -> Any:
+    """Load a DREAM sampler state saved by :func:`save_sampler_state`.
+
+    The returned object can be passed as ``resume_state`` to
+    :meth:`Bumps.mcmc_sample` (or ``MultiFitter.mcmc_sample``) to extend a
+    previously saved chain.
+
+    Works around a regression introduced in BUMPS 1.0.4: ``load_state`` reads
+    the saved buffers with ``numpy.loadtxt``, which collapses a single-row
+    file to a 1-D array. A short chain stores a single CR-weight update row,
+    so the subsequent ``stats[:, 0]`` indexing in ``load_state`` raises
+    ``IndexError: too many indices for array: array is 1-dimensional, but 2
+    were indexed``. We coerce each buffer read back to 2-D before
+    ``load_state`` consumes it. Older BUMPS releases (< 1.0.4) used a custom
+    2-D-safe parser and are loaded unchanged.
+
+    Parameters
+    ----------
+    filename : str
+        Path prefix that was passed to :func:`save_sampler_state`.
+
+    Returns
+    -------
+    Any
+        The reloaded BUMPS ``MCMCDraw`` object.
+    """
+    from bumps.dream import state as _bumps_state
+
+    loader = getattr(_bumps_state, 'loadtxt_with_fallback', None)
+    if loader is None:
+        # BUMPS < 1.0.4: load_state uses a custom parser that is already 2-D safe.
+        return _bumps_state.load_state(str(filename))
+
+    def _loadtxt_2d(file: Any, report: int = 0) -> np.ndarray:
+        arr = loader(file, report=report)
+        # A single saved row is read back as 1-D; restore it to a (1, N) row.
+        return np.atleast_2d(arr) if getattr(arr, 'ndim', 2) == 1 else arr
+
+    _bumps_state.loadtxt_with_fallback = _loadtxt_2d
+    try:
+        return _bumps_state.load_state(str(filename))
+    finally:
+        _bumps_state.loadtxt_with_fallback = loader

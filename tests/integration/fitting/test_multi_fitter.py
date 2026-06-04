@@ -546,16 +546,20 @@ class TestMultiFitterMcmcSample:
         labels (they come back as ``['P0', 'P1', ...]``), so name-based
         validation must not reject a reloaded state. Resume should proceed
         (matching by parameter order) with a warning instead of raising.
+
+        Also guards the BUMPS 1.0.4 single-row buffer regression handled by
+        ``load_sampler_state`` (a short chain stores one CR-weight row, which
+        BUMPS' numpy-based reader would otherwise collapse to a 1-D array).
         """
-        from bumps.dream.state import load_state
-        from bumps.dream.state import save_state
+        from easyscience.fitting.minimizers import load_sampler_state
+        from easyscience.fitting.minimizers import save_sampler_state
 
         f, x, y, weights = self._bumps_sampler()
         first = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=1)
 
         prefix = str(tmp_path / 'chain')
-        save_state(first['internal_bumps_object'], prefix)
-        reloaded = load_state(prefix)
+        save_sampler_state(first['internal_bumps_object'], prefix)
+        reloaded = load_sampler_state(prefix)
 
         with pytest.warns(UserWarning, match='does not carry parameter names'):
             extended = f.mcmc_sample(
