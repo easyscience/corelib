@@ -919,9 +919,10 @@ class TestBumpsSample:
         )
 
         assert result is not None
-        # Verify fit_state was passed to driver.fit()
+        # Verify a fit_state (defensive copy of resume_state) was passed to driver.fit()
         call_kwargs = mock_driver.fit.call_args.kwargs
-        assert call_kwargs.get('fit_state') is resume_state
+        assert call_kwargs.get('fit_state') is not None
+        assert call_kwargs['fit_state'] is not resume_state
 
     def test_sample_resume_param_mismatch_raises(self, minimizer: Bumps, monkeypatch) -> None:
         """Parameter count mismatch raises ValueError before driver.fit()."""
@@ -1018,32 +1019,6 @@ class TestBumpsSample:
                 samples=10,
                 burn=5,
                 thin=1,
-                resume_state=resume_state,
-            )
-
-    def test_sample_resume_warns_on_seed(self, minimizer: Bumps, monkeypatch) -> None:
-        """seed with resume_state emits UserWarning."""
-        self._setup_driver_mock(monkeypatch)
-        import bumps.names
-
-        monkeypatch.setattr(
-            bumps.names,
-            'FitProblem',
-            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
-        )
-        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
-        resume_state = self._make_resume_state_mock()
-
-        with pytest.warns(UserWarning, match='seed is ignored'):
-            minimizer.sample(
-                x=np.array([1.0]),
-                y=np.array([0.1]),
-                weights=np.array([1.0]),
-                samples=10,
-                burn=0,
-                thin=1,
-                population=5,
-                seed=42,
                 resume_state=resume_state,
             )
 

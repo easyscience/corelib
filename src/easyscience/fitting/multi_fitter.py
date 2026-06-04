@@ -198,7 +198,6 @@ class MultiFitter(Fitter):
         thin: int = 10,
         chains: int | None = None,
         population: int | None = None,
-        seed: int | None = None,
         resume_state: Any | None = None,
         vectorized: bool = False,
         sampler_kwargs: dict | None = None,
@@ -232,11 +231,6 @@ class MultiFitter(Fitter):
             BUMPS creates ``ceil(population * n_parameters)`` parallel chains,
             so for a 4-parameter model the default scale of 10 yields 40
             chains. ``None`` uses the BUMPS default.
-        seed : int | None, default=None
-            Best-effort random seed. BUMPS DREAM may use additional internal
-            RNG state that is not controlled by this seed, so exact
-            reproducibility is not guaranteed. Ignored when ``resume_state``
-            is provided.
         resume_state : Any | None, default=None
             A sampler state object from a previous ``sample()`` call (the
             ``'internal_bumps_object'`` value of the returned dict). When
@@ -314,7 +308,6 @@ class MultiFitter(Fitter):
                 thin=thin,
                 chains=None,  # alias already resolved into `pop`
                 population=pop,
-                seed=seed,
                 resume_state=resume_state,
                 sampler_kwargs=sampler_kwargs,
                 progress_callback=progress_callback,

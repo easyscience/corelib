@@ -423,7 +423,6 @@ class Fitter:
         burn: int = 2000,
         thin: int = 10,
         population: Optional[int] = None,
-        seed: Optional[int] = None,
         resume_state: Optional[Any] = None,
         vectorized: bool = False,
         sampler_kwargs: Optional[dict] = None,
@@ -456,11 +455,6 @@ class Fitter:
         population : Optional[int], default=None
             DREAM population **scale factor** (not an absolute chain count):
             BUMPS creates ``ceil(population * n_parameters)`` parallel chains.
-        seed : Optional[int], default=None
-            Best-effort random seed.  Calls ``numpy.random.seed(seed)``
-            before DREAM starts, which affects the *global* NumPy RNG
-            state.  Ignored when ``resume_state`` is provided (the saved
-            chain has already advanced the RNG state).
         resume_state : Optional[Any], default=None
             A BUMPS ``MCMCDraw`` state object from a previous
             ``mcmc_sample()`` call (the ``'internal_bumps_object'`` value
@@ -538,7 +532,6 @@ class Fitter:
                 burn=burn,
                 thin=thin,
                 population=population,
-                seed=seed,
                 resume_state=resume_state,
                 sampler_kwargs=sampler_kwargs,
                 progress_callback=progress_callback,

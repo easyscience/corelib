@@ -427,7 +427,6 @@ class Bumps(MinimizerBase):
         thin: int = 10,
         chains: int | None = None,
         population: int | None = None,
-        seed: int | None = None,
         resume_state: Any | None = None,
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
@@ -459,8 +458,6 @@ class Bumps(MinimizerBase):
         population : int | None, default=None
             DREAM population **scale factor** (not an absolute chain count):
             BUMPS creates ``ceil(population * n_parameters)`` parallel chains.
-        seed : int | None, default=None
-            Best-effort random seed.
         resume_state : Any | None, default=None
             A BUMPS ``MCMCDraw`` state object from a previous run.
         sampler_kwargs : dict | None, default=None
@@ -487,7 +484,6 @@ class Bumps(MinimizerBase):
             burn=burn,
             thin=thin,
             population=pop,
-            seed=seed,
             resume_state=resume_state,
             sampler_kwargs=sampler_kwargs,
             progress_callback=progress_callback,
@@ -503,7 +499,6 @@ class Bumps(MinimizerBase):
         burn: int = 2000,
         thin: int = 10,
         population: int | None = None,
-        seed: int | None = None,
         resume_state: Any | None = None,
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
@@ -534,15 +529,6 @@ class Bumps(MinimizerBase):
             DREAM population **scale factor** (not an absolute chain count):
             BUMPS creates ``ceil(population * n_parameters)`` parallel chains,
             so the default scale of 10 yields ``10 * n_parameters`` chains.
-        seed : int | None, default=None
-            Best-effort random seed.  Calls ``numpy.random.seed(seed)``
-            before DREAM starts, which affects the *global* NumPy RNG
-            state and may interact with other code in the process.
-            BUMPS DREAM uses additional internal RNG state that is
-            **not** controlled by this seed, so exact reproducibility
-            across runs is **not** guaranteed.  Ignored when
-            ``resume_state`` is provided (the saved chain has already
-            advanced the RNG).
         resume_state : Any | None, default=None
             A BUMPS ``MCMCDraw`` state object from a previous
             ``sample()`` call (e.g. ``PosteriorResults.sampler_state``).
@@ -724,21 +710,6 @@ class Bumps(MinimizerBase):
                     UserWarning,
                     stacklevel=2,
                 )
-            if seed is not None:
-                warnings.warn(
-                    'seed is ignored when resume_state is provided: the '
-                    'saved chain has already advanced the RNG state, so '
-                    'the resumed run cannot be made reproducible via seed.',
-                    UserWarning,
-                    stacklevel=2,
-                )
-
-        # Best-effort seed: sets numpy's global RNG state just before DREAM
-        # starts. Skipped on resume — the saved chain has already advanced the
-        # RNG, so a seed cannot make a resumed run reproducible (see warning
-        # above).
-        if seed is not None and resume_state is None:
-            np.random.seed(seed)
 
         # Build DREAM kwargs. Use the resolved ``pop`` (the alias result, or
         # the value recovered from the saved state on resume), not the raw
@@ -789,7 +760,15 @@ class Bumps(MinimizerBase):
         try:
             fit_kwargs = {}
             if resume_state is not None:
-                fit_kwargs['fit_state'] = resume_state
+                # Defensive copy: BUMPS mutates the state object in-place
+                # (via MCMCDraw.resize() — see bumps/dream/core.py allocate_state)
+                # during resume.  Without a copy, the caller's original state
+                # object is silently altered, making it impossible to compare
+                # pre- and post-resume state (shape mismatch).  See
+                # https://github.com/easyscience/core/pull/257
+                import copy
+
+                fit_kwargs['fit_state'] = copy.deepcopy(resume_state)
             x_opt, fx = driver.fit(**fit_kwargs)
             result_state = getattr(driver.fitter, 'state', None)
             if result_state is None:
