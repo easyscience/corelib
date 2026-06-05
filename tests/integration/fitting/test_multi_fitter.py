@@ -567,7 +567,9 @@ class TestSampleSeedReproducibility:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        result = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42)
+        result = f.mcmc_sample(
+            x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42
+        )
 
         assert result['draws'].ndim == 2
         assert result['draws'].shape[0] > 0
@@ -594,7 +596,9 @@ class TestSampleSeedReproducibility:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        result1 = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42)
+        result1 = f.mcmc_sample(
+            x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42
+        )
         result2 = f.mcmc_sample(
             x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=12345
         )
