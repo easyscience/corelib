@@ -294,13 +294,15 @@ def test_multi_fit_1D_2D(fit_engine):
 
 
 # ---------------------------------------------------------------------------
-# Tests for MultiFitter.sample (Bayesian MCMC via BUMPS DREAM)
+# Tests for MultiFitter.mcmc_sample (Bayesian MCMC via BUMPS DREAM)
 # ---------------------------------------------------------------------------
 
 
-class TestSampleRequiresBumps:
+class TestMultiFitterMcmcSample:
+    """Integration tests for ``MultiFitter.mcmc_sample``."""
+
     def test_raises_runtime_error_when_not_bumps(self):
-        """sample() must raise RuntimeError if the minimizer is not a BUMPS instance."""
+        """mcmc_sample() must raise RuntimeError if the minimizer is not a BUMPS instance."""
         sp = AbsSin(0.354, 3.05)
         f = MultiFitter([sp], [sp])
 
@@ -309,13 +311,11 @@ class TestSampleRequiresBumps:
         weights = np.ones_like(x)
 
         with pytest.raises(RuntimeError, match='Bayesian sampling requires a BUMPS minimizer'):
-            f.sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1)
+            f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1)
 
-
-class TestSampleBasic:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_returns_expected_keys_and_shapes(self):
-        """sample() with BUMPS should return draws, param_names, state, logp."""
+        """mcmc_sample() with BUMPS should return draws, param_names, state, logp."""
         ref_sin = AbsSin(0.2, np.pi)
         sp = AbsSin(0.354, 3.05)
 
@@ -332,12 +332,12 @@ class TestSampleBasic:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        result = f.sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2)
+        result = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2)
 
         assert isinstance(result, dict)
         assert 'draws' in result
         assert 'param_names' in result
-        assert 'state' in result
+        assert 'internal_bumps_object' in result
         assert 'logp' in result
 
         # draws shape: (retained_samples, n_params)
@@ -350,7 +350,7 @@ class TestSampleBasic:
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_multi_dataset_returns_consistent_param_names(self):
-        """sample() with multiple datasets should have correct param_names across all."""
+        """mcmc_sample() with multiple datasets should have correct param_names across all."""
         ref_sin_1 = AbsSin(0.2, np.pi)
         sp_sin_1 = AbsSin(0.354, 3.05)
         sp_line = Line(0.43, 6.1)
@@ -376,7 +376,7 @@ class TestSampleBasic:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        result = f.sample(
+        result = f.mcmc_sample(
             x=[x1, x2], y=[y1, y2], weights=[weights, weights], samples=100, burn=20, thin=2
         )
 
@@ -384,6 +384,125 @@ class TestSampleBasic:
         all_params = {p.unique_name for p in sp_sin_1.get_fit_parameters()}
         all_params |= {p.unique_name for p in sp_line.get_fit_parameters()}
         assert set(result['param_names']) == all_params
+
+    def test_population_param_controls_chain_count(self):
+        """Passing population should succeed and produce valid draws."""
+        sp = AbsSin(0.354, 3.05)
+        sp.offset.fixed = False
+        sp.phase.fixed = False
+        f = MultiFitter([sp], [sp])
+        try:
+            f.switch_minimizer('Bumps')
+        except AttributeError:
+            pytest.skip('BUMPS is not installed')
+
+        x = np.linspace(0, 5, 50)
+        y = np.sin(x)
+        weights = np.ones_like(x)
+
+        result = f.mcmc_sample(
+            x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, population=5
+        )
+        assert 'draws' in result
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_vectorized_2d_input_produces_valid_draws(self):
+        """mcmc_sample() with vectorized=True and 2D input should produce valid draws."""
+        sp = AbsSin2D(0.1, 1.75)
+
+        x = np.linspace(0, 5, 50)
+        X, Y = np.meshgrid(x, x)
+        x2D = np.stack((X, Y), axis=2)
+        y2D = np.abs(np.sin(X)) * np.abs(np.sin(Y))
+        weights = np.ones_like(y2D)
+
+        sp.offset.fixed = False
+        sp.phase.fixed = False
+
+        f = MultiFitter([sp], [sp])
+        try:
+            f.switch_minimizer('Bumps')
+        except AttributeError:
+            pytest.skip('BUMPS is not installed')
+
+        result = f.mcmc_sample(
+            x=[x2D], y=[y2D], weights=[weights], samples=100, burn=20, thin=2, vectorized=True
+        )
+
+        assert result['draws'].ndim == 2
+        assert result['draws'].shape[0] > 0
+        assert result['draws'].shape[1] == len(result['param_names'])
+
+    def test_fit_function_restored_after_runtime_error(self):
+        """fit_function must be restored to its original value even when mcmc_sample() raises."""
+        sp = AbsSin(0.354, 3.05)
+        f = MultiFitter([sp], [sp])
+
+        x = np.linspace(0, 5, 50)
+        y = np.sin(x)
+        weights = np.ones_like(x)
+
+        original_func = f.fit_function
+
+        with pytest.raises(RuntimeError):
+            f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1)
+
+        assert f.fit_function is original_func
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_fit_function_restored_after_successful_sample(self):
+        """fit_function must be restored to its original value after a successful mcmc_sample()."""
+        ref_sin = AbsSin(0.2, np.pi)
+        sp = AbsSin(0.354, 3.05)
+
+        x = np.linspace(0, 5, 50)
+        y = ref_sin(x)
+        weights = np.ones_like(x)
+
+        sp.offset.fixed = False
+        sp.phase.fixed = False
+
+        f = MultiFitter([sp], [sp])
+        try:
+            f.switch_minimizer('Bumps')
+        except AttributeError:
+            pytest.skip('BUMPS is not installed')
+
+        original_func = f.fit_function
+        f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2)
+        assert f.fit_function is original_func
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_sampler_kwargs_forwarded(self):
+        """sampler_kwargs dict is forwarded to the BUMPS DREAM sampler."""
+        ref_sin = AbsSin(0.2, np.pi)
+        sp = AbsSin(0.354, 3.05)
+
+        x = np.linspace(0, 5, 50)
+        y = ref_sin(x)
+        weights = np.ones_like(x)
+
+        sp.offset.fixed = False
+        sp.phase.fixed = False
+
+        f = MultiFitter([sp], [sp])
+        try:
+            f.switch_minimizer('Bumps')
+        except AttributeError:
+            pytest.skip('BUMPS is not installed')
+
+        result = f.mcmc_sample(
+            x=[x],
+            y=[y],
+            weights=[weights],
+            samples=100,
+            burn=20,
+            thin=2,
+            sampler_kwargs={'init': 'random'},
+        )
+
+        assert result['draws'].ndim == 2
+        assert result['draws'].shape[0] > 0
 
 
 class TestSampleAliasResolution:
@@ -401,7 +520,7 @@ class TestSampleAliasResolution:
         weights = np.ones_like(x)
 
         with pytest.raises(ValueError, match='Conflicting population arguments'):
-            f.sample(
+            f.mcmc_sample(
                 x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1, chains=3, population=5
             )
 
@@ -422,7 +541,7 @@ class TestSampleAliasResolution:
 
         # Should not raise ValueError — chains and population are equal.
         # DREAM needs a sufficient population; 5 is a safe minimum.
-        result = f.sample(
+        result = f.mcmc_sample(
             x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, chains=5, population=5
         )
         assert 'draws' in result
@@ -431,7 +550,7 @@ class TestSampleAliasResolution:
 class TestSampleSeedReproducibility:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_seed_produces_valid_draws(self):
-        """Running sample() with a seed must produce valid draws."""
+        """Running mcmc_sample() with a seed must produce valid draws."""
         ref_sin = AbsSin(0.2, np.pi)
         sp = AbsSin(0.354, 3.05)
 
@@ -448,7 +567,7 @@ class TestSampleSeedReproducibility:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        result = f.sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42)
+        result = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42)
 
         assert result['draws'].ndim == 2
         assert result['draws'].shape[0] > 0
@@ -458,7 +577,7 @@ class TestSampleSeedReproducibility:
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_different_seeds_both_produce_valid_draws(self):
-        """Running sample() with different seeds should each produce valid draws."""
+        """Running mcmc_sample() with different seeds should each produce valid draws."""
         ref_sin = AbsSin(0.2, np.pi)
         sp = AbsSin(0.354, 3.05)
 
@@ -475,8 +594,8 @@ class TestSampleSeedReproducibility:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        result1 = f.sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42)
-        result2 = f.sample(
+        result1 = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=42)
+        result2 = f.mcmc_sample(
             x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2, seed=12345
         )
 
@@ -485,112 +604,6 @@ class TestSampleSeedReproducibility:
         assert result2['draws'].shape[0] > 0
         assert result1['draws'].ndim == 2
         assert result2['draws'].ndim == 2
-
-
-class TestSampleVectorized:
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_vectorized_2d_input_produces_valid_draws(self):
-        """sample() with vectorized=True and 2D input should produce valid draws."""
-        sp = AbsSin2D(0.1, 1.75)
-
-        x = np.linspace(0, 5, 50)
-        X, Y = np.meshgrid(x, x)
-        x2D = np.stack((X, Y), axis=2)
-        y2D = np.abs(np.sin(X)) * np.abs(np.sin(Y))
-        weights = np.ones_like(y2D)
-
-        sp.offset.fixed = False
-        sp.phase.fixed = False
-
-        f = MultiFitter([sp], [sp])
-        try:
-            f.switch_minimizer('Bumps')
-        except AttributeError:
-            pytest.skip('BUMPS is not installed')
-
-        result = f.sample(
-            x=[x2D], y=[y2D], weights=[weights], samples=100, burn=20, thin=2, vectorized=True
-        )
-
-        assert result['draws'].ndim == 2
-        assert result['draws'].shape[0] > 0
-        assert result['draws'].shape[1] == len(result['param_names'])
-
-
-class TestSampleStateRestoration:
-    def test_fit_function_restored_after_runtime_error(self):
-        """fit_function must be restored to its original value even when sample() raises."""
-        sp = AbsSin(0.354, 3.05)
-        f = MultiFitter([sp], [sp])
-
-        x = np.linspace(0, 5, 50)
-        y = np.sin(x)
-        weights = np.ones_like(x)
-
-        original_func = f.fit_function
-
-        with pytest.raises(RuntimeError):
-            f.sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1)
-
-        assert f.fit_function is original_func
-
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_fit_function_restored_after_successful_sample(self):
-        """fit_function must be restored to its original value after a successful sample()."""
-        ref_sin = AbsSin(0.2, np.pi)
-        sp = AbsSin(0.354, 3.05)
-
-        x = np.linspace(0, 5, 50)
-        y = ref_sin(x)
-        weights = np.ones_like(x)
-
-        sp.offset.fixed = False
-        sp.phase.fixed = False
-
-        f = MultiFitter([sp], [sp])
-        try:
-            f.switch_minimizer('Bumps')
-        except AttributeError:
-            pytest.skip('BUMPS is not installed')
-
-        original_func = f.fit_function
-        f.sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2)
-        assert f.fit_function is original_func
-
-
-class TestSampleSamplerKwargs:
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_sampler_kwargs_forwarded(self):
-        """sampler_kwargs dict is forwarded to the BUMPS DREAM sampler."""
-        ref_sin = AbsSin(0.2, np.pi)
-        sp = AbsSin(0.354, 3.05)
-
-        x = np.linspace(0, 5, 50)
-        y = ref_sin(x)
-        weights = np.ones_like(x)
-
-        sp.offset.fixed = False
-        sp.phase.fixed = False
-
-        f = MultiFitter([sp], [sp])
-        try:
-            f.switch_minimizer('Bumps')
-        except AttributeError:
-            pytest.skip('BUMPS is not installed')
-
-        # Pass extra kwargs — should not raise
-        result = f.sample(
-            x=[x],
-            y=[y],
-            weights=[weights],
-            samples=100,
-            burn=20,
-            thin=2,
-            sampler_kwargs={'init': 'random'},
-        )
-
-        assert result['draws'].ndim == 2
-        assert result['draws'].shape[0] > 0
 
 
 class TestSampleMultiprocessing:
@@ -613,7 +626,7 @@ class TestSampleMultiprocessing:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        result = f.sample(
+        result = f.mcmc_sample(
             x=[x], y=[y], weights=[weights], samples=50, burn=10, thin=2, n_workers=1
         )
 
@@ -638,16 +651,18 @@ class TestSampleMultiprocessing:
         weights = np.ones_like(x)
 
         with pytest.raises(ValueError, match='n_workers must be at least 1'):
-            f.sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1, n_workers=0)
+            f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1, n_workers=0)
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_n_workers_two_produces_valid_draws(self, tmp_path):
         """n_workers>1 should evaluate DREAM populations through process workers."""
         repo_root = str(Path(__file__).resolve().parents[3])
+        test_file = str(Path(__file__).resolve())
         script = tmp_path / 'run_bumps_multiprocessing_sample.py'
         script.write_text(
             textwrap.dedent(
                 f"""
+                import importlib.util
                 import multiprocessing as mp
                 import sys
 
@@ -656,8 +671,15 @@ class TestSampleMultiprocessing:
 
                 import numpy as np
 
-                from tests.integration.fitting.test_multi_fitter import AbsSin
                 from easyscience.fitting.multi_fitter import MultiFitter
+
+                # Load the AbsSin model straight from this test file to avoid
+                # depending on ``tests`` being importable as a package (it is a
+                # plain namespace dir and can be shadowed by sibling projects).
+                _spec = importlib.util.spec_from_file_location('_mp_test_models', {test_file!r})
+                _models = importlib.util.module_from_spec(_spec)
+                _spec.loader.exec_module(_models)
+                AbsSin = _models.AbsSin
 
 
                 def main():
@@ -673,7 +695,7 @@ class TestSampleMultiprocessing:
 
                     f = MultiFitter([sp], [sp])
                     f.switch_minimizer('Bumps')
-                    result = f.sample(
+                    result = f.mcmc_sample(
                         x=[x],
                         y=[y],
                         weights=[weights],

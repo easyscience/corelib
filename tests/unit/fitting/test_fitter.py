@@ -258,3 +258,187 @@ class TestFitter:
 # TODO
 #       def test_fit_function_wrapper()
 #       def test_precompute_reshaping()
+
+
+# ===================================================================
+# Fitter.mcmc_sample() — Bayesian DREAM sampling
+# ===================================================================
+
+
+class TestFitterMcmcSample:
+    @pytest.fixture
+    def fitter(self, monkeypatch):
+        monkeypatch.setattr(Fitter, '_update_minimizer', MagicMock())
+        return Fitter(MagicMock(), MagicMock())
+
+    def test_basic(self, fitter: Fitter):
+        """mcmc_sample() calls minimizer.mcmc_sample() and returns its result."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'bumps'
+        expected = {
+            'draws': np.array([[1.0]]),
+            'param_names': ['a'],
+            'internal_bumps_object': 'stub',
+            'logp': None,
+        }
+        fitter._minimizer.mcmc_sample = MagicMock(return_value=expected)
+
+        result = fitter.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            samples=100,
+            burn=20,
+            thin=2,
+            population=5,
+        )
+
+        assert result == expected
+        fitter._precompute_reshaping.assert_called_once_with(
+            np.array([1.0]), np.array([0.1]), np.array([1.0]), False
+        )
+        fitter._fit_function_wrapper.assert_called_once_with('x_new', flatten=True)
+        fitter._minimizer.mcmc_sample.assert_called_once()
+        kw = fitter._minimizer.mcmc_sample.call_args.kwargs
+        assert kw['x'] == 'x_fit'
+        assert kw['y'] == 'y_new'
+        assert kw['weights'] == 'w_new'
+        assert kw['samples'] == 100
+        assert kw['burn'] == 20
+        assert kw['thin'] == 2
+        assert kw['population'] == 5
+        assert kw['progress_callback'] is None
+        assert fitter._dependent_dims == 'dims'
+
+    def test_chains_seed_and_n_workers_forwarded(self, fitter: Fitter):
+        """chains, seed and n_workers are forwarded to minimizer.mcmc_sample()."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'bumps'
+        fitter._minimizer.mcmc_sample = MagicMock(
+            return_value={
+                'draws': [],
+                'param_names': [],
+                'internal_bumps_object': None,
+                'logp': None,
+            }
+        )
+
+        fitter.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            chains=7,
+            seed=42,
+            n_workers=2,
+        )
+
+        kw = fitter._minimizer.mcmc_sample.call_args.kwargs
+        assert kw['chains'] == 7
+        assert kw['seed'] == 42
+        assert kw['n_workers'] == 2
+
+    def test_raises_if_not_bumps(self, fitter: Fitter):
+        """RuntimeError raised when the active minimizer is not BUMPS."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'lmfit'
+
+        with pytest.raises(RuntimeError, match='Bayesian sampling requires a BUMPS minimizer'):
+            fitter.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+
+    def test_progress_callback_forwarded(self, fitter: Fitter):
+        """progress_callback is forwarded to minimizer.mcmc_sample()."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'bumps'
+        fitter._minimizer.mcmc_sample = MagicMock(
+            return_value={
+                'draws': [],
+                'param_names': [],
+                'internal_bumps_object': None,
+                'logp': None,
+            }
+        )
+        cb = MagicMock()
+
+        fitter.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            progress_callback=cb,
+        )
+
+        assert fitter._minimizer.mcmc_sample.call_args.kwargs['progress_callback'] is cb
+
+    def test_fit_function_restored_on_success(self, fitter: Fitter):
+        """Original fit function is restored after a successful call."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'bumps'
+        fitter._minimizer.mcmc_sample = MagicMock(
+            return_value={
+                'draws': [],
+                'param_names': [],
+                'internal_bumps_object': None,
+                'logp': None,
+            }
+        )
+        original = fitter._fit_function
+
+        fitter.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+
+        assert fitter._fit_function is original
+
+    def test_fit_function_restored_on_error(self, fitter: Fitter):
+        """Original fit function is restored even when minimizer raises."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'bumps'
+        fitter._minimizer.mcmc_sample = MagicMock(side_effect=RuntimeError('boom'))
+        original = fitter._fit_function
+
+        with pytest.raises(RuntimeError):
+            fitter.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+
+        assert fitter._fit_function is original
+
+    @pytest.mark.parametrize(
+        'kwargs, match',
+        [
+            ({'samples': 0}, 'samples must be a positive integer'),
+            ({'samples': -1}, 'samples must be a positive integer'),
+            ({'burn': -1}, 'burn must be a non-negative integer'),
+            ({'thin': 0}, 'thin must be a positive integer'),
+        ],
+    )
+    def test_invalid_args_raise(self, fitter: Fitter, kwargs, match):
+        """Invalid samples/burn/thin values raise ValueError before any I/O."""
+        with pytest.raises(ValueError, match=match):
+            fitter.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=kwargs.get('samples', 10),
+                burn=kwargs.get('burn', 0),
+                thin=kwargs.get('thin', 1),
+            )

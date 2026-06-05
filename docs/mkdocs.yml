@@ -176,10 +176,11 @@ nav:
       - User Guide: user-guide/index.md
   - Tutorials:
       - Tutorials: tutorials/index.md
+      - Bayesian analysis: tutorials/fitting-bayesian.ipynb
+      - Progress Callback: tutorials/progress-callback.ipynb
       - Workshops & Schools:
           - Fitting QENS: tutorials/fitting-qens.ipynb
           - Fitting SANS: tutorials/fitting-sans.ipynb
-          - Progress Callback: tutorials/progress-callback.ipynb
   - API Reference:
       - API Reference: api-reference/index.md
       - base_classes: api-reference/base_classes.md

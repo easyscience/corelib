@@ -59,7 +59,7 @@ def run_sample(n_workers: int | None, **sample_kwargs) -> tuple[dict, float]:
     fitter.switch_minimizer('Bumps')
 
     t0 = time.perf_counter()
-    result = fitter.sample(
+    result = fitter.mcmc_sample(
         x=[x],
         y=[y],
         weights=[weights],

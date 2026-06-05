@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+from __future__ import annotations
+
 import copy
 import io
 import multiprocessing as mp
@@ -9,7 +11,6 @@ import warnings
 import weakref
 from typing import Any
 from typing import Callable
-from typing import List
 
 import numpy as np
 from bumps.fitters import FIT_AVAILABLE_IDS
@@ -264,11 +265,11 @@ class Bumps(MinimizerBase):
         self._eval_counter: EvalCounter | None = None
 
     @staticmethod
-    def all_methods() -> List[str]:
+    def all_methods() -> list[str]:
         return FIT_AVAILABLE_IDS_FILTERED
 
     @staticmethod
-    def supported_methods() -> List[str]:
+    def supported_methods() -> list[str]:
         # only a small subset
         methods = ['amoeba', 'newton', 'lm']
         return methods
@@ -279,7 +280,7 @@ class Bumps(MinimizerBase):
         y: np.ndarray,
         weights: np.ndarray,
         model: Callable | None = None,
-        parameters: List[Parameter] | None = None,
+        parameters: list[Parameter] | None = None,
         method: str | None = None,
         tolerance: float | None = None,
         max_evaluations: int | None = None,
@@ -302,7 +303,7 @@ class Bumps(MinimizerBase):
             Weights for supplied measured points.
         model : Callable | None, default=None
             Optional Model which is being fitted to. By default, None.
-        parameters : List[Parameter] | None, default=None
+        parameters : list[Parameter] | None, default=None
             Optional parameters for the fit. By default, None.
         method : str | None, default=None
             Method for minimization. By default, None.
@@ -408,7 +409,7 @@ class Bumps(MinimizerBase):
             fitclass=fitclass,
             problem=problem,
             monitors=monitors,
-            abort_test=abort_test or (lambda: False),
+            abort_test=abort_test if abort_test is not None else (lambda: False),
             **minimizer_kwargs,
             **kwargs,
         )
@@ -527,20 +528,20 @@ class Bumps(MinimizerBase):
             snapshot[dict_name] = float(value)
         return snapshot
 
-    def convert_to_pars_obj(self, par_list: List[Parameter] | None = None) -> List[BumpsParameter]:
+    def convert_to_pars_obj(self, par_list: list[Parameter] | None = None) -> list[BumpsParameter]:
         """
         Create a container with the ``Parameters`` converted from the
         base object.
 
         Parameters
         ----------
-        par_list : List[Parameter] | None, default=None
+        par_list : list[Parameter] | None, default=None
             If only a single/selection of parameter is required. Specify
             as a list. By default, None.
 
         Returns
         -------
-        List[BumpsParameter]
+        list[BumpsParameter]
             Bumps Parameters list.
         """
         if par_list is None:
@@ -576,7 +577,7 @@ class Bumps(MinimizerBase):
             fixed=obj.fixed,
         )
 
-    def _make_model(self, parameters: List[BumpsParameter] | None = None) -> Callable:
+    def _make_model(self, parameters: list[BumpsParameter] | None = None) -> Callable:
         """
         Generate a bumps model from the supplied ``fit_function`` and
         parameters in the base object. Note that this makes a callable
@@ -586,7 +587,7 @@ class Bumps(MinimizerBase):
 
         Parameters
         ----------
-        parameters : List[BumpsParameter] | None, default=None
+        parameters : list[BumpsParameter] | None, default=None
             Optional BUMPS parameters to bind into the model.
 
         Returns
@@ -617,7 +618,7 @@ class Bumps(MinimizerBase):
 
         return _outer(self)
 
-    def sample(
+    def mcmc_sample(
         self,
         x: np.ndarray,
         y: np.ndarray,
@@ -637,7 +638,7 @@ class Bumps(MinimizerBase):
 
         Builds a BUMPS `FitProblem` from the current model and runs the DREAM
         sampler.  This is the public minimizer-level entry point for Bayesian
-        sampling; the higher-level `MultiFitter.sample` delegates to this
+        sampling; the higher-level `MultiFitter.mcmc_sample` delegates to this
         method after flattening multi-dataset arrays.
 
         Parameters
@@ -655,7 +656,8 @@ class Bumps(MinimizerBase):
         thin : int, default=10
             Thinning interval.
         chains : int | None, default=None
-            User-friendly alias for BUMPS DREAM population count.
+            User-friendly alias for BUMPS DREAM population count (number of
+            parallel chains).
         population : int | None, default=None
             BUMPS DREAM population count for advanced users.
         seed : int | None, default=None
@@ -684,8 +686,8 @@ class Bumps(MinimizerBase):
         Returns
         -------
         dict
-            Dictionary with keys ``'draws'``, ``'param_names'``, ``'state'``,
-            and ``'logp'``.
+            Dictionary with keys ``'draws'``, ``'param_names'``,
+            ``'internal_bumps_object'``, and ``'logp'``.
 
         Raises
         ------
@@ -706,8 +708,20 @@ class Bumps(MinimizerBase):
 
         x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
 
+        if not isinstance(samples, int) or samples <= 0:
+            raise ValueError('samples must be a positive integer.')
+        if not isinstance(burn, int) or burn < 0:
+            raise ValueError('burn must be a non-negative integer.')
+        if not isinstance(thin, int) or thin < 1:
+            raise ValueError('thin must be a positive integer.')
+
         if y.shape != x.shape:
             raise ValueError('x and y must have the same shape.')
+
+        if not np.isfinite(x).all():
+            raise ValueError('x cannot contain NaN or infinite values.')
+        if not np.isfinite(y).all():
+            raise ValueError('y cannot contain NaN or infinite values.')
 
         if weights.shape != x.shape:
             raise ValueError('Weights must have the same shape as x and y.')
@@ -753,8 +767,10 @@ class Bumps(MinimizerBase):
         if progress_callback is not None:
             if not callable(progress_callback):
                 raise ValueError('progress_callback must be callable')
-            # Compute total DREAM steps for progress display (burn + sampling generations)
-            pop_val = pop if pop else 10
+            # Compute total DREAM steps for progress display (burn + sampling generations).
+            # BUMPS DREAM default population count is 10 when not specified by the user.
+            _dream_default_pop = 10
+            pop_val = pop if pop is not None else _dream_default_pop
             _total_steps = burn + (samples + pop_val - 1) // pop_val
             monitors.append(
                 BumpsProgressMonitor(
@@ -771,7 +787,7 @@ class Bumps(MinimizerBase):
             fitclass=DreamFit,
             problem=problem,
             monitors=monitors,
-            abort_test=abort_test or (lambda: False),
+            abort_test=abort_test if abort_test is not None else (lambda: False),
             mapper=mapper,
             **dream_kwargs,
         )
@@ -805,7 +821,7 @@ class Bumps(MinimizerBase):
         return {
             'draws': draws,
             'param_names': param_names,
-            'state': result_state,
+            'internal_bumps_object': result_state,
             'logp': logp,
         }
 
@@ -826,7 +842,7 @@ class Bumps(MinimizerBase):
         self,
         fit_result: Any,
         stack_status: bool,
-        par_list: List[BumpsParameter],
+        par_list: list[BumpsParameter],
     ) -> None:
         """
         Update parameters to their final values and assign a std error
@@ -838,7 +854,7 @@ class Bumps(MinimizerBase):
             BUMPS OptimizeResult containing best-fit values and errors.
         stack_status : bool
             Whether the undo stack was enabled.
-        par_list : List[BumpsParameter]
+        par_list : list[BumpsParameter]
             List of BUMPS parameter objects.
         """
         from easyscience import global_object
