@@ -416,12 +416,13 @@ class Fitter:
 
     def mcmc_sample(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
-        weights: np.ndarray,
+        x: Union[np.ndarray, List[np.ndarray]],
+        y: Union[np.ndarray, List[np.ndarray]],
+        weights: Union[Optional[np.ndarray], List[Optional[np.ndarray]]],
         samples: int = 10000,
         burn: int = 2000,
         thin: int = 10,
+        chains: Optional[int] = None,
         population: Optional[int] = None,
         resume_state: Optional[Any] = None,
         vectorized: bool = False,
@@ -439,11 +440,11 @@ class Fitter:
 
         Parameters
         ----------
-        x : np.ndarray
+        x : Union[np.ndarray, List[np.ndarray]]
             Independent variable array (or list of arrays for ``MultiFitter``).
-        y : np.ndarray
+        y : Union[np.ndarray, List[np.ndarray]]
             Dependent variable array (or list of arrays for ``MultiFitter``).
-        weights : np.ndarray
+        weights : Union[Optional[np.ndarray], List[Optional[np.ndarray]]]
             Weight array (or list of arrays for ``MultiFitter``).
         samples : int, default=10000
             Number of retained DREAM samples requested from BUMPS.
@@ -452,6 +453,9 @@ class Fitter:
         thin : int, default=10
             Thinning interval — only every ``thin``-th sample is kept,
             which reduces autocorrelation between consecutive draws.
+        chains : Optional[int], default=None
+            User-friendly alias for ``population``.  Provide one or the
+            other, not both.
         population : Optional[int], default=None
             DREAM population **scale factor** (not an absolute chain count):
             BUMPS creates ``ceil(population * n_parameters)`` parallel chains.
@@ -510,6 +514,11 @@ class Fitter:
         if not isinstance(thin, int) or thin < 1:
             raise ValueError('thin must be a positive integer.')
 
+        # Resolve chains/population alias
+        from easyscience.fitting.minimizers.minimizer_bumps import Bumps
+
+        pop = Bumps._resolve_population_alias(chains=chains, population=population)
+
         x_fit, x_new, y_new, w_new, dims = self._precompute_reshaping(x, y, weights, vectorized)
         self._dependent_dims = dims
 
@@ -531,7 +540,7 @@ class Fitter:
                 samples=samples,
                 burn=burn,
                 thin=thin,
-                population=population,
+                population=pop,
                 resume_state=resume_state,
                 sampler_kwargs=sampler_kwargs,
                 progress_callback=progress_callback,

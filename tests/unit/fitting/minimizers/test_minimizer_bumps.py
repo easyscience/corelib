@@ -908,7 +908,7 @@ class TestBumpsSample:
             MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
         )
 
-        result = minimizer.sample(
+        result = minimizer.mcmc_sample(
             x=np.array([1.0, 2.0]),
             y=np.array([0.1, 0.2]),
             weights=np.array([1.0, 1.0]),
@@ -938,7 +938,7 @@ class TestBumpsSample:
         resume_state = self._make_resume_state_mock(nvar=2)
 
         with pytest.raises(ValueError, match='resume_state has 2 parameters'):
-            minimizer.sample(
+            minimizer.mcmc_sample(
                 x=np.array([1.0]),
                 y=np.array([0.1]),
                 weights=np.array([1.0]),
@@ -964,7 +964,7 @@ class TestBumpsSample:
         resume_state = self._make_resume_state_mock(nvar=2, labels=['px', 'py'])
 
         with pytest.raises(ValueError, match='Parameter names/order mismatch'):
-            minimizer.sample(
+            minimizer.mcmc_sample(
                 x=np.array([1.0]),
                 y=np.array([0.1]),
                 weights=np.array([1.0]),
@@ -987,7 +987,7 @@ class TestBumpsSample:
         resume_state = self._make_resume_state_mock(nvar=2, npop=10)
 
         with pytest.raises(ValueError, match='would produce'):
-            minimizer.sample(
+            minimizer.mcmc_sample(
                 x=np.array([1.0]),
                 y=np.array([0.1]),
                 weights=np.array([1.0]),
@@ -1012,7 +1012,7 @@ class TestBumpsSample:
         resume_state = self._make_resume_state_mock()
 
         with pytest.warns(UserWarning, match='re-burning'):
-            minimizer.sample(
+            minimizer.mcmc_sample(
                 x=np.array([1.0]),
                 y=np.array([0.1]),
                 weights=np.array([1.0]),

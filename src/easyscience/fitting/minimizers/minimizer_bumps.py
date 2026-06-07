@@ -417,7 +417,7 @@ class Bumps(MinimizerBase):
 
         return _outer(self)
 
-    def sample(
+    def mcmc_sample(
         self,
         x: np.ndarray,
         y: np.ndarray,
@@ -434,81 +434,9 @@ class Bumps(MinimizerBase):
     ) -> dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
-        This is the public minimizer-level entry point with the wider
-        ``MultiFitter``-compatible signature.  It resolves the
-        ``chains``/``population`` alias and delegates to ``mcmc_sample``
-        for the core sampling logic.
-
-        Parameters
-        ----------
-        x : np.ndarray
-            Flattened independent variable array.
-        y : np.ndarray
-            Flattened dependent variable array.
-        weights : np.ndarray
-            Flattened weight array.
-        samples : int, default=10000
-            Number of retained DREAM samples requested from BUMPS.
-        burn : int, default=2000
-            Burn-in steps.
-        thin : int, default=10
-            Thinning interval.
-        chains : int | None, default=None
-            User-friendly alias for ``population``. Provide one or the other.
-        population : int | None, default=None
-            DREAM population **scale factor** (not an absolute chain count):
-            BUMPS creates ``ceil(population * n_parameters)`` parallel chains.
-        resume_state : Any | None, default=None
-            A BUMPS ``MCMCDraw`` state object from a previous run.
-        sampler_kwargs : dict | None, default=None
-            Additional keyword arguments forwarded to the BUMPS DREAM sampler.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            Optional callback for progress updates during sampling.
-        abort_test : Callable[[], bool] | None, default=None
-            Optional callback that returns ``True`` to abort sampling early.
-
-        Returns
-        -------
-        dict
-            Dictionary with keys ``'draws'``, ``'param_names'``,
-            ``'internal_bumps_object'``, and ``'logp'``.
-        """
-        # Resolve chains/population alias
-        pop = self._resolve_population_alias(chains=chains, population=population)
-
-        return self.mcmc_sample(
-            x=x,
-            y=y,
-            weights=weights,
-            samples=samples,
-            burn=burn,
-            thin=thin,
-            population=pop,
-            resume_state=resume_state,
-            sampler_kwargs=sampler_kwargs,
-            progress_callback=progress_callback,
-            abort_test=abort_test,
-        )
-
-    def mcmc_sample(
-        self,
-        x: np.ndarray,
-        y: np.ndarray,
-        weights: np.ndarray,
-        samples: int = 10000,
-        burn: int = 2000,
-        thin: int = 10,
-        population: int | None = None,
-        resume_state: Any | None = None,
-        sampler_kwargs: dict | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
-        abort_test: Callable[[], bool] | None = None,
-    ) -> dict:
-        """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
-
         Builds a BUMPS `FitProblem` from the current model and runs the DREAM
         sampler.  This is the public minimizer-level entry point for Bayesian
-        sampling; the higher-level `MultiFitter.mcmc_sample` delegates to this
+        sampling; the higher-level `Fitter.mcmc_sample` delegates to this
         method after flattening multi-dataset arrays.
 
         Parameters
@@ -525,13 +453,16 @@ class Bumps(MinimizerBase):
             Burn-in steps.
         thin : int, default=10
             Thinning interval.
+        chains : int | None, default=None
+            User-friendly alias for ``population``.  Provide one or the
+            other, not both.
         population : int | None, default=None
             DREAM population **scale factor** (not an absolute chain count):
             BUMPS creates ``ceil(population * n_parameters)`` parallel chains,
             so the default scale of 10 yields ``10 * n_parameters`` chains.
         resume_state : Any | None, default=None
             A BUMPS ``MCMCDraw`` state object from a previous
-            ``sample()`` call (e.g. ``PosteriorResults.sampler_state``).
+            ``mcmc_sample()`` call (e.g. ``PosteriorResults.sampler_state``).
             When provided, DREAM **continues** the saved chain instead of
             starting cold.  The population, parameter count, and parameter
             names must match the current model — a ``ValueError`` is raised
@@ -542,7 +473,7 @@ class Bumps(MinimizerBase):
             ``samples=N`` retains only the **last N** draws.  To extend an
             existing chain of M draws by N without losing any::
 
-                fitter.sample(data, samples=M + N, burn=0, resume_state=old_state)
+                fitter.mcmc_sample(data, samples=M + N, burn=0, resume_state=old_state)
 
             The ``burn`` parameter controls burn-in for the *new* draws
             only; passing ``burn=0`` (strongly recommended on resume)
@@ -623,9 +554,7 @@ class Bumps(MinimizerBase):
 
         # Resolve population parameter (before resume validation, since
         # validation needs the resolved value).
-        # Bumps.mcmc_sample only has ``population`` — ``chains`` is the
-        # user-friendly alias used by ``MultiFitter.sample()``.
-        pop = self._resolve_population_alias(population=population)
+        pop = self._resolve_population_alias(chains=chains, population=population)
 
         # --- Resume-state compatibility validation ---
         if resume_state is not None:
@@ -766,8 +695,6 @@ class Bumps(MinimizerBase):
                 # object is silently altered, making it impossible to compare
                 # pre- and post-resume state (shape mismatch).  See
                 # https://github.com/easyscience/core/pull/257
-                import copy
-
                 fit_kwargs['fit_state'] = copy.deepcopy(resume_state)
             x_opt, fx = driver.fit(**fit_kwargs)
             result_state = getattr(driver.fitter, 'state', None)
