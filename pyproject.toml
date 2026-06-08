@@ -211,7 +211,8 @@ select = [
 # Ignore specific rules globally
 ignore = [
   'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
+  # Replaced by 'D' plus pydocstyle and pydoclint
+  'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
   'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/
 ]
