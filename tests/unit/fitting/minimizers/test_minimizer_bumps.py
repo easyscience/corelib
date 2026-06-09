@@ -1231,14 +1231,16 @@ class TestBumpsPoolMapperCall:
         m.n_workers = 2
         return m
 
-    def test_maps_2d_population_and_passes_chunksize_one(self):
+    def test_maps_2d_population_and_chunks_across_workers(self):
         pop = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         mapper = self._mapper([1.0, 2.0, 3.0])
 
         result = mapper(pop)
 
         assert result == [1.0, 2.0, 3.0]
-        assert mapper._pool.map.call_args.kwargs.get('chunksize') == 1
+        # 3 points across 2 workers => ceil(3/2) = 2 points per IPC task,
+        # amortizing per-task multiprocessing overhead over the generation.
+        assert mapper._pool.map.call_args.kwargs.get('chunksize') == 2
 
     def test_reshapes_1d_point_to_single_row(self):
         mapper = self._mapper([7.0])

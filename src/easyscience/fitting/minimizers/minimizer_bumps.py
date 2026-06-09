@@ -212,7 +212,12 @@ class BumpsPoolMapper:
         # Always reshape to 2D so list() produces one element per chain member.
         pop = np.atleast_2d(np.asarray(population))
         n_points = pop.shape[0]
-        results = self._pool.map(_evaluate_bumps_point, list(pop), chunksize=1)
+        # Distribute the population across workers in as few tasks as possible.
+        # DREAM evaluations are individually cheap, so per-task IPC overhead
+        # (pickling + queue round-trip) dominates when chunksize=1. Sending one
+        # chunk per worker amortizes that overhead across the whole generation.
+        chunksize = max(1, (n_points + self.n_workers - 1) // self.n_workers)
+        results = self._pool.map(_evaluate_bumps_point, list(pop), chunksize=chunksize)
 
         # Safety check: BUMPS DREAM state corruption can occur if the
         # mapper returns a different number of values than expected.
