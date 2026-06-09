@@ -7542,7 +7542,12 @@ engine Parameter object.</p>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
-<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BumpsPoolMapper</span><span class="p">:</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BumpsPoolMapper</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Multiprocessing mapper for BUMPS DREAM population evaluation.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problem</span><span class="p">:</span> <span class="n">FitProblem</span><span class="p">,</span> <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
@@ -7571,7 +7576,12 @@ engine Parameter object.</p>
         <span class="c1"># Always reshape to 2D so list() produces one element per chain member.</span>
         <span class="n">pop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">population</span><span class="p">))</span>
         <span class="n">n_points</span> <span class="o">=</span> <span class="n">pop</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_evaluate_bumps_point</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">pop</span><span class="p">),</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Distribute the population across workers in as few tasks as possible.</span>
+        <span class="c1"># DREAM evaluations are individually cheap, so per-task IPC overhead</span>
+        <span class="c1"># (pickling + queue round-trip) dominates when chunksize=1. Sending one</span>
+        <span class="c1"># chunk per worker amortizes that overhead across the whole generation.</span>
+        <span class="n">chunksize</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n_points</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_evaluate_bumps_point</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">pop</span><span class="p">),</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">)</span>
 
         <span class="c1"># Safety check: BUMPS DREAM state corruption can occur if the</span>
         <span class="c1"># mapper returns a different number of values than expected.</span>
@@ -7647,12 +7657,7 @@ for the Bumps fitting engine to use parameters declared in an
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
@@ -8382,7 +8387,12 @@ for the Bumps fitting engine to use parameters declared in an
 <span class="normal">968</span>
 <span class="normal">969</span>
 <span class="normal">970</span>
-<span class="normal">971</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bumps</span><span class="p">(</span><span class="n">MinimizerBase</span><span class="p">):</span>
+<span class="normal">971</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span>
+<span class="normal">975</span>
+<span class="normal">976</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Bumps</span><span class="p">(</span><span class="n">MinimizerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a wrapper to Bumps: https://bumps.readthedocs.io/ It allows</span>
 <span class="sd">    for the Bumps fitting engine to use parameters declared in an</span>
@@ -9225,12 +9235,7 @@ for the Bumps fitting engine to use parameters declared in an
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
@@ -9245,7 +9250,12 @@ for the Bumps fitting engine to use parameters declared in an
 <span class="normal">262</span>
 <span class="normal">263</span>
 <span class="normal">264</span>
-<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>  <span class="c1">#: ObjBase,</span>
     <span class="n">fit_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
@@ -9626,12 +9636,7 @@ By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
@@ -9806,7 +9811,12 @@ By default, None.</p>
 <span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span>
-<span class="normal">457</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -10074,12 +10084,7 @@ as a list. By default, None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">536</span>
 <span class="normal">537</span>
 <span class="normal">538</span>
 <span class="normal">539</span>
@@ -10094,7 +10099,12 @@ as a list. By default, None.</p>
 <span class="normal">548</span>
 <span class="normal">549</span>
 <span class="normal">550</span>
-<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_to_pars_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">BumpsParameter</span><span class="p">]:</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">convert_to_pars_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Parameter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">BumpsParameter</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a container with the ``Parameters`` converted from the</span>
 <span class="sd">    base object.</span>
@@ -10205,12 +10215,7 @@ Parameter object.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">559</span>
 <span class="normal">560</span>
 <span class="normal">561</span>
 <span class="normal">562</span>
@@ -10229,7 +10234,12 @@ Parameter object.</p>
 <span class="normal">575</span>
 <span class="normal">576</span>
 <span class="normal">577</span>
-<span class="normal">578</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_to_par_object</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Parameter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BumpsParameter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an ``EasyScience.variable.Parameter`` object to a bumps</span>
@@ -10642,12 +10652,7 @@ serialized for worker processes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/easyscience/fitting/minimizers/minimizer_bumps.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">626</span>
 <span class="normal">627</span>
 <span class="normal">628</span>
 <span class="normal">629</span>
@@ -10847,7 +10852,12 @@ serialized for worker processes.</p>
 <span class="normal">823</span>
 <span class="normal">824</span>
 <span class="normal">825</span>
-<span class="normal">826</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
+<span class="normal">826</span>
+<span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mcmc_sample</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
