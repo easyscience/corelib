@@ -289,5 +289,4 @@ def test_multi_fit_1D_2D(fit_engine):
 
 
 # NOTE: The Bayesian MCMC tests formerly here (TestMultiFitterMcmcSample) were
-# moved to test_sampler.py and adapted to the ``fitter.create_sampler(...)``
-# API. The deprecated ``mcmc_sample()`` shim is covered there as well.
+# moved to test_sampler.py and adapted to ``Sampler(f, ...)``.

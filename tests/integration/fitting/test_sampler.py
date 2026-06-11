@@ -4,9 +4,7 @@
 
 The behavioural MCMC tests formerly in
 ``test_multi_fitter.py::TestMultiFitterMcmcSample`` were moved here and
-adapted to the ``fitter.create_sampler(...)`` API. The deprecated
-``Fitter.mcmc_sample()`` shim is covered by the ``TestDeprecatedMcmcSample``
-class at the bottom.
+adapted to ``Sampler(f,  ...)`` directly.
 """
 
 import json
@@ -82,7 +80,7 @@ def _bumps_fitter_and_data():
 
 
 class TestSampler:
-    """Integration tests for ``fitter.create_sampler(...)`` / ``Sampler``."""
+    """Integration tests for ``Sampler(f, ...)`` / ``Sampler``."""
 
     def test_sample_requires_bumps(self):
         """sample() must raise RuntimeError if the minimizer is not BUMPS —
@@ -94,7 +92,7 @@ class TestSampler:
         y = np.sin(x)
         weights = np.ones_like(x)
 
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         minimizer_before = f.minimizer
         with pytest.raises(RuntimeError, match='Bayesian sampling requires a BUMPS minimizer'):
             sampler.sample(samples=10, burn=5, thin=1)
@@ -104,7 +102,7 @@ class TestSampler:
     def test_sample_returns_results_object(self):
         """sample() returns a populated SamplingResults; to_legacy_dict() has the legacy shape."""
         f, sp, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         results = sampler.sample(samples=100, burn=20, thin=2)
 
@@ -131,7 +129,7 @@ class TestSampler:
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_sample_multi_dataset(self):
-        """Multi-dataset sampling via MultiFitter.create_sampler has correct param_names."""
+        """Multi-dataset sampling via Sampler(f, ...) has correct param_names."""
         ref_sin_1 = AbsSin(0.2, np.pi)
         sp_sin_1 = AbsSin(0.354, 3.05)
         sp_line = Line(0.43, 6.1)
@@ -157,7 +155,7 @@ class TestSampler:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        sampler = f.create_sampler([x1, x2], [y1, y2], [weights, weights])
+        sampler = Sampler(f, [x1, x2], [y1, y2], [weights, weights])
         results = sampler.sample(samples=100, burn=20, thin=2)
 
         # All parameters across both models should appear
@@ -168,7 +166,7 @@ class TestSampler:
     def test_sample_population(self):
         """Passing population should succeed and produce valid draws."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         results = sampler.sample(samples=100, burn=20, thin=2, population=5)
         assert results.draws.shape[0] > 0
@@ -193,7 +191,7 @@ class TestSampler:
         except AttributeError:
             pytest.skip('BUMPS is not installed')
 
-        sampler = f.create_sampler([x2D], [y2D], [weights], vectorized=True)
+        sampler = Sampler(f, [x2D], [y2D], [weights], vectorized=True)
         results = sampler.sample(samples=100, burn=20, thin=2)
 
         assert results.draws.ndim == 2
@@ -203,7 +201,7 @@ class TestSampler:
     def test_fit_function_restored_on_error(self):
         """fit_function must be restored even when the minimizer raises."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         original_func = f.fit_function
 
         # Invalid `samples` is rejected by the minimizer (single source of
@@ -217,7 +215,7 @@ class TestSampler:
     def test_fit_function_restored_on_success(self):
         """fit_function must be restored after a successful sample()."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         original_func = f.fit_function
 
         sampler.sample(samples=100, burn=20, thin=2)
@@ -227,7 +225,7 @@ class TestSampler:
     def test_sampler_kwargs_forwarded(self):
         """Per-call sampler_kwargs dict is forwarded to the BUMPS DREAM sampler."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         results = sampler.sample(samples=100, burn=20, thin=2, sampler_kwargs={'init': 'random'})
 
@@ -238,7 +236,7 @@ class TestSampler:
     def test_default_sampler_kwargs_merged(self):
         """Constructor-level sampler_kwargs defaults are used; per-call kwargs win."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights], sampler_kwargs={'init': 'random'})
+        sampler = Sampler(f, [x], [y], [weights], sampler_kwargs={'init': 'random'})
 
         captured = {}
         original_mcmc_sample = type(f.minimizer).mcmc_sample
@@ -262,7 +260,7 @@ class TestSampler:
     def test_extend_chain(self):
         """extend(additional_samples=) continues the chain; ring-buffer math is done for the user."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         first = sampler.sample(samples=100, burn=20, thin=1)
         n_first = first.draws.shape[0]
@@ -282,7 +280,7 @@ class TestSampler:
         which BUMPS divides by the thinning interval.
         """
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         first = sampler.sample(samples=1000, burn=20, thin=10)
         n_first = first.draws.shape[0]
@@ -296,7 +294,7 @@ class TestSampler:
     def test_extend_total_samples_override(self):
         """extend(total_samples=) bypasses the additional_samples arithmetic."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         sampler.sample(samples=100, burn=20, thin=1)
         extended = sampler.extend(total_samples=150, thin=1)
@@ -306,7 +304,7 @@ class TestSampler:
     def test_extend_requires_existing_state(self):
         """extend() before sample()/load_state() raises RuntimeError."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         with pytest.raises(RuntimeError, match='No chain to extend'):
             sampler.extend(additional_samples=10)
@@ -320,13 +318,13 @@ class TestSampler:
         warning) instead of raising.
         """
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         first = sampler.sample(samples=100, burn=20, thin=1)
 
         prefix = str(tmp_path / 'chain')
         sampler.save(prefix)
 
-        sampler2 = f.create_sampler([x], [y], [weights])
+        sampler2 = Sampler(f, [x], [y], [weights])
         loaded = sampler2.load_state(prefix)
         assert loaded.draws.shape[1] == first.draws.shape[1]
 
@@ -345,7 +343,7 @@ class TestSampler:
         population and raises ``Cannot change Nvar, Npop or Ncr on resize``.
         """
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         first = sampler.sample(samples=100, burn=20, thin=1, population=5)
         first_npop = first.state.Npop
@@ -360,7 +358,7 @@ class TestSampler:
     def test_save_raises_without_state(self, tmp_path):
         """save() before sample() raises RuntimeError."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
 
         with pytest.raises(RuntimeError, match='No chain state to save'):
             sampler.save(str(tmp_path / 'chain'))
@@ -369,13 +367,13 @@ class TestSampler:
     def test_load_state_populates_results(self, tmp_path):
         """A freshly loaded sampler reports draws/logp/param_names without resampling."""
         f, sp, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         first = sampler.sample(samples=100, burn=20, thin=2)
 
         prefix = str(tmp_path / 'chain')
         sampler.save(prefix)
 
-        sampler2 = f.create_sampler([x], [y], [weights])
+        sampler2 = Sampler(f, [x], [y], [weights])
         assert sampler2.draws is None
         loaded = sampler2.load_state(prefix)
 
@@ -390,7 +388,7 @@ class TestSampler:
     def test_load_restores_param_names_from_sidecar(self, tmp_path):
         """v2 sidecar restores names; a legacy v1 sidecar is still accepted."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         first = sampler.sample(samples=100, burn=20, thin=2)
 
         prefix = str(tmp_path / 'chain')
@@ -414,7 +412,7 @@ class TestSampler:
                 fh,
             )
 
-        sampler2 = f.create_sampler([x], [y], [weights])
+        sampler2 = Sampler(f, [x], [y], [weights])
         loaded = sampler2.load_state(prefix)
         assert loaded.param_names == first.param_names
 
@@ -427,13 +425,13 @@ class TestSampler:
         ``IndexError`` without the 2-D coercion workaround.
         """
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         sampler.sample(samples=20, burn=5, thin=1)
 
         prefix = str(tmp_path / 'short_chain')
         sampler.save(prefix)
 
-        sampler2 = f.create_sampler([x], [y], [weights])
+        sampler2 = Sampler(f, [x], [y], [weights])
         loaded = sampler2.load_state(prefix)
         assert loaded.draws.shape[0] > 0
 
@@ -441,68 +439,13 @@ class TestSampler:
     def test_load_fingerprint_mismatch_warns(self, tmp_path):
         """Loading a chain into a sampler bound to different data warns."""
         f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = f.create_sampler([x], [y], [weights])
+        sampler = Sampler(f, [x], [y], [weights])
         sampler.sample(samples=100, burn=20, thin=2)
 
         prefix = str(tmp_path / 'chain')
         sampler.save(prefix)
 
         other_y = y + 0.5
-        sampler2 = f.create_sampler([x], [other_y], [weights])
+        sampler2 = Sampler(f, [x], [other_y], [weights])
         with pytest.warns(UserWarning, match='does not match the data fingerprint'):
             sampler2.load_state(prefix)
-
-
-class TestDeprecatedMcmcSample:
-    """The deprecated ``Fitter.mcmc_sample()`` shim keeps the full legacy
-    signature working and returns the legacy dict shape."""
-
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_warns_and_returns_legacy_dict(self):
-        f, sp, x, y, weights = _bumps_fitter_and_data()
-
-        with pytest.warns(DeprecationWarning, match='mcmc_sample.*deprecated'):
-            result = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=2)
-
-        assert isinstance(result, dict)
-        assert set(result.keys()) == {'draws', 'param_names', 'internal_bumps_object', 'logp'}
-        assert result['draws'].ndim == 2
-        assert result['draws'].shape[1] == len(result['param_names'])
-        expected_pars = {p.unique_name for p in sp.get_fit_parameters()}
-        assert set(result['param_names']) == expected_pars
-
-    def test_raises_runtime_error_when_not_bumps(self):
-        """The shim still raises RuntimeError when the minimizer is not BUMPS."""
-        sp = AbsSin(0.354, 3.05)
-        f = MultiFitter([sp], [sp])
-
-        x = np.linspace(0, 5, 50)
-        y = np.sin(x)
-        weights = np.ones_like(x)
-
-        with pytest.warns(DeprecationWarning):
-            with pytest.raises(RuntimeError, match='Bayesian sampling requires a BUMPS minimizer'):
-                f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=10, burn=5, thin=1)
-
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    @pytest.mark.filterwarnings('ignore::DeprecationWarning')
-    def test_resume_state_still_works(self):
-        """Legacy ``resume_state=`` continues a chain through the shim."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
-
-        first = f.mcmc_sample(x=[x], y=[y], weights=[weights], samples=100, burn=20, thin=1)
-        first_state = first['internal_bumps_object']
-
-        extended = f.mcmc_sample(
-            x=[x],
-            y=[y],
-            weights=[weights],
-            samples=200,
-            burn=0,
-            thin=1,
-            resume_state=first_state,
-        )
-
-        assert extended['draws'].shape[1] == first['draws'].shape[1]
-        assert extended['draws'].shape[0] > 0
-        assert extended['internal_bumps_object'].Npop == first_state.Npop

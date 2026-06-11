@@ -400,7 +400,7 @@ class Bumps(MinimizerBase):
 
         Builds a BUMPS `FitProblem` from the current model and runs the DREAM
         sampler.  This is the public minimizer-level entry point for Bayesian
-        sampling; the higher-level `Fitter.mcmc_sample` delegates to this
+        sampling; the higher-level `Sampler` delegates to this
         method after flattening multi-dataset arrays.
 
         Parameters
@@ -434,7 +434,8 @@ class Bumps(MinimizerBase):
             ``samples=N`` retains only the **last N** draws.  To extend an
             existing chain of M draws by N without losing any::
 
-                fitter.mcmc_sample(data, samples=M + N, burn=0, resume_state=old_state)
+                sampler = Sampler(fitter, data)
+                sampler.extend(additional_samples=N)
 
             The ``burn`` parameter controls burn-in for the *new* draws
             only; passing ``burn=0`` (strongly recommended on resume)
@@ -832,7 +833,7 @@ def save_sampler_state(state: Any, filename: str) -> None:
 
     Thin wrapper around BUMPS ``save_state``. ``state`` is the
     ``internal_bumps_object`` returned by :meth:`Bumps.mcmc_sample` (or by
-    ``MultiFitter.mcmc_sample``). Three gzipped text files are written:
+    ``Sampler``). Three gzipped text files are written:
     ``<filename>-chain.mc.gz``, ``<filename>-point.mc.gz`` and
     ``<filename>-stats.mc.gz``.
 
@@ -857,7 +858,7 @@ def load_sampler_state(filename: str, skip: int = 0) -> Any:
         internal helper used by ``easyscience.fitting.sampler``.
 
     The returned object can be passed as ``resume_state`` to
-    :meth:`Bumps.mcmc_sample` (or ``MultiFitter.mcmc_sample``) to extend a
+    :meth:`Bumps.mcmc_sample` (or the ``Sampler``) to extend a
     previously saved chain.
 
     Works around a regression introduced in BUMPS 1.0.4: ``load_state`` reads

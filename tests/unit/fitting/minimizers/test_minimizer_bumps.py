@@ -770,7 +770,7 @@ class TestBumpsSample:
         """Invalid samples/burn/thin values raise ValueError before any sampling.
 
         This is the single source of truth for these checks — the higher-level
-        ``Sampler`` and the deprecated ``Fitter.mcmc_sample()`` shim rely on it.
+        ``Sampler`` relies on it.
         """
         with pytest.raises(ValueError, match=match):
             minimizer.mcmc_sample(

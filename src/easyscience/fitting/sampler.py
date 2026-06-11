@@ -186,8 +186,8 @@ class Sampler:
     :meth:`extend` take no data arguments, so a chain can never be extended
     against different data (undefined behaviour in BUMPS).
 
-    Create via ``fitter.create_sampler(x, y, weights)`` (or, in
-    reflectometry-lib, ``fitter.create_sampler(data)``).
+    Construct directly with a configured ``Fitter`` (or ``MultiFitter``) whose
+    minimizer has been switched to ``AvailableMinimizers.Bumps``.
 
     The sampler is BUMPS/DREAM-specific for now: the BUMPS check in
     :meth:`_run` is the seam where another backend would plug in.
@@ -278,8 +278,7 @@ class Sampler:
         progress_callback: Optional[Callable[[dict], Optional[bool]]],
         abort_test: Optional[Callable[[], bool]],
     ) -> SamplingResults:
-        """Shared sampling engine for :meth:`sample`, :meth:`extend` and the
-        deprecated ``Fitter.mcmc_sample`` shim.
+        """Shared sampling engine for :meth:`sample` and :meth:`extend`.
 
         Argument validation for ``samples``/``burn``/``thin`` lives in
         ``Bumps.mcmc_sample`` (single source of truth).
@@ -293,9 +292,11 @@ class Sampler:
                 'Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.'
             )
 
-        x_fit, y_new, w_new, wrapped = self._fitter._prepare_sampling(
+        x_fit, x_new, y_new, w_new, dims = self._fitter._precompute_reshaping(
             self._x, self._y, self._weights, self._vectorized
         )
+        self._fitter._dependent_dims = dims
+        wrapped = self._fitter._fit_function_wrapper(x_new, flatten=True)
 
         merged_kwargs = {**self._default_sampler_kwargs, **(sampler_kwargs or {})}
 
