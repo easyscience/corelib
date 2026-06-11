@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import functools
+import warnings
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import List
@@ -15,6 +17,9 @@ from .available_minimizers import from_string_to_enum
 from .minimizers import FitResults
 from .minimizers import MinimizerBase
 from .minimizers.factory import factory
+
+if TYPE_CHECKING:
+    from .sampler import Sampler
 
 DEFAULT_MINIMIZER = AvailableMinimizers.LMFit_leastsq
 
@@ -414,6 +419,90 @@ class Fitter:
         fit_result.y_err = np.reshape(fit_result.y_err, y.shape)
         return fit_result
 
+    def _prepare_sampling(
+        self,
+        x: Union[np.ndarray, List[np.ndarray]],
+        y: Union[np.ndarray, List[np.ndarray]],
+        weights: Union[Optional[np.ndarray], List[Optional[np.ndarray]]],
+        vectorized: bool,
+    ) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Callable]:
+        """
+        Reshape data and build the wrapped fit function for MCMC sampling.
+
+        Protected seam used by :class:`~easyscience.fitting.sampler.Sampler`.
+        Polymorphic: ``MultiFitter`` inherits this method unchanged, and its
+        overridden ``_precompute_reshaping`` / ``_fit_function_wrapper``
+        handle multi-dataset flattening automatically.
+
+        Parameters
+        ----------
+        x : Union[np.ndarray, List[np.ndarray]]
+            Independent variable array (or list of arrays for ``MultiFitter``).
+        y : Union[np.ndarray, List[np.ndarray]]
+            Dependent variable array (or list of arrays for ``MultiFitter``).
+        weights : Union[Optional[np.ndarray], List[Optional[np.ndarray]]]
+            Weight array (or list of arrays for ``MultiFitter``).
+        vectorized : bool
+            Whether the x arrays already store vectorized coordinates.
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray, Optional[np.ndarray], Callable]
+            Dummy x array for the minimizer, flattened y values, flattened
+            weights, and the wrapped fit function with the real x injected.
+        """
+        x_fit, x_new, y_new, w_new, dims = self._precompute_reshaping(x, y, weights, vectorized)
+        # Read back by MultiFitter._fit_function_wrapper to split datasets.
+        self._dependent_dims = dims
+        wrapped = self._fit_function_wrapper(x_new, flatten=True)
+        return x_fit, y_new, w_new, wrapped
+
+    def create_sampler(
+        self,
+        x: Union[np.ndarray, List[np.ndarray]],
+        y: Union[np.ndarray, List[np.ndarray]],
+        weights: Union[Optional[np.ndarray], List[Optional[np.ndarray]]] = None,
+        vectorized: bool = False,
+        sampler_kwargs: Optional[dict] = None,
+    ) -> 'Sampler':
+        """Create a :class:`~easyscience.fitting.sampler.Sampler` bound to this
+        fitter and dataset for Bayesian MCMC sampling.
+
+        The data is bound to the sampler at construction; subsequent
+        ``sample()`` / ``extend()`` calls take no data arguments, so a chain
+        can never be extended against different data.
+
+        Parameters
+        ----------
+        x : Union[np.ndarray, List[np.ndarray]]
+            Independent variable array (or list of arrays for ``MultiFitter``).
+        y : Union[np.ndarray, List[np.ndarray]]
+            Dependent variable array (or list of arrays for ``MultiFitter``).
+        weights : Union[Optional[np.ndarray], List[Optional[np.ndarray]]], default=None
+            Weight array (or list of arrays for ``MultiFitter``).
+        vectorized : bool, default=False
+            Whether the x arrays already store vectorized coordinates.
+        sampler_kwargs : Optional[dict], default=None
+            Per-instance default keyword arguments forwarded to the BUMPS
+            DREAM sampler on every run (merged with, and overridden by,
+            per-call ``sampler_kwargs``).
+
+        Returns
+        -------
+        Sampler
+            A sampler bound to this fitter and dataset.
+        """
+        from .sampler import Sampler
+
+        return Sampler(
+            self,
+            x,
+            y,
+            weights=weights,
+            vectorized=vectorized,
+            sampler_kwargs=sampler_kwargs,
+        )
+
     def mcmc_sample(
         self,
         x: Union[np.ndarray, List[np.ndarray]],
@@ -422,7 +511,6 @@ class Fitter:
         samples: int = 10000,
         burn: int = 2000,
         thin: int = 10,
-        chains: Optional[int] = None,
         population: Optional[int] = None,
         resume_state: Optional[Any] = None,
         vectorized: bool = False,
@@ -432,11 +520,14 @@ class Fitter:
     ) -> dict:
         """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
-        Works with both a plain ``Fitter`` (single dataset) and a
-        ``MultiFitter`` (multiple datasets) via polymorphic dispatch:
-        ``_precompute_reshaping`` and ``_fit_function_wrapper`` are resolved
-        on the concrete subclass at call time, so multi-dataset flattening
-        is handled automatically when called on a ``MultiFitter`` instance.
+        .. deprecated::
+            Use ``fitter.create_sampler(x, y, weights).sample(...)`` instead;
+            chain continuation is ``sampler.extend(additional_samples=...)``.
+
+        This method is a thin backward-compatibility shim around
+        :class:`~easyscience.fitting.sampler.Sampler`. It keeps the full
+        legacy signature working — including the ``resume_state``
+        continuation argument — and returns the legacy dict shape.
 
         Parameters
         ----------
@@ -451,46 +542,19 @@ class Fitter:
         burn : int, default=2000
             Burn-in steps to discard before collecting samples.
         thin : int, default=10
-            Thinning interval — only every ``thin``-th sample is kept,
-            which reduces autocorrelation between consecutive draws.
-        chains : Optional[int], default=None
-            User-friendly alias for ``population``.  Provide one or the
-            other, not both.
+            Thinning interval.
         population : Optional[int], default=None
-            DREAM population **scale factor** (not an absolute chain count):
-            BUMPS creates ``ceil(population * n_parameters)`` parallel chains.
+            DREAM population **scale factor** (not an absolute chain count).
         resume_state : Optional[Any], default=None
-            A BUMPS ``MCMCDraw`` state object from a previous
-            ``mcmc_sample()`` call (the ``'internal_bumps_object'`` value
-            of the returned dict).  When provided, DREAM **continues** the
-            saved chain instead of starting cold.  The population, parameter
-            count, and parameter names must match the current model.
-
-            **Ring-buffer contract:** DREAM stores draws in a fixed-size
-            ring buffer sized to *samples*.  Resuming with ``samples=N``
-            retains only the last N draws.  To extend an existing chain of
-            M draws by N without losing any::
-
-                fitter.mcmc_sample(
-                    data, samples=M + N, burn=0, resume_state=previous_state
-                )
-
-            The ``burn`` parameter controls burn-in for the *new* draws
-            only; passing ``burn=0`` (strongly recommended on resume)
-            skips additional burn-in.  A non-zero ``burn`` on a
-            previously-converged chain is usually a mistake.
-
-            Resuming against *different* data is undefined behaviour (the
-            chain's likelihood changes underneath it).
+            A BUMPS ``MCMCDraw`` state from a previous call; DREAM continues
+            the saved chain. See ``Sampler.extend()`` for the safer,
+            data-bound replacement and the ring-buffer contract.
         vectorized : bool, default=False
-            When ``True``, each x array may be multi-dimensional (e.g. an
-            ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When
-            ``False`` (default), each x array is expected to be 1-D.
+            When ``True``, each x array may be multi-dimensional.
         sampler_kwargs : Optional[dict], default=None
             Additional keyword arguments forwarded to the BUMPS DREAM sampler.
         progress_callback : Optional[Callable[[dict], Optional[bool]]], default=None
-            Optional callback invoked at each DREAM generation.  The payload
-            dict includes ``iteration`` and ``sampling: True``.
+            Optional callback invoked at each DREAM generation.
         abort_test : Optional[Callable[[], bool]], default=None
             Optional callable that returns ``True`` to abort sampling early.
 
@@ -500,53 +564,28 @@ class Fitter:
             Dictionary with keys ``'draws'``, ``'param_names'``,
             ``'internal_bumps_object'``, and ``'logp'``.
 
-        Raises
-        ------
-        ValueError
-            If ``samples``, ``burn``, or ``thin`` are invalid.
-        RuntimeError
-            If the active minimizer is not a BUMPS instance.
+        Notes
+        -----
+        Exceptions propagate from the underlying ``Sampler``: ``ValueError``
+        if ``samples``, ``burn``, or ``thin`` are invalid, and
+        ``RuntimeError`` if the active minimizer is not a BUMPS instance.
         """
-        if not isinstance(samples, int) or samples <= 0:
-            raise ValueError('samples must be a positive integer.')
-        if not isinstance(burn, int) or burn < 0:
-            raise ValueError('burn must be a non-negative integer.')
-        if not isinstance(thin, int) or thin < 1:
-            raise ValueError('thin must be a positive integer.')
-
-        # Resolve chains/population alias
-        from easyscience.fitting.minimizers.minimizer_bumps import Bumps
-
-        pop = Bumps._resolve_population_alias(chains=chains, population=population)
-
-        x_fit, x_new, y_new, w_new, dims = self._precompute_reshaping(x, y, weights, vectorized)
-        self._dependent_dims = dims
-
-        original_fit_func = self._fit_function
-        self.fit_function = self._fit_function_wrapper(x_new, flatten=True)
-
-        try:
-            minimizer = self.minimizer
-            if not (hasattr(minimizer, 'package') and minimizer.package == 'bumps'):
-                raise RuntimeError(
-                    'Bayesian sampling requires a BUMPS minimizer. '
-                    'Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.'
-                )
-
-            result = minimizer.mcmc_sample(
-                x=x_fit,
-                y=y_new,
-                weights=w_new,
-                samples=samples,
-                burn=burn,
-                thin=thin,
-                population=pop,
-                resume_state=resume_state,
-                sampler_kwargs=sampler_kwargs,
-                progress_callback=progress_callback,
-                abort_test=abort_test,
-            )
-        finally:
-            self.fit_function = original_fit_func
-
-        return result
+        warnings.warn(
+            'Fitter.mcmc_sample() is deprecated. '
+            'Use fitter.create_sampler(x, y, weights).sample(...) instead; '
+            'chain continuation is sampler.extend(additional_samples=...).',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        sampler = self.create_sampler(x, y, weights, vectorized=vectorized)
+        results = sampler._run(
+            samples=samples,
+            burn=burn,
+            thin=thin,
+            population=population,
+            resume_state=resume_state,
+            sampler_kwargs=sampler_kwargs,
+            progress_callback=progress_callback,
+            abort_test=abort_test,
+        )
+        return results.to_legacy_dict()

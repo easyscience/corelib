@@ -265,7 +265,11 @@ class TestFitter:
 # ===================================================================
 
 
+@pytest.mark.filterwarnings('ignore::DeprecationWarning')
 class TestFitterMcmcSample:
+    """Unit tests for the deprecated ``Fitter.mcmc_sample()`` shim, which
+    delegates to ``Sampler`` while keeping the full legacy signature."""
+
     @pytest.fixture
     def fitter(self, monkeypatch):
         monkeypatch.setattr(Fitter, '_update_minimizer', MagicMock())
@@ -391,23 +395,53 @@ class TestFitterMcmcSample:
 
         assert fitter._fit_function is original
 
-    @pytest.mark.parametrize(
-        'kwargs, match',
-        [
-            ({'samples': 0}, 'samples must be a positive integer'),
-            ({'samples': -1}, 'samples must be a positive integer'),
-            ({'burn': -1}, 'burn must be a non-negative integer'),
-            ({'thin': 0}, 'thin must be a positive integer'),
-        ],
-    )
-    def test_invalid_args_raise(self, fitter: Fitter, kwargs, match):
-        """Invalid samples/burn/thin values raise ValueError before any I/O."""
-        with pytest.raises(ValueError, match=match):
-            fitter.mcmc_sample(
-                x=np.array([1.0]),
-                y=np.array([0.1]),
-                weights=np.array([1.0]),
-                samples=kwargs.get('samples', 10),
-                burn=kwargs.get('burn', 0),
-                thin=kwargs.get('thin', 1),
-            )
+    # NOTE: samples/burn/thin validation lives in ``Bumps.mcmc_sample`` (the
+    # single source of truth); see ``TestBumpsSample.test_sample_invalid_args``
+    # in tests/unit/fitting/minimizers/test_minimizer_bumps.py.
+
+    def test_emits_deprecation_warning(self, fitter: Fitter):
+        """The mcmc_sample() shim emits a DeprecationWarning pointing at Sampler."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'bumps'
+        fitter._minimizer.mcmc_sample = MagicMock(
+            return_value={
+                'draws': [],
+                'param_names': [],
+                'internal_bumps_object': None,
+                'logp': None,
+            }
+        )
+
+        with pytest.warns(DeprecationWarning, match='mcmc_sample.*deprecated'):
+            fitter.mcmc_sample(x=np.array([1.0]), y=np.array([0.1]), weights=np.array([1.0]))
+
+    def test_resume_state_forwarded(self, fitter: Fitter):
+        """The legacy ``resume_state`` argument is forwarded to the minimizer."""
+        fitter._precompute_reshaping = MagicMock(
+            return_value=('x_fit', 'x_new', 'y_new', 'w_new', 'dims')
+        )
+        fitter._fit_function_wrapper = MagicMock(return_value='wrapped')
+        fitter._minimizer = MagicMock()
+        fitter._minimizer.package = 'bumps'
+        fitter._minimizer.mcmc_sample = MagicMock(
+            return_value={
+                'draws': [],
+                'param_names': [],
+                'internal_bumps_object': None,
+                'logp': None,
+            }
+        )
+        state = object()
+
+        fitter.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            resume_state=state,
+        )
+
+        assert fitter._minimizer.mcmc_sample.call_args.kwargs['resume_state'] is state
