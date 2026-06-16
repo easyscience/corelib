@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
@@ -11,6 +10,8 @@ from typing import List
 from typing import NamedTuple
 from typing import Optional
 from typing import Type
+
+from easyscience import global_object
 
 if TYPE_CHECKING:
     from abc import ABCMeta
@@ -97,14 +98,14 @@ class InterfaceFactoryTemplate:
                     if hasattr(obj, 'update_bindings'):
                         obj.update_bindings()
                 except Exception as e:
-                    logging.getLogger('easyscience.fitting.calculators').warning(
+                    global_object.log.getLogger('fitting.calculators').warning(
                         'Unable to auto generate bindings.\n%s', e
                     )
             elif hasattr(fitter, 'generate_bindings'):
                 try:
                     fitter.generate_bindings()
                 except Exception as e:
-                    logging.getLogger('easyscience.fitting.calculators').warning(
+                    global_object.log.getLogger('fitting.calculators').warning(
                         'Unable to auto generate bindings.\n%s', e
                     )
 

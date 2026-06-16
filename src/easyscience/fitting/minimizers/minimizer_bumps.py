@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import copy
-import logging
 from typing import Any
 from typing import Callable
 from typing import List
@@ -484,14 +483,16 @@ class Bumps(MinimizerBase):
                 f'objective evaluated {n_evaluations} times'
             )
         if stopped_on_budget:
+            from easyscience import global_object
+
             if tolerance is None:
-                logging.getLogger('easyscience.fitting.bumps').warning(
+                global_object.log.getLogger('fitting.bumps').warning(
                     f'Fit did not converge within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
                     'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
                 )
             else:
-                logging.getLogger('easyscience.fitting.bumps').warning(
+                global_object.log.getLogger('fitting.bumps').warning(
                     f'Fit did not reach the desired tolerance of {tolerance} within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
                     'Consider increasing the maximum number of evaluations or adjusting the tolerance.'

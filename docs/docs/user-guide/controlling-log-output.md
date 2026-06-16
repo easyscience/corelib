@@ -163,7 +163,6 @@ When developing or debugging, see all EasyScience internal diagnostics:
 
 ```python
 from easyscience import global_object
-import logging
 
 global_object.log.set_level('DEBUG')
 

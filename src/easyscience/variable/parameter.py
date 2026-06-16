@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import copy
-import logging
 import numbers
 import re
 import weakref
@@ -238,7 +237,7 @@ class Parameter(DescriptorNumber):
 
             self._notify_observers()
         else:
-            logging.getLogger('easyscience.variable').warning(
+            global_object.log.getLogger('variable').warning(
                 'This parameter is not dependent. It cannot be updated.'
             )
 

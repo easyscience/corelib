@@ -7,11 +7,11 @@
     Please update your imports.
 """
 
-import logging
+from easyscience import global_object
 
 from ..legacy.obj_base import ObjBase  # noqa: F401
 
-logging.getLogger('easyscience').warning(
+global_object.log.warning(
     'easyscience.base_classes.obj_base is deprecated. '
     'Please import from easyscience.legacy.obj_base instead.'
 )

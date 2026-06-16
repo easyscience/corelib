@@ -4,7 +4,7 @@
 import contextlib
 import logging
 import os
-from typing import Optional
+from collections.abc import Iterator
 
 PACKAGE_LOGGER_NAME = 'easyscience'
 _LOG_LEVEL_ENV_VAR = 'EASYSCIENCE_LOG_LEVEL'
@@ -19,7 +19,7 @@ _LEVEL_NAME_MAP = {
 
 
 def _resolve_log_level(
-    raw: Optional[str],
+    raw: str | None,
     default: int = logging.WARNING,
 ) -> int:
     """Parse an environment-variable string into a logging level."""
@@ -39,23 +39,19 @@ class Logger:
     Central logging controller for EasyScience.
 
     Owns the package-root logger ``easyscience`` and provides a
-    convenience API to set its level.
-
-    Library-safe behaviour:
-    - Never calls :func:`logging.basicConfig`.
-    - Never attaches a default stream handler.
-    - Child loggers returned by :meth:`getLogger` are left at
-      ``logging.NOTSET`` so they inherit level control from the package
-      root logger.
-
-    Parameters
-    ----------
-    log_level : int, default=logging.WARNING
-        Default level for the package-root logger. Overridden by the
-        ``EASYSCIENCE_LOG_LEVEL`` environment variable when set.
+    convenience API to set its level. It never calls
+    ``logging.basicConfig`` nor attaches a handler, so the host
+    application keeps full control over where output goes.
     """
 
     def __init__(self, log_level: int = logging.WARNING):
+        """
+        Parameters
+        ----------
+        log_level : int, default=logging.WARNING
+            Default level for the package-root logger. Overridden by the
+            ``EASYSCIENCE_LOG_LEVEL`` environment variable when set.
+        """
         self._effective_default = _resolve_log_level(
             os.environ.get(_LOG_LEVEL_ENV_VAR), default=log_level
         )
@@ -100,10 +96,9 @@ class Logger:
         level : int | str
             Logging level — e.g. ``logging.WARNING``, ``'ERROR'``.
         """
-        if isinstance(level, str):
-            level = _resolve_log_level(level)
-        self.level = level
-        self.logger.setLevel(level)
+        resolved_level = _resolve_log_level(level) if isinstance(level, str) else level
+        self.level = resolved_level
+        self.logger.setLevel(resolved_level)
 
     def getLogger(self, logger_name: str) -> logging.Logger:
         """
@@ -124,26 +119,41 @@ class Logger:
             when *logger_name* does not already start with *easyscience*
             or a dot.
         """
-        if not logger_name.startswith('easyscience') and not logger_name.startswith('.'):
+        if not logger_name.startswith(PACKAGE_LOGGER_NAME) and not logger_name.startswith('.'):
             logger_name = f'{PACKAGE_LOGGER_NAME}.{logger_name}'
         return logging.getLogger(logger_name)
 
     @contextlib.contextmanager
-    def at_level(self, level: int | str):
+    def at_level(self, level: int | str) -> Iterator[None]:
         """
         Context manager that temporarily sets the package-root logger
         to *level*, restoring the previous level on exit.
 
-        Example::
+        Parameters
+        ----------
+        level : int | str
+            Temporary level for the package-root logger — e.g.
+            ``logging.ERROR`` or ``'ERROR'``.
 
-            with global_object.log.at_level(logging.ERROR):
-                fitter.fit(x, y, weights)  # no core messages below ERROR
+        Yields
+        ------
+        None
+            Control is handed back to the ``with`` block with the
+            temporary level applied.
+
+        Example
+        -------
+        Setting the log-level only within the context:
+
+        ```python
+        with global_object.log.at_level(logging.ERROR):
+            fitter.fit(x, y, weights)  # no core messages below ERROR
+        ```
         """
         previous = self.level
-        if isinstance(level, str):
-            level = _resolve_log_level(level)
-        self.level = level
-        self.logger.setLevel(level)
+        resolved_level = _resolve_log_level(level) if isinstance(level, str) else level
+        self.level = resolved_level
+        self.logger.setLevel(resolved_level)
         try:
             yield
         finally:

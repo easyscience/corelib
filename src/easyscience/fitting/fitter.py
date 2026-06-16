@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import functools
-import logging
 from typing import Callable
 from typing import List
 from typing import Optional
 from typing import Union
 
 import numpy as np
+
+from easyscience import global_object
 
 from .available_minimizers import AvailableMinimizers
 from .available_minimizers import from_string_to_enum
@@ -73,7 +74,7 @@ class Fitter:
             DEFAULT_MINIMIZER.
         """
         if isinstance(minimizer_enum, str):
-            logging.getLogger('easyscience.fitting').warning(
+            global_object.log.getLogger('fitting').warning(
                 'minimizer should be set with enum %s', minimizer_enum
             )
             minimizer_enum = from_string_to_enum(minimizer_enum)
@@ -89,7 +90,7 @@ class Fitter:
             The enum of the minimizer to create and instantiate.
         """
         if isinstance(minimizer_enum, str):
-            logging.getLogger('easyscience.fitting').warning(
+            global_object.log.getLogger('fitting').warning(
                 'minimizer should be set with enum %s', minimizer_enum
             )
             minimizer_enum = from_string_to_enum(minimizer_enum)

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import copy
-import logging
 from collections.abc import MutableSequence
 from typing import Any
 from typing import Callable
@@ -16,6 +15,7 @@ from typing import Type
 from typing import TypeVar
 from typing import overload
 
+from easyscience import global_object
 from easyscience.io.serializer_base import SerializerBase
 from easyscience.variable.descriptor_base import DescriptorBase
 
@@ -159,7 +159,7 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
             if not isinstance(value, tuple(self._protected_types)):
                 raise TypeError(f'Items must be one of {self._protected_types}, got {type(value)}')
             if value is not self._data[idx] and value in self:
-                logging.getLogger('easyscience.base_classes').warning(
+                global_object.log.getLogger('base_classes').warning(
                     f'Item with unique name "{self._get_key(value)}" already in EasyList, it will be ignored'
                 )
                 return
@@ -177,7 +177,7 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
                 if not isinstance(v, tuple(self._protected_types)):
                     raise TypeError(f'Items must be one of {self._protected_types}, got {type(v)}')
                 if v in self and replaced[i] is not v:
-                    logging.getLogger('easyscience.base_classes').warning(
+                    global_object.log.getLogger('base_classes').warning(
                         f'Item with unique name "{v.unique_name}" already in EasyList, it will be ignored'
                     )
                     new_values[i] = replaced[
@@ -240,7 +240,7 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
         elif not isinstance(value, tuple(self._protected_types)):
             raise TypeError(f'Items must be one of {self._protected_types}, got {type(value)}')
         if value in self:
-            logging.getLogger('easyscience.base_classes').warning(
+            global_object.log.getLogger('base_classes').warning(
                 f'Item with unique name "{self._get_key(value)}" already in EasyList, it will be ignored'
             )
             return

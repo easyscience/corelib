@@ -7,11 +7,11 @@
     Please update your imports.
 """
 
-import logging
+from easyscience import global_object
 
 from ..legacy.collection_base import CollectionBase  # noqa: F401
 
-logging.getLogger('easyscience').warning(
+global_object.log.warning(
     'easyscience.base_classes.collection_base is deprecated. '
     'Please import from easyscience.legacy.collection_base instead.'
 )

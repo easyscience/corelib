@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2024 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import logging
 from dataclasses import dataclass
 from enum import Enum
+
+from easyscience import global_object
 
 # Change to importlib.metadata when Python 3.10 is the minimum version
 # import importlib.metadata
@@ -15,7 +16,7 @@ try:
 
     lmfit_engine_available = True
 except ImportError:
-    logging.getLogger('easyscience.fitting').warning(
+    global_object.log.getLogger('fitting').warning(
         'LMFit minimization is not available. Probably lmfit has not been installed.'
     )
 
@@ -25,7 +26,7 @@ try:
 
     bumps_engine_available = True
 except ImportError:
-    logging.getLogger('easyscience.fitting').warning(
+    global_object.log.getLogger('fitting').warning(
         'Bumps minimization is not available. Probably bumps has not been installed.'
     )
 
@@ -35,7 +36,7 @@ try:
 
     dfo_engine_available = True
 except ImportError:
-    logging.getLogger('easyscience.fitting').warning(
+    global_object.log.getLogger('fitting').warning(
         'DFO minimization is not available. Probably dfols has not been installed.'
     )
 

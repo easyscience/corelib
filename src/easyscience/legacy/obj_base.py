@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Optional
+
+from easyscience import global_object
 
 from ..base_classes.based_base import BasedBase
 from ..utils.classTools import addLoggedProp
@@ -58,7 +59,7 @@ class ObjBase(BasedBase):
             If a keyword component name would overwrite an existing
             class attribute.
         """
-        logging.getLogger('easyscience.legacy').warning(
+        global_object.log.getLogger('legacy').warning(
             'ObjBase is deprecated and will be removed in a future version. '
             'Please migrate to ModelBase.'
         )

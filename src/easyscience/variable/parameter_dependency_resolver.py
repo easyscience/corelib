@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 from typing import Dict
 from typing import List
+
+from easyscience import global_object
 
 from .parameter import Parameter
 
@@ -57,7 +58,7 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
                             attr_value = getattr(item, attr_name)
                             _collect_parameters(attr_value, parameters)
                         except (AttributeError, Exception):
-                            logging.getLogger('easyscience.variable.dependencies').debug(
+                            global_object.log.getLogger('variable.dependencies').debug(
                                 "Error accessing property '%s' of %s", attr_name, item
                             )
                             # Skip properties that can't be accessed
@@ -87,7 +88,7 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
 
     # Report results
     if resolved_count > 0:
-        logging.getLogger('easyscience.variable.dependencies').debug(
+        global_object.log.getLogger('variable.dependencies').debug(
             'Successfully resolved dependencies for %d parameter(s).', resolved_count
         )
 
@@ -144,7 +145,7 @@ def get_parameters_with_pending_dependencies(obj: Any) -> List[Parameter]:
                             attr_value = getattr(item, attr_name)
                             _collect_pending_parameters(attr_value)
                         except (AttributeError, Exception):
-                            logging.getLogger('easyscience.variable.dependencies').debug(
+                            global_object.log.getLogger('variable.dependencies').debug(
                                 "Error accessing property '%s' of %s", attr_name, item
                             )
                             # Skip properties that can't be accessed
