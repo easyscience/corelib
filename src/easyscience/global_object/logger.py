@@ -18,20 +18,28 @@ _LEVEL_NAME_MAP = {
 }
 
 
-def _resolve_log_level(
-    raw: str | None,
-    default: int = logging.WARNING,
-) -> int:
-    """Parse an environment-variable string into a logging level."""
-    if raw is None:
-        return default
-    stripped = raw.strip()
+def _parse_log_level(level: int | str) -> int:
+    """Convert a level number or name into a numeric level, raising on an unknown name."""
+    if isinstance(level, int):
+        return level
+    stripped = level.strip()
     if stripped.isdigit():
         return int(stripped)
     upper = stripped.upper()
     if upper in _LEVEL_NAME_MAP:
         return _LEVEL_NAME_MAP[upper]
-    return default
+    valid = ', '.join(sorted(_LEVEL_NAME_MAP))
+    raise ValueError(f'Unknown log level {level!r}. Expected an integer or one of: {valid}.')
+
+
+def _env_log_level(raw: str | None, default: int) -> int:
+    """Parse the EASYSCIENCE_LOG_LEVEL env var, falling back to *default* on an unset/bad value."""
+    if raw is None:
+        return default
+    try:
+        return _parse_log_level(raw)
+    except ValueError:
+        return default
 
 
 class Logger:
@@ -52,12 +60,10 @@ class Logger:
             Default level for the package-root logger. Overridden by the
             ``EASYSCIENCE_LOG_LEVEL`` environment variable when set.
         """
-        self._effective_default = _resolve_log_level(
-            os.environ.get(_LOG_LEVEL_ENV_VAR), default=log_level
-        )
+        effective_default = _env_log_level(os.environ.get(_LOG_LEVEL_ENV_VAR), default=log_level)
         self.logger = logging.getLogger(PACKAGE_LOGGER_NAME)
-        self.logger.setLevel(self._effective_default)
-        self.level = self._effective_default
+        self.logger.setLevel(effective_default)
+        self._level_before_suspend = effective_default
 
     # -- convenience delegation methods (mirror logging module) ------------
 
@@ -87,18 +93,32 @@ class Logger:
 
     # -- public API -------------------------------------------------------
 
-    def set_level(self, level: int | str) -> None:
+    @property
+    def level(self) -> int:
         """
-        Set the effective level of the package-root logger.
+        Get the effective level of the package-root logger.
+
+        Returns
+        -------
+        int
+            Numeric logging level currently set on the ``easyscience``
+            package-root logger.
+        """
+        return self.logger.level
+
+    @level.setter
+    def level(self, value: int | str) -> None:
+        """
+        Set the level of the package-root logger.
 
         Parameters
         ----------
-        level : int | str
-            Logging level — e.g. ``logging.WARNING``, ``'ERROR'``.
+        value : int | str
+            Logging level — a number (e.g. ``logging.WARNING``) or a
+            level name (e.g. ``'ERROR'``). A string that is not a
+            recognised level name or numeric string raises ``ValueError``.
         """
-        resolved_level = _resolve_log_level(level) if isinstance(level, str) else level
-        self.level = resolved_level
-        self.logger.setLevel(resolved_level)
+        self.logger.setLevel(_parse_log_level(value))
 
     def getLogger(self, logger_name: str) -> logging.Logger:
         """
@@ -150,22 +170,20 @@ class Logger:
             fitter.fit(x, y, weights)  # no core messages below ERROR
         ```
         """
-        previous = self.level
-        resolved_level = _resolve_log_level(level) if isinstance(level, str) else level
-        self.level = resolved_level
-        self.logger.setLevel(resolved_level)
+        previous = self.logger.level
+        self.level = level
         try:
             yield
         finally:
-            self.level = previous
             self.logger.setLevel(previous)
 
     # -- deprecated helpers (compatibility shims) -------------------------
 
     def suspend(self):
         """Suppress all core log output (set level to CRITICAL+1)."""
+        self._level_before_suspend = self.logger.level
         self.logger.setLevel(logging.CRITICAL + 1)
 
     def resume(self):
-        """Restore the previously configured log level."""
-        self.logger.setLevel(self.level)
+        """Restore the level captured by the most recent suspend call."""
+        self.level = self._level_before_suspend

@@ -12,7 +12,7 @@ can do it in one line:
 ```python
 from easyscience import global_object
 
-global_object.log.set_level('ERROR')
+global_object.log.level = 'ERROR'
 ```
 
 Or using the standard library directly:
@@ -112,22 +112,22 @@ don't want EasyScience output to leak into their own users' consoles.
 
 ## Convenience API
 
-The `global_object.log` object exposes convenience methods that mirror
-`logging` module-level functions:
+The `global_object.log` object exposes a `level` property plus
+convenience methods that mirror `logging` module-level functions:
 
-| Method              | Description                                                          |
-| ------------------- | -------------------------------------------------------------------- |
-| `.set_level(level)` | Set the package-root logger level (`'WARNING'` or `logging.WARNING`) |
-| `.debug(msg)`       | Log a `DEBUG`-level message                                          |
-| `.info(msg)`        | Log an `INFO`-level message                                          |
-| `.warning(msg)`     | Log a `WARNING`-level message                                        |
-| `.error(msg)`       | Log an `ERROR`-level message                                         |
-| `.critical(msg)`    | Log a `CRITICAL`-level message                                       |
-| `.exception(msg)`   | Log an `ERROR`-level message with traceback                          |
-| `.getLogger(name)`  | Get a child logger under `easyscience`                               |
-| `.at_level(level)`  | Context manager for temporary level change                           |
-| `.suspend()`        | Suppress all EasyScience output                                      |
-| `.resume()`         | Restore the previously set level                                     |
+| Member             | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `.level`           | Get/set the package-root logger level (`'WARNING'` or `logging.WARNING`) |
+| `.debug(msg)`      | Log a `DEBUG`-level message                                              |
+| `.info(msg)`       | Log an `INFO`-level message                                              |
+| `.warning(msg)`    | Log a `WARNING`-level message                                            |
+| `.error(msg)`      | Log an `ERROR`-level message                                             |
+| `.critical(msg)`   | Log a `CRITICAL`-level message                                           |
+| `.exception(msg)`  | Log an `ERROR`-level message with traceback                              |
+| `.getLogger(name)` | Get a child logger under `easyscience`                                   |
+| `.at_level(level)` | Context manager for temporary level change                               |
+| `.suspend()`       | Suppress all EasyScience output                                          |
+| `.resume()`        | Restore the previously set level                                         |
 
 ## Recipes
 
@@ -164,7 +164,7 @@ When developing or debugging, see all EasyScience internal diagnostics:
 ```python
 from easyscience import global_object
 
-global_object.log.set_level('DEBUG')
+global_object.log.level = 'DEBUG'
 
 # Your code here — all EasyScience messages will be visible
 ```
@@ -176,7 +176,7 @@ Keep the console clean but still see critical problems:
 ```python
 from easyscience import global_object
 
-global_object.log.set_level('ERROR')
+global_object.log.level = 'ERROR'
 ```
 
 ## Library-Safe Behaviour
