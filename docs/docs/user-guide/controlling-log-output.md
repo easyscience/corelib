@@ -142,6 +142,7 @@ from easyscience import global_object
 
 @pytest.fixture(autouse=True)
 def _quiet_easyscience():
+    # The test body runs *inside* the context manager (yield within `with`)
     with global_object.log.at_level(logging.ERROR):
         yield
 ```
@@ -194,6 +195,9 @@ EasyScience follows standard library-logging best practices:
   package-root logger. Supressing the root suppresses everything.
 
 This means you are in full control. If you don't configure any handlers,
-EasyScience messages will not appear. If you do configure handlers (as
-`pytest` does via its logging plugin, or as an application might via
-`basicConfig`), you control what is shown and where.
+Python's built-in `logging.lastResort` fallback still prints `WARNING`
+and above to `stderr`, so standalone users see important messages out of
+the box. `INFO` and `DEBUG` messages remain hidden until you opt in. If
+you do configure handlers (as `pytest` does via its logging plugin, or
+as an application might via `basicConfig`), you control what is shown
+and where.

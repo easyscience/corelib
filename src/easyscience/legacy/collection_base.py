@@ -71,7 +71,8 @@ class CollectionBase(BasedBase, MutableSequence):
         """
         global_object.log.getLogger('legacy').warning(
             'CollectionBase is deprecated and will be removed in a future version. '
-            'Please migrate to ModelBase or EasyList.'
+            'Please migrate to ModelBase or EasyList.',
+            stacklevel=2,
         )
         BasedBase.__init__(self, name, unique_name=unique_name)
         kwargs = {key: kwargs[key] for key in kwargs.keys() if kwargs[key] is not None}

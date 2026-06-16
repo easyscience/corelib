@@ -61,7 +61,8 @@ class ObjBase(BasedBase):
         """
         global_object.log.getLogger('legacy').warning(
             'ObjBase is deprecated and will be removed in a future version. '
-            'Please migrate to ModelBase.'
+            'Please migrate to ModelBase.',
+            stacklevel=2,
         )
         super(ObjBase, self).__init__(name=name, unique_name=unique_name)
         # If Parameter or Descriptor is given as arguments...

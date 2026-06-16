@@ -13,5 +13,6 @@ from ..legacy.obj_base import ObjBase  # noqa: F401
 
 global_object.log.warning(
     'easyscience.base_classes.obj_base is deprecated. '
-    'Please import from easyscience.legacy.obj_base instead.'
+    'Please import from easyscience.legacy.obj_base instead.',
+    stacklevel=2,
 )
