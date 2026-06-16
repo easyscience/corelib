@@ -1438,7 +1438,7 @@ what output the library produces and where it goes.</p>
 can do it in one line:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
 
-<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;ERROR&#39;</span>
 </code></pre></div>
 <p>Or using the standard library directly:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
@@ -1509,19 +1509,19 @@ the <code>at_level</code> context manager:</p>
 <p>This is the recommended pattern for technique-specific libraries that
 don't want EasyScience output to leak into their own users' consoles.</p>
 <h2 id="convenience-api">Convenience API</h2>
-<p>The <code>global_object.log</code> object exposes convenience methods that mirror
-<code>logging</code> module-level functions:</p>
+<p>The <code>global_object.log</code> object exposes a <code>level</code> property plus
+convenience methods that mirror <code>logging</code> module-level functions:</p>
 <table>
 <thead>
 <tr>
-<th>Method</th>
+<th>Member</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>.set_level(level)</code></td>
-<td>Set the package-root logger level (<code>'WARNING'</code> or <code>logging.WARNING</code>)</td>
+<td><code>.level</code></td>
+<td>Get/set the package-root logger level (<code>'WARNING'</code> or <code>logging.WARNING</code>)</td>
 </tr>
 <tr>
 <td><code>.debug(msg)</code></td>
@@ -1588,7 +1588,7 @@ EasyScience from writing to your users' consoles:</p>
 <p>When developing or debugging, see all EasyScience internal diagnostics:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
 
-<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">)</span>
+<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;DEBUG&#39;</span>
 
 <span class="c1"># Your code here — all EasyScience messages will be visible</span>
 </code></pre></div>
@@ -1596,7 +1596,7 @@ EasyScience from writing to your users' consoles:</p>
 <p>Keep the console clean but still see critical problems:</p>
 <div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">easyscience</span><span class="w"> </span><span class="kn">import</span> <span class="n">global_object</span>
 
-<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+<span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;ERROR&#39;</span>
 </code></pre></div>
 <h2 id="library-safe-behaviour">Library-Safe Behaviour</h2>
 <p>EasyScience follows standard library-logging best practices:</p>
