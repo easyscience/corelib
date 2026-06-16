@@ -1574,6 +1574,7 @@ library's messages so they don't clutter your test reports:</p>
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_quiet_easyscience</span><span class="p">():</span>
+    <span class="c1"># The test body runs *inside* the context manager (yield within `with`)</span>
     <span class="k">with</span> <span class="n">global_object</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">at_level</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">):</span>
         <span class="k">yield</span>
 </code></pre></div>
@@ -1612,9 +1613,12 @@ EasyScience from writing to your users' consoles:</p>
   package-root logger. Supressing the root suppresses everything.</li>
 </ul>
 <p>This means you are in full control. If you don't configure any handlers,
-EasyScience messages will not appear. If you do configure handlers (as
-<code>pytest</code> does via its logging plugin, or as an application might via
-<code>basicConfig</code>), you control what is shown and where.</p>
+Python's built-in <code>logging.lastResort</code> fallback still prints <code>WARNING</code>
+and above to <code>stderr</code>, so standalone users see important messages out of
+the box. <code>INFO</code> and <code>DEBUG</code> messages remain hidden until you opt in. If
+you do configure handlers (as <code>pytest</code> does via its logging plugin, or
+as an application might via <code>basicConfig</code>), you control what is shown
+and where.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
