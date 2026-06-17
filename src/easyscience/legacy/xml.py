@@ -13,6 +13,8 @@ from typing import Optional
 
 import numpy as np
 
+from easyscience import global_object
+
 from ..io.dict import DataDictSerializer
 from ..io.dict import DictSerializer
 from ..io.template import BaseEncoderDecoder
@@ -191,5 +193,5 @@ class XMLSerializer(BaseEncoderDecoder):
         elif issubclass(T_, np.ndarray):
             element.text = str(value.tolist())
         else:
-            print(f'Cannot encode {T_} to XML')
+            global_object.log.getLogger('legacy.xml').error('Cannot encode %s to XML', T_)
             raise NotImplementedError

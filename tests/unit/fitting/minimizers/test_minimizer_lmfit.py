@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
+import logging
 from unittest.mock import ANY
 from unittest.mock import MagicMock
 
@@ -340,7 +340,9 @@ class TestLMFit:
         with pytest.raises(FitError):
             minimizer.fit(x=1.0, y=2.0, weights=1)
 
-    def test_gen_fit_results_populates_evaluation_metadata(self, minimizer: LMFit) -> None:
+    def test_gen_fit_results_populates_evaluation_metadata(
+        self, minimizer: LMFit, caplog: 'pytest.LogCaptureFixture'
+    ) -> None:
         fit_results = MagicMock()
         fit_results.success = False
         fit_results.data = 'data'
@@ -352,8 +354,10 @@ class TestLMFit:
         fit_results.nfev = 9
         fit_results.message = 'max evaluations reached'
 
-        with pytest.warns(UserWarning, match='max evaluations reached'):
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.lmfit'):
             result = minimizer._gen_fit_results(fit_results, iterations=4)
+
+        assert 'max evaluations reached' in caplog.text
 
         assert result.success is False
         assert result.n_evaluations == 9
@@ -361,7 +365,9 @@ class TestLMFit:
         assert result.message == 'max evaluations reached'
         assert result.engine_result == fit_results
 
-    def test_gen_fit_results_success_does_not_warn(self, minimizer: LMFit) -> None:
+    def test_gen_fit_results_success_does_not_warn(
+        self, minimizer: LMFit, caplog: 'pytest.LogCaptureFixture'
+    ) -> None:
         fit_results = MagicMock()
         fit_results.success = True
         fit_results.data = 'data'
@@ -373,11 +379,10 @@ class TestLMFit:
         fit_results.nfev = 3
         fit_results.message = 'success'
 
-        with warnings.catch_warnings(record=True) as record:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.lmfit'):
             result = minimizer._gen_fit_results(fit_results)
 
-        assert len(record) == 0
+        assert len(caplog.records) == 0
         assert result.success is True
 
     def test_convert_to_pars_obj(self, minimizer: LMFit, monkeypatch) -> None:

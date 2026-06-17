@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import MutableSequence
 from numbers import Number
 from typing import TYPE_CHECKING
@@ -14,6 +13,7 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 
+from easyscience import global_object
 from easyscience.base_classes.new_base import NewBase
 from easyscience.global_object.undo_redo import NotarizedDict
 
@@ -69,10 +69,9 @@ class CollectionBase(BasedBase, MutableSequence):
             If a provided item is not an EasyScience object or if a
             keyword collides with an internal attribute.
         """
-        warnings.warn(
+        global_object.log.getLogger('legacy').warning(
             'CollectionBase is deprecated and will be removed in a future version. '
             'Please migrate to ModelBase or EasyList.',
-            DeprecationWarning,
             stacklevel=2,
         )
         BasedBase.__init__(self, name, unique_name=unique_name)

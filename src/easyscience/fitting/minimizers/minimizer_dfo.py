@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
 from dataclasses import dataclass
 from typing import Any
 from typing import Callable
@@ -393,6 +392,8 @@ class DFO(MinimizerBase):
         """
 
         results = FitResults()
+        from easyscience import global_object
+
         for name, value in kwargs.items():
             if getattr(results, name, False):
                 setattr(results, name, value)
@@ -400,7 +401,7 @@ class DFO(MinimizerBase):
         # EXIT_SUCCESS is 0 and EXIT_MAXFUN_WARNING keeps a different flag value.
         results.success = fit_results.flag == fit_results.EXIT_SUCCESS
         if fit_results.flag == fit_results.EXIT_MAXFUN_WARNING:
-            warnings.warn(str(fit_results.msg), UserWarning)
+            global_object.log.getLogger('fitting.dfo').warning(str(fit_results.msg))
 
         pars = {}
         for p_name, par in self._cached_pars.items():
@@ -419,7 +420,7 @@ class DFO(MinimizerBase):
         results.message = str(fit_results.msg)
         if not results.success:
             warning_message = results.message or 'DFO fit did not succeed.'
-            warnings.warn(warning_message, UserWarning, stacklevel=2)
+            global_object.log.getLogger('fitting.dfo').warning(warning_message)
         # results.residual = results.y_obs - results.y_calc
         # results.goodness_of_fit = fit_results.f
 

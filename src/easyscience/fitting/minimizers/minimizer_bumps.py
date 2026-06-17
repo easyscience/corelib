@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import copy
-import warnings
 from typing import Any
 from typing import Callable
 
@@ -666,19 +665,19 @@ class Bumps(MinimizerBase):
                 f'objective evaluated {n_evaluations} times'
             )
         if stopped_on_budget:
+            from easyscience import global_object
+
             if tolerance is None:
-                warnings.warn(
+                global_object.log.getLogger('fitting.bumps').warning(
                     f'Fit did not converge within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.',
-                    UserWarning,
+                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
                 )
             else:
-                warnings.warn(
+                global_object.log.getLogger('fitting.bumps').warning(
                     f'Fit did not reach the desired tolerance of {tolerance} within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.',
-                    UserWarning,
+                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
                 )
 
         # results.residual = results.y_obs - results.y_calc

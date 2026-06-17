@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import logging
 from unittest.mock import ANY
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -194,7 +195,9 @@ class TestBumpsFit:
         assert minimizer._cached_pars['b'].value == 2.0
         assert minimizer._cached_pars['b'].error == 0.2
 
-    def test_gen_fit_results(self, minimizer: Bumps, monkeypatch):
+    def test_gen_fit_results(
+        self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ):
         # When
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
@@ -224,12 +227,13 @@ class TestBumpsFit:
         minimizer.evaluate = MagicMock(return_value='evaluate')
 
         # Then
-        with pytest.warns(UserWarning, match='maximum optimizer steps of 3'):
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.bumps'):
             domain_fit_results = minimizer._gen_fit_results(
                 mock_fit_result,
                 max_evaluations=3,
                 **{'kwargs_set_key': 'kwargs_set_val'},
             )
+        assert 'maximum optimizer steps of 3' in caplog.text
 
         # Expect
         assert domain_fit_results == mock_domain_fit_results
@@ -636,7 +640,9 @@ class TestBumpsFit:
 
         assert parameter.value == 1.0
 
-    def test_gen_fit_results_uses_nit_for_budget_check(self, minimizer: Bumps, monkeypatch):
+    def test_gen_fit_results_uses_nit_for_budget_check(
+        self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ):
         mock_domain_fit_results = MagicMock()
         mock_FitResults = MagicMock(return_value=mock_domain_fit_results)
         monkeypatch.setattr(
@@ -662,8 +668,10 @@ class TestBumpsFit:
         minimizer._eval_counter = MagicMock(count=2)
         minimizer.evaluate = MagicMock(return_value='evaluate')
 
-        with pytest.warns(UserWarning, match='maximum optimizer steps of 3'):
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.bumps'):
             domain_fit_results = minimizer._gen_fit_results(mock_fit_result, max_evaluations=3)
+
+        assert 'maximum optimizer steps of 3' in caplog.text
 
         assert domain_fit_results.success == False
         assert domain_fit_results.n_evaluations == 2
