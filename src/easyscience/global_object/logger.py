@@ -20,16 +20,19 @@ _LEVEL_NAME_MAP = {
 
 def _parse_log_level(level: int | str) -> int:
     """Convert a level number or name into a numeric level, raising on an unknown name."""
-    if isinstance(level, int):
-        return level
-    stripped = level.strip()
-    if stripped.isdigit():
-        return int(stripped)
-    upper = stripped.upper()
-    if upper in _LEVEL_NAME_MAP:
-        return _LEVEL_NAME_MAP[upper]
-    valid = ', '.join(sorted(_LEVEL_NAME_MAP))
-    raise ValueError(f'Unknown log level {level!r}. Expected an integer or one of: {valid}.')
+    if isinstance(level, str):
+        stripped = level.strip()
+        if stripped.isdigit():
+            return int(stripped)
+        upper = stripped.upper()
+        if upper in _LEVEL_NAME_MAP:
+            return _LEVEL_NAME_MAP[upper]
+        valid = ', '.join(sorted(_LEVEL_NAME_MAP))
+        raise ValueError(f'Unknown log level {level!r}. Expected an integer or one of: {valid}.')
+    # bool is a subclass of int, so reject it explicitly before accepting ints.
+    if isinstance(level, bool) or not isinstance(level, int):
+        raise TypeError(f'Log level must be int or str, not {type(level).__name__}')
+    return level
 
 
 def _env_log_level(raw: str | None, default: int) -> int:

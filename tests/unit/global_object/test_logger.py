@@ -76,6 +76,20 @@ class TestParseLogLevel:
         assert 'VERBOSE' in str(exc.value)
         assert 'WARNING' in str(exc.value)
 
+    @pytest.mark.parametrize('value', [True, False])
+    def test_bool_raises_type_error(self, value):
+        # bool is a subclass of int but must not be treated as a level number
+        with pytest.raises(TypeError) as exc:
+            _parse_log_level(value)
+        assert 'bool' in str(exc.value)
+
+    @pytest.mark.parametrize('value', [10.0, None, ['INFO'], (logging.INFO,)])
+    def test_non_int_non_str_raises_type_error(self, value):
+        # When Then — anything that is neither int nor str is rejected
+        with pytest.raises(TypeError) as exc:
+            _parse_log_level(value)
+        assert type(value).__name__ in str(exc.value)
+
 
 # ---------------------------------------------------------------------------
 # _env_log_level
