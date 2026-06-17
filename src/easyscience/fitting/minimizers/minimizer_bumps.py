@@ -417,9 +417,8 @@ class Bumps(MinimizerBase):
         thin : int, default=10
             Thinning interval.
         population : int | None, default=None
-            DREAM population **scale factor** (not an absolute chain count):
-            BUMPS creates ``ceil(population * n_parameters)`` parallel chains,
-            so the default scale of 10 yields ``10 * n_parameters`` chains.
+            BUMPS DREAM population count per parameter (number of parallel
+            chains): BUMPS creates ``ceil(population * n_parameters)`` chains.
         resume_state : Any | None, default=None
             A BUMPS ``MCMCDraw`` state object from a previous
             ``mcmc_sample()`` call (e.g. ``PosteriorResults.sampler_state``).
@@ -428,19 +427,13 @@ class Bumps(MinimizerBase):
             names must match the current model — a ``ValueError`` is raised
             otherwise.
 
-            **Ring-buffer contract (important!):** DREAM stores draws in a
-            fixed-size ring buffer sized to *samples*.  Resuming with
-            ``samples=N`` retains only the **last N** draws.  To extend an
-            existing chain of M draws by N without losing any::
+            ``samples`` must be the **total** number of retained draws, not
+            an increment: to extend an existing chain of ``N`` draws by ``M``,
+            pass ``samples=N + M`` (DREAM keeps only the last ``samples``
+            draws). The :meth:`Sampler.extend` helper computes this for you.
 
-                sampler = Sampler(fitter, data)
-                sampler.extend(additional_samples=N)
-
-            The ``burn`` parameter controls burn-in for the *new* draws
-            only; passing ``burn=0`` (strongly recommended on resume)
-            skips additional burn-in.  A non-zero ``burn`` on a
-            previously-converged chain is usually a mistake and emits a
-            warning.
+            ``burn`` is forced to 0 on resume: a previously-converged chain is
+            never re-burned.
 
             The ``population`` and ``initializer`` parameters
             have **no effect** when ``resume_state`` is provided — they
@@ -587,16 +580,16 @@ class Bumps(MinimizerBase):
                     recovered = int(resume_state.Npop / n_params)
                 pop = recovered
 
-            # Warn about common resume mistakes
+            # Force burn=0 on resume: re-burning a previously converged
+            # chain discards good draws and is almost always a mistake.
             if burn > 0:
                 from easyscience import global_object
 
                 global_object.log.getLogger('fitting.bumps').warning(
-                    'burn > 0 with resume_state: re-burning a previously '
-                    'converged chain is usually a mistake. Pass burn=0 to '
-                    'skip additional burn-in unless you specifically intend '
-                    'to re-burn.'
+                    f'burn={burn} ignored on resume: a previously converged '
+                    f'chain is not re-burned. Forcing burn=0.'
                 )
+            burn = 0
 
         # Build DREAM kwargs. Use the resolved ``pop`` (the alias result, or
         # the value recovered from the saved state on resume), not the raw

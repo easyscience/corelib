@@ -1031,11 +1031,11 @@ class TestBumpsSample:
                 resume_state=resume_state,
             )
 
-    def test_sample_resume_warns_on_nonzero_burn(
+    def test_sample_resume_forces_burn_to_zero(
         self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
     ) -> None:
-        """burn>0 with resume_state logs a warning."""
-        self._setup_driver_mock(monkeypatch)
+        """burn>0 with resume_state warns and is forced to 0."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
         import bumps.names
 
         monkeypatch.setattr(
@@ -1057,7 +1057,9 @@ class TestBumpsSample:
                 resume_state=resume_state,
             )
 
-        assert 're-burning' in caplog.text
+        assert 'ignored on resume' in caplog.text
+        # burn must be forced to 0 in the kwargs passed to BUMPS
+        assert mock_FitDriver.call_args.kwargs['burn'] == 0
 
 
 # ===================================================================
