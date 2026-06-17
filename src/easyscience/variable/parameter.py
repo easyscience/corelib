@@ -6,7 +6,6 @@ from __future__ import annotations
 import copy
 import numbers
 import re
-import warnings
 import weakref
 from typing import Any
 from typing import Dict
@@ -238,7 +237,9 @@ class Parameter(DescriptorNumber):
 
             self._notify_observers()
         else:
-            warnings.warn('This parameter is not dependent. It cannot be updated.')
+            global_object.log.getLogger('variable').warning(
+                'This parameter is not dependent. It cannot be updated.'
+            )
 
     def make_dependent_on(
         self,

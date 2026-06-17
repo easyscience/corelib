@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import copy
 import math
-import warnings
 from typing import Any
 from typing import Callable
 
@@ -553,15 +552,15 @@ class Bumps(MinimizerBase):
                         f'  resume_state  : {state_stripped}'
                     )
             else:
-                warnings.warn(
+                from easyscience import global_object
+
+                global_object.log.getLogger('fitting.bumps').warning(
                     'resume_state does not carry parameter names (it was most '
                     'likely reloaded from disk, where BUMPS does not preserve '
                     'labels). Parameter-name validation is skipped; the saved '
                     'chain is matched to the current model by parameter order. '
                     'Ensure this is the same model, with parameters in the same '
-                    'order, used to create the chain.',
-                    UserWarning,
-                    stacklevel=2,
+                    'order, used to create the chain.'
                 )
 
             # Population: BUMPS interprets ``pop`` as a **scale factor**.
@@ -590,13 +589,13 @@ class Bumps(MinimizerBase):
 
             # Warn about common resume mistakes
             if burn > 0:
-                warnings.warn(
+                from easyscience import global_object
+
+                global_object.log.getLogger('fitting.bumps').warning(
                     'burn > 0 with resume_state: re-burning a previously '
                     'converged chain is usually a mistake. Pass burn=0 to '
                     'skip additional burn-in unless you specifically intend '
-                    'to re-burn.',
-                    UserWarning,
-                    stacklevel=2,
+                    'to re-burn.'
                 )
 
         # Build DREAM kwargs. Use the resolved ``pop`` (the alias result, or
@@ -800,19 +799,19 @@ class Bumps(MinimizerBase):
                 f'objective evaluated {n_evaluations} times'
             )
         if stopped_on_budget:
+            from easyscience import global_object
+
             if tolerance is None:
-                warnings.warn(
+                global_object.log.getLogger('fitting.bumps').warning(
                     f'Fit did not converge within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.',
-                    UserWarning,
+                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
                 )
             else:
-                warnings.warn(
+                global_object.log.getLogger('fitting.bumps').warning(
                     f'Fit did not reach the desired tolerance of {tolerance} within the maximum optimizer steps of {max_evaluations} '
                     f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.',
-                    UserWarning,
+                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
                 )
 
         # results.residual = results.y_obs - results.y_calc

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
+import logging
 
 import pytest
 
@@ -219,27 +219,25 @@ class TestEasyList:
         assert el[0].unique_name == 'a3'
         assert el[1].unique_name == 'a4'
 
-    def test_setitem_self_replacement_int(self):
+    def test_setitem_self_replacement_int(self, caplog: 'pytest.LogCaptureFixture'):
         """e[0] = e[0] should work without warning."""
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
         el = EasyList(a1, a2, protected_types=Alpha)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
             el[0] = el[0]
-            assert len(w) == 0
+            assert len(caplog.records) == 0
         assert el[0].unique_name == 'a1'
         assert len(el) == 2
 
-    def test_setitem_self_replacement_slice(self):
+    def test_setitem_self_replacement_slice(self, caplog: 'pytest.LogCaptureFixture'):
         """e[0:2] = e[0:2] should work without warning."""
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
         el = EasyList(a1, a2, protected_types=Alpha)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
             el[0:2] = [el[0], el[1]]
-            assert len(w) == 0
+            assert len(caplog.records) == 0
         assert el[0].unique_name == 'a1'
         assert el[1].unique_name == 'a2'
 
@@ -306,49 +304,45 @@ class TestEasyList:
 
     # --- Uniqueness ---
 
-    def test_append_duplicate_warns(self):
+    def test_append_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         el = EasyList(a1, protected_types=Alpha)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
             el.append(a1)
-            assert len(w) == 1
-            assert 'already in EasyList' in str(w[0].message)
+            assert len(caplog.records) == 1
+            assert 'already in EasyList' in caplog.records[0].message
         assert len(el) == 1
 
-    def test_insert_duplicate_warns(self):
+    def test_insert_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         el = EasyList(a1, protected_types=Alpha)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
             el.insert(0, a1)
-            assert len(w) == 1
-            assert 'already in EasyList' in str(w[0].message)
+            assert len(caplog.records) == 1
+            assert 'already in EasyList' in caplog.records[0].message
         assert len(el) == 1
 
-    def test_setitem_duplicate_warns(self):
+    def test_setitem_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
         el = EasyList(a1, a2, protected_types=Alpha)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
             el[0] = a2  # a2 already at index 1
-            assert len(w) == 1
-            assert 'already in EasyList' in str(w[0].message)
+            assert len(caplog.records) == 1
+            assert 'already in EasyList' in caplog.records[0].message
         # Original value should remain unchanged
         assert el[0].unique_name == 'a1'
 
-    def test_setitem_slice_duplicate_warns(self):
+    def test_setitem_slice_duplicate_warns(self, caplog: 'pytest.LogCaptureFixture'):
         a1 = Alpha(unique_name='a1')
         a2 = Alpha(unique_name='a2')
         a3 = Alpha(unique_name='a3')
         a4 = Alpha(unique_name='a4')
         el = EasyList(a1, a2, a3, protected_types=Alpha)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with caplog.at_level(logging.WARNING, logger='easyscience.base_classes'):
             el[0:3] = [a1, a3, a4]  # a3 already at index 2
-            assert len(w) == 1
-            assert 'already in EasyList' in str(w[0].message)
+            assert len(caplog.records) == 1
+            assert 'already in EasyList' in caplog.records[0].message
         assert el[0].unique_name == 'a1'
         assert el[1].unique_name == 'a2'  # a3 should not replace a2 because it's a duplicate
         assert el[2].unique_name == 'a4'

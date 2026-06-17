@@ -11,6 +11,8 @@ from typing import NamedTuple
 from typing import Optional
 from typing import Type
 
+from easyscience import global_object
+
 if TYPE_CHECKING:
     from abc import ABCMeta
 
@@ -96,12 +98,16 @@ class InterfaceFactoryTemplate:
                     if hasattr(obj, 'update_bindings'):
                         obj.update_bindings()
                 except Exception as e:
-                    print(f'Unable to auto generate bindings.\n{e}')
+                    global_object.log.getLogger('fitting.calculators').warning(
+                        'Unable to auto generate bindings.\n%s', e
+                    )
             elif hasattr(fitter, 'generate_bindings'):
                 try:
                     fitter.generate_bindings()
                 except Exception as e:
-                    print(f'Unable to auto generate bindings.\n{e}')
+                    global_object.log.getLogger('fitting.calculators').warning(
+                        'Unable to auto generate bindings.\n%s', e
+                    )
 
     @property
     def available_interfaces(self) -> List[str]:

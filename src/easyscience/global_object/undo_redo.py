@@ -3,6 +3,7 @@
 
 import abc
 import functools
+import logging
 from collections import UserDict
 from collections import deque
 from typing import Any
@@ -233,7 +234,7 @@ class UndoStack:
                     self._command_running = True
                     command.undo()
                 except Exception as e:
-                    print(e)
+                    logging.getLogger('easyscience.global_object.undo_redo').warning(str(e))
                 finally:
                     self._command_running = False
 
@@ -251,7 +252,7 @@ class UndoStack:
                     self._command_running = True
                     command.redo()
                 except Exception as e:
-                    print(e)
+                    logging.getLogger('easyscience.global_object.undo_redo').warning(str(e))
                 finally:
                     self._command_running = False
 
@@ -446,7 +447,9 @@ def property_stack(arg: Union[str, Callable], begin_macro: bool = False) -> Call
                 return
 
             if global_object.debug:
-                print(f"I'm {obj} and have been set from {old_value} to {new_value}!")
+                logging.getLogger('easyscience.global_object.undo_redo').debug(
+                    "I'm %s and have been set from %s to %s!", obj, old_value, new_value
+                )
 
             global_object.stack.push(PropertyStack(obj, func, old_value, new_value, **kwargs))
 

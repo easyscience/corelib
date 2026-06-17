@@ -3,12 +3,13 @@
 
 """Tests for the deprecated wrapper modules in easyscience.base_classes.
 
-These modules now only emit DeprecationWarnings and re-export from
-easyscience.legacy. We test that the warnings are raised and that
+These modules now only emit log warnings and re-export from
+easyscience.legacy. We test that the log messages are raised and that
 the classes are still usable.
 """
 
-import warnings
+import importlib
+import logging
 
 import pytest
 
@@ -28,24 +29,23 @@ def _clear_map():
 # ---------------------------------------------------------------------------
 
 
-def test_import_collection_base_warns():
-    """Importing easyscience.base_classes.collection_base emits DeprecationWarning."""
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter('always')
-        from easyscience.base_classes.collection_base import CollectionBase  # noqa: F811
+def test_import_collection_base_warns(caplog: 'pytest.LogCaptureFixture'):
+    """Importing easyscience.base_classes.collection_base logs a WARNING."""
+    import easyscience.base_classes.collection_base
 
-        assert len(w) >= 1, 'Expected at least one DeprecationWarning'
-        deprecation_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
-        assert len(deprecation_warnings) >= 1, 'Expected a DeprecationWarning'
-        msg = str(deprecation_warnings[0].message)
-        assert 'deprecated' in msg.lower()
-        assert 'legacy.collection_base' in msg
+    with caplog.at_level(logging.WARNING, logger='easyscience'):
+        importlib.reload(easyscience.base_classes.collection_base)
+
+    assert len(caplog.records) >= 1, 'Expected at least one log record'
+    messages = [r.message for r in caplog.records]
+    combined = ' '.join(messages)
+    assert 'deprecated' in combined.lower()
+    assert 'legacy.collection_base' in combined
 
 
-def test_collection_base_still_works_from_deprecated():
+def test_collection_base_still_works_from_deprecated(caplog: 'pytest.LogCaptureFixture'):
     """The class imported from the deprecated wrapper still works."""
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore', DeprecationWarning)
+    with caplog.at_level(logging.ERROR, logger='easyscience'):
         from easyscience.base_classes.collection_base import CollectionBase  # noqa: F811
 
     from easyscience import Parameter
@@ -61,24 +61,23 @@ def test_collection_base_still_works_from_deprecated():
 # ---------------------------------------------------------------------------
 
 
-def test_import_obj_base_warns():
-    """Importing easyscience.base_classes.obj_base emits DeprecationWarning."""
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter('always')
-        from easyscience.base_classes.obj_base import ObjBase  # noqa: F811
+def test_import_obj_base_warns(caplog: 'pytest.LogCaptureFixture'):
+    """Importing easyscience.base_classes.obj_base logs a WARNING."""
+    import easyscience.base_classes.obj_base
 
-        assert len(w) >= 1, 'Expected at least one DeprecationWarning'
-        deprecation_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
-        assert len(deprecation_warnings) >= 1, 'Expected a DeprecationWarning'
-        msg = str(deprecation_warnings[0].message)
-        assert 'deprecated' in msg.lower()
-        assert 'legacy.obj_base' in msg
+    with caplog.at_level(logging.WARNING, logger='easyscience'):
+        importlib.reload(easyscience.base_classes.obj_base)
+
+    assert len(caplog.records) >= 1, 'Expected at least one log record'
+    messages = [r.message for r in caplog.records]
+    combined = ' '.join(messages)
+    assert 'deprecated' in combined.lower()
+    assert 'legacy.obj_base' in combined
 
 
-def test_obj_base_still_works_from_deprecated():
+def test_obj_base_still_works_from_deprecated(caplog: 'pytest.LogCaptureFixture'):
     """The class imported from the deprecated wrapper still works."""
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore', DeprecationWarning)
+    with caplog.at_level(logging.ERROR, logger='easyscience'):
         from easyscience.base_classes.obj_base import ObjBase  # noqa: F811
 
     from easyscience import Parameter

@@ -310,13 +310,15 @@ class TestSampler:
             sampler.extend(additional_samples=10)
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_extend_after_save_load_roundtrip(self, tmp_path):
+    def test_extend_after_save_load_roundtrip(self, tmp_path, caplog):
         """save() -> new sampler -> load_state() -> extend() continues the chain.
 
         Regression coverage: BUMPS ``load_state`` does not preserve parameter
         labels, so resume validation must proceed by parameter order (with a
-        warning) instead of raising.
+        logged warning) instead of raising.
         """
+        import logging
+
         f, _, x, y, weights = _bumps_fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
         first = sampler.sample(samples=100, burn=20, thin=1)
@@ -328,9 +330,10 @@ class TestSampler:
         loaded = sampler2.load_state(prefix)
         assert loaded.draws.shape[1] == first.draws.shape[1]
 
-        with pytest.warns(UserWarning, match='does not carry parameter names'):
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.bumps'):
             extended = sampler2.extend(additional_samples=100, thin=1)
 
+        assert 'does not carry parameter names' in caplog.text
         assert extended.draws.shape[1] == first.draws.shape[1]
         assert extended.draws.shape[0] > 0
 

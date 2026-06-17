@@ -9,6 +9,8 @@ from typing import Union
 
 import numpy as np
 
+from easyscience import global_object
+
 from .available_minimizers import AvailableMinimizers
 from .available_minimizers import from_string_to_enum
 from .minimizers import FitResults
@@ -72,7 +74,9 @@ class Fitter:
             DEFAULT_MINIMIZER.
         """
         if isinstance(minimizer_enum, str):
-            print(f'minimizer should be set with enum {minimizer_enum}')
+            global_object.log.getLogger('fitting').warning(
+                'minimizer should be set with enum %s', minimizer_enum
+            )
             minimizer_enum = from_string_to_enum(minimizer_enum)
         self._update_minimizer(minimizer_enum)
 
@@ -86,7 +90,9 @@ class Fitter:
             The enum of the minimizer to create and instantiate.
         """
         if isinstance(minimizer_enum, str):
-            print(f'minimizer should be set with enum {minimizer_enum}')
+            global_object.log.getLogger('fitting').warning(
+                'minimizer should be set with enum %s', minimizer_enum
+            )
             minimizer_enum = from_string_to_enum(minimizer_enum)
 
         self._update_minimizer(minimizer_enum)

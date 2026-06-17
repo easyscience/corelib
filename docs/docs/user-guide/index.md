@@ -4,5 +4,7 @@ icon: material/book-open-variant
 
 # :material-book-open-variant: User Guide
 
-This section is currently under development. Please check back later for
-updates.
+- [:material-volume-high: Controlling Log Output](controlling-log-output.md)
+  – How to suppress, filter, or redirect the messages that EasyScience
+  produces. Covers the `EASYSCIENCE_LOG_LEVEL` environment variable, the
+  logger hierarchy, context managers, and common recipes.
