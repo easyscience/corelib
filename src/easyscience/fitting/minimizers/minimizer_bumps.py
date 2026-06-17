@@ -264,41 +264,6 @@ class Bumps(MinimizerBase):
                 return fitclass
         raise FitError(f'Unknown BUMPS fitting method: {method}')
 
-    @staticmethod
-    def _resolve_population_alias(
-        chains: int | None = None,
-        population: int | None = None,
-    ) -> int | None:
-        """Resolve the ``chains`` / ``population`` alias for DREAM.
-
-        ``chains`` is the user-friendly name; ``population`` is the parameter
-        name used by BUMPS.  If both are provided and differ, an error is
-        raised.  Returns the resolved value (or ``None`` if neither is set).
-
-        Parameters
-        ----------
-        chains : int | None, default=None
-            User-friendly alias for DREAM population count.
-        population : int | None, default=None
-            BUMPS DREAM population count.
-
-        Returns
-        -------
-        int | None
-            The resolved population value, or ``None`` if neither is set.
-
-        Raises
-        ------
-        ValueError
-            If both ``chains`` and ``population`` are provided but differ.
-        """
-        if chains is not None and population is not None and chains != population:
-            raise ValueError(
-                f'Conflicting population specifications: chains={chains} '
-                f'and population={population}. Use only one.'
-            )
-        return chains if chains is not None else population
-
     def _build_progress_payload(
         self, problem, iteration: int, point: np.ndarray, nllf: float
     ) -> dict:
@@ -425,7 +390,6 @@ class Bumps(MinimizerBase):
         samples: int = 10000,
         burn: int = 2000,
         thin: int = 10,
-        chains: int | None = None,
         population: int | None = None,
         resume_state: Any | None = None,
         sampler_kwargs: dict | None = None,
@@ -436,7 +400,7 @@ class Bumps(MinimizerBase):
 
         Builds a BUMPS `FitProblem` from the current model and runs the DREAM
         sampler.  This is the public minimizer-level entry point for Bayesian
-        sampling; the higher-level `Fitter.mcmc_sample` delegates to this
+        sampling; the higher-level `Sampler` delegates to this
         method after flattening multi-dataset arrays.
 
         Parameters
@@ -453,9 +417,6 @@ class Bumps(MinimizerBase):
             Burn-in steps.
         thin : int, default=10
             Thinning interval.
-        chains : int | None, default=None
-            User-friendly alias for ``population``.  Provide one or the
-            other, not both.
         population : int | None, default=None
             DREAM population **scale factor** (not an absolute chain count):
             BUMPS creates ``ceil(population * n_parameters)`` parallel chains,
@@ -473,7 +434,8 @@ class Bumps(MinimizerBase):
             ``samples=N`` retains only the **last N** draws.  To extend an
             existing chain of M draws by N without losing any::
 
-                fitter.mcmc_sample(data, samples=M + N, burn=0, resume_state=old_state)
+                sampler = Sampler(fitter, data)
+                sampler.extend(additional_samples=N)
 
             The ``burn`` parameter controls burn-in for the *new* draws
             only; passing ``burn=0`` (strongly recommended on resume)
@@ -481,7 +443,7 @@ class Bumps(MinimizerBase):
             previously-converged chain is usually a mistake and emits a
             warning.
 
-            The ``chains``/``population`` and ``initializer`` parameters
+            The ``population`` and ``initializer`` parameters
             have **no effect** when ``resume_state`` is provided — they
             are determined by the saved state.
 
@@ -507,8 +469,7 @@ class Bumps(MinimizerBase):
         Raises
         ------
         ValueError
-            If the input shapes or weights are invalid, if both ``chains``
-            and ``population`` are provided with different values, if
+            If the input shapes or weights are invalid, if
             ``progress_callback`` is not callable, or if ``resume_state``
             is incompatible with the current model (parameter count,
             names/order, or population mismatch).
@@ -552,9 +513,7 @@ class Bumps(MinimizerBase):
         curve = model_func(x, y, weights)
         problem = FitProblem(curve)
 
-        # Resolve population parameter (before resume validation, since
-        # validation needs the resolved value).
-        pop = self._resolve_population_alias(chains=chains, population=population)
+        pop = population
 
         # --- Resume-state compatibility validation ---
         if resume_state is not None:
@@ -611,7 +570,7 @@ class Bumps(MinimizerBase):
             # On resume we must recover the scale factor from the state.
             n_params = len(problem._parameters)
             if pop is not None:
-                # Caller explicitly set chains/population — validate it
+                # Caller explicitly set population — validate it
                 # produces the same Npop as the saved state.
                 expected_npop = int(math.ceil(pop * n_params))
                 if expected_npop != resume_state.Npop:
@@ -867,9 +826,14 @@ class Bumps(MinimizerBase):
 def save_sampler_state(state: Any, filename: str) -> None:
     """Persist a DREAM sampler state to disk.
 
+    .. deprecated::
+        Not public API anymore — use ``Sampler.save()`` (which also writes a
+        metadata sidecar). Kept as the internal helper used by
+        ``easyscience.fitting.sampler``.
+
     Thin wrapper around BUMPS ``save_state``. ``state`` is the
     ``internal_bumps_object`` returned by :meth:`Bumps.mcmc_sample` (or by
-    ``MultiFitter.mcmc_sample``). Three gzipped text files are written:
+    ``Sampler``). Three gzipped text files are written:
     ``<filename>-chain.mc.gz``, ``<filename>-point.mc.gz`` and
     ``<filename>-stats.mc.gz``.
 
@@ -885,11 +849,16 @@ def save_sampler_state(state: Any, filename: str) -> None:
     save_state(state, str(filename))
 
 
-def load_sampler_state(filename: str) -> Any:
+def load_sampler_state(filename: str, skip: int = 0) -> Any:
     """Load a DREAM sampler state saved by :func:`save_sampler_state`.
 
+    .. deprecated::
+        Not public API anymore — use ``Sampler.load_state()`` (which also
+        restores parameter names from the metadata sidecar). Kept as the
+        internal helper used by ``easyscience.fitting.sampler``.
+
     The returned object can be passed as ``resume_state`` to
-    :meth:`Bumps.mcmc_sample` (or ``MultiFitter.mcmc_sample``) to extend a
+    :meth:`Bumps.mcmc_sample` (or the ``Sampler``) to extend a
     previously saved chain.
 
     Works around a regression introduced in BUMPS 1.0.4: ``load_state`` reads
@@ -905,6 +874,9 @@ def load_sampler_state(filename: str) -> Any:
     ----------
     filename : str
         Path prefix that was passed to :func:`save_sampler_state`.
+    skip : int, default=0
+        Discard the first ``skip`` saved generations on load, forwarded to
+        ``bumps.dream.state.load_state``.
 
     Returns
     -------
@@ -916,7 +888,7 @@ def load_sampler_state(filename: str) -> Any:
     loader = getattr(_bumps_state, 'loadtxt_with_fallback', None)
     if loader is None:
         # BUMPS < 1.0.4: load_state uses a custom parser that is already 2-D safe.
-        return _bumps_state.load_state(str(filename))
+        return _bumps_state.load_state(str(filename), skip=skip)
 
     def _loadtxt_2d(file: Any, report: int = 0) -> np.ndarray:
         arr = loader(file, report=report)
@@ -925,6 +897,6 @@ def load_sampler_state(filename: str) -> Any:
 
     _bumps_state.loadtxt_with_fallback = _loadtxt_2d
     try:
-        return _bumps_state.load_state(str(filename))
+        return _bumps_state.load_state(str(filename), skip=skip)
     finally:
         _bumps_state.loadtxt_with_fallback = loader

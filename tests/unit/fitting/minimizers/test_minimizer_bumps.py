@@ -757,6 +757,31 @@ class TestBumpsSample:
         )
         return mock_FitDriver, mock_driver
 
+    @pytest.mark.parametrize(
+        'kwargs, match',
+        [
+            ({'samples': 0}, 'samples must be a positive integer'),
+            ({'samples': -1}, 'samples must be a positive integer'),
+            ({'burn': -1}, 'burn must be a non-negative integer'),
+            ({'thin': 0}, 'thin must be a positive integer'),
+        ],
+    )
+    def test_sample_invalid_args(self, minimizer: Bumps, kwargs, match) -> None:
+        """Invalid samples/burn/thin values raise ValueError before any sampling.
+
+        This is the single source of truth for these checks — the higher-level
+        ``Sampler`` relies on it.
+        """
+        with pytest.raises(ValueError, match=match):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=kwargs.get('samples', 10),
+                burn=kwargs.get('burn', 0),
+                thin=kwargs.get('thin', 1),
+            )
+
     def test_sample_basic(self, minimizer: Bumps, monkeypatch) -> None:
         """Verify that mcmc_sample() returns a dict with expected keys."""
         mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
