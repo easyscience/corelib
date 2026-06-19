@@ -83,7 +83,7 @@ def test_multi_fit(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(f'{fit_engine} is not installed')
 
     results = f.fit(x=[x1, x2], y=[y1, y2], weights=[weights, weights])
     X = [x1, x2]
@@ -133,7 +133,7 @@ def test_multi_fit_propagates_iteration_metadata_and_message(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(f'{fit_engine} is not installed')
 
     results = f.fit(x=[x1, x2], y=[y1, y2], weights=[weights, weights])
     for result in results:
@@ -188,7 +188,7 @@ def test_multi_fit2(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(f'{fit_engine} is not installed')
 
     results = f.fit(x=[x1, x2, x3], y=[y1, y2, y3], weights=[weights, weights, weights])
     X = [x1, x2, x3]
@@ -244,7 +244,7 @@ def test_multi_fit_1D_2D(fit_engine):
         try:
             ff.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(f'{fit_engine} is not installed')
 
     sp_sin1D.offset.fixed = False
     sp_sin1D.phase.fixed = False
@@ -255,14 +255,14 @@ def test_multi_fit_1D_2D(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(f'{fit_engine} is not installed')
     try:
         results = f.fit(
             x=[x1D, x2D], y=[y1D, y2D], weights=[weights1D, weights2D], vectorized=True
         )
     except FitError as e:
         if 'Unable to allocate' in str(e):
-            pytest.skip(msg='MemoryError - Matrix too large')
+            pytest.skip('MemoryError - Matrix too large')
         else:
             raise e
 
