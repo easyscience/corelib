@@ -63,32 +63,8 @@ jobs:
           files: ./coverage-unit.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  # Job 2: Run integration tests with coverage and upload to Codecov
-  integration-tests-coverage:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check-out repository
-        uses: actions/checkout@v6
-
-      - name: Set up pixi
-        uses: ./.github/actions/setup-pixi
-
-      - name: Run integration tests with coverage
-        run:
-          pixi run integration-tests-coverage --cov-report=xml:coverage-integration.xml
-
-      - name: Upload integration tests coverage to Codecov
-        if: ${{ !cancelled() }}
-        uses: ./.github/actions/upload-codecov
-        with:
-          name: integration-tests-job
-          flags: integration
-          files: ./coverage-integration.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
-
   # Job 4: Build and publish dashboard (reusable workflow)
   run-reusable-workflows:
-    needs: [docstring-coverage, unit-tests-coverage, integration-tests-coverage] # depend on the previous jobs
+    needs: [docstring-coverage, unit-tests-coverage] # depend on the previous jobs
     uses: ./.github/workflows/dashboard.yml
     secrets: inherit

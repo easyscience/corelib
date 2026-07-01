@@ -182,8 +182,9 @@ docs-serve = 'pixi run docs-pre serve -f docs/mkdocs.yml'
 docs-serve-dirty = 'pixi run docs-serve --dirty'
 docs-build = 'pixi run docs-pre build -f docs/mkdocs.yml'
 docs-build-local = 'pixi run docs-build --no-directory-urls'
+docs-inventory-check = 'python -c "from pathlib import Path; p = Path(\"docs/site/objects.inv\"); raise SystemExit(0 if p.is_file() and p.stat().st_size > 0 else \"missing or empty docs/site/objects.inv\")"'
 
-docs-deploy-pre = 'mike deploy -F docs/mkdocs.yml --push --branch gh-pages --update-aliases --alias-type redirect'
+docs-deploy-pre = 'mike deploy -F docs/mkdocs.yml --push --branch gh-pages --update-aliases --alias-type copy'
 docs-set-default-pre = 'mike set-default -F docs/mkdocs.yml --push --branch gh-pages'
 
 docs-update-assets = 'python tools/update_docs_assets.py'

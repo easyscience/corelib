@@ -211,14 +211,15 @@ jobs:
             echo "🔹🔸🔹🔸🔹 Python: $py_ver 🔹🔸🔹🔸🔹"
 
             echo "Initializing pixi project"
-            pixi init easyscience_py$py_ver
+            pixi init --platform linux-64 --platform osx-arm64 --platform win-64 eeasyscience_py$py_ver
             cd easyscience_py$py_ver
+
+            echo "Configure pixi platforms"
+            pixi workspace platform edit linux-64 --glibc 2.35 --no-install
+            pixi workspace platform edit osx-arm64 --macos 14.0 --no-install
 
             echo "Adding Python $py_ver"
             pixi add "python=$py_ver"
-
-            echo "Setting macOS 14.0 as minimum required"
-            pixi project system-requirements add macos 14.0
 
             echo "Looking for wheel in ../dist/py$py_ver/"
             ls -l "../dist/py$py_ver/"
