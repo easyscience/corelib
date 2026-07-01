@@ -200,7 +200,14 @@ label.md-nav__title[for="__drawer"] {
 
 /* Change the overall width of the page */
 .md-grid {
-  max-width: 1280px;
+  max-width: 116em;
+}
+
+/* Keep prose line length stable when sidebars are hidden at narrower widths */
+.md-main .md-content > .md-content__inner {
+  width: min(100%, 40.5em);
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 /* Needed for mkdocs-jupyter to show download and other buttons on top of the notebook */
