@@ -211,7 +211,7 @@ jobs:
             echo "🔹🔸🔹🔸🔹 Python: $py_ver 🔹🔸🔹🔸🔹"
 
             echo "Initializing pixi project"
-            pixi init --platform linux-64 --platform osx-arm64 --platform win-64 eeasyscience_py$py_ver
+            pixi init --platform linux-64 --platform osx-arm64 --platform win-64 easyscience_py$py_ver
             cd easyscience_py$py_ver
 
             echo "Configure pixi platforms"
