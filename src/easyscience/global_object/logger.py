@@ -4,7 +4,7 @@
 import contextlib
 import logging
 import os
-from collections.abc import Iterator
+from collections.abc import Generator
 
 PACKAGE_LOGGER_NAME = 'easyscience'
 _LOG_LEVEL_ENV_VAR = 'EASYSCIENCE_LOG_LEVEL'
@@ -157,7 +157,7 @@ class Logger:
         return logging.getLogger(logger_name)
 
     @contextlib.contextmanager
-    def at_level(self, level: int | str) -> Iterator[None]:
+    def at_level(self, level: int | str) -> Generator[None, None, None]:
         """
         Context manager that temporarily sets the package-root logger to
         *level*, restoring the previous level on exit.
@@ -170,7 +170,7 @@ class Logger:
 
         Yields
         ------
-        Iterator[None]
+        None
             Control is handed back to the ``with`` block with the
             temporary level applied.
 
