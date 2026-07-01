@@ -433,20 +433,24 @@ class Fitter:
         progress_callback: Optional[Callable[[dict], Optional[bool]]] = None,
         abort_test: Optional[Callable[[], bool]] = None,
     ) -> dict:
-        """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
+        """
+        Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
         Works with both a plain ``Fitter`` (single dataset) and a
         ``MultiFitter`` (multiple datasets) via polymorphic dispatch:
-        ``_precompute_reshaping`` and ``_fit_function_wrapper`` are resolved
-        on the concrete subclass at call time, so multi-dataset flattening
-        is handled automatically when called on a ``MultiFitter`` instance.
+        ``_precompute_reshaping`` and ``_fit_function_wrapper`` are
+        resolved on the concrete subclass at call time, so multi-dataset
+        flattening is handled automatically when called on a
+        ``MultiFitter`` instance.
 
         Parameters
         ----------
         x : np.ndarray
-            Independent variable array (or list of arrays for ``MultiFitter``).
+            Independent variable array (or list of arrays for
+            ``MultiFitter``).
         y : np.ndarray
-            Dependent variable array (or list of arrays for ``MultiFitter``).
+            Dependent variable array (or list of arrays for
+            ``MultiFitter``).
         weights : np.ndarray
             Weight array (or list of arrays for ``MultiFitter``).
         samples : int, default=10000
@@ -459,16 +463,19 @@ class Fitter:
         population : Optional[int], default=None
             BUMPS DREAM population count (number of parallel chains).
         vectorized : bool, default=False
-            When ``True``, each x array may be multi-dimensional (e.g. an
-            ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When
-            ``False`` (default), each x array is expected to be 1-D.
+            When ``True``, each x array may be multi-dimensional (e.g.
+            an ``(N, M, 2)`` grid for a 2D model) and is left as-is.
+            When ``False`` (default), each x array is expected to be
+            1-D.
         sampler_kwargs : Optional[dict], default=None
-            Additional keyword arguments forwarded to the BUMPS DREAM sampler.
+            Additional keyword arguments forwarded to the BUMPS DREAM
+            sampler.
         progress_callback : Optional[Callable[[dict], Optional[bool]]], default=None
-            Optional callback invoked at each DREAM generation.  The payload
-            dict includes ``iteration`` and ``sampling: True``.
+            Optional callback invoked at each DREAM generation.  The
+            payload dict includes ``iteration`` and ``sampling: True``.
         abort_test : Optional[Callable[[], bool]], default=None
-            Optional callable that returns ``True`` to abort sampling early.
+            Optional callable that returns ``True`` to abort sampling
+            early.
 
         Returns
         -------

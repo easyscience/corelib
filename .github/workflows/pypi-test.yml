@@ -43,7 +43,9 @@ jobs:
           frozen: false
 
       - name: Init pixi project
-        run: pixi init --platform linux-64 --platform osx-arm64 --platform win-64 easyscience
+        run:
+          pixi init --platform linux-64 --platform osx-arm64 --platform win-64
+          easyscience
 
       - name: Configure pixi platforms
         working-directory: easyscience
