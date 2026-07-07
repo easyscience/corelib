@@ -21,7 +21,8 @@ from ..io.serializer_base import SerializerBase
 
 
 class NewBase:
-    """This is the new base class for easyscience objects.
+    """
+    This is the new base class for easyscience objects.
 
     It provides serialization capabilities as well as unique naming and
     display naming.
@@ -44,7 +45,8 @@ class NewBase:
 
     @property
     def _arg_spec(self) -> Set[str]:
-        """This method is used by the serializer to determine which
+        """
+        This method is used by the serializer to determine which
         arguments are needed by the constructor to deserialize the
         object.
         """
@@ -63,10 +65,20 @@ class NewBase:
 
     @unique_name.setter
     def unique_name(self, new_unique_name: str):
-        """Set a new unique name for the object. The old name is still
-        kept in the map.
+        """
+        Set a new unique name for the object.
 
-        :param new_unique_name: New unique name for the object
+        The old name is still kept in the map.
+
+        Parameters
+        ----------
+        new_unique_name : str
+            New unique name for the object.
+
+        Raises
+        ------
+        TypeError
+            If ``new_unique_name`` is not a string.
         """
         if not isinstance(new_unique_name, str):
             raise TypeError('Unique name has to be a string.')
@@ -76,9 +88,13 @@ class NewBase:
 
     @property
     def display_name(self) -> str:
-        """Get a pretty display name.
+        """
+        Get a pretty display name.
 
-        :return: The pretty display name.
+        Returns
+        -------
+        str
+            The pretty display name.
         """
         display_name = self._display_name
         if display_name is None:
@@ -88,21 +104,38 @@ class NewBase:
     @display_name.setter
     @property_stack
     def display_name(self, name: str | None) -> None:
-        """Set the pretty display name.
+        """
+        Set the pretty display name.
 
-        :param name: Pretty display name of the object.
+        Parameters
+        ----------
+        name : str | None
+            Pretty display name of the object.
+
+        Raises
+        ------
+        TypeError
+            If ``name`` is neither a string nor ``None``.
         """
         if name is not None and not isinstance(name, str):
             raise TypeError('Display name must be a string or None')
         self._display_name = name
 
     def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        """Convert an EasyScience object into a full dictionary using
-        `SerializerBase`s generic `convert_to_dict` method.
+        """
+        Convert an EasyScience object into a full dictionary using
+        ``SerializerBase``s generic ``convert_to_dict`` method.
 
-        :param skip: List of field names as strings to skip when forming
-            the dictionary
-        :return: encoded object containing all information to reform an
+        Parameters
+        ----------
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            dictionary. By default, None.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Encoded object containing all information to reform an
             EasyScience object.
         """
         serializer = SerializerBase()
@@ -116,11 +149,25 @@ class NewBase:
 
     @classmethod
     def from_dict(cls, obj_dict: Dict[str, Any]) -> NewBase:
-        """Re-create an EasyScience object from a full encoded
-        dictionary.
+        """
+        Re-create an EasyScience object from a full encoded dictionary.
 
-        :param obj_dict: dictionary containing the serialized contents (from `SerializerDict`) of an EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        obj_dict : Dict[str, Any]
+            Dictionary containing the serialized contents (from
+            ``SerializerDict``) of an EasyScience object.
+
+        Returns
+        -------
+        NewBase
+            Reformed EasyScience object.
+
+        Raises
+        ------
+        ValueError
+            If the input dictionary does not describe the expected
+            class.
         """
         if not SerializerBase._is_serialized_easyscience_object(obj_dict):
             raise ValueError('Input must be a dictionary representing an EasyScience object.')
@@ -133,11 +180,13 @@ class NewBase:
             )
 
     def __dir__(self) -> Iterable[str]:
-        """This creates auto-completion and helps out in iPython
-        notebooks.
+        """
+        This creates auto-completion and helps out in iPython notebooks.
 
-        :return: list of function and parameter names for auto-
-            completion
+        Returns
+        -------
+        Iterable[str]
+            List of function and parameter names for auto- completion.
         """
         new_class_objs = list(k for k in dir(self.__class__) if not k.startswith('_'))
         return sorted(new_class_objs)

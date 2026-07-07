@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to **EasyScience**!
 
-This guide explains how to:
+This guide explains how you can:
 
 - Report issues
 - Contribute code
@@ -39,11 +39,10 @@ Please make sure you follow the EasyScience organization-wide
 
 ## How to Interact With This Project
 
-If you are not planning to modify the code, you may want to:
+If you are not planning to contribute code, you may want to:
 
 - 🐞 Report a bug — see [Reporting Issues](#11-reporting-issues)
-- 🛡 Report a security issue — see
-  [Security Issues](#12-security-issues)
+- 🛡 Report a security issue — see [Security Issues](#12-security-issues)
 - 💬 Ask a question or start a discussion at
   [Project Discussions](https://github.com/easyscience/core/discussions)
 
@@ -62,17 +61,18 @@ We use the following branches:
 
 - `master` — stable releases only
 - `develop` — active development branch
-- Short-lived branches — one branch per contribution
+- Short-lived branches — feature or fix branches created for a single
+  contribution and deleted after merge
 
-All normal contributions must target the `develop` branch.
+> [!IMPORTANT]
+>
+> All normal contributions must target the `develop` branch.
+>
+> - Do **not** open Pull Requests against `master`
+> - Always create your branch from `develop`
+> - Always target `develop` when opening a Pull Request
 
-This means:
-
-- Do **not** open Pull Requests against `master`
-- Always create your branch from `develop`
-- Always target `develop` when opening a Pull Request
-
-See ADR easyscience/.github#12 for full details on the branching
+See ADR easyscience/.github#12 for more details on the branching
 strategy.
 
 ---
@@ -121,8 +121,8 @@ This ensures you are working on the latest version of the project.
 
 ### 2.2. If You Are a Core Team Member
 
-Core team members do not need to fork the repository. You can create a
-new branch directly from `develop`, but the rest of the workflow remains
+Core team members can create branches directly in this repository and
+therefore do not need to fork it, but the rest of the workflow remains
 the same.
 
 ---
@@ -149,12 +149,13 @@ Set up the environment:
 
 ```bash
 pixi install
-pixi run post-install
+pixi run post-install  # Install additional tooling
 ```
 
 After this step, your development environment is ready.
 
-See ADR easyscience/.github#63 for more details about this decision.
+See ADR easyscience/.github#63 for more details about using Pixi for
+development.
 
 ---
 
@@ -165,14 +166,16 @@ Never work directly on `develop`.
 Create a new branch:
 
 ```bash
-git checkout -b my-change
+git checkout -b my-change develop
 ```
 
-Use a clear and descriptive name, for example:
-
-- `improve-solver-speed`
-- `fix-boundary-condition`
-- `add-tutorial-example`
+> [!IMPORTANT]
+>
+> Use a clear and descriptive name, for example:
+>
+> - `improve-solver-speed`
+> - `fix-boundary-condition`
+> - `add-tutorial-example`
 
 Clear branch names make reviews and history easier to understand.
 
@@ -180,12 +183,7 @@ Clear branch names make reviews and history easier to understand.
 
 ## 5. Implementing Your Changes
 
-While developing:
-
-- Make small, logical commits
-- Write clear and descriptive commit messages
-- Follow the Google docstring convention
-- Add or update unit tests if behavior changes
+While developing, make small, logical commits with clear messages.
 
 Example:
 
@@ -194,17 +192,17 @@ git add .
 git commit -m "Improve performance of time integrator for large systems"
 ```
 
-Run tests locally:
-
-```bash
-pixi run unit-tests
-```
-
-Running tests frequently is strongly recommended.
-
 ---
 
 ## 6. Code Quality Checks
+
+> [!IMPORTANT]
+>
+> When adding new functionality or making changes, make sure to add or
+> update the following as needed:
+>
+> - 📘 docstrings
+> - 🧪 unit tests
 
 Before opening a Pull Request, always run:
 
@@ -212,33 +210,47 @@ Before opening a Pull Request, always run:
 pixi run check
 ```
 
-This command runs:
+This command:
 
-- Formatting checks
-- Linting
-- Docstring validation
-- Notebook checks
-- Unit tests
-- Other project validations
+- Validates the pyproject.toml file
+- Checks for licence headers in code files
+- Identifies linting and formatting issues in Python code
+- Checks docstring linting and formatting issues in Python code
+- Detects formatting issues in non-Python files (MD, YAML, TOML etc.)
+- Checks linting issues in Jupyter notebooks (if applicable)
+- Runs unit tests
 
 A successful run should look like this:
 
 ```bash
-pixi run pyproject-check...................................Passed
-pixi run py-lint-check.....................................Passed
-pixi run py-format-check...................................Passed
-pixi run nonpy-format-check................................Passed
-pixi run docs-format-check.................................Passed
-pixi run notebook-format-check.............................Passed
-pixi run unit-tests........................................Passed
+pixi run pyproject-check.......................Passed
+pixi run license-check.........................Passed
+pixi run py-lint-check.........................Passed
+pixi run py-format-check.......................Passed
+pixi run docstring-lint-check..................Passed
+pixi run nonpy-format-check....................Passed
+pixi run notebook-lint-check...................Passed
+pixi run unit-tests............................Passed
 ```
 
 If something fails, read the error message carefully and fix the issue.
 
-You can run individual checks, for example:
+You can run individual checks, for example, to run only unit tests:
+
+```bash
+pixi run unit-tests
+```
+
+or to run only Python linting checks:
 
 ```bash
 pixi run py-lint-check
+```
+
+To add missing license headers:
+
+```bash
+pixi run spdx-add
 ```
 
 Some formatting issues can be fixed automatically:
@@ -250,7 +262,7 @@ pixi run fix
 If everything is correctly formatted, you will see:
 
 ```text
-✅ All code auto-formatting steps have been applied.
+✅ All auto-formatting steps completed successfully!
 ```
 
 This indicates that the auto-formatting pipeline completed successfully.
@@ -263,7 +275,9 @@ If errors are reported, resolve them and re-run:
 pixi run check
 ```
 
-All checks must pass before your Pull Request can be merged.
+> [!IMPORTANT]
+>
+> All checks must pass before your Pull Request can be merged.
 
 If you are unsure how to fix an issue, ask for help in your Pull Request
 discussion.
@@ -288,8 +302,10 @@ On GitHub:
 
 ### Pull Request Title
 
-The PR title appears in release notes and changelogs. It should be
-concise and informative.
+> [!IMPORTANT]
+>
+> The PR title appears in release notes and changelogs. It should be
+> concise and informative.
 
 Good examples:
 
@@ -301,7 +317,12 @@ Good examples:
 
 ### Required `[scope]` Label
 
-Each Pull Request must include one `[scope]` label:
+> [!IMPORTANT]
+>
+> Each Pull Request must include a `[scope]` label, which is used for
+> automatically suggesting version bumps when preparing a new release.
+
+The available scopes are:
 
 | Label                   | Description                                                             |
 | ----------------------- | ----------------------------------------------------------------------- |
@@ -311,7 +332,8 @@ Each Pull Request must include one `[scope]` label:
 | `[scope] maintenance`   | Code/tooling cleanup without feature or bug fix (major.minor.**PATCH**) |
 | `[scope] significant`   | Breaking or major changes (**MAJOR**.minor.patch)                       |
 
-See ADR easyscience/.github#33 for full versioning rules.
+See ADR easyscience/.github#33 for more details on the standardized
+labeling scheme.
 
 ---
 
@@ -354,7 +376,19 @@ git push
 
 ## 10. Documentation Contributions
 
-If your change affects users, update the documentation.
+> [!IMPORTANT]
+>
+> If your change affects user-facing functionality, update the project
+> documentation accordingly — specifically the `nav:` (navigation)
+> structure in `mkdocs.yml` and the relevant documentation Markdown
+> files in `docs/docs/`.
+>
+> ```text
+> 📁 docs
+> ├── 📁 docs        - Markdown files for documentation
+> │   └── ...
+> └── 📄 mkdocs.yml  - Configuration file (navigation, theme, etc.)
+> ```
 
 This may include:
 
@@ -375,31 +409,40 @@ Open the URL shown in the terminal to review your changes.
 
 ## 11. Reporting Issues
 
-If you find a bug but do not want to fix it:
+If you find a bug but cannot work on a fix, please consider opening an
+issue.
 
-- Search existing issues first
-- Provide clear reproduction steps
-- Include logs and environment details
+When reporting an issue, it helps to:
 
-Clear issue reports help maintainers significantly.
+- Search existing issues first.
+- Provide clear reproduction steps.
+- Include logs, screenshots, and environment details.
+
+Clear and detailed reports help maintainers investigate and resolve
+issues more effectively.
 
 ---
 
 ## 12. Security Issues
 
-Do **not** report security vulnerabilities publicly.
+> [!IMPORTANT]
+>
+> Please do **not** report security vulnerabilities publicly.
 
-If you discover a potential vulnerability, contact the maintainers
-privately.
+If you discover a potential vulnerability, please contact the
+maintainers privately so the issue can be investigated and addressed
+responsibly.
 
 ---
 
 ## 13. Releases
 
-Releases are created by merging `develop` into `master`.
+Once your contribution is merged into `develop`, it will eventually be
+included in the next stable release.
 
-Once your contribution is merged into `develop`, it will be included in
-the next stable release.
+When enough changes have accumulated in `develop`, core team members
+merge `develop` into `master` to prepare a new release. The release is
+then tagged and published on GitHub and PyPI.
 
 ---
 

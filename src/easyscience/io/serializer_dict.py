@@ -8,6 +8,7 @@ __version__ = '3.0.0'
 
 
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -19,8 +20,9 @@ if TYPE_CHECKING:
 
 
 class SerializerDict(SerializerBase):
-    """This is a serializer that can encode and decode EasyScience
-    objects to and from a dictionary.
+    """
+    This is a serializer that can encode and decode EasyScience objects
+    to and from a dictionary.
     """
 
     def encode(
@@ -28,30 +30,49 @@ class SerializerDict(SerializerBase):
         obj: SerializerComponent,
         skip: Optional[List[str]] = None,
         full_encode: bool = False,
-        **kwargs,
-    ):
-        """Convert an EasyScience object to a dictionary.
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
+        """
+        Convert an EasyScience object to a dictionary.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param full_encode: Should the data also be encoded (default
-            False)
-        :param kwargs: Any additional key word arguments to be passed to
-            the encoder
-        :return: object encoded to dictionary containing all information
-            to reform an EasyScience object.
+        Parameters
+        ----------
+        obj : SerializerComponent
+            Object to be encoded.
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            encoded object. By default, None.
+        full_encode : bool, default=False
+            Should the data also be encoded (default False). By default,
+            False.
+        **kwargs : Any
+            Any additional key word arguments to be passed to the
+            encoder.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Object encoded to dictionary containing all information to
+            reform an EasyScience object.
         """
 
         return self._convert_to_dict(obj, skip=skip, full_encode=full_encode, **kwargs)
 
     @classmethod
-    def decode(cls, d: Dict) -> SerializerComponent:
-        """Re-create an EasyScience object from the dictionary
+    def decode(cls, d: Dict[str, Any]) -> SerializerComponent:
+        """
+        Re-create an EasyScience object from the dictionary
         representation.
 
-        :param d: Dict representation of an EasyScience object.
-        :return: EasyScience object.
+        Parameters
+        ----------
+        d : Dict[str, Any]
+            Dict representation of an EasyScience object.
+
+        Returns
+        -------
+        SerializerComponent
+            EasyScience object.
         """
 
         return SerializerBase._convert_from_dict(d)

@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-from ..base_classes.obj_base import ObjBase
+from ..legacy.obj_base import ObjBase
 
 
 class ExperimentBase(ObjBase):
-    """This virtual class allows for the creation of technique-specific
+    """
+    This virtual class allows for the creation of technique-specific
     Experiment objects.
     """
 

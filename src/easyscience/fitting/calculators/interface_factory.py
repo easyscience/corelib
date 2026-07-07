@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Callable
 from typing import List
 from typing import NamedTuple
 from typing import Optional
 from typing import Type
+
+from easyscience import global_object
 
 if TYPE_CHECKING:
     from abc import ABCMeta
@@ -17,8 +20,8 @@ if TYPE_CHECKING:
 
 
 class InterfaceFactoryTemplate:
-    """This class allows for the creation and transference of
-    interfaces.
+    """
+    This class allows for the creation and transference of interfaces.
     """
 
     def __init__(self, interface_list: List[ABCMeta], *args, **kwargs):
@@ -27,43 +30,60 @@ class InterfaceFactoryTemplate:
         self.__interface_obj: None = None
         self.create(*args, **kwargs)
 
-    def create(self, *args, **kwargs):
-        """Create an interface to a calculator from those initialized.
-        Interfaces can be selected by `interface_name` where
-        `interface_name` is one of `obj.available_interfaces`. This
+    def create(self, *args: Any, interface_name: str | None = None, **kwargs: Any) -> None:
+        """
+        Create an interface to a calculator from those initialized.
+
+        Interfaces can be selected by ``interface_name`` where
+        ``interface_name`` is one of ``obj.available_interfaces``. This
         interface can now be accessed by obj().
 
-        :param interface_name: name of interface to be created
-        :type interface_name: str
-        :return: None
-        :rtype: noneType
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments forwarded to the interface constructor.
+        interface_name : str | None, default=None
+            Name of interface to be created.
+
+        **kwargs : Any
+            Keyword arguments forwarded to the interface constructor.
+
+        Raises
+        ------
+        NotImplementedError
+            If no interfaces are available to instantiate.
         """
-        if kwargs.get('interface_name', None) is None:
+        if interface_name is None:
             if len(self._interfaces) > 0:
                 # Fallback name
                 interface_name = self.return_name(self._interfaces[0])
             else:
                 raise NotImplementedError
-        else:
-            interface_name = kwargs.pop('interface_name')
         interfaces = self.available_interfaces
         if interface_name in interfaces:
             self._current_interface = self._interfaces[interfaces.index(interface_name)]
         self.__interface_obj = self._current_interface(*args, **kwargs)
 
-    def switch(self, new_interface: str, fitter: Optional[Type[Fitter]] = None):
-        """Changes the current interface to a new interface. The current
-        interface is destroyed and all SerializerComponent parameters
-        carried over to the new interface. i.e. pick up where you left
-        off.
+    def switch(self, new_interface: str, fitter: Optional[Type[Fitter]] = None) -> None:
+        """
+        Changes the current interface to a new interface.
 
-        :param new_interface: name of new interface to be created
-        :type new_interface: str
-        :param fitter: Fitting interface which contains the fitting
-            object which may have bindings which will be updated.
-        :type fitter: EasyScience.fitting.Fitter
-        :return: None
-        :rtype: noneType
+        The current interface is destroyed and all SerializerComponent
+        parameters carried over to the new interface. i.e. pick up where
+        you left off.
+
+        Parameters
+        ----------
+        new_interface : str
+            Name of new interface to be created.
+        fitter : Optional[Type[Fitter]], default=None
+            Fitting interface which contains the fitting object which
+            may have bindings which will be updated. By default, None.
+
+        Raises
+        ------
+        AttributeError
+            If ``new_interface`` is not a valid interface name.
         """
         interfaces = self.available_interfaces
         if new_interface in interfaces:
@@ -78,38 +98,51 @@ class InterfaceFactoryTemplate:
                     if hasattr(obj, 'update_bindings'):
                         obj.update_bindings()
                 except Exception as e:
-                    print(f'Unable to auto generate bindings.\n{e}')
+                    global_object.log.getLogger('fitting.calculators').warning(
+                        'Unable to auto generate bindings.\n%s', e
+                    )
             elif hasattr(fitter, 'generate_bindings'):
                 try:
                     fitter.generate_bindings()
                 except Exception as e:
-                    print(f'Unable to auto generate bindings.\n{e}')
+                    global_object.log.getLogger('fitting.calculators').warning(
+                        'Unable to auto generate bindings.\n%s', e
+                    )
 
     @property
     def available_interfaces(self) -> List[str]:
-        """Return all available interfaces.
+        """
+        Return all available interfaces.
 
-        :return: List of available interface names
-        :rtype: List[str]
+        Returns
+        -------
+        List[str]
+            List of available interface names.
         """
         return [self.return_name(this_interface) for this_interface in self._interfaces]
 
     @property
     def current_interface(self) -> ABCMeta:
-        """Returns the constructor for the currently selected interface.
+        """
+        Returns the constructor for the currently selected interface.
 
-        :return: Interface constructor
-        :rtype: InterfaceTemplate
+        Returns
+        -------
+        ABCMeta
+            Interface constructor.
         """
         return self._current_interface
 
     @property
     def current_interface_name(self) -> str:
-        """Returns the constructor name for the currently selected
+        """
+        Returns the constructor name for the currently selected
         interface.
 
-        :return: Interface constructor name
-        :rtype: str
+        Returns
+        -------
+        str
+            Interface constructor name.
         """
         return self.return_name(self._current_interface)
 
@@ -117,17 +150,13 @@ class InterfaceFactoryTemplate:
     def fit_func(
         self,
     ) -> Callable:  # , x_array: np.ndarray, *args, **kwargs) -> np.ndarray:
-        """Pass through to the underlying interfaces fitting function.
+        """
+        Pass through to the underlying interfaces fitting function.
 
-        :param x_array: points to be calculated at
-        :type x_array: np.ndarray
-        :param args: positional arguments for the fitting function
-        :type args: Any
-        :param kwargs: key/value pair arguments for the fitting function.
-        :type kwargs: Any
-        :return: points calculated at positional values `x`
-        :rtype: np.ndarray
-        #
+        Returns
+        -------
+        Callable
+            Callable proxy to the underlying interface fit function.
         """
 
         def __fit_func(*args, **kwargs):
@@ -138,14 +167,23 @@ class InterfaceFactoryTemplate:
     def call(self, *args, **kwargs):
         return self.fit_func(*args, **kwargs)
 
-    def generate_bindings(self, model, *args, ifun=None, **kwargs):
-        """Automatically bind a `Parameter` to the corresponding
+    def generate_bindings(self, model: Any, *args: Any, ifun: Any = None, **kwargs: Any) -> None:
+        """
+        Automatically bind a ``Parameter`` to the corresponding
         interface.
 
-        :param name: parameter name
-        :type name: str
-        :return: binding property
-        :rtype: property
+        Parameters
+        ----------
+        model : Any
+            Model whose linkable attributes should be bound.
+        *args : Any
+            Positional arguments reserved for interface-specific binding
+            hooks.
+        ifun : Any, default=None
+            Optional interface hook. By default, None.
+        **kwargs : Any
+            Keyword arguments reserved for interface-specific binding
+            hooks.
         """
 
         class_links = self.__interface_obj.create(model)
@@ -214,6 +252,7 @@ class ItemContainer(NamedTuple):
         return key
 
     def __make_getter(self, get_name: str) -> Callable:
+
         def get_value():
             inner_key = self.name_conversion.get(get_name, None)
             return self.getter_fn(self.link_name, inner_key)
@@ -221,6 +260,7 @@ class ItemContainer(NamedTuple):
         return get_value
 
     def __make_setter(self, get_name: str) -> Callable:
+
         def set_value(value):
             inner_key = self.name_conversion.get(get_name, None)
             self.setter_fn(self.link_name, **{inner_key: value})

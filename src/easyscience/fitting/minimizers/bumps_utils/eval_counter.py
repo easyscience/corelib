@@ -7,7 +7,8 @@ from typing import Callable
 
 
 class EvalCounter:
-    """Wrap a callable so the number of invocations is recorded on
+    """
+    Wrap a callable so the number of invocations is recorded on
     ``count``.
 
     Used by the BUMPS minimizer to count objective-function evaluations

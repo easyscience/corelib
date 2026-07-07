@@ -27,24 +27,36 @@ _e = json.JSONEncoder()
 
 
 class SerializerBase:
-    """This is the base class for creating an encoder/decoder which can
+    """
+    This is the base class for creating an encoder/decoder which can
     convert EasyScience objects.
 
-    `encode` and `decode` are
-    abstract methods to be implemented for each serializer. It is expected that the helper function `_convert_to_dict`
-    will be used as a base for encoding (or the `SerializerDict` as it's more flexible).
+    ``encode`` and ``decode`` are abstract methods to be implemented for
+    each serializer. It is expected that the helper function
+    `_convert_to_dict` will be used as a base for encoding (or the
+    ``SerializerDict`` as it's more flexible).
     """
 
     @abstractmethod
     def encode(self, obj: SerializerComponent, skip: Optional[List[str]] = None, **kwargs) -> any:
-        """Abstract implementation of an encoder.
+        """
+        Abstract implementation of an encoder.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param kwargs: Any additional key word arguments to be passed to
-            the encoder
-        :return: encoded object containing all information to reform an
+        Parameters
+        ----------
+        obj : SerializerComponent
+            Object to be encoded.
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            encoded object. By default, None.
+        **kwargs :
+            Any additional key word arguments to be passed to the
+            encoder.
+
+        Returns
+        -------
+        any
+            Encoded object containing all information to reform an
             EasyScience object.
         """
 
@@ -53,21 +65,37 @@ class SerializerBase:
     @classmethod
     @abstractmethod
     def decode(cls, obj: Any) -> Any:
-        """Re-create an EasyScience object from the output of an
-        encoder. The default decoder is `SerializerDict`.
+        """
+        Re-create an EasyScience object from the output of an encoder.
+        The default decoder is ``SerializerDict``.
 
-        :param obj: encoded EasyScience object
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        obj : Any
+            Encoded EasyScience object.
+
+        Returns
+        -------
+        Any
+            Reformed EasyScience object.
         """
         pass
 
     @staticmethod
     def get_arg_spec(func: Callable) -> Tuple[Any, List[str]]:
-        """Get the full argument specification of a function (typically
-        `__init__`)
+        """
+        Get the full argument specification of a function (typically
+        ``__init__``)
 
-        :param func: Function to be inspected
-        :return: Tuple of argument spec and arguments
+        Parameters
+        ----------
+        func : Callable
+            Function to be inspected.
+
+        Returns
+        -------
+        Tuple[Any, List[str]]
+            Tuple of argument spec and arguments.
         """
 
         spec = getfullargspec(func)
@@ -76,12 +104,18 @@ class SerializerBase:
 
     @staticmethod
     def _encode_objs(obj: Any) -> Dict[str, Any]:
-        """A JSON serializable dict representation of an object.
+        """
+        A JSON serializable dict representation of an object.
 
-        :param obj: any object to be encoded
-        :param skip: List of field names as strings to skip when forming the encoded object
-        :param kwargs: Key-words to pass to `SerializerBase`
-        :return: JSON encoded dictionary
+        Parameters
+        ----------
+        obj : Any
+            Any object to be encoded.
+
+        Returns
+        -------
+        Dict[str, Any]
+            JSON encoded dictionary.
         """
 
         if isinstance(obj, datetime.datetime):
@@ -224,12 +258,20 @@ class SerializerBase:
         return d
 
     @staticmethod
-    def _convert_from_dict(d):
-        """Recursive method to support decoding dicts and lists
-        containing EasyScience objects.
+    def _convert_from_dict(d: Any) -> Any:
+        """
+        Recursive method to support decoding dicts and lists containing
+        EasyScience objects.
 
-        :param d: Dictionary containing JSONed EasyScience objects
-        :return: Reformed EasyScience object
+        Parameters
+        ----------
+        d : Any
+            Dictionary containing JSONed EasyScience objects.
+
+        Returns
+        -------
+        Any
+            Reformed EasyScience object.
         """
         T_ = type(d)
         if isinstance(d, dict):
@@ -267,12 +309,20 @@ class SerializerBase:
 
     @staticmethod
     def deserialize_dict(in_dict: Dict[str, Any]) -> Dict[str, Any]:
-        """Deserialize a dictionary using from_dict for ES objects and
+        """
+        Deserialize a dictionary using from_dict for ES objects and
         SerializerBase otherwise. This method processes constructor
         arguments, skipping metadata keys starting with '@'.
 
-        :param in_dict: dictionary to deserialize
-        :return: deserialized dictionary with constructor arguments
+        Parameters
+        ----------
+        in_dict : Dict[str, Any]
+            Dictionary to deserialize.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Deserialized dictionary with constructor arguments.
         """
         d = {
             key: SerializerBase._deserialize_value(value)
@@ -283,11 +333,18 @@ class SerializerBase:
 
     @staticmethod
     def _deserialize_value(value: Any) -> Any:
-        """Deserialize a single value, using specialized handling for ES
+        """
+        Deserialize a single value, using specialized handling for ES
         objects.
 
-        :param value:
-        :return: deserialized value
+        Parameters
+        ----------
+        value : Any
+
+        Returns
+        -------
+        Any
+            Deserialized value.
         """
         if not SerializerBase._is_serialized_easyscience_object(value):
             return SerializerBase._convert_from_dict(value)
@@ -310,10 +367,17 @@ class SerializerBase:
 
     @staticmethod
     def _is_serialized_easyscience_object(value: Any) -> bool:
-        """Check if a value represents a serialized ES object.
+        """
+        Check if a value represents a serialized ES object.
 
-        :param value:
-        :return: True if this is a serialized ES object
+        Parameters
+        ----------
+        value : Any
+
+        Returns
+        -------
+        bool
+            True if this is a serialized ES object.
         """
         return (
             isinstance(value, dict)
@@ -323,14 +387,28 @@ class SerializerBase:
         )
 
     @staticmethod
-    def _import_class(module_name: str, class_name: str):
-        """Import a class from a module name and class name.
+    def _import_class(module_name: str, class_name: str) -> Any:
+        """
+        Import a class from a module name and class name.
 
-        :param module_name: name of the module
-        :param class_name: name of the class
-        :return: the imported class
-        :raises ImportError: if module cannot be imported
-        :raises ValueError: if class is not found in module
+        Parameters
+        ----------
+        module_name : str
+            Name of the module.
+        class_name : str
+            Name of the class.
+
+        Returns
+        -------
+        Any
+            The imported class.
+
+        Raises
+        ------
+        ImportError
+            If the module cannot be imported.
+        ValueError
+            If the class is not found in the module.
         """
         try:
             module = __import__(module_name, globals(), locals(), [class_name], 0)

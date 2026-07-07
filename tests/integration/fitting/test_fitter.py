@@ -125,7 +125,7 @@ def test_basic_fit(fit_engine: AvailableMinimizers):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
 
     result = f.fit(x=x, y=y, weights=weights)
 
@@ -173,7 +173,7 @@ def test_fit_result(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
 
     result = f.fit(x, y, weights=weights)
     check_fit_results(result, sp_sin, ref_sin, x, sp_ref1=sp_ref1, sp_ref2=sp_ref2)
@@ -205,7 +205,7 @@ def test_basic_max_evaluations(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
     f.max_evaluations = 3
     result = f.fit(x=x, y=y, weights=weights)
     # Result should not be the same as the reference
@@ -240,7 +240,7 @@ def test_max_evaluations_populates_fit_result_fields(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
     f.max_evaluations = 3
     result = f.fit(x=x, y=y, weights=weights)
 
@@ -268,7 +268,7 @@ def test_bumps_max_evaluations_counts_objective_calls() -> None:
     try:
         f.switch_minimizer(AvailableMinimizers.Bumps)
     except AttributeError:
-        pytest.skip(msg=f'{AvailableMinimizers.Bumps} is not installed')
+        pytest.skip(reason=f'{AvailableMinimizers.Bumps} is not installed')
 
     f.max_evaluations = 3
     result = f.fit(x=x, y=y, weights=weights)
@@ -306,7 +306,7 @@ def test_basic_tolerance(fit_engine, tolerance):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
     f.tolerance = tolerance
     result = f.fit(x=x, y=y, weights=weights)
     # Result should not be the same as the reference
@@ -377,7 +377,7 @@ def test_dependent_parameter(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
 
     result = f.fit(x, y, weights=weights)
     check_fit_results(result, sp_sin, ref_sin, x)
@@ -405,12 +405,12 @@ def test_2D_vectorized(fit_engine):
         try:
             ff.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
     try:
         result = ff.fit(x=XY, y=mm(XY), weights=weights, vectorized=True)
     except FitError as e:
         if 'Unable to allocate' in str(e):
-            pytest.skip(msg='MemoryError - Matrix too large')
+            pytest.skip(reason='MemoryError - Matrix too large')
         else:
             raise e
     assert result.n_pars == len(m2.get_fit_parameters())
@@ -444,12 +444,12 @@ def test_2D_non_vectorized(fit_engine):
         try:
             ff.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
     try:
         result = ff.fit(x=XY, y=mm(XY.reshape(-1, 2)), weights=weights, vectorized=False)
     except FitError as e:
         if 'Unable to allocate' in str(e):
-            pytest.skip(msg='MemoryError - Matrix too large')
+            pytest.skip(reason='MemoryError - Matrix too large')
         else:
             raise e
     assert result.n_pars == len(m2.get_fit_parameters())
@@ -492,7 +492,7 @@ def test_fixed_parameter_does_not_change(fit_engine):
         try:
             f.switch_minimizer(fit_engine)
         except AttributeError:
-            pytest.skip(msg=f'{fit_engine} is not installed')
+            pytest.skip(reason=f'{fit_engine} is not installed')
 
     result = f.fit(x=x, y=y, weights=weights)
 
@@ -567,7 +567,7 @@ def test_fitter_variable_weights(fit_engine):
             try:
                 f.switch_minimizer(fit_engine)
             except AttributeError:
-                pytest.skip(msg=f'{fit_engine} is not installed')
+                pytest.skip(reason=f'{fit_engine} is not installed')
 
         f.fit(x=x, y=y, weights=weights)
         return model.offset.value, model.phase.value

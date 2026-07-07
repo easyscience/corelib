@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout ${{ env.SOURCE_BRANCH }} branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.SOURCE_BRANCH }}
 
@@ -48,7 +48,7 @@ jobs:
           gh pr create \
             --base ${{ env.DEFAULT_BRANCH }} \
             --head ${{ env.SOURCE_BRANCH }} \
-            --title "Release: merge ${{ env.SOURCE_BRANCH }} into ${{ env.DEFAULT_BRANCH }}" \
+            --title "🎉 Release: merge ${{ env.SOURCE_BRANCH }} into ${{ env.DEFAULT_BRANCH }}" \
             --label "[bot] release" \
             --body "This PR is created automatically to trigger the release pipeline. It merges the accumulated changes from \`${{ env.SOURCE_BRANCH }}\` into \`${{ env.DEFAULT_BRANCH }}\`.
 

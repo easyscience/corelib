@@ -14,14 +14,26 @@ from ..variable import Parameter
 
 
 class Polynomial(ObjBase):
-    """A polynomial model.
+    """
+    A polynomial model.
+
+    Attributes
+    ----------
+    coefficients : ClassVar[CollectionBase]
+        Coefficients of the polynomial.
 
     Parameters
     ----------
-    name : str
+    name : str, default='polynomial'
         The name of the model.
-    degree : int
-        The degree of the polynomial.
+    coefficients : Optional[Union[Iterable[Union[float, Parameter]], CollectionBase]], default=None
+        Coefficients used to populate ``self.coefficients``.
+
+    Raises
+    ------
+    TypeError
+        If ``coefficients`` is neither a ``CollectionBase`` nor an
+        iterable of floats or ``Parameter`` instances.
     """
 
     coefficients: ClassVar[CollectionBase]

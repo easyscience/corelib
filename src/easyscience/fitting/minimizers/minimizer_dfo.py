@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
-import warnings
 from dataclasses import dataclass
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -38,26 +38,29 @@ class DFOCallbackState:
 
 class DFO(MinimizerBase):
     """
-    This is a wrapper to Derivative Free Optimisation for Least Square: https://numericalalgorithmsgroup.github.io/dfols/
+    This is a wrapper to Derivative Free Optimisation for Least Square:
+    https://numericalalgorithmsgroup.github.io/dfols/.
     """
 
     package = 'dfo'
 
     def __init__(
         self,
-        obj,  #: ObjBase,
+        obj: object,  #: ObjBase,
         fit_function: Callable,
         minimizer_enum: AvailableMinimizers | None = None,
     ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
-        """Initialize the fitting engine with a `ObjBase` and an
-        arbitrary fitting function.
+        """
+        Initialize the fitting engine.
 
-        :param obj: Object containing elements of the `Parameter` class
-        :type obj: ObjBase
-        :param fit_function: function that when called returns y values. 'x' must be the first
-                            and only positional argument. Additional values can be supplied by
-                            keyword/value pairs
-        :type fit_function: Callable
+        Parameters
+        ----------
+        obj : object
+            Object containing the ``Parameter`` instances to fit.
+        fit_function : Callable
+            Callable returning model y values for the supplied x values.
+        minimizer_enum : AvailableMinimizers | None, default=None
+            Selected DFO minimizer configuration. By default, None.
         """
         super().__init__(obj=obj, fit_function=fit_function, minimizer_enum=minimizer_enum)
         self._p_0 = {}
@@ -84,26 +87,47 @@ class DFO(MinimizerBase):
         callback: Callable[[DFOCallbackState], None] | None = None,
         **kwargs,
     ) -> FitResults:
-        """Perform a fit using the DFO-ls engine.
+        """
+        Perform a fit using the DFO-ls engine.
 
-        :param x: points to be calculated at
-        :type x: np.ndarray
-        :param y: measured points
-        :type y: np.ndarray
-        :param weights: Weights for supplied measured points.
-        :type weights: np.ndarray
-        :param model: Optional Model which is being fitted to
-        :type model: lmModel
-        :param parameters: Optional parameters for the fit
-        :type parameters: List[bumpsParameter]
-        :param kwargs: Additional arguments for the fitting function.
-        :param method: Method for minimization
-        :type method: str
-        :return: Fit results
-        :rtype: ModelResult For standard least squares, the weights
-            should be 1/sigma, where sigma is the standard deviation of
-            the measurement. For unweighted least squares, these should
-            be 1.
+        Parameters
+        ----------
+        x : np.ndarray
+            Points to be calculated at.
+        y : np.ndarray
+            Measured points.
+        weights : np.ndarray
+            Weights for supplied measured points.
+        model : Callable | None, default=None
+            Optional Model which is being fitted to. By default, None.
+        parameters : List[Parameter] | None, default=None
+            Optional parameters for the fit. By default, None.
+        method : str | None, default=None
+            Method for minimization. By default, None.
+        tolerance : float | None, default=None
+            Requested optimizer tolerance. By default, None.
+        max_evaluations : int | None, default=None
+            Maximum number of evaluations. By default, None.
+        progress_callback : Callable[[dict], bool | None] | None, default=None
+            Optional callback receiving normalized progress payloads.
+        callback : Callable[[DFOCallbackState], None] | None, default=None
+            Optional native DFO callback.
+        **kwargs :
+            Additional arguments for the fitting function.
+
+        Returns
+        -------
+        FitResults
+            Fit results should be 1/sigma, where sigma is the standard
+            deviation of the measurement. For unweighted least squares,
+            these should be 1.
+
+        Raises
+        ------
+        FitError
+            If the DFO fit fails.
+        ValueError
+            If the input shapes, weights, or tolerance are invalid.
         """
         x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
 
@@ -177,16 +201,27 @@ class DFO(MinimizerBase):
         parameters: List[Parameter] | None = None,
         callback: Callable[[DFOCallbackState], None] | None = None,
     ) -> Callable:
-        """Generate a model from the supplied `fit_function` and
+        """
+        Generate a model from the supplied ``fit_function`` and
         parameters in the base object. Note that this makes a callable
         as it needs to be initialized with *x*, *y*, *weights*
 
-        :return: Callable model which returns residuals
-        :rtype: Callable
+        Parameters
+        ----------
+        parameters : List[Parameter] | None, default=None
+            Optional parameter subset to include in the model.
+        callback : Callable[[DFOCallbackState], None] | None, default=None
+            Optional callback invoked on each objective evaluation.
+
+        Returns
+        -------
+        Callable
+            Callable model which returns residuals.
         """
         fit_func = self._generate_fit_function()
 
         def _outer(obj: DFO):
+
             def _make_func(x, y, weights):
                 dfo_pars = {}
                 if not parameters:
@@ -269,12 +304,19 @@ class DFO(MinimizerBase):
     def _make_progress_adapter(
         progress_callback: Callable[[dict], bool | None],
     ) -> Callable[['DFOCallbackState'], None]:
-        """Create a DFO callback that translates DFOCallbackState into
-        the standard progress_callback dict format used by the GUI.
+        """
+        Create a DFO callback that translates DFOCallbackState into the
+        standard progress_callback dict format used by the GUI.
 
-        :param progress_callback: Standard progress callback (dict ->
-            bool|None)
-        :return: DFO-compatible callback
+        Parameters
+        ----------
+        progress_callback : Callable[[dict], bool | None]
+            Standard progress callback (dict -> bool|None).
+
+        Returns
+        -------
+        Callable[['DFOCallbackState'], None]
+            DFO-compatible callback.
         """
 
         def adapter(state: 'DFOCallbackState') -> None:
@@ -297,15 +339,22 @@ class DFO(MinimizerBase):
 
         return adapter
 
-    def _set_parameter_fit_result(self, fit_result, stack_status, ci: float = 0.95) -> None:
-        """Update parameters to their final values and assign a std
-        error to them.
+    def _set_parameter_fit_result(
+        self, fit_result: Any, stack_status: bool, ci: float = 0.95
+    ) -> None:
+        """
+        Update parameters to their final values and assign a std error
+        to them.
 
-        :param fit_result: Fit object which contains info on the fit
-        :param ci: Confidence interval for calculating errors. Default
-            95%
-        :return: None
-        :rtype: noneType
+        Parameters
+        ----------
+        fit_result : Any
+            Fit object which contains info on the fit.
+        stack_status : bool
+            Whether the undo stack was enabled.
+        ci : float, default=0.95
+            Confidence interval for calculating errors. Default 95%. By
+            default, 0.95.
         """
         from easyscience import global_object
 
@@ -323,15 +372,28 @@ class DFO(MinimizerBase):
         if stack_status:
             global_object.stack.endMacro()
 
-    def _gen_fit_results(self, fit_results, weights, **kwargs) -> FitResults:
-        """Convert fit results into the unified `FitResults` format.
+    def _gen_fit_results(self, fit_results: Any, weights: np.ndarray, **kwargs: Any) -> FitResults:
+        """
+        Convert fit results into the unified ``FitResults`` format.
 
-        :param fit_result: Fit object which contains info on the fit
-        :return: fit results container
-        :rtype: FitResults
+        Parameters
+        ----------
+        fit_results : Any
+            Fit object which contains info on the fit.
+        weights : np.ndarray
+            Weights used during fitting.
+        **kwargs : Any
+            Additional result attributes to copy onto ``FitResults``.
+
+        Returns
+        -------
+        FitResults
+            Fit results container.
         """
 
         results = FitResults()
+        from easyscience import global_object
+
         for name, value in kwargs.items():
             if getattr(results, name, False):
                 setattr(results, name, value)
@@ -339,7 +401,7 @@ class DFO(MinimizerBase):
         # EXIT_SUCCESS is 0 and EXIT_MAXFUN_WARNING keeps a different flag value.
         results.success = fit_results.flag == fit_results.EXIT_SUCCESS
         if fit_results.flag == fit_results.EXIT_MAXFUN_WARNING:
-            warnings.warn(str(fit_results.msg), UserWarning)
+            global_object.log.getLogger('fitting.dfo').warning(str(fit_results.msg))
 
         pars = {}
         for p_name, par in self._cached_pars.items():
@@ -358,7 +420,7 @@ class DFO(MinimizerBase):
         results.message = str(fit_results.msg)
         if not results.success:
             warning_message = results.message or 'DFO fit did not succeed.'
-            warnings.warn(warning_message, UserWarning, stacklevel=2)
+            global_object.log.getLogger('fitting.dfo').warning(warning_message)
         # results.residual = results.y_obs - results.y_calc
         # results.goodness_of_fit = fit_results.f
 
@@ -394,16 +456,30 @@ class DFO(MinimizerBase):
     def _dfo_fit(
         pars: Dict[str, Parameter],
         model: Callable,
-        **kwargs,
-    ):
-        """Method to convert EasyScience styling to DFO-LS styling (yes,
+        **kwargs: Any,
+    ) -> Any:
+        """
+        Method to convert EasyScience styling to DFO-LS styling (yes,
         again)
 
-        :param model: Model which accepts f(x[0])
-        :type model: Callable
-        :param kwargs: Any additional arguments for dfols.solver
-        :type kwargs: dict
-        :return: dfols fit results container
+        Parameters
+        ----------
+        pars : Dict[str, Parameter]
+            Parameters to optimize.
+        model : Callable
+            Model which accepts f(x[0]).
+        **kwargs : Any
+            Any additional arguments for dfols.solver.
+
+        Returns
+        -------
+        Any
+            DFO-LS fit results container.
+
+        Raises
+        ------
+        FitError
+            If DFO-LS reports a failure.
         """
 
         pars_values = np.array([par.value for par in pars.values()])

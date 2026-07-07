@@ -1,6 +1,5 @@
-# Verifies if an issue has at least one of the `[scope]` and one of the
-# `[priority]` labels. If not, the bot adds labels with a warning emoji
-# to indicate that those labels need to be added.
+# Verifies if the current issue has at least one `[scope]` label and one
+# `[priority]` label. If either is missing, the workflow adds a reminder label.
 
 name: Issue labels check
 
@@ -15,28 +14,27 @@ jobs:
   check-labels:
     runs-on: ubuntu-latest
 
+    concurrency:
+      group: issue-labels-${{ github.event.issue.number }}
+      cancel-in-progress: true
+
     steps:
-      - name: Setup easyscience[bot]
-        id: bot
-        uses: ./.github/actions/setup-easyscience-bot
+      - name: Ensure [scope] label
+        uses: Rindrics/expect-label-prefix@v1.2.1
         with:
-          app-id: ${{ vars.EASYSCIENCE_APP_ID }}
-          private-key: ${{ secrets.EASYSCIENCE_APP_KEY }}
+          repository_full_name: ${{ github.repository }}
+          token: ${{ github.token }}
+          label_prefix: '[scope]'
+          label_separator: ' '
+          add_label: 'true'
+          default_label: '[scope] ⚠️ label needed'
 
-      - name: Check for required [scope] label
-        uses: trstringer/require-label-prefix@v1
+      - name: Ensure [priority] label
+        uses: Rindrics/expect-label-prefix@v1.2.1
         with:
-          secret: ${{ steps.bot.outputs.token }}
-          prefix: '[scope]'
-          labelSeparator: ' '
-          addLabel: true
-          defaultLabel: '[scope] ⚠️ label needed'
-
-      - name: Check for required [priority] label
-        uses: trstringer/require-label-prefix@v1
-        with:
-          secret: ${{ steps.bot.outputs.token }}
-          prefix: '[priority]'
-          labelSeparator: ' '
-          addLabel: true
-          defaultLabel: '[priority] ⚠️ label needed'
+          repository_full_name: ${{ github.repository }}
+          token: ${{ github.token }}
+          label_prefix: '[priority]'
+          label_separator: ' '
+          add_label: 'true'
+          default_label: '[priority] ⚠️ label needed'

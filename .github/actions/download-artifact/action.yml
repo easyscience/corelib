@@ -1,5 +1,5 @@
 name: 'Download artifact'
-description: 'Generic wrapper for actions/download-artifact'
+description: 'Wrapper for actions/download-artifact'
 inputs:
   name:
     description: 'Name of the artifact to download'
@@ -39,7 +39,7 @@ runs:
   using: 'composite'
   steps:
     - name: Download artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}

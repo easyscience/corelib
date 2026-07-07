@@ -13,6 +13,8 @@ from typing import Optional
 
 import numpy as np
 
+from easyscience import global_object
+
 from ..io.dict import DataDictSerializer
 from ..io.dict import DictSerializer
 from ..io.template import BaseEncoderDecoder
@@ -25,8 +27,9 @@ can_intent = (sys.version_info.major > 2) & (sys.version_info.minor > 8)
 
 
 class XMLSerializer(BaseEncoderDecoder):
-    """This is a serializer that can encode and decode EasyScience
-    objects to a basic xml format.
+    """
+    This is a serializer that can encode and decode EasyScience objects
+    to a basic xml format.
     """
 
     def encode(
@@ -38,21 +41,35 @@ class XMLSerializer(BaseEncoderDecoder):
         use_header: bool = False,
         **kwargs,
     ) -> str:
-        """Convert an EasyScience object to an XML encoded string. Note
-        that for speed the `fast` setting can be changed to `True`. An
-        XML document with initial block *data* is returned.
+        """
+        Convert an EasyScience object to an XML encoded string.
 
-        :param obj: Object to be encoded.
-        :param skip: List of field names as strings to skip when forming
-            the encoded object
-        :param data_only: Should only the object's data be encoded.
-        :param fast: Should the returned string be pretty? This can be
-            turned off for speed.
-        :param use_header: Should a header of `'?xml version="1.0"
-            encoding="UTF-8"?'` be included?
-        :param kwargs: Any additional key-words to pass to the
-            Dictionary Serializer.
-        :return: string containing the XML encoded object
+        Note that for speed the ``fast`` setting can be changed to
+        ``True``. An XML document with initial block *data* is returned.
+
+        Parameters
+        ----------
+        obj : ComponentSerializer
+            Object to be encoded.
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            encoded object. By default, None.
+        data_only : bool, default=False
+            Should only the object's data be encoded. By default, False.
+        fast : bool, default=False
+            Should the returned string be pretty? This can be turned off
+            for speed. By default, False.
+        use_header : bool, default=False
+            Should a header of ``'?xml version="1.0"
+            encoding="UTF-8"?'`` be included? By default, False.
+        **kwargs :
+            Any additional key-words to pass to the Dictionary
+            Serializer.
+
+        Returns
+        -------
+        str
+            String containing the XML encoded object.
         """
 
         if skip is None:
@@ -77,11 +94,19 @@ class XMLSerializer(BaseEncoderDecoder):
 
     @classmethod
     def decode(cls, data: str) -> ComponentSerializer:
-        """Decode an EasyScience object which has been encoded in XML
+        """
+        Decode an EasyScience object which has been encoded in XML
         format.
 
-        :param data: String containing XML encoded data.
-        :return: Reformed EasyScience object.
+        Parameters
+        ----------
+        data : str
+            String containing XML encoded data.
+
+        Returns
+        -------
+        ComponentSerializer
+            Reformed EasyScience object.
         """
 
         data_xml = ET.XML(data)
@@ -136,8 +161,9 @@ class XMLSerializer(BaseEncoderDecoder):
         return value
 
     def _check_class(self, element, key: str, value: Any, skip: Optional[List[str]] = None):
-        """Add a value to an element or create a new element based on
-        input type.
+        """
+        Add a value to an element or create a new element based on input
+        type.
         """
         T_ = type(value)
         if isinstance(value, dict):
@@ -167,5 +193,5 @@ class XMLSerializer(BaseEncoderDecoder):
         elif issubclass(T_, np.ndarray):
             element.text = str(value.tolist())
         else:
-            print(f'Cannot encode {T_} to XML')
+            global_object.log.getLogger('legacy.xml').error('Cannot encode %s to XML', T_)
             raise NotImplementedError
