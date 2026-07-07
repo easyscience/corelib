@@ -1,0 +1,366 @@
+/*************/
+/* Variables */
+/*************/
+
+:root {
+  --sz-link-color--lightmode:             #0184c7;
+  --sz-hovered-link-color--lightmode:     #37bdf9;
+  --sz-body-background-color--lightmode:  #fafafa;
+  --sz-body-text-color--lightmode:        #525252;
+  --sz-body-heading-color--lightmode:     #434343;
+  --sz-code-background-color--lightmode:  #ececec;
+
+  --sz-link-color--darkmode:              #37bdf9;
+  --sz-hovered-link-color--darkmode:      #2890c0;
+  --sz-body-background-color--darkmode:   #262626;
+  --sz-body-text-color--darkmode:         #a3a3a3;
+  --sz-body-heading-color--darkmode:      #e5e5e5;
+  --sz-code-background-color--darkmode:   #212121;
+}
+
+/****************/
+/* Color styles */
+/****************/
+
+/* Default styles https://github.com/squidfunk/mkdocs-material/blob/master/src/assets/stylesheets/main/_typeset.scss */
+
+/* Light mode */
+
+/* Default light mode https://github.com/squidfunk/mkdocs-material/blob/master/src/assets/stylesheets/main/_colors.scss */
+
+[data-md-color-scheme="default"] {
+
+  /* Primary color shades */
+  --md-primary-fg-color:            var(--sz-body-background-color--lightmode);  /* Navigation background */
+  --md-primary-bg-color:            var(--sz-body-text-color--lightmode);        /* E.g., Header title and icons */
+  --md-primary-bg-color--light:     var(--sz-body-text-color--lightmode);        /* E.g., Header search */
+
+  /* Accent color shades */
+  --md-accent-fg-color:             var(--sz-hovered-link-color--lightmode);     /* E.g., Hovered `a` elements & copy icon in code */
+
+  /* Default color shades */
+  --md-default-fg-color:            var(--sz-body-text-color--lightmode);
+  --md-default-fg-color--light:     var(--sz-body-heading-color--lightmode);     /* E.g., `h1` color & TOC viewed items & `$` in code */
+  --md-default-fg-color--lighter:   var(--sz-body-text-color--lightmode);        /* E.g., `¶` sign near `h1-h8` */
+  --md-default-fg-color--lightest:  var(--sz-body-text-color--lightmode);        /* E.g., Copy icon in code */
+  --md-default-bg-color:            var(--sz-body-background-color--lightmode);
+
+  /* Code color shades */
+  --md-code-bg-color:               var(--sz-code-background-color--lightmode);
+
+  /* Typeset color shades */
+  --md-typeset-color:               var(--sz-body-text-color--lightmode);
+
+  /* Typeset `a` color shades */
+  --md-typeset-a-color:             var(--sz-link-color--lightmode);
+
+  /* Footer color shades */
+  --md-footer-fg-color:             var(--sz-body-text-color--lightmode);        /* E.g., Next -> */
+  --md-footer-fg-color--light:      var(--sz-body-text-color--lightmode);        /* E.g., © 2022 EasyDiffraction, Material for MkDocs */
+  --md-footer-fg-color--lighter:    var(--sz-body-text-color--lightmode);        /* E.g. Made with */
+  --md-footer-bg-color:             hsla(0, 0%, 0%, 0.0);                        /* Space with, e.g., Next -> */
+  --md-footer-bg-color--dark:       hsla(0, 0%, 0%, 0.0);                        /* Space with, e.g., © 2022 EasyDiffraction */
+
+  /* Custom colors */
+  --sz-red-color:                   #F44336;
+  --sz-blue-color:                  #03A9F4;
+  --sz-green-color:                 #4CAF50;
+  --sz-orange-color:                #FF9800;
+
+  /* Logo display */
+  --md-footer-logo-dark-mode:       none;
+  --md-footer-logo-light-mode:      block;
+}
+
+/* Dark mode */
+
+/* Default dark mode: https://github.com/squidfunk/mkdocs-material/blob/master/src/assets/stylesheets/palette/_scheme.scss */
+
+[data-md-color-scheme="slate"] {
+
+  /* Primary color shades */
+  --md-primary-fg-color:            var(--sz-body-background-color--darkmode);   /* Navigation background */
+  --md-primary-bg-color:            var(--sz-body-text-color--darkmode);         /* E.g., Header title and icons */
+  --md-primary-bg-color--light:     var(--sz-body-text-color--darkmode);         /* E.g., Header search */
+
+  /* Accent color shades */
+  --md-accent-fg-color:             var(--sz-hovered-link-color--darkmode);      /* E.g., Hovered `a` elements & copy icon in code */
+
+  /* Default color shades */
+  --md-default-fg-color:            var(--sz-body-text-color--darkmode);
+  --md-default-fg-color--light:     var(--sz-body-heading-color--darkmode);      /* E.g., `h1` color & TOC viewed items & `$` in code */
+  --md-default-fg-color--lighter:   var(--sz-body-text-color--darkmode);         /* E.g., `¶` sign near `h1-h8` */
+  --md-default-fg-color--lightest:  var(--sz-body-text-color--darkmode);         /* E.g., Copy icon in code */
+  --md-default-bg-color:            var(--sz-body-background-color--darkmode);
+
+  /* Code color shades */
+  --md-code-bg-color:               var(--sz-code-background-color--darkmode);
+
+  /* Typeset color shades */
+  --md-typeset-color:               var(--sz-body-text-color--darkmode);
+
+  /* Typeset `a` color shades */
+  --md-typeset-a-color:             var(--sz-link-color--darkmode);
+
+  /* Footer color shades */
+  --md-footer-fg-color:             var(--sz-body-text-color--darkmode);         /* E.g., Next -> */
+  --md-footer-fg-color--light:      var(--sz-body-text-color--darkmode);         /* E.g., © 2022 EasyDiffraction, Material for MkDocs */
+  --md-footer-fg-color--lighter:    var(--sz-body-text-color--darkmode);         /* E.g. Made with */
+  --md-footer-bg-color:             hsla(0, 0%, 0%, 0.0);                        /* Space with, e.g., Next -> */
+  --md-footer-bg-color--dark:       hsla(0, 0%, 0%, 0.0);                        /* Space with, e.g., © 2022 EasyDiffraction */
+
+  /* Custom colors */
+  --sz-red-color:                   #EF9A9A;
+  --sz-blue-color:                  #81D4FA;
+  --sz-green-color:                 #A5D6A7;
+  --sz-orange-color:                #FFCC80;
+
+  /* Logo display */
+  --md-footer-logo-dark-mode:       block;
+  --md-footer-logo-light-mode:      none;
+}
+
+/*****************/
+/* Custom styles */
+/*****************/
+
+/* Logo */
+
+#logo_light_mode {
+  display: var(--md-footer-logo-light-mode);
+}
+
+#logo_dark_mode {
+  display: var(--md-footer-logo-dark-mode);
+}
+
+/* Customize default styles of MkDocs Material */
+
+/* Hide navigation title */
+label.md-nav__title[for="__drawer"] {
+  height: 0;
+}
+
+/* Hide site title (first topic) while keeping page title and version selector */
+.md-header__topic:first-child .md-ellipsis {
+  display: none;
+}
+
+/* Increase logo size */
+.md-logo :is(img, svg) {
+  height: 1.8rem !important;
+}
+
+/* Hide GH repo with counts (top right page corner) */
+.md-header__source {
+  display: none;
+}
+
+/* Hide GH repo with counts (navigation bar in mobile view) */
+.md-nav__source {
+  display: none;
+}
+
+/* Ensure all horizontal lines in the navigation list are removed or hidden */
+.md-nav__item {
+  /* Removes any border starting from the second level */
+  border: none !important;
+  /* Modifies the background color to hide the first horizontal line */
+  background-color: var(--md-default-bg-color);
+}
+
+/* Increase TOC (on the right) width */
+.md-nav--secondary {
+  margin-left: -10px;
+  margin-right: -4px;
+}
+
+/* */
+.md-nav__item > .md-nav__link {
+    padding-left: 0.5em; /* Default */
+}
+
+/* Change line height of the tabel cells */
+.md-typeset td,
+.md-typeset th {
+  line-height: 1.25 !important;
+}
+
+/* Change vertical alignment of the icon inside the tabel cells */
+.md-typeset td .twemoji {
+  vertical-align: sub !important;
+}
+
+/* Change the width of the primary sidebar */
+/*
+.md-sidebar--primary {
+  width: 240px;
+}
+*/
+
+/* Change the overall width of the page */
+.md-grid {
+  max-width: 116em;
+}
+
+/* Keep prose line length stable when sidebars are hidden at narrower widths */
+.md-main .md-content > .md-content__inner {
+  width: min(100%, 40.5em);
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Needed for mkdocs-jupyter to show download and other buttons on top of the notebook */
+.md-content__button {
+  position: relative !important;
+}
+
+/* Background color of the search input field */
+.md-search__input {
+  background-color: var(--md-code-bg-color) !important;
+}
+
+/* Customize default style of mkdocs-jupyter plugin */
+
+/* Set the width of the notebook to fill 100% and not reduce by the width of .md-content__button's
+Adjust the margins and paddings to fit the defaults in MkDocs Material and do not crop the label in the header
+*/
+.jupyter-wrapper {
+  width: 100% !important;
+  display: flex !important;
+}
+
+.jp-Notebook {
+  padding: 0 !important;
+  margin-top: -3em !important;
+
+  /* Ensure notebook content stretches across the page */
+  width: 100% !important;
+  max-width: 100% !important;
+
+  /* mkdocs-material + some notebook HTML end up as flex */
+  align-items: stretch !important;
+}
+
+.jp-Notebook .jp-Cell {
+  /* Key: flex children often need min-width: 0 to prevent weird shrink */
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
+  /* Removes jupyter cell paddings */
+  padding-left: 0 !important;
+}
+
+/* Removes jupyter cell prefixes, like In[123]: */
+.prompt,
+.jp-InputPrompt,
+.jp-OutputPrompt {
+  display: none !important;
+}
+
+/* Removes jupyter output cell padding to align with input cell text */
+.jp-RenderedText {
+  padding-left: 0.85em !important;
+}
+
+/* Extra styling the panda dataframes, on top of the style included in the code */
+table.dataframe {
+  float: left;
+  margin-left: 0.75em !important;
+  margin-bottom: 0.5em !important;
+  font-size: var(--jp-code-font-size) !important;
+  color: var(--md-primary-bg-color) !important;
+  /* Allow table cell wrapping in MkDocs-Jupyter outputs */
+  /*
+  table-layout: auto !important;
+  width: auto !important;
+  */
+}
+
+/* Allow wrap for the last column */
+/*
+table.dataframe td:last-child,
+table.dataframe th:last-child {
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+*/
+
+/* Custom styles for the CIF files */
+
+.cif {
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  background-color: var(--md-code-bg-color);
+  font-size: small;
+}
+.red {
+  color: var(--sz-red-color);
+}
+.green {
+  color: var(--sz-green-color);
+}
+.blue {
+  color: var(--sz-blue-color);
+}
+.orange {
+  color: var(--sz-orange-color);
+}
+.grey {
+  color: grey;
+}
+
+/**********/
+/* Labels */
+/**********/
+
+.label-cif {
+  padding-top: 0.5ex;
+  padding-bottom: 0.5ex;
+  padding-left: 0.9ex;
+  padding-right: 0.9ex;
+  border-radius: 1ex;
+  color: var(--md-default-fg-color) !important;
+  background-color: var(--md-code-bg-color);
+}
+
+p .label-cif, li .label-cif {
+  vertical-align: 5%;
+  font-size: 12px;
+}
+
+.label-cif:hover {
+  color: white !important;
+}
+
+.label-experiment {
+  padding-top: 0.25ex;
+  padding-bottom: 0.6ex;
+  padding-left: 0.9ex;
+  padding-right: 0.9ex;
+  border-radius: 1ex;
+  color: var(--md-default-fg-color) !important;
+  background-color: rgba(55, 189, 249, 0.1);
+}
+
+p .label-experiment, li .label-experiment {
+  vertical-align: 5%;
+  font-size: 12px;
+}
+
+h1 .label-experiment {
+  padding-top: 0.05ex;
+  padding-bottom: 0.4ex;
+  padding-left: 0.9ex;
+  padding-right: 0.9ex;
+  border-radius: 0.75ex;
+  color: var(--md-default-fg-color) !important;
+  background-color: rgba(55, 189, 249, 0.1);
+}
+
+.label-experiment:hover {
+  color: white !important;
+}
