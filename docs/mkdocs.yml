@@ -171,7 +171,6 @@ plugins:
           inventories:
             - url: https://scipp.github.io/objects.inv
             - url: https://numpy.org/doc/stable/objects.inv
-            - url: https://easyscience.github.io/core/latest/objects.inv
   - search
 
 # Determines additional directories to watch when running mkdocs serve
