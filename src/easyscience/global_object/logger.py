@@ -4,7 +4,7 @@
 import contextlib
 import logging
 import os
-from collections.abc import Iterator
+from collections.abc import Generator
 
 PACKAGE_LOGGER_NAME = 'easyscience'
 _LOG_LEVEL_ENV_VAR = 'EASYSCIENCE_LOG_LEVEL'
@@ -19,7 +19,10 @@ _LEVEL_NAME_MAP = {
 
 
 def _parse_log_level(level: int | str) -> int:
-    """Convert a level number or name into a numeric level, raising on an unknown name."""
+    """
+    Convert a level number or name into a numeric level, raising on an
+    unknown name.
+    """
     if isinstance(level, str):
         stripped = level.strip()
         if stripped.isdigit():
@@ -36,7 +39,10 @@ def _parse_log_level(level: int | str) -> int:
 
 
 def _env_log_level(raw: str | None, default: int) -> int:
-    """Parse the EASYSCIENCE_LOG_LEVEL env var, falling back to *default* on an unset/bad value."""
+    """
+    Parse the EASYSCIENCE_LOG_LEVEL env var, falling back to *default*
+    on an unset/bad value.
+    """
     if raw is None:
         return default
     try:
@@ -91,7 +97,10 @@ class Logger:
         self.logger.critical(msg, *args, **kwargs)
 
     def exception(self, msg: str, *args, **kwargs) -> None:
-        """Log an ERROR-level message with traceback on the package-root logger."""
+        """
+        Log an ERROR-level message with traceback on the package-root
+        logger.
+        """
         self.logger.exception(msg, *args, **kwargs)
 
     # -- public API -------------------------------------------------------
@@ -119,7 +128,8 @@ class Logger:
         value : int | str
             Logging level — a number (e.g. ``logging.WARNING``) or a
             level name (e.g. ``'ERROR'``). A string that is not a
-            recognised level name or numeric string raises ``ValueError``.
+            recognised level name or numeric string raises
+            ``ValueError``.
         """
         self.logger.setLevel(_parse_log_level(value))
 
@@ -147,10 +157,10 @@ class Logger:
         return logging.getLogger(logger_name)
 
     @contextlib.contextmanager
-    def at_level(self, level: int | str) -> Iterator[None]:
+    def at_level(self, level: int | str) -> Generator[None, None, None]:
         """
-        Context manager that temporarily sets the package-root logger
-        to *level*, restoring the previous level on exit.
+        Context manager that temporarily sets the package-root logger to
+        *level*, restoring the previous level on exit.
 
         Parameters
         ----------
@@ -164,8 +174,8 @@ class Logger:
             Control is handed back to the ``with`` block with the
             temporary level applied.
 
-        Example
-        -------
+        Examples
+        --------
         Setting the log-level only within the context:
 
         ```python
@@ -188,5 +198,7 @@ class Logger:
         self.logger.setLevel(logging.CRITICAL + 1)
 
     def resume(self):
-        """Restore the level captured by the most recent suspend call."""
+        """
+        Restore the level captured by the most recent suspend call.
+        """
         self.level = self._level_before_suspend

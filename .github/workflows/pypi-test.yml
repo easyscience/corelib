@@ -43,11 +43,15 @@ jobs:
           frozen: false
 
       - name: Init pixi project
-        run: pixi init easyscience
+        run:
+          pixi init --platform linux-64 --platform osx-arm64 --platform win-64
+          easyscience
 
-      - name: Set the minimum system requirements
+      - name: Configure pixi platforms
         working-directory: easyscience
-        run: pixi project system-requirements add macos 14.0
+        run: |
+          pixi workspace platform edit linux-64 --glibc 2.35 --no-install
+          pixi workspace platform edit osx-arm64 --macos 14.0 --no-install
 
       - name: Add Python 3.14 from Conda
         working-directory: easyscience

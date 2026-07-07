@@ -98,9 +98,10 @@ class MultiFitter(Fitter):
         weights : list[np.ndarray] | None
             Optional weights for each dataset.
         vectorized : bool
-            When ``True``, each x array may be multi-dimensional (e.g. an
-            ``(N, M, 2)`` grid for a 2D model) and is left as-is.  When
-            ``False`` (default), each x array is expected to be 1-D.
+            When ``True``, each x array may be multi-dimensional (e.g.
+            an ``(N, M, 2)`` grid for a 2D model) and is left as-is.
+            When ``False`` (default), each x array is expected to be
+            1-D.
 
         Returns
         -------
