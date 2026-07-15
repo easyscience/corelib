@@ -1008,6 +1008,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#easyscience.fitting.sampler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sampler
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1290,6 +1301,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#easyscience.fitting.sampler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sampler
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1374,6 +1396,17 @@
             <td>
               <div class="doc-md-description">
                 
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code&gt;sampler&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler&lt;/code&gt;)" href="#easyscience.fitting.sampler">sampler</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Bayesian MCMC sampling — the <code>Sampler</code> class and persistence helpers.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
               </div>
             </td>
           </tr>
@@ -5113,7 +5146,7 @@ for the Bumps fitting engine to use parameters declared in an
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;mcmc_sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;weights&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;burn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sampler_kwargs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress_callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;abort_test&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.minimizers.minimizer_bumps.Bumps.mcmc_sample&lt;/code&gt;)" href="#easyscience.fitting.minimizers.minimizer_bumps.Bumps.mcmc_sample">mcmc_sample</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;mcmc_sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;weights&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;burn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resume_state&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sampler_kwargs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress_callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;abort_test&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.minimizers.minimizer_bumps.Bumps.mcmc_sample&lt;/code&gt;)" href="#easyscience.fitting.minimizers.minimizer_bumps.Bumps.mcmc_sample">mcmc_sample</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Run Bayesian MCMC sampling using the BUMPS DREAM sampler.</p>
@@ -5682,7 +5715,7 @@ Parameter object.</p>
 
 
 <h9 id="easyscience.fitting.minimizers.minimizer_bumps.Bumps.mcmc_sample" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">mcmc_sample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h9>
 
@@ -5834,7 +5867,43 @@ flattening multi-dataset arrays.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>BUMPS DREAM population count (number of parallel chains).</p>
+                <p>BUMPS DREAM population count per parameter (number of parallel
+chains): BUMPS creates <code>ceil(population * n_parameters)</code> chains.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resume_state</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A BUMPS <code>MCMCDraw</code> state object from a previous
+<code>mcmc_sample()</code> call (e.g. <code>PosteriorResults.sampler_state</code>).
+When provided, DREAM <strong>continues</strong> the saved chain instead of
+starting cold.  The population, parameter count, and parameter
+names must match the current model — a <code>ValueError</code> is raised
+otherwise.</p>
+<p><code>samples</code> must be the <strong>total</strong> number of retained draws, not
+an increment: to extend an existing chain of <code>N</code> draws by <code>M</code>,
+pass <code>samples=N + M</code> (DREAM keeps only the last <code>samples</code>
+draws). The <code>Sampler.extend</code> helper computes this for you.</p>
+<p><code>burn</code> is forced to 0 on resume: a previously-converged chain is
+never re-burned.</p>
+<p>The <code>population</code> and <code>initializer</code> parameters
+have <strong>no effect</strong> when <code>resume_state</code> is provided — they
+are determined by the saved state.</p>
+<p>Resuming against <em>different</em> data is undefined behaviour (the
+chain's likelihood changes underneath it).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5952,8 +6021,10 @@ DREAM sampling loop.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the input shapes or weights are invalid, or if
-<code>progress_callback</code> is not callable.</p>
+                <p>If the input shapes or weights are invalid, if
+<code>progress_callback</code> is not callable, or if <code>resume_state</code>
+is incompatible with the current model (parameter count,
+names/order, or population mismatch).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9206,6 +9277,1739 @@ early.</p>
 
 </div>
 
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="easyscience.fitting.sampler" class="doc doc-heading">
+            <code>sampler</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Bayesian MCMC sampling — the <code>Sampler</code> class and persistence helpers.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Classes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;SamplingResults&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draws&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-dataclass&quot;&gt;&lt;code&gt;dataclass&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.SamplingResults&lt;/code&gt;)" href="#easyscience.fitting.sampler.SamplingResults">SamplingResults</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Structured result of an MCMC sampling run (analogous to <code>FitResults</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Sampler&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fitter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;weights&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vectorized&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sampler_kwargs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler">Sampler</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Bayesian MCMC sampler for one dataset, backed by a Fitter's BUMPS minimizer.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+<p><span class="doc-section-title">Functions:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;save_chain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data_fingerprint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.save_chain&lt;/code&gt;)" href="#easyscience.fitting.sampler.save_chain">save_chain</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Persist a DREAM chain state plus a metadata sidecar.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;load_chain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.load_chain&lt;/code&gt;)" href="#easyscience.fitting.sampler.load_chain">load_chain</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Reload a DREAM chain state saved by <code>save_chain</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<h4 id="easyscience.fitting.sampler-classes">Classes</h4>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h5 id="easyscience.fitting.sampler.SamplingResults" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">SamplingResults</span><span class="p">(</span><span class="n">draws</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">logp</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Structured result of an MCMC sampling run (analogous to <code>FitResults</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="easyscience.fitting.sampler.SamplingResults.draws">draws</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Posterior samples, shape <code>(n_samples, n_params)</code>. For results from
+<code>Sampler.sample()</code>/<code>Sampler.extend()</code> this is a <em>trimmed,
+outlier-filtered</em> view of the chain, not the raw buffer, so it holds
+fewer rows than <code>samples / thin</code> — see the notes on <code>Sampler</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="easyscience.fitting.sampler.SamplingResults.param_names">param_names</span></code></td>
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Parameter names (one per column of <code>draws</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="easyscience.fitting.sampler.SamplingResults.logp">logp</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Log-posterior values, shape <code>(n_samples,)</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="easyscience.fitting.sampler.SamplingResults.state">state</span></code></td>
+            <td>
+                  <code><span title="bumps.dream.state.MCMCDraw">MCMCDraw</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The raw BUMPS chain state, holding the full untrimmed chain.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;to_legacy_dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.SamplingResults.to_legacy_dict&lt;/code&gt;)" href="#easyscience.fitting.sampler.SamplingResults.to_legacy_dict">to_legacy_dict</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return the legacy dict shape produced by the deprecated</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+<h6 id="easyscience.fitting.sampler.SamplingResults-functions">Functions</h6>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easyscience.fitting.sampler.SamplingResults.to_legacy_dict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">to_legacy_dict</span><span class="p">()</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the legacy dict shape produced by the deprecated
+<code>mcmc_sample()</code> APIs.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h5 id="easyscience.fitting.sampler.Sampler" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">Sampler</span><span class="p">(</span><span class="n">fitter</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Bayesian MCMC sampler for one dataset, backed by a Fitter's BUMPS minimizer.</p>
+<p>One <code>Sampler</code> instance represents one chain over one <code>(x, y, weights)</code>
+dataset. The data is bound at construction; <code>sample()</code> and <code>extend()</code>
+take no data arguments, so a chain can never be extended against different
+data (undefined behaviour in BUMPS).</p>
+<p>Construct directly with a configured <code>Fitter</code> (or <code>MultiFitter</code>) whose
+minimizer has been switched to <code>AvailableMinimizers.Bumps</code>. <strong>Running a
+fit first is not required</strong> — the <code>Fitter</code> supplies the model and the
+minimizer, not a fit result, and sampling from the initial parameter values
+works fine.</p>
+<p>It is often worth fitting first anyway. DREAM seeds its whole starting
+population inside a tiny ball around the parameters' <em>current</em> values
+(BUMPS' default <code>init='eps'</code>), so sampling from fitted values starts the
+chain in the right region and shortens the burn-in needed to reach the
+typical set. From a poor initial guess, expect to burn for longer.</p>
+<p>The sampler is BUMPS/DREAM-specific for now: the BUMPS check in <code>_run()</code>
+is the seam where another backend would plug in.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>fitter</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Fitter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fit_object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fit_function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.fitter.Fitter&lt;/code&gt;)" href="#easyscience.fitting.fitter.Fitter">Fitter</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A configured <code>Fitter</code> (or <code>MultiFitter</code>) whose minimizer has been
+switched to <code>AvailableMinimizers.Bumps</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>x</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Independent variable array (or list of arrays for <code>MultiFitter</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>y</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dependent variable array (or list of arrays for <code>MultiFitter</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>weights</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | None] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Weight array (or list of arrays for <code>MultiFitter</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vectorized</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>When <code>True</code>, each x array may be multi-dimensional (e.g. an
+<code>(N, M, 2)</code> grid for a 2D model) and is left as-is.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sampler_kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Per-instance default keyword arguments forwarded to the BUMPS DREAM
+sampler on every run, merged with (and overridden by) per-call
+<code>sampler_kwargs</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p><strong>The retained draws are a trimmed view, not the whole chain.</strong> BUMPS'
+DREAM sampler defaults to <code>trim=True</code>: once sampling finishes it runs a
+convergence-based burn-point detector over the chain and returns only the
+portion after that point. <code>state.draw()</code> additionally drops chains
+flagged as outliers. So <code>results.draws</code> is usually <em>smaller</em> than the
+chain, and its length is not deterministic — the detector re-runs from
+scratch on every <code>sample()</code> and <code>extend()</code> call and may place the burn
+point differently each time. Read the count off the array; do not predict
+it.</p>
+<p>Nor is the chain itself exactly <code>samples / thin</code> rows: DREAM allocates
+its ring buffer in whole generations, so the true size is <code>samples /
+thin</code> rounded <em>up</em> to a generation boundary. <code>samples</code> is a floor, not
+a promise.</p>
+<p>The trimming is only a <em>view</em> — nothing is dropped from the buffer. To
+read the full untrimmed chain::</p>
+<div class="language-text highlight"><pre><span></span><code>results = sampler.sample(samples=10000, burn=500, thin=2)
+full = results.state.draw(portion=1.0, outliers=True)
+full.points  # (n_chain_rows, n_params)
+full.logp
+</code></pre></div>
+<p>To switch the automatic trimming off entirely, pass BUMPS' own <code>trim</code>
+option straight through <code>sampler_kwargs</code>; <code>results.draws</code> then holds
+the whole chain::</p>
+<div class="language-text highlight"><pre><span></span><code>sampler = Sampler(
+    fitter, x, y, weights=w, sampler_kwargs={&#39;trim&#39;: False}
+)
+</code></pre></div>
+<p>Note also that trimming does not survive a <code>save()</code>/<code>load_state()</code>
+round-trip: BUMPS does not persist the trim point, so a reloaded chain
+comes back untrimmed and <code>load_state()</code> reports <em>more</em> draws than the
+<code>sample()</code> call that created it. The chain itself is identical.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
+
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;burn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;population&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sampler_kwargs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress_callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;abort_test&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.sample&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.sample">sample</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Run fresh Bayesian MCMC sampling on the bound data.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;extend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;additional_samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thin&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;total_samples&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sampler_kwargs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;progress_callback&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;abort_test&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.extend&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.extend">extend</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Continue the existing chain with additional samples.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;save&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.save&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.save">save</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Persist the chain state and metadata to disk.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;load_state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.load_state&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.load_state">load_state</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Load a previously saved chain into this sampler.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.state&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.state">state</a></code></td>
+            <td>
+                  <code><span title="bumps.dream.state.MCMCDraw">MCMCDraw</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Raw BUMPS MCMCDraw state (None before first sample/load_state).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;results&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.results&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.results">results</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;SamplingResults&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draws&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-dataclass&quot;&gt;&lt;code&gt;dataclass&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.SamplingResults&lt;/code&gt;)" href="#easyscience.fitting.sampler.SamplingResults">SamplingResults</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Results of the most recent sample/extend/load_state call.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;draws&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.draws&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.draws">draws</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Posterior draws from the most recent run (or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.param_names&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.param_names">param_names</a></code></td>
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Parameter names from the most recent run (or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;logp&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.logp&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.logp">logp</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Log-posterior values from the most recent run (or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+<h6 id="easyscience.fitting.sampler.Sampler-attributes">Attributes</h6>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.state" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">state</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Raw BUMPS MCMCDraw state (None before first sample/load_state).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.results" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">results</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Results of the most recent sample/extend/load_state call.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.draws" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">draws</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Posterior draws from the most recent run (or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.param_names" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">param_names</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Parameter names from the most recent run (or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.logp" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">logp</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Log-posterior values from the most recent run (or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+
+<h6 id="easyscience.fitting.sampler.Sampler-functions">Functions</h6>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.sample" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">sample</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Run fresh Bayesian MCMC sampling on the bound data.</p>
+<p>Calling <code>sample()</code> on a sampler that already holds a chain starts a
+<strong>fresh</strong> chain — the previous state and results are replaced. Use
+<code>extend()</code> to continue an existing chain.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>samples</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of retained DREAM samples requested from BUMPS.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>10000</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>burn</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Burn-in steps to discard before collecting samples.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>2000</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>thin</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thinning interval — only every <code>thin</code>-th sample is kept,
+which reduces autocorrelation between consecutive draws.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>10</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>population</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>DREAM population <strong>scale factor</strong> (not an absolute chain count):
+BUMPS creates <code>ceil(population * n_parameters)</code> parallel chains.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sampler_kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the BUMPS DREAM
+sampler (merged over the instance defaults).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>progress_callback</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="bool">bool</span> | None] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional callback invoked at each DREAM generation. The payload
+dict includes <code>iteration</code> and <code>sampling: True</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>abort_test</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[[], <span title="bool">bool</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional callable that returns <code>True</code> to abort sampling early.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;SamplingResults&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draws&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-dataclass&quot;&gt;&lt;code&gt;dataclass&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.SamplingResults&lt;/code&gt;)" href="#easyscience.fitting.sampler.SamplingResults">SamplingResults</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Structured sampling results (also stored on <code>results</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p><code>results.draws</code> is a trimmed, outlier-filtered view of the chain,
+so it is usually smaller than the chain and its length is not
+predictable from <code>samples</code>/<code>thin</code>. See the <code>Sampler</code> class notes
+for how to read the full chain or switch trimming off.</p>
+<p>Exceptions propagate from the sampling engine: <code>ValueError</code> if
+<code>samples</code>, <code>burn</code>, or <code>thin</code> are invalid, and <code>RuntimeError</code>
+if the active minimizer is not a BUMPS instance.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.extend" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">extend</span><span class="p">(</span><span class="n">additional_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">thin</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">total_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abort_test</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Continue the existing chain with additional samples.</p>
+<p>DREAM stores draws in a fixed-size ring buffer sized to its
+<code>samples</code> parameter; this method does the ring-buffer arithmetic
+for you (<code>samples = stored_generations * population +
+additional_samples</code>) so no existing draws are dropped from the
+buffer, regardless of the thinning interval. Runs with <code>burn=0</code> —
+re-burning a converged chain is usually a mistake, and BUMPS forces
+it to 0 on resume in any case. The DREAM population is recovered from
+the saved state and cannot be changed on extend.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>additional_samples</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of additional DREAM samples to draw, in the same units
+as <code>samples</code> in <code>sample()</code>. This grows the ring buffer by
+exactly <code>additional_samples</code>; how many of the new draws become
+<em>visible</em> in <code>results.draws</code> depends on the thinning interval
+and on BUMPS' automatic trimming (see Notes).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>5000</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>thin</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thinning interval for the retained draws.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>10</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>total_samples</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Advanced: total retained samples requested from the ring buffer,
+<strong>overriding</strong> the <code>additional_samples</code> arithmetic. With
+<code>total_samples=N</code>, only the last N draws are retained.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sampler_kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional keyword arguments forwarded to the BUMPS DREAM
+sampler (merged over the instance defaults).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>progress_callback</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="bool">bool</span> | None] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional callback invoked at each DREAM generation.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>abort_test</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[[], <span title="bool">bool</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional callable that returns <code>True</code> to abort sampling early.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;SamplingResults&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draws&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-dataclass&quot;&gt;&lt;code&gt;dataclass&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.SamplingResults&lt;/code&gt;)" href="#easyscience.fitting.sampler.SamplingResults">SamplingResults</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Structured sampling results for the full (extended) chain.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If there is no chain to extend (call <code>sample()</code> or
+<code>load_state()</code> first), or the minimizer is not BUMPS.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p><code>results.draws</code> will <strong>not</strong> grow by exactly
+<code>additional_samples / thin</code>. Two things get in the way, neither of
+them a re-applied burn-in: BUMPS re-runs its burn-point detector over
+the whole extended chain and re-trims the returned view (so the
+visible count can even shrink), and the ring buffer is allocated in
+whole generations, so it grows by <em>at least</em>
+<code>additional_samples / thin</code>, rounded up. To see the chain itself,
+compare <code>results.state.draw(portion=1.0, outliers=True)</code> before and
+after, or run with <code>sampler_kwargs={'trim': False}</code>. See the
+<code>Sampler</code> class notes.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.save" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Persist the chain state and metadata to disk.</p>
+<p>Writes BUMPS native files (<code>&lt;path&gt;-chain.mc.gz</code> etc.) plus a
+<code>&lt;path&gt;.params.json</code> sidecar with parameter names, the easyscience
+version, and a fingerprint of the bound data (verified with a warning
+on <code>load_state()</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>path</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>File path prefix. BUMPS appends its own suffixes.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If no chain state exists yet (call <code>sample()</code> first).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.load_state" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load_state</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Load a previously saved chain into this sampler.</p>
+<p>The sampler must be constructed with the same fitter and data used to
+create the chain — <code>extend()</code> then continues the saved chain. If the
+sidecar carries a data fingerprint and it does not match this
+sampler's bound data, a <code>UserWarning</code> is emitted (extending a chain
+against different data is undefined behaviour).</p>
+<p>Populates <code>state</code> and <code>results</code> (draws, log-posterior and
+parameter names) from the saved chain, so summaries and
+<code>PosteriorResults.from_sampler()</code> work without resampling.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>path</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>File path prefix used in <code>save()</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>skip</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Discard the first <code>skip</code> saved generations on load. Useful for
+trimming additional burn-in without re-sampling.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;SamplingResults&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;draws&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;logp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-dataclass&quot;&gt;&lt;code&gt;dataclass&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.SamplingResults&lt;/code&gt;)" href="#easyscience.fitting.sampler.SamplingResults">SamplingResults</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The reloaded chain results (also stored on <code>results</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary><p>Notes</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end --></summary>
+  <p>BUMPS does not persist its automatic trim point, so a reloaded chain
+comes back <strong>untrimmed</strong>: this method reports more draws than the
+<code>sample()</code> call that wrote the file, even though the chain is
+identical. Use <code>skip</code> to discard leading generations explicitly.
+See the <code>Sampler</code> class notes.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+</details>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+<h4 id="easyscience.fitting.sampler-functions">Functions</h4>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easyscience.fitting.sampler.save_chain" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">save_chain</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">data_fingerprint</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Persist a DREAM chain state plus a metadata sidecar.</p>
+<p>Writes the BUMPS native files (<code>&lt;path&gt;-chain.mc.gz</code>, <code>&lt;path&gt;-point.mc.gz</code>
+and <code>&lt;path&gt;-stats.mc.gz</code>) plus a <code>&lt;path&gt;.params.json</code> sidecar holding
+the parameter names and metadata.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>state</code>
+            </td>
+            <td>
+                  <code><span title="bumps.dream.state.MCMCDraw">MCMCDraw</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The BUMPS chain state to persist.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>param_names</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Parameter names (one per chain column), stored in the sidecar.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>path</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>File path prefix. BUMPS appends its own suffixes.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>data_fingerprint</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>SHA-256 fingerprint of the data the chain was sampled against,
+verified (with a warning) on reload.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="easyscience.fitting.sampler.load_chain" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load_chain</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Reload a DREAM chain state saved by <code>save_chain</code>.</p>
+<p>Parameter names are restored from the sidecar when available (schema
+versions 1 and 2), falling back to the state's labels with the minimizer
+prefix stripped.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>path</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>File path prefix used when saving.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>skip</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Discard the first <code>skip</code> saved generations on load, forwarded to
+<code>bumps.dream.state.load_state</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<span title="bumps.dream.state.MCMCDraw">MCMCDraw</span>, <span title="list">list</span>[<span title="str">str</span>] | None, <span title="dict">dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The reloaded BUMPS chain state, the parameter names (or <code>None</code> if
+neither sidecar nor labels yielded them), and the raw sidecar dict
+(empty if absent/unreadable).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
 
 
 
