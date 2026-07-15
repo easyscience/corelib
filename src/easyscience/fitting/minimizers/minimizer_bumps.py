@@ -119,9 +119,9 @@ class Bumps(MinimizerBase):
             ``iteration`` carries the BUMPS optimizer step index. By
             default, None.
         abort_test : Callable[[], bool] | None, default=None
-            Optional callback that returns ``True`` to signal that the fit
-            should be aborted.  Called periodically during the
-            BUMPS optimizer iteration loop.
+            Optional callback that returns ``True`` to signal that the
+            fit should be aborted.  Called periodically during the BUMPS
+            optimizer iteration loop.
         minimizer_kwargs : dict | None, default=None
             Additional keyword arguments passed to the BUMPS minimizer.
             By default, None.
@@ -395,12 +395,14 @@ class Bumps(MinimizerBase):
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
     ) -> dict:
-        """Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
+        """
+        Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
 
-        Builds a BUMPS `FitProblem` from the current model and runs the DREAM
-        sampler.  This is the public minimizer-level entry point for Bayesian
-        sampling; the higher-level `Sampler` delegates to this
-        method after flattening multi-dataset arrays.
+        Builds a BUMPS ``FitProblem`` from the current model and runs
+        the DREAM sampler.  This is the public minimizer-level entry
+        point for Bayesian sampling; the higher-level
+        ``MultiFitter.mcmc_sample`` delegates to this method after
+        flattening multi-dataset arrays.
 
         Parameters
         ----------
@@ -442,15 +444,16 @@ class Bumps(MinimizerBase):
             Resuming against *different* data is undefined behaviour (the
             chain's likelihood changes underneath it).
         sampler_kwargs : dict | None, default=None
-            Additional keyword arguments forwarded to `bumps.fitters.fit`.
+            Additional keyword arguments forwarded to
+            ``bumps.fitters.fit``.
         progress_callback : Callable[[dict], bool | None] | None, default=None
             Optional callback for progress updates during sampling.  The
-            payload dict includes ``iteration`` (DREAM generation number) and
-            ``sampling: True``.
+            payload dict includes ``iteration`` (DREAM generation
+            number) and ``sampling: True``.
         abort_test : Callable[[], bool] | None, default=None
-            Optional callback that returns ``True`` to signal that sampling
-            should be aborted. Called periodically during the DREAM sampling
-            loop.
+            Optional callback that returns ``True`` to signal that
+            sampling should be aborted. Called periodically during the
+            DREAM sampling loop.
 
         Returns
         -------
@@ -466,7 +469,8 @@ class Bumps(MinimizerBase):
             is incompatible with the current model (parameter count,
             names/order, or population mismatch).
         FitError
-            If DREAM sampling was aborted by the user (via ``abort_test``).
+            If DREAM sampling was aborted by the user (via
+            ``abort_test``).
         Exception
             Re-raised from DREAM fitting if any unexpected error occurs
             (parameter values are restored beforehand).
@@ -672,11 +676,13 @@ class Bumps(MinimizerBase):
     def _build_sample_progress_payload(
         self, problem, iteration: int, point: np.ndarray, nllf: float
     ) -> dict:
-        """Build a progress payload for Bayesian DREAM sampling steps.
+        """
+        Build a progress payload for Bayesian DREAM sampling steps.
 
-        Called by :class:`BumpsProgressMonitor` at each DREAM generation.
-        The payload includes ``sampling: True`` so downstream consumers can
-        distinguish sampling progress from classical fitting progress.
+        Called by :class:`BumpsProgressMonitor` at each DREAM
+        generation. The payload includes ``sampling: True`` so
+        downstream consumers can distinguish sampling progress from
+        classical fitting progress.
         """
         payload = self._build_progress_payload(problem, iteration, point, nllf)
         payload['sampling'] = True

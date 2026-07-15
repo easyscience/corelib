@@ -123,11 +123,14 @@ jobs:
 
       # Build the static files for the documentation site for local inspection
       # Input: docs/ directory containing the Markdown files
-      # Output: site/ directory containing the generated HTML files
+      # Output: docs/site/ directory containing the generated HTML files
+      # Also verifies that mkdocstrings generated docs/site/objects.inv.
       - name: Build site for local check
-        run: pixi run docs-build-local
+        run: |
+          pixi run docs-build-local
+          pixi run docs-inventory-check
 
-      # Upload the static files from the site/ directory to be used for
+      # Upload the static files from the docs/site/ directory to be used for
       # local check
       - name: Upload built site as artifact
         uses: ./.github/actions/upload-artifact

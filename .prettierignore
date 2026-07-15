@@ -25,6 +25,9 @@ docs/docs/assets/
 # Node
 node_modules
 
+# Tox
+.tox
+
 # Misc
 .benchmarks
 .cache

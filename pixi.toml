@@ -5,7 +5,19 @@
 [workspace]
 
 # Supported platforms for the lock file (pixi.lock)
-platforms = ['win-64', 'linux-64', 'osx-arm64']
+platforms = [
+  'win-64',
+  # Set minimum supported version for glibc to be 2.35 to ensure packages
+  # like `crysfml` that only have wheels for glibc 2.35+
+  # (manylinux_2_35_x86_64) are used.
+  #libc = { family = 'glibc', version = '2.35' }
+  { platform = 'linux-64', glibc = '2.35' },
+  # Set minimum supported version for macOS to be 14.0 to ensure packages
+  # like `scipp` that only have wheels for macOS 14.0+ (macosx_14_0_arm64)
+  # are used instead of building from source. This is a workaround for
+  # Pixi, see https://github.com/prefix-dev/pixi/issues/5667
+  { platform = 'osx-arm64', macos = '14.0' },
+]
 
 # Channels for fetching packages
 channels = ['nodefaults', 'conda-forge']
@@ -18,13 +30,6 @@ channels = ['nodefaults', 'conda-forge']
 
 [activation.env]
 PYTHONIOENCODING = 'utf-8'
-
-[system-requirements]
-# Set minimum supported version for macOS to be 14.0 to ensure packages
-# like `scipp` that only have wheels for macOS 14.0+ (macosx_14_0_arm64)
-# are used instead of building from source. This is a workaround for
-# Pixi, see https://github.com/prefix-dev/pixi/issues/5667
-macos = '14.0'
 
 # Non-default features:
 
@@ -182,8 +187,9 @@ docs-serve = 'pixi run docs-pre serve -f docs/mkdocs.yml'
 docs-serve-dirty = 'pixi run docs-serve --dirty'
 docs-build = 'pixi run docs-pre build -f docs/mkdocs.yml'
 docs-build-local = 'pixi run docs-build --no-directory-urls'
+docs-inventory-check = 'python -c "from pathlib import Path; p = Path(\"docs/site/objects.inv\"); raise SystemExit(0 if p.is_file() and p.stat().st_size > 0 else \"missing or empty docs/site/objects.inv\")"'
 
-docs-deploy-pre = 'mike deploy -F docs/mkdocs.yml --push --branch gh-pages --update-aliases --alias-type redirect'
+docs-deploy-pre = 'mike deploy -F docs/mkdocs.yml --push --branch gh-pages --update-aliases --alias-type copy'
 docs-set-default-pre = 'mike set-default -F docs/mkdocs.yml --push --branch gh-pages'
 
 docs-update-assets = 'python tools/update_docs_assets.py'
