@@ -17,6 +17,7 @@ from easyscience import Parameter
 from easyscience.fitting import Sampler
 from easyscience.fitting import SamplingResults
 from easyscience.fitting.multi_fitter import MultiFitter
+from easyscience.fitting.sampler import load_chain
 
 
 class Line(ObjBase):
@@ -418,6 +419,64 @@ class TestSampler:
         sampler2 = Sampler(f, [x], [y], [weights])
         loaded = sampler2.load_state(prefix)
         assert loaded.param_names == first.param_names
+
+    def test_load_without_sidecar_falls_back_to_state_labels(self, tmp_path):
+        """A missing sidecar is tolerated; names fall back to the state labels.
+
+        BUMPS does not preserve labels through save/load, so the fallback
+        yields placeholder names -- only the count is guaranteed.
+        """
+        f, _, x, y, weights = _bumps_fitter_and_data()
+        sampler = Sampler(f, [x], [y], [weights])
+        first = sampler.sample(samples=100, burn=20, thin=2)
+
+        prefix = str(tmp_path / 'chain')
+        sampler.save(prefix)
+        (tmp_path / 'chain.params.json').unlink()
+
+        _, param_names, sidecar = load_chain(prefix)
+        assert sidecar == {}
+        assert len(param_names) == len(first.param_names)
+
+        sampler2 = Sampler(f, [x], [y], [weights])
+        loaded = sampler2.load_state(prefix)
+        assert loaded.draws.shape[0] > 0
+        assert len(loaded.param_names) == len(first.param_names)
+
+    def test_load_with_corrupt_sidecar_falls_back_to_state_labels(self, tmp_path):
+        """A corrupt sidecar is tolerated rather than raising JSONDecodeError."""
+        f, _, x, y, weights = _bumps_fitter_and_data()
+        sampler = Sampler(f, [x], [y], [weights])
+        first = sampler.sample(samples=100, burn=20, thin=2)
+
+        prefix = str(tmp_path / 'chain')
+        sampler.save(prefix)
+        (tmp_path / 'chain.params.json').write_text('{ not valid json')
+
+        _, param_names, sidecar = load_chain(prefix)
+        assert sidecar == {}
+        assert len(param_names) == len(first.param_names)
+
+        sampler2 = Sampler(f, [x], [y], [weights])
+        loaded = sampler2.load_state(prefix)
+        assert loaded.draws.shape[0] > 0
+
+    def test_load_ignores_unknown_sidecar_schema_version(self, tmp_path):
+        """A sidecar from a future schema is read but its names are not trusted."""
+        f, _, x, y, weights = _bumps_fitter_and_data()
+        sampler = Sampler(f, [x], [y], [weights])
+        first = sampler.sample(samples=100, burn=20, thin=2)
+
+        prefix = str(tmp_path / 'chain')
+        sampler.save(prefix)
+        (tmp_path / 'chain.params.json').write_text(
+            json.dumps({'schema_version': 99, 'param_names': ['bogus']})
+        )
+
+        _, param_names, sidecar = load_chain(prefix)
+        assert sidecar['schema_version'] == 99
+        assert param_names != ['bogus']
+        assert len(param_names) == len(first.param_names)
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_load_short_chain_regression(self, tmp_path):
