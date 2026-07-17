@@ -5810,7 +5810,10 @@ flattening multi-dataset arrays.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Number of retained DREAM samples requested from BUMPS.</p>
+                <p>Number of raw samples to draw across all chains, before thinning.
+A guaranteed minimum, not an exact count: DREAM advances in
+blocks of 10 generations (one generation = one draw per chain)
+and stops at the first block boundary at or past <code>samples</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5829,7 +5832,9 @@ flattening multi-dataset arrays.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Burn-in steps.</p>
+                <p>Burn-in generations to discard. BUMPS counts <code>burn</code> in
+generations while <code>samples</code> counts raw draws, so <code>burn=500</code>
+discards <code>500 * n_chains</code> raw samples.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5848,7 +5853,7 @@ flattening multi-dataset arrays.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Thinning interval.</p>
+                <p>Thinning interval — only every <code>thin</code>-th generation is stored.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5893,10 +5898,11 @@ When provided, DREAM <strong>continues</strong> the saved chain instead of
 starting cold.  The population, parameter count, and parameter
 names must match the current model — a <code>ValueError</code> is raised
 otherwise.</p>
-<p><code>samples</code> must be the <strong>total</strong> number of retained draws, not
-an increment: to extend an existing chain of <code>N</code> draws by <code>M</code>,
-pass <code>samples=N + M</code> (DREAM keeps only the last <code>samples</code>
-draws). The <code>Sampler.extend</code> helper computes this for you.</p>
+<p><code>samples</code> must be the <strong>total</strong> number of raw samples, not an
+increment: to extend an existing chain of <code>N</code> raw samples by
+<code>M</code>, pass <code>samples=N + M</code> (DREAM keeps only the last
+<code>samples</code> draws in its buffer). The <code>Sampler.extend</code> helper
+computes this for you.</p>
 <p><code>burn</code> is forced to 0 on resume: a previously-converged chain is
 never re-burned.</p>
 <p>The <code>population</code> and <code>initializer</code> parameters
@@ -9363,21 +9369,10 @@ early.</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;save_chain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param_names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data_fingerprint&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.save_chain&lt;/code&gt;)" href="#easyscience.fitting.sampler.save_chain">save_chain</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Persist a DREAM chain state plus a metadata sidecar.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
               <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;load_chain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.sampler.load_chain&lt;/code&gt;)" href="#easyscience.fitting.sampler.load_chain">load_chain</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Reload a DREAM chain state saved by <code>save_chain</code>.</p>
+                  <p>Reload a DREAM chain state saved by <code>Sampler.save</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -9760,10 +9755,11 @@ chain, and its length is not deterministic — the detector re-runs from
 scratch on every <code>sample()</code> and <code>extend()</code> call and may place the burn
 point differently each time. Read the count off the array; do not predict
 it.</p>
-<p>Nor is the chain itself exactly <code>samples / thin</code> rows: DREAM allocates
-its ring buffer in whole generations, so the true size is <code>samples /
-thin</code> rounded <em>up</em> to a generation boundary. <code>samples</code> is a floor, not
-a promise.</p>
+<p>Nor is the chain itself exactly <code>samples / thin</code> rows: <code>samples</code> is a
+guaranteed minimum, not an exact count. DREAM advances in blocks of 10
+generations (one generation = one draw per chain) and only checks its
+stopping condition between blocks, so the raw chain length is <code>samples</code>
+rounded up to a multiple of <code>10 * n_chains</code>.</p>
 <p>The trimming is only a <em>view</em> — nothing is dropped from the buffer. To
 read the full untrimmed chain::</p>
 <div class="language-text highlight"><pre><span></span><code>results = sampler.sample(samples=10000, burn=500, thin=2)
@@ -10142,7 +10138,10 @@ comes back untrimmed and <code>load_state()</code> reports <em>more</em> draws t
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Number of retained DREAM samples requested from BUMPS.</p>
+                <p>Number of raw samples to draw across all chains, before thinning.
+This is a guaranteed minimum, not an exact count: DREAM advances
+in blocks of 10 generations (one generation = one draw per chain)
+and stops at the first block boundary at or past <code>samples</code>.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10161,7 +10160,9 @@ comes back untrimmed and <code>load_state()</code> reports <em>more</em> draws t
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Burn-in steps to discard before collecting samples.</p>
+                <p>Burn-in generations to discard before collecting samples. Note
+BUMPS counts <code>burn</code> in generations while <code>samples</code> counts raw
+draws, so <code>burn=500</code> discards <code>500 * n_chains</code> raw samples.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10180,7 +10181,7 @@ comes back untrimmed and <code>load_state()</code> reports <em>more</em> draws t
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Thinning interval — only every <code>thin</code>-th sample is kept,
+                <p>Thinning interval — only every <code>thin</code>-th generation is kept,
 which reduces autocorrelation between consecutive draws.</p>
 <!-- prettier-ignore-start -->
 
@@ -10552,12 +10553,13 @@ sampler (merged over the instance defaults).</p>
 <code>additional_samples / thin</code>. Two things get in the way, neither of
 them a re-applied burn-in: BUMPS re-runs its burn-point detector over
 the whole extended chain and re-trims the returned view (so the
-visible count can even shrink), and the ring buffer is allocated in
-whole generations, so it grows by <em>at least</em>
-<code>additional_samples / thin</code>, rounded up. To see the chain itself,
-compare <code>results.state.draw(portion=1.0, outliers=True)</code> before and
-after, or run with <code>sampler_kwargs={'trim': False}</code>. See the
-<code>Sampler</code> class notes.</p>
+visible count can even shrink), and DREAM advances in blocks of 10
+generations, so the raw growth is <code>additional_samples</code> rounded up
+to a multiple of <code>10 * n_chains</code> (i.e. at least
+<code>additional_samples / thin</code> retained rows). To see the chain
+itself, compare <code>results.state.draw(portion=1.0, outliers=True)</code>
+before and after, or run with <code>sampler_kwargs={'trim': False}</code>. See
+the <code>Sampler</code> class notes.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10579,10 +10581,12 @@ after, or run with <code>sampler_kwargs={'trim': False}</code>. See the
     <div class="doc doc-contents ">
 
         <p>Persist the chain state and metadata to disk.</p>
-<p>Writes BUMPS native files (<code>&lt;path&gt;-chain.mc.gz</code> etc.) plus a
-<code>&lt;path&gt;.params.json</code> sidecar with parameter names, the easyscience
-version, and a fingerprint of the bound data (verified with a warning
-on <code>load_state()</code>).</p>
+<p>Writes the BUMPS native files (<code>&lt;path&gt;-chain.mc.gz</code>,
+<code>&lt;path&gt;-point.mc.gz</code> and <code>&lt;path&gt;-stats.mc.gz</code>) plus a
+<code>&lt;path&gt;.params.json</code> sidecar with the parameter names, the
+easyscience version, and a fingerprint of the bound data (verified
+with a warning on <code>load_state()</code>). Use <code>load_chain</code> to read the
+files back without a fitter.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10792,122 +10796,6 @@ See the <code>Sampler</code> class notes.</p>
 <div class="doc doc-object doc-function">
 
 
-<h5 id="easyscience.fitting.sampler.save_chain" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">save_chain</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">data_fingerprint</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-
-</h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Persist a DREAM chain state plus a metadata sidecar.</p>
-<p>Writes the BUMPS native files (<code>&lt;path&gt;-chain.mc.gz</code>, <code>&lt;path&gt;-point.mc.gz</code>
-and <code>&lt;path&gt;-stats.mc.gz</code>) plus a <code>&lt;path&gt;.params.json</code> sidecar holding
-the parameter names and metadata.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>state</code>
-            </td>
-            <td>
-                  <code><span title="bumps.dream.state.MCMCDraw">MCMCDraw</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The BUMPS chain state to persist.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>param_names</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Parameter names (one per chain column), stored in the sidecar.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>path</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>File path prefix. BUMPS appends its own suffixes.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>data_fingerprint</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>SHA-256 fingerprint of the data the chain was sampled against,
-verified (with a warning) on reload.</p>
-<!-- prettier-ignore-start -->
-
-<!-- prettier-ignore-end -->
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h5 id="easyscience.fitting.sampler.load_chain" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">load_chain</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
 
@@ -10916,10 +10804,12 @@ verified (with a warning) on reload.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Reload a DREAM chain state saved by <code>save_chain</code>.</p>
-<p>Parameter names are restored from the sidecar when available (schema
-versions 1 and 2), falling back to the state's labels with the minimizer
-prefix stripped.</p>
+        <p>Reload a DREAM chain state saved by <code>Sampler.save</code>.</p>
+<p>This is the standalone reader: unlike <code>Sampler.load_state</code> it needs no
+fitter, model or data, so a saved chain can be inspected or post-processed
+on a machine that does not have the model. Parameter names are restored
+from the sidecar when available (schema versions 1 and 2), falling back to
+the state's labels with the minimizer prefix stripped.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11010,7 +10900,7 @@ neither sidecar nor labels yielded them), and the raw sidecar dict
     </div>
 
 </div>
-
+<h4 id="easyscience.fitting.sampler-modules">Modules</h4>
 
 
   </div>
