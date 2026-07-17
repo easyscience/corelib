@@ -413,11 +413,16 @@ class Bumps(MinimizerBase):
         weights : np.ndarray
             Flattened weight array.
         samples : int, default=10000
-            Number of retained DREAM samples requested from BUMPS.
+            Number of raw samples to draw across all chains, before thinning.
+            A guaranteed minimum, not an exact count: DREAM advances in
+            blocks of 10 generations (one generation = one draw per chain)
+            and stops at the first block boundary at or past ``samples``.
         burn : int, default=2000
-            Burn-in steps.
+            Burn-in generations to discard. BUMPS counts ``burn`` in
+            generations while ``samples`` counts raw draws, so ``burn=500``
+            discards ``500 * n_chains`` raw samples.
         thin : int, default=10
-            Thinning interval.
+            Thinning interval — only every ``thin``-th generation is stored.
         population : int | None, default=None
             BUMPS DREAM population count per parameter (number of parallel
             chains): BUMPS creates ``ceil(population * n_parameters)`` chains.
@@ -429,10 +434,11 @@ class Bumps(MinimizerBase):
             names must match the current model — a ``ValueError`` is raised
             otherwise.
 
-            ``samples`` must be the **total** number of retained draws, not
-            an increment: to extend an existing chain of ``N`` draws by ``M``,
-            pass ``samples=N + M`` (DREAM keeps only the last ``samples``
-            draws). The `Sampler.extend` helper computes this for you.
+            ``samples`` must be the **total** number of raw samples, not an
+            increment: to extend an existing chain of ``N`` raw samples by
+            ``M``, pass ``samples=N + M`` (DREAM keeps only the last
+            ``samples`` draws in its buffer). The `Sampler.extend` helper
+            computes this for you.
 
             ``burn`` is forced to 0 on resume: a previously-converged chain is
             never re-burned.

@@ -13,6 +13,8 @@ from typing import Callable
 
 import numpy as np
 
+from easyscience import global_object
+
 from .minimizers.minimizer_base import MINIMIZER_PARAMETER_PREFIX
 
 if TYPE_CHECKING:  # avoid import cycles; only needed for type hints
@@ -60,7 +62,7 @@ def _load_bumps_state(path: str, skip: int = 0) -> MCMCDraw:
     Parameters
     ----------
     path : str
-        File path prefix that was passed to ``save_chain``.
+        File path prefix that was passed to ``Sampler.save``.
     skip : int, default=0
         Discard the first ``skip`` saved generations, forwarded to
         ``bumps.dream.state.load_state``.
@@ -89,52 +91,14 @@ def _load_bumps_state(path: str, skip: int = 0) -> MCMCDraw:
         bumps_state.loadtxt_with_fallback = loader
 
 
-def save_chain(
-    state: MCMCDraw,
-    param_names: list[str] | None,
-    path: str,
-    data_fingerprint: str | None = None,
-) -> None:
-    """Persist a DREAM chain state plus a metadata sidecar.
-
-    Writes the BUMPS native files (``<path>-chain.mc.gz``, ``<path>-point.mc.gz``
-    and ``<path>-stats.mc.gz``) plus a ``<path>.params.json`` sidecar holding
-    the parameter names and metadata.
-
-    Parameters
-    ----------
-    state : MCMCDraw
-        The BUMPS chain state to persist.
-    param_names : list[str] | None
-        Parameter names (one per chain column), stored in the sidecar.
-    path : str
-        File path prefix. BUMPS appends its own suffixes.
-    data_fingerprint : str | None, default=None
-        SHA-256 fingerprint of the data the chain was sampled against,
-        verified (with a warning) on reload.
-    """
-    from bumps.dream.state import save_state
-
-    from easyscience import __version__
-
-    save_state(state, str(path))
-
-    sidecar = {
-        'schema_version': _SIDECAR_SCHEMA_VERSION,
-        'param_names': param_names,
-        'easyscience_version': __version__,
-        'data_fingerprint': data_fingerprint,
-    }
-    with open(f'{path}.params.json', 'w') as f:
-        json.dump(sidecar, f, indent=2)
-
-
 def load_chain(path: str, skip: int = 0) -> tuple[MCMCDraw, list[str] | None, dict]:
-    """Reload a DREAM chain state saved by ``save_chain``.
+    """Reload a DREAM chain state saved by ``Sampler.save``.
 
-    Parameter names are restored from the sidecar when available (schema
-    versions 1 and 2), falling back to the state's labels with the minimizer
-    prefix stripped.
+    This is the standalone reader: unlike ``Sampler.load_state`` it needs no
+    fitter, model or data, so a saved chain can be inspected or post-processed
+    on a machine that does not have the model. Parameter names are restored
+    from the sidecar when available (schema versions 1 and 2), falling back to
+    the state's labels with the minimizer prefix stripped.
 
     Parameters
     ----------
@@ -266,10 +230,11 @@ class Sampler:
     point differently each time. Read the count off the array; do not predict
     it.
 
-    Nor is the chain itself exactly ``samples / thin`` rows: DREAM allocates
-    its ring buffer in whole generations, so the true size is ``samples /
-    thin`` rounded *up* to a generation boundary. ``samples`` is a floor, not
-    a promise.
+    Nor is the chain itself exactly ``samples / thin`` rows: ``samples`` is a
+    guaranteed minimum, not an exact count. DREAM advances in blocks of 10
+    generations (one generation = one draw per chain) and only checks its
+    stopping condition between blocks, so the raw chain length is ``samples``
+    rounded up to a multiple of ``10 * n_chains``.
 
     The trimming is only a *view* — nothing is dropped from the buffer. To
     read the full untrimmed chain::
@@ -432,11 +397,16 @@ class Sampler:
         Parameters
         ----------
         samples : int, default=10000
-            Number of retained DREAM samples requested from BUMPS.
+            Number of raw samples to draw across all chains, before thinning.
+            This is a guaranteed minimum, not an exact count: DREAM advances
+            in blocks of 10 generations (one generation = one draw per chain)
+            and stops at the first block boundary at or past ``samples``.
         burn : int, default=2000
-            Burn-in steps to discard before collecting samples.
+            Burn-in generations to discard before collecting samples. Note
+            BUMPS counts ``burn`` in generations while ``samples`` counts raw
+            draws, so ``burn=500`` discards ``500 * n_chains`` raw samples.
         thin : int, default=10
-            Thinning interval — only every ``thin``-th sample is kept,
+            Thinning interval — only every ``thin``-th generation is kept,
             which reduces autocorrelation between consecutive draws.
         population : int | None, default=None
             DREAM population **scale factor** (not an absolute chain count):
@@ -536,12 +506,13 @@ class Sampler:
         ``additional_samples / thin``. Two things get in the way, neither of
         them a re-applied burn-in: BUMPS re-runs its burn-point detector over
         the whole extended chain and re-trims the returned view (so the
-        visible count can even shrink), and the ring buffer is allocated in
-        whole generations, so it grows by *at least*
-        ``additional_samples / thin``, rounded up. To see the chain itself,
-        compare ``results.state.draw(portion=1.0, outliers=True)`` before and
-        after, or run with ``sampler_kwargs={'trim': False}``. See the
-        ``Sampler`` class notes.
+        visible count can even shrink), and DREAM advances in blocks of 10
+        generations, so the raw growth is ``additional_samples`` rounded up
+        to a multiple of ``10 * n_chains`` (i.e. at least
+        ``additional_samples / thin`` retained rows). To see the chain
+        itself, compare ``results.state.draw(portion=1.0, outliers=True)``
+        before and after, or run with ``sampler_kwargs={'trim': False}``. See
+        the ``Sampler`` class notes.
         """
         if self._state is None:
             raise RuntimeError('No chain to extend. Call sample() or load_state() first.')
@@ -567,10 +538,12 @@ class Sampler:
     def save(self, path: str) -> None:
         """Persist the chain state and metadata to disk.
 
-        Writes BUMPS native files (``<path>-chain.mc.gz`` etc.) plus a
-        ``<path>.params.json`` sidecar with parameter names, the easyscience
-        version, and a fingerprint of the bound data (verified with a warning
-        on ``load_state()``).
+        Writes the BUMPS native files (``<path>-chain.mc.gz``,
+        ``<path>-point.mc.gz`` and ``<path>-stats.mc.gz``) plus a
+        ``<path>.params.json`` sidecar with the parameter names, the
+        easyscience version, and a fingerprint of the bound data (verified
+        with a warning on ``load_state()``). Use ``load_chain`` to read the
+        files back without a fitter.
 
         Parameters
         ----------
@@ -582,14 +555,30 @@ class Sampler:
         RuntimeError
             If no chain state exists yet (call ``sample()`` first).
         """
+        from bumps.dream.state import save_state
+
+        from easyscience import __version__
+
         if self._state is None:
             raise RuntimeError('No chain state to save. Call sample() first.')
-        save_chain(
-            self._state,
-            self._results.param_names if self._results is not None else None,
-            path,
-            data_fingerprint=self._fingerprint(),
-        )
+
+        fingerprint = self._fingerprint()
+        if fingerprint is None:
+            global_object.log.getLogger('fitting').warning(
+                'Could not compute a fingerprint of the bound data; the saved '
+                'chain cannot be verified against its data on load_state().'
+            )
+
+        save_state(self._state, str(path))
+
+        sidecar = {
+            'schema_version': _SIDECAR_SCHEMA_VERSION,
+            'param_names': self._results.param_names if self._results is not None else None,
+            'easyscience_version': __version__,
+            'data_fingerprint': fingerprint,
+        }
+        with open(f'{path}.params.json', 'w') as f:
+            json.dump(sidecar, f, indent=2)
 
     def load_state(self, path: str, skip: int = 0) -> SamplingResults:
         """Load a previously saved chain into this sampler.
@@ -630,7 +619,7 @@ class Sampler:
         saved_fingerprint = sidecar.get('data_fingerprint')
         if saved_fingerprint is not None:
             current_fingerprint = self._fingerprint()
-            if current_fingerprint is not None and current_fingerprint != saved_fingerprint:
+            if current_fingerprint is None or current_fingerprint != saved_fingerprint:
                 warnings.warn(
                     'The data bound to this Sampler does not match the data '
                     'fingerprint stored with the saved chain. Extending a '

@@ -368,6 +368,26 @@ class TestSampler:
             sampler.save(str(tmp_path / 'chain'))
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_save_warns_when_fingerprint_unavailable(self, tmp_path, caplog, monkeypatch):
+        """save() still succeeds when the data cannot be fingerprinted, but
+        logs a warning and records ``null`` in the sidecar."""
+        import logging
+
+        f, _, x, y, weights = _bumps_fitter_and_data()
+        sampler = Sampler(f, [x], [y], [weights])
+        sampler.sample(samples=100, burn=20, thin=2)
+
+        monkeypatch.setattr('easyscience.fitting.sampler._data_fingerprint', lambda *args: None)
+
+        prefix = str(tmp_path / 'chain')
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting'):
+            sampler.save(prefix)
+
+        assert 'Could not compute a fingerprint' in caplog.text
+        with open(f'{prefix}.params.json') as fh:
+            assert json.load(fh)['data_fingerprint'] is None
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_load_state_populates_results(self, tmp_path):
         """A freshly loaded sampler reports draws/logp/param_names without resampling."""
         f, sp, x, y, weights = _bumps_fitter_and_data()
