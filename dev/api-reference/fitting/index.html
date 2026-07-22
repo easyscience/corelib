@@ -5888,7 +5888,7 @@ chains): BUMPS creates <code>ceil(population * n_parameters)</code> chains.</p>
                 <code>resume_state</code>
             </td>
             <td>
-                  <code><span title="typing.Any">Any</span> | None</code>
+                  <code><span title="bumps.dream.state.MCMCDraw">MCMCDraw</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9741,6 +9741,47 @@ sampler on every run, merged with (and overridden by) per-call
     </table>
 
 
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>fitter</code> is not Fitter-shaped (no <code>minimizer</code>/<code>fit_function</code>),
+or <code>vectorized</code>/<code>sampler_kwargs</code> have the wrong type.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>x</code>, <code>y</code> and <code>weights</code> do not hold matching structures
+(all arrays, or lists of the same length).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
 <details class="note" open>
   <summary><p>Notes</p>
 <!-- prettier-ignore-start -->
@@ -10608,7 +10649,7 @@ files back without a fitter.</p>
                 <code>path</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="str">str</span> | <span title="os">os</span>.<span title="os.PathLike">PathLike</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10635,6 +10676,19 @@ files back without a fitter.</p>
         </tr>
       </thead>
       <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>path</code> is not a <code>str</code> or <code>os.PathLike</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
           <tr class="doc-section-item">
             <td>
                   <code><span title="RuntimeError">RuntimeError</span></code>
@@ -10671,8 +10725,8 @@ files back without a fitter.</p>
 <p>The sampler must be constructed with the same fitter and data used to
 create the chain — <code>extend()</code> then continues the saved chain. If the
 sidecar carries a data fingerprint and it does not match this
-sampler's bound data, a <code>UserWarning</code> is emitted (extending a chain
-against different data is undefined behaviour).</p>
+sampler's bound data, a warning is logged (extending a chain against
+different data is undefined behaviour).</p>
 <p>Populates <code>state</code> and <code>results</code> (draws, log-posterior and
 parameter names) from the saved chain, so summaries and
 <code>PosteriorResults.from_sampler()</code> work without resampling.</p>
@@ -10697,7 +10751,7 @@ parameter names) from the saved chain, so summaries and
                 <code>path</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="str">str</span> | <span title="os">os</span>.<span title="os.PathLike">PathLike</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10755,6 +10809,45 @@ trimming additional burn-in without re-sampling.</p>
             <td>
               <div class="doc-md-description">
                 <p>The reloaded chain results (also stored on <code>results</code>).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>path</code> is not a <code>str</code> or <code>os.PathLike</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>skip</code> is not a non-negative integer.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -10831,7 +10924,7 @@ the state's labels with the minimizer prefix stripped.</p>
                 <code>path</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="str">str</span> | <span title="os">os</span>.<span title="os.PathLike">PathLike</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10887,6 +10980,45 @@ the state's labels with the minimizer prefix stripped.</p>
                 <p>The reloaded BUMPS chain state, the parameter names (or <code>None</code> if
 neither sidecar nor labels yielded them), and the raw sidecar dict
 (empty if absent/unreadable).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>path</code> is not a <code>str</code> or <code>os.PathLike</code>.</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>skip</code> is not a non-negative integer.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
