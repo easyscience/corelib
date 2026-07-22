@@ -286,7 +286,3 @@ def test_multi_fit_1D_2D(fit_engine):
         assert result.success
         assert np.all(result.x == X[idx])
         assert np.all(result.y_obs == Y[idx])
-
-
-# NOTE: The Bayesian MCMC tests formerly here (TestMultiFitterMcmcSample) were
-# moved to test_sampler.py and adapted to ``Sampler(f, ...)``.

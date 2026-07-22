@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import copy
 import math
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 
@@ -27,6 +28,9 @@ from .minimizer_base import MINIMIZER_PARAMETER_PREFIX
 from .minimizer_base import MinimizerBase
 from .utils import FitError
 from .utils import FitResults
+
+if TYPE_CHECKING:
+    from bumps.dream.state import MCMCDraw
 
 FIT_AVAILABLE_IDS_FILTERED = copy.copy(FIT_AVAILABLE_IDS)
 # Considered experimental
@@ -381,6 +385,99 @@ class Bumps(MinimizerBase):
 
         return _outer(self)
 
+    def _validate_resume_state(
+        self,
+        problem: FitProblem,
+        resume_state: MCMCDraw,
+        population: int | None,
+        burn: int,
+    ) -> tuple[int, int]:
+        """Check that ``resume_state`` is compatible with ``problem`` and
+        resolve the population and burn values to use when resuming.
+
+        Parameters
+        ----------
+        problem : FitProblem
+            The freshly built BUMPS ``FitProblem`` for the current model.
+        resume_state : MCMCDraw
+            The saved chain state to resume from.
+        population : int | None
+            The caller-supplied population scale factor, or ``None``.
+        burn : int
+            The caller-supplied burn-in, ignored (with a warning) on resume.
+
+        Returns
+        -------
+        tuple[int, int]
+            ``(population, burn)`` to pass to DREAM. The population is
+            returned as a **negative** number, which BUMPS'
+            ``initpop.generate`` reads as an absolute chain count, exactly
+            reproducing the saved state's population. ``burn`` is always 0:
+            a previously converged chain is never re-burned.
+
+        Raises
+        ------
+        ValueError
+            If ``resume_state`` is incompatible with the current model
+            (parameter count, names/order, or population mismatch).
+        """
+        from easyscience import global_object
+
+        logger = global_object.log.getLogger('fitting.bumps')
+
+        # Parameter count
+        n_params = len(problem._parameters)
+        if n_params != resume_state.Nvar:
+            raise ValueError(
+                f'resume_state has {resume_state.Nvar} parameters but the current '
+                f'model has {n_params}. The model must have the same '
+                f'number of fitted parameters as when the saved chain was created.'
+            )
+
+        prefix = MINIMIZER_PARAMETER_PREFIX
+        fresh_names = [(p.name or '')[len(prefix) :] for p in problem._parameters]
+        state_labels = list(resume_state.labels)
+        if state_labels and all(lbl.startswith(prefix) for lbl in state_labels):
+            state_names = [lbl[len(prefix) :] for lbl in state_labels]
+            if fresh_names != state_names:
+                raise ValueError(
+                    f'Parameter names/order mismatch between the current model '
+                    f'and resume_state.\n'
+                    f'  Current model : {fresh_names}\n'
+                    f'  resume_state  : {state_names}'
+                )
+        else:
+            logger.warning(
+                'resume_state does not carry parameter names (it was most '
+                'likely reloaded from disk, where BUMPS does not preserve '
+                'labels). Parameter-name validation is skipped; the saved '
+                'chain is matched to the current model by parameter order. '
+                'Ensure this is the same model, with parameters in the same '
+                'order, used to create the chain.'
+            )
+
+        # Population. BUMPS creates ``ceil(population * n_params)`` chains
+        # and requires the resumed state's chain count to match.
+        if population is not None:
+            expected_npop = math.ceil(population * n_params)
+            if expected_npop != resume_state.Npop:
+                raise ValueError(
+                    f'Requested population ({population}) would produce '
+                    f'{expected_npop} chains but the saved state has '
+                    f'{resume_state.Npop} chains. The population cannot '
+                    f'be changed on resume.'
+                )
+        if burn > 0:
+            logger.warning(
+                f'burn={burn} ignored on resume: a previously converged '
+                f'chain is not re-burned. Forcing burn=0.'
+            )
+
+        # A negative ``pop`` is read by ``bumps.initpop.generate`` as an
+        # absolute chain count, exactly reproducing the saved population
+        # without having to recover the original scale factor.
+        return -int(resume_state.Npop), 0
+
     def mcmc_sample(
         self,
         x: np.ndarray,
@@ -390,7 +487,7 @@ class Bumps(MinimizerBase):
         burn: int = 2000,
         thin: int = 10,
         population: int | None = None,
-        resume_state: Any | None = None,
+        resume_state: MCMCDraw | None = None,
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], bool | None] | None = None,
         abort_test: Callable[[], bool] | None = None,
@@ -426,7 +523,7 @@ class Bumps(MinimizerBase):
         population : int | None, default=None
             BUMPS DREAM population count per parameter (number of parallel
             chains): BUMPS creates ``ceil(population * n_parameters)`` chains.
-        resume_state : Any | None, default=None
+        resume_state : MCMCDraw | None, default=None
             A BUMPS ``MCMCDraw`` state object from a previous
             ``mcmc_sample()`` call (e.g. ``PosteriorResults.sampler_state``).
             When provided, DREAM **continues** the saved chain instead of
@@ -516,95 +613,12 @@ class Bumps(MinimizerBase):
         problem = FitProblem(curve)
 
         pop = population
-
-        # --- Resume-state compatibility validation ---
         if resume_state is not None:
-            # Parameter count
-            n_fresh_params = len(problem._parameters)
-            state_nvar = resume_state.Nvar
-            if n_fresh_params != state_nvar:
-                raise ValueError(
-                    f'resume_state has {state_nvar} parameters but the current '
-                    f'model has {n_fresh_params}. The model must have the same '
-                    f'number of fitted parameters as when the saved chain was created.'
-                )
+            pop, burn = self._validate_resume_state(problem, resume_state, population, burn)
 
-            # Parameter names / order.
-            #
-            # BUMPS ``save_state``/``load_state`` does **not** preserve the
-            # original parameter labels: a reloaded ``MCMCDraw`` comes back
-            # with default labels like ``['P0', 'P1', ...]``. We can therefore
-            # only validate names when the state still carries our prefixed
-            # labels, i.e. an in-memory state from the current session. For a
-            # reloaded state we fall back to the parameter-count check (done
-            # above) plus an order-based warning, because BUMPS resumes
-            # positionally by column order, not by name.
-            fresh_names = [p.name[len(MINIMIZER_PARAMETER_PREFIX) :] for p in problem._parameters]
-            state_labels = list(resume_state.labels)
-            state_prefix = MINIMIZER_PARAMETER_PREFIX
-            labels_carry_our_names = bool(state_labels) and all(
-                lbl.startswith(state_prefix) for lbl in state_labels
-            )
-            if labels_carry_our_names:
-                state_stripped = [lbl[len(state_prefix) :] for lbl in state_labels]
-                if fresh_names != state_stripped:
-                    raise ValueError(
-                        f'Parameter names/order mismatch between the current model '
-                        f'and resume_state.\n'
-                        f'  Current model : {fresh_names}\n'
-                        f'  resume_state  : {state_stripped}'
-                    )
-            else:
-                from easyscience import global_object
-
-                global_object.log.getLogger('fitting.bumps').warning(
-                    'resume_state does not carry parameter names (it was most '
-                    'likely reloaded from disk, where BUMPS does not preserve '
-                    'labels). Parameter-name validation is skipped; the saved '
-                    'chain is matched to the current model by parameter order. '
-                    'Ensure this is the same model, with parameters in the same '
-                    'order, used to create the chain.'
-                )
-
-            # Population: BUMPS interprets ``pop`` as a **scale factor**.
-            # ``initpop.generate(problem, pop=P)`` creates
-            # ``ceil(P * n_params)`` chains, which becomes ``state.Npop``.
-            # On resume we must recover the scale factor from the state.
-            n_params = len(problem._parameters)
-            if pop is not None:
-                # Caller explicitly set population — validate it
-                # produces the same Npop as the saved state.
-                expected_npop = int(math.ceil(pop * n_params))
-                if expected_npop != resume_state.Npop:
-                    raise ValueError(
-                        f'Requested population ({pop}) would produce '
-                        f'{expected_npop} chains but the saved state has '
-                        f'{resume_state.Npop} chains. The population cannot '
-                        f'be changed on resume.'
-                    )
-            else:
-                # Recover the original scale factor from the state's Npop.
-                # Try ceil-division first, then fall back to floor.
-                recovered = int(math.ceil(resume_state.Npop / n_params))
-                if int(math.ceil(recovered * n_params)) != resume_state.Npop:
-                    recovered = int(resume_state.Npop / n_params)
-                pop = recovered
-
-            # Force burn=0 on resume: re-burning a previously converged
-            # chain discards good draws and is almost always a mistake.
-            if burn > 0:
-                from easyscience import global_object
-
-                global_object.log.getLogger('fitting.bumps').warning(
-                    f'burn={burn} ignored on resume: a previously converged '
-                    f'chain is not re-burned. Forcing burn=0.'
-                )
-            burn = 0
-
-        # Build DREAM kwargs. Use the resolved ``pop`` (the alias result, or
-        # the value recovered from the saved state on resume), not the raw
-        # ``population`` argument — on resume ``population`` is ``None`` while
-        # ``pop`` holds the scale factor that reproduces the saved state's
+        # Build DREAM kwargs. Use the resolved ``pop``, not the raw
+        # ``population`` argument — on resume ``pop`` is the negative
+        # absolute chain count that reproduces the saved state's
         # population, which BUMPS requires to match.
         dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
         if pop is not None:
@@ -619,8 +633,9 @@ class Bumps(MinimizerBase):
                 raise ValueError('progress_callback must be callable')
             # Compute total DREAM steps for progress display (burn + sampling generations).
             # BUMPS DREAM default population count is 10 when not specified by the user.
+            # A negative ``pop`` (resume) is an absolute chain count.
             _dream_default_pop = 10
-            pop_val = pop if pop is not None else _dream_default_pop
+            pop_val = abs(pop) if pop is not None else _dream_default_pop
             _total_steps = burn + (samples + pop_val - 1) // pop_val
             monitors.append(
                 BumpsProgressMonitor(

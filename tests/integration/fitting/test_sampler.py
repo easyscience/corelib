@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 """Integration tests for the ``Sampler`` class (Bayesian MCMC via BUMPS DREAM).
 
-The behavioural MCMC tests formerly in
-``test_multi_fitter.py::TestMultiFitterMcmcSample`` were moved here and
-adapted to ``Sampler(f,  ...)`` directly.
+Only full sampling runs and save/load/resume roundtrips live here; error
+paths, argument validation and sidecar parsing are unit-tested in
+``tests/unit/fitting/test_sampler.py``.
 """
 
 import json
@@ -17,7 +17,6 @@ from easyscience import Parameter
 from easyscience.fitting import Sampler
 from easyscience.fitting import SamplingResults
 from easyscience.fitting.multi_fitter import MultiFitter
-from easyscience.fitting.sampler import load_chain
 
 
 class Line(ObjBase):
@@ -82,22 +81,6 @@ def _bumps_fitter_and_data():
 
 class TestSampler:
     """Integration tests for ``Sampler(f, ...)`` / ``Sampler``."""
-
-    def test_sample_requires_bumps(self):
-        """sample() must raise RuntimeError if the minimizer is not BUMPS —
-        and must not mutate the fitter (no needless minimizer rebuild)."""
-        sp = AbsSin(0.354, 3.05)
-        f = MultiFitter([sp], [sp])
-
-        x = np.linspace(0, 5, 50)
-        y = np.sin(x)
-        weights = np.ones_like(x)
-
-        sampler = Sampler(f, [x], [y], [weights])
-        minimizer_before = f.minimizer
-        with pytest.raises(RuntimeError, match='Bayesian sampling requires a BUMPS minimizer'):
-            sampler.sample(samples=10, burn=5, thin=1)
-        assert f.minimizer is minimizer_before
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_sample_returns_results_object(self):
@@ -199,19 +182,6 @@ class TestSampler:
         assert results.draws.shape[0] > 0
         assert results.draws.shape[1] == len(results.param_names)
 
-    def test_fit_function_restored_on_error(self):
-        """fit_function must be restored even when the minimizer raises."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = Sampler(f, [x], [y], [weights])
-        original_func = f.fit_function
-
-        # Invalid `samples` is rejected by the minimizer (single source of
-        # validation) *after* the fitter has been mutated for sampling.
-        with pytest.raises(ValueError, match='samples must be a positive integer'):
-            sampler.sample(samples=-1, burn=5, thin=1)
-
-        assert f.fit_function is original_func
-
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_fit_function_restored_on_success(self):
         """fit_function must be restored after a successful sample()."""
@@ -302,14 +272,6 @@ class TestSampler:
 
         assert extended.draws.shape[0] > 0
 
-    def test_extend_requires_existing_state(self):
-        """extend() before sample()/load_state() raises RuntimeError."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = Sampler(f, [x], [y], [weights])
-
-        with pytest.raises(RuntimeError, match='No chain to extend'):
-            sampler.extend(additional_samples=10)
-
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_extend_after_save_load_roundtrip(self, tmp_path, caplog):
         """save() -> new sampler -> load_state() -> extend() continues the chain.
@@ -359,14 +321,6 @@ class TestSampler:
         # Population must be preserved across the extend.
         assert extended.state.Npop == first_npop
 
-    def test_save_raises_without_state(self, tmp_path):
-        """save() before sample() raises RuntimeError."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = Sampler(f, [x], [y], [weights])
-
-        with pytest.raises(RuntimeError, match='No chain state to save'):
-            sampler.save(str(tmp_path / 'chain'))
-
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_save_warns_when_fingerprint_unavailable(self, tmp_path, caplog, monkeypatch):
         """save() still succeeds when the data cannot be fingerprinted, but
@@ -408,95 +362,12 @@ class TestSampler:
         # Sidecar restores the original (prefix-stripped) parameter names.
         assert loaded.param_names == first.param_names
 
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_load_restores_param_names_from_sidecar(self, tmp_path):
-        """v2 sidecar restores names; a legacy v1 sidecar is still accepted."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = Sampler(f, [x], [y], [weights])
-        first = sampler.sample(samples=100, burn=20, thin=2)
-
-        prefix = str(tmp_path / 'chain')
-        sampler.save(prefix)
-
-        # v2 sidecar written by Sampler.save()
+        # save() wrote a v2 sidecar carrying names and a data fingerprint.
         with open(f'{prefix}.params.json') as fh:
             sidecar = json.load(fh)
         assert sidecar['schema_version'] == 2
         assert sidecar['param_names'] == first.param_names
         assert sidecar['data_fingerprint'] is not None
-
-        # Rewrite as a legacy v1 sidecar (as written by old save_posterior)
-        with open(f'{prefix}.params.json', 'w') as fh:
-            json.dump(
-                {
-                    'schema_version': 1,
-                    'param_names': first.param_names,
-                    'easyreflectometry_version': '0.0.0',
-                },
-                fh,
-            )
-
-        sampler2 = Sampler(f, [x], [y], [weights])
-        loaded = sampler2.load_state(prefix)
-        assert loaded.param_names == first.param_names
-
-    def test_load_without_sidecar_falls_back_to_state_labels(self, tmp_path):
-        """A missing sidecar is tolerated; names fall back to the state labels.
-
-        BUMPS does not preserve labels through save/load, so the fallback
-        yields placeholder names -- only the count is guaranteed.
-        """
-        f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = Sampler(f, [x], [y], [weights])
-        first = sampler.sample(samples=100, burn=20, thin=2)
-
-        prefix = str(tmp_path / 'chain')
-        sampler.save(prefix)
-        (tmp_path / 'chain.params.json').unlink()
-
-        _, param_names, sidecar = load_chain(prefix)
-        assert sidecar == {}
-        assert len(param_names) == len(first.param_names)
-
-        sampler2 = Sampler(f, [x], [y], [weights])
-        loaded = sampler2.load_state(prefix)
-        assert loaded.draws.shape[0] > 0
-        assert len(loaded.param_names) == len(first.param_names)
-
-    def test_load_with_corrupt_sidecar_falls_back_to_state_labels(self, tmp_path):
-        """A corrupt sidecar is tolerated rather than raising JSONDecodeError."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = Sampler(f, [x], [y], [weights])
-        first = sampler.sample(samples=100, burn=20, thin=2)
-
-        prefix = str(tmp_path / 'chain')
-        sampler.save(prefix)
-        (tmp_path / 'chain.params.json').write_text('{ not valid json')
-
-        _, param_names, sidecar = load_chain(prefix)
-        assert sidecar == {}
-        assert len(param_names) == len(first.param_names)
-
-        sampler2 = Sampler(f, [x], [y], [weights])
-        loaded = sampler2.load_state(prefix)
-        assert loaded.draws.shape[0] > 0
-
-    def test_load_ignores_unknown_sidecar_schema_version(self, tmp_path):
-        """A sidecar from a future schema is read but its names are not trusted."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
-        sampler = Sampler(f, [x], [y], [weights])
-        first = sampler.sample(samples=100, burn=20, thin=2)
-
-        prefix = str(tmp_path / 'chain')
-        sampler.save(prefix)
-        (tmp_path / 'chain.params.json').write_text(
-            json.dumps({'schema_version': 99, 'param_names': ['bogus']})
-        )
-
-        _, param_names, sidecar = load_chain(prefix)
-        assert sidecar['schema_version'] == 99
-        assert param_names != ['bogus']
-        assert len(param_names) == len(first.param_names)
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_load_short_chain_regression(self, tmp_path):
@@ -518,7 +389,7 @@ class TestSampler:
         assert loaded.draws.shape[0] > 0
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_load_fingerprint_mismatch_warns(self, tmp_path):
+    def test_load_fingerprint_mismatch_warns(self, tmp_path, caplog):
         """Loading a chain into a sampler bound to different data warns."""
         f, _, x, y, weights = _bumps_fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
@@ -527,7 +398,10 @@ class TestSampler:
         prefix = str(tmp_path / 'chain')
         sampler.save(prefix)
 
+        import logging
+
         other_y = y + 0.5
         sampler2 = Sampler(f, [x], [other_y], [weights])
-        with pytest.warns(UserWarning, match='does not match the data fingerprint'):
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting'):
             sampler2.load_state(prefix)
+        assert 'does not match the data fingerprint' in caplog.text

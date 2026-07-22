@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import warnings
+import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import Callable
@@ -48,16 +48,28 @@ def _data_fingerprint(
         return None
 
 
+def _validate_chain_path(path: str | os.PathLike, skip: int = 0) -> str:
+    """Validate the persistence arguments shared by the save/load functions.
+
+    Returns ``path`` coerced to ``str``. Raises ``TypeError`` if ``path`` is
+    not path-like and ``ValueError`` if ``skip`` is not a non-negative int.
+    """
+    if not isinstance(path, (str, os.PathLike)):
+        raise TypeError(f'path must be a str or os.PathLike, got {type(path).__name__}.')
+    if isinstance(skip, bool) or not isinstance(skip, int) or skip < 0:
+        raise ValueError('skip must be a non-negative integer.')
+    return str(path)
+
+
 def _load_bumps_state(path: str, skip: int = 0) -> MCMCDraw:
-    """Read a BUMPS chain from disk, working around a BUMPS >= 1.0.4 bug.
+    """Read a BUMPS chain from disk, working around a BUMPS bug.
 
     ``bumps.dream.state.load_state`` reads the saved buffers with
     ``numpy.loadtxt``, which collapses a single-row file to a 1-D array. A
     short chain stores a single CR-weight update row, so ``load_state``'s
     subsequent ``stats[:, 0]`` indexing raises ``IndexError: too many indices
     for array``. We coerce each buffer read back to 2-D before ``load_state``
-    consumes it. Older BUMPS releases (< 1.0.4) used a custom 2-D-safe parser
-    and are read unchanged.
+    consumes it.
 
     Parameters
     ----------
@@ -74,10 +86,7 @@ def _load_bumps_state(path: str, skip: int = 0) -> MCMCDraw:
     """
     from bumps.dream import state as bumps_state
 
-    loader = getattr(bumps_state, 'loadtxt_with_fallback', None)
-    if loader is None:
-        # BUMPS < 1.0.4: the custom parser is already 2-D safe.
-        return bumps_state.load_state(path, skip=skip)
+    loader = bumps_state.loadtxt_with_fallback
 
     def _loadtxt_2d(file, report: int = 0) -> np.ndarray:
         arr = loader(file, report=report)
@@ -91,7 +100,7 @@ def _load_bumps_state(path: str, skip: int = 0) -> MCMCDraw:
         bumps_state.loadtxt_with_fallback = loader
 
 
-def load_chain(path: str, skip: int = 0) -> tuple[MCMCDraw, list[str] | None, dict]:
+def load_chain(path: str | os.PathLike, skip: int = 0) -> tuple[MCMCDraw, list[str] | None, dict]:
     """Reload a DREAM chain state saved by ``Sampler.save``.
 
     This is the standalone reader: unlike ``Sampler.load_state`` it needs no
@@ -102,7 +111,7 @@ def load_chain(path: str, skip: int = 0) -> tuple[MCMCDraw, list[str] | None, di
 
     Parameters
     ----------
-    path : str
+    path : str | os.PathLike
         File path prefix used when saving.
     skip : int, default=0
         Discard the first ``skip`` saved generations on load, forwarded to
@@ -114,8 +123,16 @@ def load_chain(path: str, skip: int = 0) -> tuple[MCMCDraw, list[str] | None, di
         The reloaded BUMPS chain state, the parameter names (or ``None`` if
         neither sidecar nor labels yielded them), and the raw sidecar dict
         (empty if absent/unreadable).
-    """
-    state = _load_bumps_state(str(path), skip=skip)
+
+    Raises
+    ------
+    TypeError
+        If ``path`` is not a ``str`` or ``os.PathLike``.
+    ValueError
+        If ``skip`` is not a non-negative integer.
+    """  # noqa: DOC502 -- raised in _validate_chain_path
+    path = _validate_chain_path(path, skip)
+    state = _load_bumps_state(path, skip=skip)
 
     sidecar: dict = {}
     param_names: list[str] | None = None
@@ -218,6 +235,15 @@ class Sampler:
         sampler on every run, merged with (and overridden by) per-call
         ``sampler_kwargs``.
 
+    Raises
+    ------
+    TypeError
+        If ``fitter`` is not Fitter-shaped (no ``minimizer``/``fit_function``),
+        or ``vectorized``/``sampler_kwargs`` have the wrong type.
+    ValueError
+        If ``x``, ``y`` and ``weights`` do not hold matching structures
+        (all arrays, or lists of the same length).
+
     Notes
     -----
     **The retained draws are a trimmed view, not the whole chain.** BUMPS'
@@ -267,6 +293,33 @@ class Sampler:
         vectorized: bool = False,
         sampler_kwargs: dict | None = None,
     ):
+        if not (hasattr(fitter, 'minimizer') and hasattr(fitter, 'fit_function')):
+            raise TypeError(
+                f'fitter must be a configured Fitter or MultiFitter, got {type(fitter).__name__}.'
+            )
+        x_is_multi = isinstance(x, (list, tuple))
+        if x_is_multi != isinstance(y, (list, tuple)):
+            raise ValueError('x and y must either both be arrays or both be lists of arrays.')
+        if x_is_multi and len(x) != len(y):
+            raise ValueError(
+                f'x and y must hold the same number of datasets, got {len(x)} and {len(y)}.'
+            )
+        if weights is not None:
+            if isinstance(weights, (list, tuple)) != x_is_multi:
+                raise ValueError(
+                    'weights must match the structure of x and y (array or list of arrays).'
+                )
+            if x_is_multi and len(weights) != len(x):
+                raise ValueError(
+                    f'weights must hold the same number of datasets as x and y, '
+                    f'got {len(weights)} and {len(x)}.'
+                )
+        if not isinstance(vectorized, bool):
+            raise TypeError(f'vectorized must be a bool, got {type(vectorized).__name__}.')
+        if sampler_kwargs is not None and not isinstance(sampler_kwargs, dict):
+            raise TypeError(
+                f'sampler_kwargs must be a dict or None, got {type(sampler_kwargs).__name__}.'
+            )
         self._fitter = fitter
         self._x = x
         self._y = y
@@ -436,6 +489,11 @@ class Sampler:
         ``samples``, ``burn``, or ``thin`` are invalid, and ``RuntimeError``
         if the active minimizer is not a BUMPS instance.
         """
+        if self._state is not None:
+            global_object.log.getLogger('fitting').warning(
+                'Replacing the existing chain with a fresh one. If you meant '
+                'to continue the chain, use extend() instead.'
+            )
         return self._run(
             samples=samples,
             burn=burn,
@@ -535,7 +593,7 @@ class Sampler:
             abort_test=abort_test,
         )
 
-    def save(self, path: str) -> None:
+    def save(self, path: str | os.PathLike) -> None:
         """Persist the chain state and metadata to disk.
 
         Writes the BUMPS native files (``<path>-chain.mc.gz``,
@@ -547,18 +605,21 @@ class Sampler:
 
         Parameters
         ----------
-        path : str
+        path : str | os.PathLike
             File path prefix. BUMPS appends its own suffixes.
 
         Raises
         ------
+        TypeError
+            If ``path`` is not a ``str`` or ``os.PathLike``.
         RuntimeError
             If no chain state exists yet (call ``sample()`` first).
-        """
+        """  # noqa: DOC503 -- TypeError raised in _validate_chain_path
         from bumps.dream.state import save_state
 
         from easyscience import __version__
 
+        path = _validate_chain_path(path)
         if self._state is None:
             raise RuntimeError('No chain state to save. Call sample() first.')
 
@@ -569,7 +630,7 @@ class Sampler:
                 'chain cannot be verified against its data on load_state().'
             )
 
-        save_state(self._state, str(path))
+        save_state(self._state, path)
 
         sidecar = {
             'schema_version': _SIDECAR_SCHEMA_VERSION,
@@ -580,14 +641,14 @@ class Sampler:
         with open(f'{path}.params.json', 'w') as f:
             json.dump(sidecar, f, indent=2)
 
-    def load_state(self, path: str, skip: int = 0) -> SamplingResults:
+    def load_state(self, path: str | os.PathLike, skip: int = 0) -> SamplingResults:
         """Load a previously saved chain into this sampler.
 
         The sampler must be constructed with the same fitter and data used to
         create the chain — ``extend()`` then continues the saved chain. If the
         sidecar carries a data fingerprint and it does not match this
-        sampler's bound data, a ``UserWarning`` is emitted (extending a chain
-        against different data is undefined behaviour).
+        sampler's bound data, a warning is logged (extending a chain against
+        different data is undefined behaviour).
 
         Populates ``state`` and ``results`` (draws, log-posterior and
         parameter names) from the saved chain, so summaries and
@@ -595,7 +656,7 @@ class Sampler:
 
         Parameters
         ----------
-        path : str
+        path : str | os.PathLike
             File path prefix used in ``save()``.
         skip : int, default=0
             Discard the first ``skip`` saved generations on load. Useful for
@@ -606,6 +667,13 @@ class Sampler:
         SamplingResults
             The reloaded chain results (also stored on ``results``).
 
+        Raises
+        ------
+        TypeError
+            If ``path`` is not a ``str`` or ``os.PathLike``.
+        ValueError
+            If ``skip`` is not a non-negative integer.
+
         Notes
         -----
         BUMPS does not persist its automatic trim point, so a reloaded chain
@@ -613,19 +681,17 @@ class Sampler:
         ``sample()`` call that wrote the file, even though the chain is
         identical. Use ``skip`` to discard leading generations explicitly.
         See the ``Sampler`` class notes.
-        """
+        """  # noqa: DOC502 -- raised in _validate_chain_path via load_chain
         state, param_names, sidecar = load_chain(path, skip=skip)
 
         saved_fingerprint = sidecar.get('data_fingerprint')
         if saved_fingerprint is not None:
             current_fingerprint = self._fingerprint()
             if current_fingerprint is None or current_fingerprint != saved_fingerprint:
-                warnings.warn(
+                global_object.log.getLogger('fitting').warning(
                     'The data bound to this Sampler does not match the data '
                     'fingerprint stored with the saved chain. Extending a '
-                    'chain against different data is undefined behaviour.',
-                    UserWarning,
-                    stacklevel=2,
+                    'chain against different data is undefined behaviour.'
                 )
 
         _draw = state.draw()
