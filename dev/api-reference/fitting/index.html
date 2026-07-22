@@ -9590,7 +9590,11 @@ fewer rows than <code>samples / thin</code> — see the notes on <code>Sampler</
 <p>One <code>Sampler</code> instance represents one chain over one <code>(x, y, weights)</code>
 dataset. The data is bound at construction; <code>sample()</code> and <code>extend()</code>
 take no data arguments, so a chain can never be extended against different
-data (undefined behaviour in BUMPS).</p>
+data (undefined behaviour in BUMPS). The bound data is a defensive,
+read-only copy of the caller's arrays, exposed via the <code>x</code>, <code>y</code> and
+<code>weights</code> properties — mutating the originals after construction has no
+effect on the sampler, and there are deliberately no setters: to sample
+different data, create a new <code>Sampler</code>.</p>
 <p>Construct directly with a configured <code>Fitter</code> (or <code>MultiFitter</code>) whose
 minimizer has been switched to <code>AvailableMinimizers.Bumps</code>. <strong>Running a
 fit first is not required</strong> — the <code>Fitter</code> supplies the model and the
@@ -9904,6 +9908,78 @@ comes back untrimmed and <code>load_state()</code> reports <em>more</em> draws t
       </thead>
       <tbody>
           <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;fitter&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.fitter&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.fitter">fitter</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;Fitter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fit_object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fit_function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.fitter.Fitter&lt;/code&gt;)" href="#easyscience.fitting.fitter.Fitter">Fitter</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Fitter supplying the model and minimizer (read-only).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.x&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.x">x</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The bound independent variable data (read-only copy).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.y&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.y">y</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The bound dependent variable data (read-only copy).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;weights&lt;/span&gt;&lt;/code&gt;
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-property&quot;&gt;&lt;code&gt;property&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;easyscience.fitting.sampler.Sampler.weights&lt;/code&gt;)" href="#easyscience.fitting.sampler.Sampler.weights">weights</a></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | <span title="list">list</span>[<a class="autorefs autorefs-external" title="&lt;code&gt;numpy&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/index.html#module-numpy">np</a>.<a class="autorefs autorefs-external" title="&lt;code&gt;numpy.ndarray&lt;/code&gt;" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray">ndarray</a> | None] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The bound weight data (read-only copy, or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
             <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;/code&gt;
 
   &lt;span class=&quot;doc doc-labels&quot;&gt;
@@ -10010,6 +10086,106 @@ comes back untrimmed and <code>load_state()</code> reports <em>more</em> draws t
 
 
 <h6 id="easyscience.fitting.sampler.Sampler-attributes">Attributes</h6>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.fitter" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">fitter</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The Fitter supplying the model and minimizer (read-only).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.x" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">x</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The bound independent variable data (read-only copy).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.y" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">y</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The bound dependent variable data (read-only copy).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="easyscience.fitting.sampler.Sampler.weights" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">weights</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h7>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The bound weight data (read-only copy, or None).</p>
+<!-- prettier-ignore-start -->
+
+<!-- prettier-ignore-end -->
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-attribute">
 
