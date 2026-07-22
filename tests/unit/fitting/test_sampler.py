@@ -112,6 +112,50 @@ class TestSamplerConstructorValidation:
         assert sampler.results is None
 
 
+class TestSamplerDataBinding:
+    def test_properties_expose_bound_data(self):
+        x, y, w = _xyw()
+        f = _StubFitter()
+        sampler = Sampler(f, [x], [y], [w])
+        assert sampler.fitter is f
+        np.testing.assert_array_equal(sampler.x[0], x)
+        np.testing.assert_array_equal(sampler.y[0], y)
+        np.testing.assert_array_equal(sampler.weights[0], w)
+
+    def test_weights_property_none_when_unset(self):
+        x, y, _ = _xyw()
+        sampler = Sampler(_StubFitter(), [x], [y])
+        assert sampler.weights is None
+
+    def test_inputs_are_copied(self):
+        """Mutating the caller's arrays after construction must not change the
+        bound data (nor the save() fingerprint derived from it)."""
+        x, y, w = _xyw()
+        y_original = y.copy()
+        sampler = Sampler(_StubFitter(), [x], [y], [w])
+        fingerprint_before = sampler._fingerprint()
+
+        y[:] = 0.0
+
+        np.testing.assert_array_equal(sampler.y[0], y_original)
+        assert sampler._fingerprint() == fingerprint_before
+
+    def test_bound_arrays_are_read_only(self):
+        x, y, w = _xyw()
+        sampler = Sampler(_StubFitter(), x, y, w)
+        with pytest.raises(ValueError, match='read-only'):
+            sampler.x[0] = 99.0
+
+    def test_data_properties_have_no_setters(self):
+        """Bound data is deliberately immutable — sample new data with a new
+        Sampler, so a chain can never be extended against different data."""
+        x, y, w = _xyw()
+        sampler = Sampler(_StubFitter(), [x], [y], [w])
+        for name in ('fitter', 'x', 'y', 'weights'):
+            with pytest.raises(AttributeError):
+                setattr(sampler, name, None)
+
+
 class TestSamplerPathValidation:
     def test_save_rejects_non_pathlike(self):
         x, y, w = _xyw()

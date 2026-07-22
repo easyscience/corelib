@@ -48,6 +48,23 @@ def _data_fingerprint(
         return None
 
 
+def _copy_data(data):
+    """Copy an array (or list of arrays) and mark the copies read-only.
+
+    The ``Sampler`` binds its data at construction; copying decouples the
+    bound data from the caller's arrays, and the read-only flag stops
+    in-place mutation of the copies, so the chain and the ``save()``
+    fingerprint always describe the data actually sampled.
+    """
+    if data is None:
+        return None
+    if isinstance(data, (list, tuple)):
+        return [_copy_data(d) for d in data]
+    arr = np.array(data, copy=True)
+    arr.flags.writeable = False
+    return arr
+
+
 def _validate_chain_path(path: str | os.PathLike, skip: int = 0) -> str:
     """Validate the persistence arguments shared by the save/load functions.
 
@@ -199,7 +216,11 @@ class Sampler:
     One ``Sampler`` instance represents one chain over one ``(x, y, weights)``
     dataset. The data is bound at construction; ``sample()`` and ``extend()``
     take no data arguments, so a chain can never be extended against different
-    data (undefined behaviour in BUMPS).
+    data (undefined behaviour in BUMPS). The bound data is a defensive,
+    read-only copy of the caller's arrays, exposed via the ``x``, ``y`` and
+    ``weights`` properties — mutating the originals after construction has no
+    effect on the sampler, and there are deliberately no setters: to sample
+    different data, create a new ``Sampler``.
 
     Construct directly with a configured ``Fitter`` (or ``MultiFitter``) whose
     minimizer has been switched to ``AvailableMinimizers.Bumps``. **Running a
@@ -321,13 +342,37 @@ class Sampler:
                 f'sampler_kwargs must be a dict or None, got {type(sampler_kwargs).__name__}.'
             )
         self._fitter = fitter
-        self._x = x
-        self._y = y
-        self._weights = weights
+        # Defensive copies, exposed read-only: mutating the caller's arrays
+        # (or the properties) cannot desynchronise the chain and the save()
+        # fingerprint from the data actually sampled. To sample different
+        # data, create a new Sampler.
+        self._x = _copy_data(x)
+        self._y = _copy_data(y)
+        self._weights = _copy_data(weights)
         self._vectorized = vectorized
         self._default_sampler_kwargs = dict(sampler_kwargs or {})
         self._state: MCMCDraw | None = None  # current chain state
         self._results: SamplingResults | None = None
+
+    @property
+    def fitter(self) -> Fitter:
+        """The Fitter supplying the model and minimizer (read-only)."""
+        return self._fitter
+
+    @property
+    def x(self) -> np.ndarray | list[np.ndarray]:
+        """The bound independent variable data (read-only copy)."""
+        return list(self._x) if isinstance(self._x, list) else self._x
+
+    @property
+    def y(self) -> np.ndarray | list[np.ndarray]:
+        """The bound dependent variable data (read-only copy)."""
+        return list(self._y) if isinstance(self._y, list) else self._y
+
+    @property
+    def weights(self) -> np.ndarray | list[np.ndarray | None] | None:
+        """The bound weight data (read-only copy, or None)."""
+        return list(self._weights) if isinstance(self._weights, list) else self._weights
 
     @property
     def state(self) -> MCMCDraw | None:
