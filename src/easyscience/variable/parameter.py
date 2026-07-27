@@ -235,6 +235,9 @@ class Parameter(DescriptorNumber):
             if self._desired_unit is not None:
                 self._convert_unit(self._desired_unit)
 
+            if self._callback.fset is not None:
+                self._callback.fset(self._scalar.value)
+
             self._notify_observers()
         else:
             global_object.log.getLogger('variable').warning(
