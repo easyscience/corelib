@@ -750,8 +750,13 @@ class TestBumpsSample:
             mock_driver.fitter.state = None
         else:
             mock_state = MagicMock()
-            mock_state.draw.return_value.points = np.array([[1.0]])
-            mock_state.logp = None
+            mock_state.Nvar = 1
+            mock_state.Npop = 5
+            mock_state.labels = ['p_param_0']
+            mock_draw = MagicMock()
+            mock_draw.points = np.array([[1.0]])
+            mock_draw.logp = np.array([0.5])
+            mock_state.draw.return_value = mock_draw
             mock_driver.fitter.state = mock_state
 
         mock_FitDriver = MagicMock(return_value=mock_driver)
@@ -759,6 +764,54 @@ class TestBumpsSample:
             easyscience.fitting.minimizers.minimizer_bumps, 'FitDriver', mock_FitDriver
         )
         return mock_FitDriver, mock_driver
+
+    @pytest.mark.parametrize(
+        'kwargs, match',
+        [
+            ({'samples': 0}, 'samples must be a positive integer'),
+            ({'samples': -1}, 'samples must be a positive integer'),
+            ({'burn': -1}, 'burn must be a non-negative integer'),
+            ({'thin': 0}, 'thin must be a positive integer'),
+        ],
+    )
+    def test_sample_invalid_args(self, minimizer: Bumps, kwargs, match) -> None:
+        """Invalid samples/burn/thin values raise ValueError before any sampling.
+
+        This is the single source of truth for these checks — the higher-level
+        ``Sampler`` relies on it.
+        """
+        with pytest.raises(ValueError, match=match):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=kwargs.get('samples', 10),
+                burn=kwargs.get('burn', 0),
+                thin=kwargs.get('thin', 1),
+            )
+
+    @pytest.mark.parametrize(
+        'overrides, match',
+        [
+            ({'y': np.array([0.1])}, 'x and y must have the same shape'),
+            ({'x': np.array([1.0, np.nan])}, 'x cannot contain NaN'),
+            ({'y': np.array([0.1, np.inf])}, 'y cannot contain NaN'),
+            ({'weights': np.array([1.0])}, 'Weights must have the same shape'),
+            ({'weights': np.array([1.0, np.nan])}, 'Weights cannot be NaN'),
+            ({'weights': np.array([1.0, 0.0])}, 'Weights must be strictly positive'),
+        ],
+    )
+    def test_sample_invalid_data(self, minimizer: Bumps, overrides, match) -> None:
+        """Shape mismatches and non-finite/non-positive data raise ValueError
+        before any sampling."""
+        data = {
+            'x': np.array([1.0, 2.0]),
+            'y': np.array([0.1, 0.2]),
+            'weights': np.array([1.0, 1.0]),
+        }
+        data.update(overrides)
+        with pytest.raises(ValueError, match=match):
+            minimizer.mcmc_sample(**data, samples=10, burn=0, thin=1)
 
     def test_sample_basic(self, minimizer: Bumps, monkeypatch) -> None:
         """Verify that mcmc_sample() returns a dict with expected keys."""
@@ -843,6 +896,23 @@ class TestBumpsSample:
         call_kwargs = mock_FitDriver.call_args.kwargs
         assert call_kwargs['pop'] == 7
 
+    def test_sample_sampler_kwargs_forwarded(self, minimizer: Bumps, monkeypatch) -> None:
+        """sampler_kwargs entries are merged into the DREAM kwargs."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+
+        minimizer.mcmc_sample(
+            x=np.array([1.0]),
+            y=np.array([0.1]),
+            weights=np.array([1.0]),
+            samples=10,
+            burn=0,
+            thin=1,
+            sampler_kwargs={'trim': False},
+        )
+
+        assert mock_FitDriver.call_args.kwargs['trim'] is False
+
     def test_sample_rejects_non_callable_callback(self, minimizer: Bumps, monkeypatch) -> None:
         import bumps.names
 
@@ -859,6 +929,208 @@ class TestBumpsSample:
                 thin=1,
                 progress_callback='not-callable',
             )
+
+    # --- Resume-state tests -------------------------------------------------
+
+    def _make_resume_state_mock(self, *, nvar=2, npop=10, labels=None):
+        """Build a mock MCMCDraw for resume tests.
+
+        BUMPS labels follow the pattern ``'p<param_name>'`` (the
+        ``MINIMIZER_PARAMETER_PREFIX`` concatenated with the unique name),
+        e.g. ``'pFilm_thickness'``.
+
+        :param nvar: Number of parameters.
+        :param npop: Population size.
+        :param labels: Parameter labels (defaults to ``['pa', 'pb']``
+            which strip to ``['a', 'b']``).
+        """
+        if labels is None:
+            labels = ['pa', 'pb']
+        mock_state = MagicMock()
+        mock_state.Nvar = nvar
+        mock_state.Npop = npop
+        mock_state.labels = labels
+        mock_draw = MagicMock()
+        mock_draw.points = np.ones((20, nvar))
+        mock_draw.logp = np.ones(20)
+        mock_state.draw.return_value = mock_draw
+        return mock_state
+
+    def _make_problem_with_parameters(self, param_names):
+        """Build a mock FitProblem whose ``_parameters`` yields the given names."""
+        params = []
+        for name in param_names:
+            p = MagicMock()
+            p.name = 'p' + name
+            params.append(p)
+        mock_problem = MagicMock()
+        mock_problem._parameters = params
+        return mock_problem
+
+    def test_sample_resume_state(self, minimizer: Bumps, monkeypatch) -> None:
+        """Verify resume_state is forwarded to driver.fit()."""
+        mock_FitDriver, mock_driver = self._setup_driver_mock(monkeypatch)
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock()
+
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+
+        result = minimizer.mcmc_sample(
+            x=np.array([1.0, 2.0]),
+            y=np.array([0.1, 0.2]),
+            weights=np.array([1.0, 1.0]),
+            samples=10,
+            burn=0,
+            thin=1,
+            resume_state=resume_state,
+        )
+
+        assert result is not None
+        # Verify a fit_state (defensive copy of resume_state) was passed to driver.fit()
+        call_kwargs = mock_driver.fit.call_args.kwargs
+        assert call_kwargs.get('fit_state') is not None
+        assert call_kwargs['fit_state'] is not resume_state
+
+    def test_sample_resume_param_mismatch_raises(self, minimizer: Bumps, monkeypatch) -> None:
+        """Parameter count mismatch raises ValueError before driver.fit()."""
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        # resume_state has 2 params, model has 1
+        resume_state = self._make_resume_state_mock(nvar=2)
+
+        with pytest.raises(ValueError, match='resume_state has 2 parameters'):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                resume_state=resume_state,
+            )
+
+    def test_sample_resume_param_name_mismatch_raises(self, minimizer: Bumps, monkeypatch) -> None:
+        """Parameter name/order mismatch raises ValueError before driver.fit()."""
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        # resume_state has labels ['px', 'py'] → stripped to ['x', 'y']
+        # Current model has params ['pa', 'pb'] → stripped to ['a', 'b']
+        # → mismatch
+        resume_state = self._make_resume_state_mock(nvar=2, labels=['px', 'py'])
+
+        with pytest.raises(ValueError, match='Parameter names/order mismatch'):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                resume_state=resume_state,
+            )
+
+    def test_sample_resume_population_mismatch_raises(self, minimizer: Bumps, monkeypatch) -> None:
+        """Explicit population differing from state.Npop raises ValueError."""
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock(nvar=2, npop=10)
+
+        with pytest.raises(ValueError, match='would produce'):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                population=3,  # ceil(3*2)=6 ≠ 10
+                resume_state=resume_state,
+            )
+
+    def test_sample_resume_forces_burn_to_zero(
+        self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ) -> None:
+        """burn>0 with resume_state warns and is forced to 0."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock()
+
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.bumps'):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=5,
+                thin=1,
+                resume_state=resume_state,
+            )
+
+        assert 'ignored on resume' in caplog.text
+        # burn must be forced to 0 in the kwargs passed to BUMPS
+        assert mock_FitDriver.call_args.kwargs['burn'] == 0
+
+    def test_sample_resume_unlabeled_state_warns_and_uses_absolute_pop(
+        self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
+    ) -> None:
+        """A state reloaded from disk carries default labels ('P0', ...), so
+        name validation is skipped with a warning, and the saved population is
+        reproduced as a negative pop (BUMPS' absolute-chain-count convention)."""
+        mock_FitDriver, _ = self._setup_driver_mock(monkeypatch)
+        import bumps.names
+
+        monkeypatch.setattr(
+            bumps.names,
+            'FitProblem',
+            MagicMock(return_value=self._make_problem_with_parameters(['a', 'b'])),
+        )
+        minimizer._make_model = MagicMock(return_value=MagicMock(return_value=MagicMock()))
+        resume_state = self._make_resume_state_mock(nvar=2, npop=10, labels=['P0', 'P1'])
+
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting.bumps'):
+            minimizer.mcmc_sample(
+                x=np.array([1.0]),
+                y=np.array([0.1]),
+                weights=np.array([1.0]),
+                samples=10,
+                burn=0,
+                thin=1,
+                resume_state=resume_state,
+            )
+
+        assert 'does not carry parameter names' in caplog.text
+        assert mock_FitDriver.call_args.kwargs['pop'] == -10
 
 
 # ===================================================================

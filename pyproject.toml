@@ -24,12 +24,12 @@ classifiers = [
 ]
 requires-python = '>=3.11'
 dependencies = [
-  'asteval', # Safely evaluate Python expressions from strings
-  'lmfit',   # Non-linear least squares fitting
-  'bumps',   # Bayesian uncertainty estimation
-  'dfo-ls',  # Derivative-free optimization
-  'numpy',   # Numerical computing
-  'scipp',   # Handling and analysis of scientific data
+  'asteval',      # Safely evaluate Python expressions from strings
+  'lmfit',        # Non-linear least squares fitting
+  'bumps>=1.0.4', # Bayesian uncertainty estimation
+  'dfo-ls',       # Derivative-free optimization
+  'numpy',        # Numerical computing
+  'scipp',        # Handling and analysis of scientific data
 ]
 
 [project.optional-dependencies]
@@ -213,7 +213,7 @@ select = [
 # Ignore specific rules globally
 ignore = [
   'COM812', # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  # The following is replaced by 'D'/[tool.ruff.lint.pydocstyle] and [tool.pydoclint]
+  # Replaced by 'D' plus pydocstyle and pydoclint
   'DOC', # https://docs.astral.sh/ruff/rules/#pydoclint-doc
   # Disable, as [tool.format_docstring] split one-line docstrings into the canonical multi-line layout
   'D200', # https://docs.astral.sh/ruff/rules/unnecessary-multiline-docstring/

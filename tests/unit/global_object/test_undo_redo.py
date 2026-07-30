@@ -306,7 +306,7 @@ def test_fittingUndoRedo(fit_engine):
     try:
         f.switch_minimizer(fit_engine)
     except AttributeError:
-        pytest.skip(msg=f'{fit_engine} is not installed')
+        pytest.skip(f'{fit_engine} is not installed')
 
     from easyscience import global_object
 

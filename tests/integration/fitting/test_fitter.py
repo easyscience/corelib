@@ -578,3 +578,82 @@ def test_fitter_variable_weights(fit_engine):
     # The fit should shift more toward the distorted region
     # when it has higher weight
     assert abs(offset_high - ref_sin.offset.value) > abs(offset_low - ref_sin.offset.value)
+
+
+def _analytic_wls(design: np.ndarray, y: np.ndarray, point_weights: np.ndarray):
+    """Solve min_beta sum_i (point_weights_i * (y_i - design_i . beta))^2.
+
+    Returns the solution and the unscaled covariance (X^T W X)^-1 of the
+    corresponding weighted least-squares problem.
+    """
+    a = design * point_weights[:, None]
+    b = y * point_weights
+    beta, *_ = np.linalg.lstsq(a, b, rcond=None)
+    covariance = np.linalg.inv(a.T @ a)
+    return beta, covariance
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize(
+    'fit_engine',
+    [
+        None,
+        AvailableMinimizers.LMFit,
+        AvailableMinimizers.Bumps,
+        AvailableMinimizers.DFO,
+    ],
+)
+def test_weight_convention_matches_analytic_wls(fit_engine):
+    """Pin the weights = 1/sigma convention against the analytic WLS solution.
+
+    A straight line is linear in (slope, intercept), so weighted least squares
+    has the closed-form solution beta = (X^T W X)^-1 X^T W y with
+    W = diag(1/sigma^2). On heteroscedastic data the candidate conventions
+    (weights = 1/sigma, sigma, 1/sigma^2) give measurably different solutions,
+    so this test fails if any minimizer's interpretation of ``weights`` drifts.
+    """
+    x = np.linspace(0.0, 10.0, 21)
+    sigma = 0.1 + 0.18 * x  # heteroscedastic, 0.1 .. 1.9
+    slope_true, intercept_true = 2.0, 1.0
+    # Deterministic 'noise' so the data does not lie exactly on any line
+    perturbation = np.cos(2.0 * x + 0.5)
+    y = slope_true * x + intercept_true + perturbation * sigma
+
+    design = np.column_stack([x, np.ones_like(x)])
+    beta, covariance = _analytic_wls(design, y, 1.0 / sigma)
+    beta_if_sigma, _ = _analytic_wls(design, y, sigma)
+    beta_if_inverse_variance, _ = _analytic_wls(design, y, 1.0 / sigma**2)
+
+    # Sanity check: the conventions are distinguishable well beyond the fit tolerance
+    tolerance = 2e-3
+    margin = min(
+        np.max(np.abs(beta_if_sigma - beta)),
+        np.max(np.abs(beta_if_inverse_variance - beta)),
+    )
+    assert margin > 20 * tolerance, 'test data cannot discriminate weight conventions'
+
+    model = StraightLine(slope=1.5, intercept=0.5)
+    model.slope.fixed = False
+    model.intercept.fixed = False
+
+    f = Fitter(model, model)
+    if fit_engine is not None:
+        try:
+            f.switch_minimizer(fit_engine)
+        except AttributeError:
+            pytest.skip(reason=f'{fit_engine} is not installed')
+
+    result = f.fit(x=x, y=y, weights=1.0 / sigma)
+
+    assert result.success
+    assert model.slope.value == pytest.approx(beta[0], abs=tolerance)
+    assert model.intercept.value == pytest.approx(beta[1], abs=tolerance)
+
+    if fit_engine in (None, AvailableMinimizers.LMFit):
+        # lmfit scales the covariance by reduced chi-square (scale_covar=True)
+        residual = y - design @ beta
+        chi2 = float(np.sum((residual / sigma) ** 2))
+        reduced_chi2 = chi2 / (x.size - 2)
+        expected_errors = np.sqrt(np.diag(covariance) * reduced_chi2)
+        assert model.slope.error == pytest.approx(expected_errors[0], rel=0.05)
+        assert model.intercept.error == pytest.approx(expected_errors[1], rel=0.05)
