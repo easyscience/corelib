@@ -8,6 +8,7 @@ Full sampling runs and save/load/resume roundtrips live in
 
 import json
 import logging
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -18,6 +19,7 @@ from easyscience.fitting import Sampler
 from easyscience.fitting import SamplingResults
 from easyscience.fitting.minimizers.minimizer_base import MINIMIZER_PARAMETER_PREFIX
 from easyscience.fitting.multi_fitter import MultiFitter
+from easyscience.fitting.sampler import _data_fingerprint
 from easyscience.fitting.sampler import load_chain
 
 
@@ -68,6 +70,26 @@ def _bumps_fitter_and_data():
 def _xyw():
     x = np.linspace(0, 5, 50)
     return x, np.sin(x), np.ones_like(x)
+
+
+def _make_state(ngen=6, npop=5, nvar=2, seed=7):
+    """Synthesize a small, fully populated BUMPS ``MCMCDraw``.
+
+    ``Nupdate=1`` is deliberate: on ``save_state`` it writes a single
+    CR-weight row, which is exactly the single-row stats file that trips
+    the BUMPS ``loadtxt`` bug worked around by ``_load_bumps_state``.
+    """
+    bumps_state = pytest.importorskip('bumps.dream.state')
+    rng = np.random.default_rng(seed)
+    state = bumps_state.MCMCDraw(
+        Ngen=ngen, Nthin=ngen, Nupdate=1, Nvar=nvar, Npop=npop, Ncr=3, thinning=1
+    )
+    for _ in range(ngen):
+        points = rng.normal(size=(npop, nvar))
+        logp = rng.normal(size=npop)
+        state._generation(new_draws=npop, x=points, logp=logp, accept=np.ones(npop))
+    state._update(CR_weight=np.array([0.2, 0.3, 0.5]))
+    return state
 
 
 class TestSamplerConstructorValidation:
@@ -317,3 +339,245 @@ class TestLoadChainSidecar:
         _, names, sidecar = load_chain(prefix)
         assert sidecar['schema_version'] == 99
         assert names == ['P0', 'P1']
+
+
+class TestSamplerConstructorDataValidation:
+    """Scalars, strings and empty/ragged data must be rejected at construction."""
+
+    def test_rejects_scalar_x(self):
+        _, y, _ = _xyw()
+        with pytest.raises(ValueError, match='x must be an array of values, got a scalar'):
+            Sampler(_StubFitter(), 5.0, y)
+
+    def test_rejects_scalar_dataset_in_list(self):
+        x, y, _ = _xyw()
+        with pytest.raises(ValueError, match=r'y\[1\] must be an array of values'):
+            Sampler(_StubFitter(), [x, x], [y, 3.0])
+
+    def test_rejects_string_data(self):
+        x, _, _ = _xyw()
+        with pytest.raises(TypeError, match='y must hold numeric values'):
+            Sampler(_StubFitter(), x, 'abc')
+
+    def test_rejects_non_numeric_object_array(self):
+        _, y, _ = _xyw()
+        with pytest.raises(TypeError, match='x must hold numeric values'):
+            Sampler(_StubFitter(), np.array([{}, {}], dtype=object), y)
+
+    def test_rejects_empty_array(self):
+        with pytest.raises(ValueError, match='x must not be empty'):
+            Sampler(_StubFitter(), np.array([]), np.array([]))
+
+    def test_rejects_ragged_dataset(self):
+        with pytest.raises(TypeError, match=r'x\[0\] could not be converted'):
+            Sampler(_StubFitter(), [[1.0, [2.0, 3.0]]], [np.zeros(3)])
+
+    def test_rejects_scalar_weights(self):
+        x, y, _ = _xyw()
+        with pytest.raises(ValueError, match='weights must be an array of values'):
+            Sampler(_StubFitter(), x, y, 2.0)
+
+    def test_weights_list_may_hold_none_entries(self):
+        x, y, w = _xyw()
+        sampler = Sampler(_StubFitter(), [x, x], [y, y], [w, None])
+        assert sampler.weights[1] is None
+
+
+class TestDataFingerprint:
+    def test_returns_none_on_unhashable_data(self):
+        assert _data_fingerprint([object()], [], []) is None
+
+    def test_fingerprint_without_weights(self):
+        x, y, _ = _xyw()
+        sampler = Sampler(_StubFitter(), x, y)
+        assert isinstance(sampler._fingerprint(), str)
+
+
+class TestSamplingResultsLegacyDict:
+    def test_to_legacy_dict_maps_fields(self):
+        state = object()
+        results = SamplingResults(
+            draws=np.ones((2, 1)), param_names=['p'], logp=np.zeros(2), state=state
+        )
+        legacy = results.to_legacy_dict()
+        assert legacy['internal_bumps_object'] is state
+        assert legacy['param_names'] == ['p']
+        np.testing.assert_array_equal(legacy['draws'], results.draws)
+        np.testing.assert_array_equal(legacy['logp'], results.logp)
+
+
+class TestSamplerRunEngine:
+    """The ``_run`` tail: results construction, storage, and kwarg merging,
+    with the minimizer's sampling entry point stubbed out."""
+
+    def test_run_stores_results_and_exposes_properties(self, monkeypatch):
+        f, _, x, y, weights = _bumps_fitter_and_data()
+        from easyscience.fitting.minimizers.minimizer_bumps import Bumps
+
+        canned = {
+            'draws': np.arange(8.0).reshape(4, 2),
+            'param_names': ['offset', 'phase'],
+            'logp': np.zeros(4),
+            'internal_bumps_object': object(),
+        }
+        captured = {}
+
+        def fake_mcmc_sample(self, **kwargs):
+            captured.update(kwargs)
+            return dict(canned)
+
+        monkeypatch.setattr(Bumps, 'mcmc_sample', fake_mcmc_sample)
+
+        sampler = Sampler(f, [x], [y], [weights], sampler_kwargs={'trim': False})
+        original_func = f.fit_function
+        results = sampler.sample(samples=100, burn=10, thin=2, sampler_kwargs={'init': 'lhs'})
+
+        assert isinstance(results, SamplingResults)
+        assert sampler.results is results
+        assert sampler.state is canned['internal_bumps_object']
+        np.testing.assert_array_equal(sampler.draws, canned['draws'])
+        assert sampler.param_names == ['offset', 'phase']
+        np.testing.assert_array_equal(sampler.logp, canned['logp'])
+        # Per-call kwargs are merged over the instance defaults.
+        assert captured['sampler_kwargs'] == {'trim': False, 'init': 'lhs'}
+        assert captured['samples'] == 100
+        assert captured['burn'] == 10
+        assert captured['resume_state'] is None
+        # The fitter's fit function is restored after the run.
+        assert f.fit_function is original_func
+
+
+class TestSamplerExtendArithmetic:
+    """extend() ring-buffer sizing, with the sampling engine stubbed out."""
+
+    @staticmethod
+    def _sampler_with_stub_state(monkeypatch, ngen=7, npop=5):
+        x, y, w = _xyw()
+        sampler = Sampler(_StubFitter(), x, y, w)
+        sampler._state = SimpleNamespace(Ngen=ngen, Npop=npop)
+        captured = {}
+        dummy = SamplingResults(
+            draws=np.zeros((1, 1)), param_names=['p'], logp=np.zeros(1), state=object()
+        )
+
+        def fake_run(self, **kwargs):
+            captured.update(kwargs)
+            return dummy
+
+        monkeypatch.setattr(Sampler, '_run', fake_run)
+        return sampler, captured
+
+    def test_buffer_sized_from_stored_generations(self, monkeypatch):
+        sampler, captured = self._sampler_with_stub_state(monkeypatch, ngen=7, npop=5)
+
+        sampler.extend(additional_samples=100, thin=3)
+
+        assert captured['samples'] == 7 * 5 + 100
+        assert captured['burn'] == 0
+        assert captured['thin'] == 3
+        assert captured['population'] is None
+        assert captured['resume_state'] is sampler._state
+
+    def test_total_samples_overrides_arithmetic(self, monkeypatch):
+        sampler, captured = self._sampler_with_stub_state(monkeypatch)
+
+        sampler.extend(additional_samples=100, total_samples=1234)
+
+        assert captured['samples'] == 1234
+
+
+class TestSamplerPersistenceRoundTrip:
+    """Real ``save()``/``load_chain()``/``load_state()`` round-trips over a
+    synthesized chain — no BUMPS reader mocking, unlike ``TestLoadChainSidecar``."""
+
+    @staticmethod
+    def _sampler_with_state():
+        x, y, w = _xyw()
+        sampler = Sampler(_StubFitter(), x, y, w)
+        state = _make_state()
+        _draw = state.draw()
+        sampler._state = state
+        sampler._results = SamplingResults(
+            draws=_draw.points, param_names=['offset', 'phase'], logp=_draw.logp, state=state
+        )
+        return sampler, state
+
+    def test_save_writes_chain_files_and_sidecar(self, tmp_path):
+        sampler, _ = self._sampler_with_state()
+        prefix = str(tmp_path / 'chain')
+
+        sampler.save(prefix)
+
+        for suffix in ('-chain.mc.gz', '-point.mc.gz', '-stats.mc.gz'):
+            assert (tmp_path / f'chain{suffix}').exists()
+        with open(f'{prefix}.params.json') as fh:
+            sidecar = json.load(fh)
+        assert sidecar['schema_version'] == 2
+        assert sidecar['param_names'] == ['offset', 'phase']
+        assert sidecar['data_fingerprint'] == sampler._fingerprint()
+        assert 'easyscience_version' in sidecar
+
+    def test_save_warns_when_fingerprint_unavailable(self, tmp_path, monkeypatch, caplog):
+        sampler, _ = self._sampler_with_state()
+        monkeypatch.setattr(Sampler, '_fingerprint', lambda self: None)
+        prefix = str(tmp_path / 'chain')
+
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting'):
+            sampler.save(prefix)
+
+        assert 'Could not compute a fingerprint' in caplog.text
+        with open(f'{prefix}.params.json') as fh:
+            assert json.load(fh)['data_fingerprint'] is None
+
+    def test_load_chain_reads_back_single_update_row_state(self, tmp_path):
+        """A short chain saves a single CR-weight row; reading it back
+        exercises the ``_load_bumps_state`` loadtxt workaround for real."""
+        sampler, state = self._sampler_with_state()
+        prefix = str(tmp_path / 'chain')
+        sampler.save(prefix)
+
+        loaded_state, names, sidecar = load_chain(prefix)
+
+        assert names == ['offset', 'phase']
+        assert loaded_state.Npop == state.Npop
+        assert loaded_state.Nvar == state.Nvar
+        assert sidecar['schema_version'] == 2
+
+    def test_load_bumps_state_restores_loader_after_failure(self, tmp_path):
+        bumps_state = pytest.importorskip('bumps.dream.state')
+        from easyscience.fitting.sampler import _load_bumps_state
+
+        original = bumps_state.loadtxt_with_fallback
+        with pytest.raises(RuntimeError, match='does not exist'):
+            _load_bumps_state(str(tmp_path / 'missing'))
+        assert bumps_state.loadtxt_with_fallback is original
+
+    def test_load_state_populates_results(self, tmp_path, caplog):
+        sampler, state = self._sampler_with_state()
+        prefix = str(tmp_path / 'chain')
+        sampler.save(prefix)
+
+        x, y, w = _xyw()
+        fresh = Sampler(_StubFitter(), x, y, w)
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting'):
+            results = fresh.load_state(prefix)
+
+        # Same bound data: the fingerprint matches, so no warning.
+        assert 'does not match the data' not in caplog.text
+        assert fresh.results is results
+        assert fresh.state is results.state
+        assert results.param_names == ['offset', 'phase']
+        assert results.draws.shape[1] == state.Nvar
+        assert results.logp.shape[0] == results.draws.shape[0]
+
+    def test_load_state_warns_on_different_data(self, tmp_path, caplog):
+        sampler, _ = self._sampler_with_state()
+        prefix = str(tmp_path / 'chain')
+        sampler.save(prefix)
+
+        x, y, w = _xyw()
+        other = Sampler(_StubFitter(), x, 2.0 * y, w)
+        with caplog.at_level(logging.WARNING, logger='easyscience.fitting'):
+            other.load_state(prefix)
+
+        assert 'does not match the data' in caplog.text

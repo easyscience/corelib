@@ -48,6 +48,58 @@ def _data_fingerprint(
         return None
 
 
+def _validate_dataset_arrays(
+    name: str,
+    data: np.ndarray | list | tuple,
+    allow_none_entries: bool = False,
+) -> None:
+    """Check that ``data`` (an array or list of arrays) holds numeric,
+    at-least-1-D, non-empty arrays.
+
+    Structural checks (array vs list, matching dataset counts) are in
+    ``Sampler.__init__``; these checks reject the issues those checks
+    miss: scalars, strings, empty and ragged arrays.
+
+    Parameters
+    ----------
+    name : str
+        Argument name used in error messages (``'x'``, ``'y'`` or
+        ``'weights'``).
+    data : np.ndarray | list | tuple
+        A single dataset array, or a list/tuple of dataset arrays.
+    allow_none_entries : bool, default=False
+        Accept ``None`` entries inside a list (used for per-dataset
+        optional weights).
+
+    Raises
+    ------
+    TypeError
+        If an entry cannot be converted to an array or is not numeric.
+    ValueError
+        If an entry is a scalar (0-d) or empty array.
+    """
+    is_multi = isinstance(data, (list, tuple))
+    for i, entry in enumerate(data if is_multi else [data]):
+        label = f'{name}[{i}]' if is_multi else name
+        if entry is None and allow_none_entries:
+            continue
+        try:
+            arr = np.asarray(entry)
+        except Exception as exc:
+            raise TypeError(f'{label} could not be converted to an array: {exc}') from exc
+        if not np.issubdtype(arr.dtype, np.number):
+            raise TypeError(f'{label} must hold numeric values, got dtype {arr.dtype}.')
+        if arr.ndim == 0:
+            hint = (
+                ' Note a list is read as a list of datasets; pass a single dataset as one array.'
+                if is_multi
+                else ''
+            )
+            raise ValueError(f'{label} must be an array of values, got a scalar.{hint}')
+        if arr.size == 0:
+            raise ValueError(f'{label} must not be empty.')
+
+
 def _copy_data(data):
     """Copy an array (or list of arrays) and mark the copies read-only.
 
@@ -260,10 +312,13 @@ class Sampler:
     ------
     TypeError
         If ``fitter`` is not Fitter-shaped (no ``minimizer``/``fit_function``),
-        or ``vectorized``/``sampler_kwargs`` have the wrong type.
+        if any dataset in ``x``/``y``/``weights`` is not a numeric array
+        (e.g. a string), or ``vectorized``/``sampler_kwargs`` have the wrong
+        type.
     ValueError
         If ``x``, ``y`` and ``weights`` do not hold matching structures
-        (all arrays, or lists of the same length).
+        (all arrays, or lists of the same length), or any dataset is a
+        scalar or empty array.
 
     Notes
     -----
@@ -335,6 +390,10 @@ class Sampler:
                     f'weights must hold the same number of datasets as x and y, '
                     f'got {len(weights)} and {len(x)}.'
                 )
+        _validate_dataset_arrays('x', x)
+        _validate_dataset_arrays('y', y)
+        if weights is not None:
+            _validate_dataset_arrays('weights', weights, allow_none_entries=True)
         if not isinstance(vectorized, bool):
             raise TypeError(f'vectorized must be a bool, got {type(vectorized).__name__}.')
         if sampler_kwargs is not None and not isinstance(sampler_kwargs, dict):
