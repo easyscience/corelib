@@ -144,6 +144,64 @@ class TestParameter:
         normal_parameter.value == 4
         self.compare_parameters(normal_parameter, 2 * independent_parameter)
 
+    def test_dependent_parameter_update_pushes_value_to_callback(self, parameter: Parameter):
+        # When # Simulate a calculator bound to the parameter via the callback (issue #281)
+        calculator = {'value': parameter._scalar.value}
+        self.mock_callback.fget.side_effect = lambda: calculator['value']
+        self.mock_callback.fset.side_effect = lambda value: calculator.update(value=value)
+        independent_parameter = Parameter(
+            name='independent', value=1, unit='m', variance=0.01, min=0, max=10
+        )
+
+        # Then
+        parameter.make_dependent_on(
+            dependency_expression='2*a', dependency_map={'a': independent_parameter}
+        )
+
+        # Expect # Making the parameter dependent pushes the computed value to the calculator
+        assert calculator['value'] == 2.0
+        self.mock_callback.fset.assert_called_with(2.0)
+        assert self.mock_callback.fset.call_count == 1
+
+        # Then
+        independent_parameter.value = 3
+
+        # Expect # The change of the independent parameter propagates to the calculator
+        assert calculator['value'] == 6.0
+        self.mock_callback.fset.assert_called_with(6.0)
+        assert self.mock_callback.fset.call_count == 2
+        # Reading the value must not return a stale calculator value
+        assert parameter.value == 6.0
+
+    def test_dependent_parameter_update_pushes_value_to_callback_with_desired_unit(
+        self, parameter: Parameter
+    ):
+        # When # Simulate a calculator bound to the parameter via the callback (issue #281)
+        calculator = {'value': parameter._scalar.value}
+        self.mock_callback.fget.side_effect = lambda: calculator['value']
+        self.mock_callback.fset.side_effect = lambda value: calculator.update(value=value)
+        independent_parameter = Parameter(
+            name='independent', value=1, unit='m', variance=0.01, min=0, max=10
+        )
+
+        # Then
+        parameter.make_dependent_on(
+            dependency_expression='2*a',
+            dependency_map={'a': independent_parameter},
+            desired_unit='cm',
+        )
+
+        # Expect # The calculator receives the value converted to the desired unit
+        assert calculator['value'] == 200.0
+        self.mock_callback.fset.assert_called_with(200.0)
+
+        # Then
+        independent_parameter.value = 2
+
+        # Expect
+        assert calculator['value'] == 400.0
+        assert parameter.value == 400.0
+
     def test_dependent_parameter_make_dependent_on_with_desired_unit(
         self, normal_parameter: Parameter
     ):
