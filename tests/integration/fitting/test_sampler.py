@@ -62,8 +62,13 @@ class AbsSin2D(ObjBase):
         )
 
 
-def _bumps_fitter_and_data():
-    """Build a 2-parameter BUMPS MultiFitter over a small sine model."""
+def _fitter_and_data():
+    """Build a 2-parameter MultiFitter over a small sine model.
+
+    The fitter keeps its default (LMFit) minimizer: sampling no longer
+    requires switching to BUMPS, only an installed ``bumps`` package.
+    """
+    pytest.importorskip('bumps')
     ref_sin = AbsSin(0.2, np.pi)
     sp = AbsSin(0.354, 3.05)
     sp.offset.fixed = False
@@ -72,10 +77,6 @@ def _bumps_fitter_and_data():
     y = ref_sin(x)
     weights = np.ones_like(x)
     f = MultiFitter([sp], [sp])
-    try:
-        f.switch_minimizer('Bumps')
-    except AttributeError:
-        pytest.skip('BUMPS is not installed')
     return f, sp, x, y, weights
 
 
@@ -85,7 +86,7 @@ class TestSampler:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_sample_returns_results_object(self):
         """sample() returns a populated SamplingResults; to_legacy_dict() has the legacy shape."""
-        f, sp, x, y, weights = _bumps_fitter_and_data()
+        f, sp, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
         results = sampler.sample(samples=100, burn=20, thin=2)
@@ -133,11 +134,8 @@ class TestSampler:
         sp_sin_1.phase.fixed = False
         sp_line.c.fixed = False
 
+        pytest.importorskip('bumps')
         f = MultiFitter([sp_sin_1, sp_line], [sp_sin_1, sp_line])
-        try:
-            f.switch_minimizer('Bumps')
-        except AttributeError:
-            pytest.skip('BUMPS is not installed')
 
         sampler = Sampler(f, [x1, x2], [y1, y2], [weights, weights])
         results = sampler.sample(samples=100, burn=20, thin=2)
@@ -149,7 +147,7 @@ class TestSampler:
 
     def test_sample_population(self):
         """Passing population should succeed and produce valid draws."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
         results = sampler.sample(samples=100, burn=20, thin=2, population=5)
@@ -169,11 +167,8 @@ class TestSampler:
         sp.offset.fixed = False
         sp.phase.fixed = False
 
+        pytest.importorskip('bumps')
         f = MultiFitter([sp], [sp])
-        try:
-            f.switch_minimizer('Bumps')
-        except AttributeError:
-            pytest.skip('BUMPS is not installed')
 
         sampler = Sampler(f, [x2D], [y2D], [weights], vectorized=True)
         results = sampler.sample(samples=100, burn=20, thin=2)
@@ -185,7 +180,7 @@ class TestSampler:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_fit_function_restored_on_success(self):
         """fit_function must be restored after a successful sample()."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
         original_func = f.fit_function
 
@@ -195,7 +190,7 @@ class TestSampler:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_sampler_kwargs_forwarded(self):
         """Per-call sampler_kwargs dict is forwarded to the BUMPS DREAM sampler."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
         results = sampler.sample(samples=100, burn=20, thin=2, sampler_kwargs={'init': 'random'})
@@ -204,33 +199,47 @@ class TestSampler:
         assert results.draws.shape[0] > 0
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_default_sampler_kwargs_merged(self):
+    def test_default_sampler_kwargs_merged(self, monkeypatch):
         """Constructor-level sampler_kwargs defaults are used; per-call kwargs win."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        from easyscience.fitting.samplers.sampler_dream import DreamSampler
+
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights], sampler_kwargs={'init': 'random'})
 
         captured = {}
-        original_mcmc_sample = type(f.minimizer).mcmc_sample
+        original_run = DreamSampler.run
 
         def spy(self, **kwargs):
             captured.update(kwargs.get('sampler_kwargs') or {})
-            return original_mcmc_sample(self, **kwargs)
+            return original_run(self, **kwargs)
 
-        try:
-            type(f.minimizer).mcmc_sample = spy
-            sampler.sample(samples=100, burn=20, thin=2)
-            assert captured == {'init': 'random'}
+        monkeypatch.setattr(DreamSampler, 'run', spy)
 
-            captured.clear()
-            sampler.sample(samples=100, burn=20, thin=2, sampler_kwargs={'init': 'lhs'})
-            assert captured == {'init': 'lhs'}  # per-call overrides default
-        finally:
-            type(f.minimizer).mcmc_sample = original_mcmc_sample
+        sampler.sample(samples=100, burn=20, thin=2)
+        assert captured == {'init': 'random'}
+
+        captured.clear()
+        sampler.sample(samples=100, burn=20, thin=2, sampler_kwargs={'init': 'lhs'})
+        assert captured == {'init': 'lhs'}  # per-call overrides default
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_sample_with_lmfit_minimizer_active(self):
+        """Sampling works without switching the fitter's minimizer to BUMPS —
+        the new capability enabled by the ``DreamSampler`` engine (#280)."""
+        f, _, x, y, weights = _fitter_and_data()
+        assert f.minimizer.package == 'lmfit'  # the default LMFit minimizer
+
+        sampler = Sampler(f, [x], [y], [weights])
+        results = sampler.sample(samples=100, burn=20, thin=2)
+
+        assert results.draws.shape[0] > 0
+        # The active minimizer is untouched by sampling.
+        assert f.minimizer.package == 'lmfit'
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_extend_chain(self):
         """extend(additional_samples=) continues the chain; ring-buffer math is done for the user."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
         first = sampler.sample(samples=100, burn=20, thin=1)
@@ -250,7 +259,7 @@ class TestSampler:
         generations (``Ngen * Npop``), not from the retained-draw count,
         which BUMPS divides by the thinning interval.
         """
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
         first = sampler.sample(samples=1000, burn=20, thin=10)
@@ -264,7 +273,7 @@ class TestSampler:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_extend_total_samples_override(self):
         """extend(total_samples=) bypasses the additional_samples arithmetic."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
         sampler.sample(samples=100, burn=20, thin=1)
@@ -282,7 +291,7 @@ class TestSampler:
         """
         import logging
 
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
         first = sampler.sample(samples=100, burn=20, thin=1)
 
@@ -308,7 +317,7 @@ class TestSampler:
         saved state on resume, otherwise BUMPS regenerates the default
         population and raises ``Cannot change Nvar, Npop or Ncr on resize``.
         """
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
         first = sampler.sample(samples=100, burn=20, thin=1, population=5)
@@ -327,7 +336,7 @@ class TestSampler:
         logs a warning and records ``null`` in the sidecar."""
         import logging
 
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
         sampler.sample(samples=100, burn=20, thin=2)
 
@@ -344,7 +353,7 @@ class TestSampler:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_load_state_populates_results(self, tmp_path):
         """A freshly loaded sampler reports draws/logp/param_names without resampling."""
-        f, sp, x, y, weights = _bumps_fitter_and_data()
+        f, sp, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
         first = sampler.sample(samples=100, burn=20, thin=2)
 
@@ -377,7 +386,7 @@ class TestSampler:
         reader collapses it to a 1-D array and ``load_state`` raises
         ``IndexError`` without the 2-D coercion workaround.
         """
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
         sampler.sample(samples=20, burn=5, thin=1)
 
@@ -391,7 +400,7 @@ class TestSampler:
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_load_fingerprint_mismatch_warns(self, tmp_path, caplog):
         """Loading a chain into a sampler bound to different data warns."""
-        f, _, x, y, weights = _bumps_fitter_and_data()
+        f, _, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
         sampler.sample(samples=100, burn=20, thin=2)
 
@@ -405,3 +414,26 @@ class TestSampler:
         with caplog.at_level(logging.WARNING, logger='easyscience.fitting'):
             sampler2.load_state(prefix)
         assert 'does not match the data fingerprint' in caplog.text
+
+
+class TestDeprecatedMcmcSampleShim:
+    """The released ``Fitter.mcmc_sample`` entry point keeps working as a
+    deprecation shim delegating to ``Sampler`` (the ``Bumps.mcmc_sample``
+    delegate is unit-tested in ``test_minimizer_bumps.py``)."""
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_fitter_mcmc_sample_warns_and_returns_legacy_dict(self):
+        f, sp, x, y, weights = _fitter_and_data()
+
+        with pytest.warns(DeprecationWarning, match='Fitter.mcmc_sample'):
+            legacy = f.mcmc_sample([x], [y], [weights], samples=100, burn=20, thin=2)
+
+        assert set(legacy.keys()) == {'draws', 'param_names', 'internal_bumps_object', 'logp'}
+        assert legacy['draws'].ndim == 2
+        assert legacy['draws'].shape[0] > 0
+        assert legacy['draws'].shape[1] == len(legacy['param_names'])
+        expected_pars = {p.unique_name for p in sp.get_fit_parameters()}
+        assert set(legacy['param_names']) == expected_pars
+        # The shim no longer requires the BUMPS minimizer — the default
+        # LMFit minimizer stays active throughout.
+        assert f.minimizer.package == 'lmfit'

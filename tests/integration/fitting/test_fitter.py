@@ -355,6 +355,35 @@ def test_bumps_methods(fit_method):
 
 
 @pytest.mark.fast
+def test_bumps_fit_emits_no_fitness_deprecation_warning():
+    """Regression (CR-1): the classical BUMPS fit path must not read the
+    deprecated ``FitProblem.fitness`` property, which emits a ``UserWarning``
+    on bumps >= 1.0.4 — the ``Curve`` comes back from ``build_curve_problem``
+    directly."""
+    import warnings
+
+    ref_sin = AbsSin(0.2, np.pi)
+    sp_sin = AbsSin(0.354, 3.05)
+
+    x = np.linspace(0, 5, 200)
+    weights = np.ones_like(x)
+    y = ref_sin(x)
+
+    sp_sin.offset.fixed = False
+    sp_sin.phase.fixed = False
+
+    f = Fitter(sp_sin, sp_sin)
+    f.switch_minimizer('Bumps')
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        f.fit(x, y, weights=weights)
+
+    fitness_warnings = [w for w in caught if 'fitness' in str(w.message)]
+    assert fitness_warnings == []
+
+
+@pytest.mark.fast
 @pytest.mark.parametrize(
     'fit_engine',
     [AvailableMinimizers.LMFit, AvailableMinimizers.Bumps, AvailableMinimizers.DFO],

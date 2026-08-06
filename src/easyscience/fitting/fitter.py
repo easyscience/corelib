@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import functools
+import warnings
 from typing import Callable
 from typing import List
 from typing import Optional
@@ -441,7 +442,6 @@ class Fitter:
         ``_precompute_reshaping`` and ``_fit_function_wrapper`` are
         resolved on the concrete subclass at call time, so multi-dataset
         flattening is handled automatically when called on a
-        ``MultiFitter`` instance.
 
         Parameters
         ----------
@@ -488,42 +488,27 @@ class Fitter:
         ValueError
             If ``samples``, ``burn``, or ``thin`` are invalid.
         RuntimeError
-            If the active minimizer is not a BUMPS instance.
+            If the ``bumps`` package is not installed.
         """
-        if not isinstance(samples, int) or samples <= 0:
-            raise ValueError('samples must be a positive integer.')
-        if not isinstance(burn, int) or burn < 0:
-            raise ValueError('burn must be a non-negative integer.')
-        if not isinstance(thin, int) or thin < 1:
-            raise ValueError('thin must be a positive integer.')
+        warnings.warn(
+            'Fitter.mcmc_sample() is deprecated. Use '
+            'Sampler(fitter, x, y, weights).sample(...) instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from .sampler import Sampler
 
-        x_fit, x_new, y_new, w_new, dims = self._precompute_reshaping(x, y, weights, vectorized)
-        self._dependent_dims = dims
-
-        original_fit_func = self._fit_function
-        self.fit_function = self._fit_function_wrapper(x_new, flatten=True)
-
-        try:
-            minimizer = self.minimizer
-            if not (hasattr(minimizer, 'package') and minimizer.package == 'bumps'):
-                raise RuntimeError(
-                    'Bayesian sampling requires a BUMPS minimizer. '
-                    'Use ``fitter.switch_minimizer(AvailableMinimizers.Bumps)`` first.'
-                )
-
-            result = minimizer.mcmc_sample(
-                x=x_fit,
-                y=y_new,
-                weights=w_new,
-                samples=samples,
-                burn=burn,
-                thin=thin,
-                population=population,
-                sampler_kwargs=sampler_kwargs,
-                progress_callback=progress_callback,
-                abort_test=abort_test,
-            )
-        finally:
-            self.fit_function = original_fit_func
-
-        return result
+        # ``sampler_kwargs`` is deliberately passed per-call rather than to
+        # the constructor: for the fresh single-use Sampler created here the
+        # two are equivalent (constructor kwargs are just per-call defaults),
+        # and per-call matches the legacy one-shot semantics exactly.
+        sampler = Sampler(self, x, y, weights=weights, vectorized=vectorized)
+        return sampler.sample(
+            samples=samples,
+            burn=burn,
+            thin=thin,
+            population=population,
+            sampler_kwargs=sampler_kwargs,
+            progress_callback=progress_callback,
+            abort_test=abort_test,
+        ).to_legacy_dict()
