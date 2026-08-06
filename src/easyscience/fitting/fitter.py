@@ -489,7 +489,7 @@ class Fitter:
             If ``samples``, ``burn``, or ``thin`` are invalid.
         RuntimeError
             If the ``bumps`` package is not installed.
-        """
+        """  # noqa: DOC502 -- raised in the delegated Sampler.sample()
         warnings.warn(
             'Fitter.mcmc_sample() is deprecated. Use '
             'Sampler(fitter, x, y, weights).sample(...) instead.',

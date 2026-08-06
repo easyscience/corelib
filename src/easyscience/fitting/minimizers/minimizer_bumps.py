@@ -416,7 +416,7 @@ class Bumps(MinimizerBase):
         Exception
             Re-raised from DREAM fitting if any unexpected error occurs
             (parameter values are restored beforehand).
-        """
+        """  # noqa: DOC502 -- raised in the delegated DreamSampler.run()
         warnings.warn(
             'Bumps.mcmc_sample() is deprecated. Use easyscience.fitting.Sampler '
             '(which no longer requires a BUMPS minimizer) instead.',
