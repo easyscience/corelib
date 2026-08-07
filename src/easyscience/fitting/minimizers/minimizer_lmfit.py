@@ -90,7 +90,7 @@ class LMFit(MinimizerBase):  # noqa: S101
         method: str | None = None,
         tolerance: float | None = None,
         max_evaluations: int | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
+        progress_callback: Callable[[dict], None] | None = None,
         minimizer_kwargs: dict | None = None,
         engine_kwargs: dict | None = None,
         **kwargs,
@@ -116,8 +116,9 @@ class LMFit(MinimizerBase):  # noqa: S101
             Requested optimizer tolerance. By default, None.
         max_evaluations : int | None, default=None
             Maximum number of function evaluations. By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            Optional callback receiving normalized progress payloads.
+        progress_callback : Callable[[dict], None] | None, default=None
+            Optional callback receiving normalized progress payloads. Its
+            return value is ignored.
         minimizer_kwargs : dict | None, default=None
             Additional keyword arguments passed to LMFit's minimizer. By
             default, None.
@@ -194,7 +195,7 @@ class LMFit(MinimizerBase):  # noqa: S101
 
     def _create_iter_callback(
         self,
-        progress_callback: Callable[[dict], bool | None] | None,
+        progress_callback: Callable[[dict], None] | None,
     ) -> Callable | None:
 
         def iter_cb(params, iteration: int, residuals: np.ndarray, *args, **kwargs) -> bool:

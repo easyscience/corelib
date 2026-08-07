@@ -41,6 +41,13 @@ class TestBumpsFit:
         # When Then Expect
         assert minimizer.all_methods() == ['amoeba', 'de', 'dream', 'newton', 'lm']
 
+    def test_all_methods_returns_a_copy(self, minimizer: Bumps) -> None:
+        """Callers must not be able to mutate the module-level list in place."""
+        methods = minimizer.all_methods()
+        methods.append('tampered')
+
+        assert 'tampered' not in minimizer.all_methods()
+
     def test_supported_methods(self, minimizer: Bumps) -> None:
         # When Then Expect
         assert set(minimizer.supported_methods()) == set(['newton', 'lm', 'amoeba'])
@@ -84,11 +91,10 @@ class TestBumpsFit:
         minimizer._cached_pars = cached_pars
         minimizer._cached_pars_vals = {'mock_parm_1': (1, 0.0)}
 
-        # Patch _set_parameter_fit_result
-        def fake_set_parameter_fit_result(fit_result, stack_status, par_list):
-            for index, name in enumerate([par.name for par in par_list]):
-                dict_name = name[len('p') :]
-            minimizer._cached_pars[dict_name].value = fit_result.x[index]
+        # Patch _set_parameter_fit_result. It now receives prefix-stripped names.
+        def fake_set_parameter_fit_result(fit_result, stack_status, par_names):
+            for index, name in enumerate(par_names):
+                minimizer._cached_pars[name].value = fit_result.x[index]
 
         minimizer._set_parameter_fit_result = fake_set_parameter_fit_result
 
@@ -159,21 +165,28 @@ class TestBumpsFit:
         mock_fit_result.x = np.array([1.0, 2.0])
         mock_fit_result.dx = np.array([0.1, 0.2])
 
-        # The new argument: par_list (list of mock parameters)
-        mock_par_a = MagicMock()
-        mock_par_a.name = 'pa'
-        mock_par_b = MagicMock()
-        mock_par_b.name = 'pb'
-        par_list = [mock_par_a, mock_par_b]
-
-        # Then
-        minimizer._set_parameter_fit_result(mock_fit_result, False, par_list)
+        # Then - names arrive already stripped of the minimizer prefix
+        minimizer._set_parameter_fit_result(mock_fit_result, False, ['a', 'b'])
 
         # Expect
         assert minimizer._cached_pars['a'].value == 1.0
         assert minimizer._cached_pars['a'].error == 0.1
         assert minimizer._cached_pars['b'].value == 2.0
         assert minimizer._cached_pars['b'].error == 0.2
+
+    def test_set_parameter_fit_result_without_stderr(self, minimizer: Bumps):
+        """Fitters that cannot produce a covariance hand back ``dx=None``;
+        those parameters get a zero error instead of raising."""
+        minimizer._cached_pars = {'a': MagicMock()}
+
+        mock_fit_result = MagicMock()
+        mock_fit_result.x = np.array([1.0])
+        mock_fit_result.dx = None
+
+        minimizer._set_parameter_fit_result(mock_fit_result, False, ['a'])
+
+        assert minimizer._cached_pars['a'].value == 1.0
+        assert minimizer._cached_pars['a'].error == 0.0
 
     def test_gen_fit_results(
         self, minimizer: Bumps, monkeypatch, caplog: 'pytest.LogCaptureFixture'
@@ -282,6 +295,51 @@ class TestBumpsFit:
 
         assert mock_domain_fit_results.success is expected_success
 
+    def test_gen_fit_results_applies_extra_kwargs(self, minimizer: Bumps) -> None:
+        """Extra kwargs land on a real FitResults. Guarding the copy on the
+        current value instead of `hasattr` would drop every one of them, since
+        all FitResults fields start out falsy."""
+        mock_cached_model = MagicMock()
+        mock_cached_model.x = np.array([1.0])
+        mock_cached_model.y = np.array([2.0])
+        mock_cached_model.dy = np.array([1.0])
+        mock_cached_model.pars = {'ppar_1': 0}
+        minimizer._cached_model = mock_cached_model
+        minimizer._cached_pars = {'par_1': MagicMock(value=1.0)}
+        minimizer._p_0 = {}
+        minimizer._eval_counter = None
+        minimizer.evaluate = MagicMock(return_value=np.array([2.0]))
+
+        mock_fit_result = MagicMock()
+        mock_fit_result.success = True
+        mock_fit_result.nit = 1
+
+        results = minimizer._gen_fit_results(mock_fit_result, x_matrices='copied')
+
+        assert results.x_matrices == 'copied'
+
+    def test_gen_fit_results_propagates_failure_message(self, minimizer: Bumps) -> None:
+        mock_cached_model = MagicMock()
+        mock_cached_model.x = np.array([1.0])
+        mock_cached_model.y = np.array([2.0])
+        mock_cached_model.dy = np.array([1.0])
+        mock_cached_model.pars = {'ppar_1': 0}
+        minimizer._cached_model = mock_cached_model
+        minimizer._cached_pars = {'par_1': MagicMock(value=1.0)}
+        minimizer._p_0 = {}
+        minimizer._eval_counter = None
+        minimizer.evaluate = MagicMock(return_value=np.array([2.0]))
+
+        mock_fit_result = MagicMock()
+        mock_fit_result.success = False
+        mock_fit_result.nit = 1
+        mock_fit_result.message = 'Fit aborted before convergence'
+
+        results = minimizer._gen_fit_results(mock_fit_result)
+
+        assert results.success is False
+        assert results.message == 'Fit aborted before convergence'
+
     def test_resolve_fitclass_valid(self, minimizer: Bumps) -> None:
         # When Then
         fitclass = Bumps._resolve_fitclass('lm')
@@ -379,8 +437,14 @@ class TestBumpsFit:
         minimizer._gen_fit_results = MagicMock(return_value='gen_fit_results')
         minimizer._resolve_fitclass = MagicMock(return_value=MagicMock(id='amoeba'))
         minimizer._set_parameter_fit_result = MagicMock()
-        minimizer._cached_pars = {'mock_parm_1': MagicMock(value=1.0)}
-        minimizer._cached_pars_vals = {'mock_parm_1': (1.0, 0.0)}
+
+        # A supplied model bypasses build_curve_problem, so fit() must populate the
+        # parameter cache itself from the bound object rather than leaving it empty.
+        object_parameter = MagicMock(unique_name='mock_parm_1')
+        object_parameter.value = 1.0
+        object_parameter.error = 0.0
+        minimizer._object = MagicMock()
+        minimizer._object.get_fit_parameters = MagicMock(return_value=[object_parameter])
 
         supplied_model = MagicMock()
         minimizer_kwargs = {'existing_option': 'minimizer'}
@@ -407,6 +471,53 @@ class TestBumpsFit:
         assert fit_driver_kwargs['xtol'] == 0.25
         assert fit_driver_kwargs['steps'] == 7
         mock_driver_instance.fit.assert_called_once()
+        # The cache and the starting-point snapshot are built from the bound object
+        assert minimizer._cached_pars == {'mock_parm_1': object_parameter}
+        assert minimizer._p_0 == {'pmock_parm_1': 1.0}
+
+    def test_fit_with_supplied_model_resets_eval_counter(
+        self, minimizer: Bumps, monkeypatch
+    ) -> None:
+        """A supplied model installs no EvalCounter, so a counter left over
+        from a previous fit must not be reported as this fit's count."""
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+
+        mock_driver_instance = MagicMock()
+        mock_driver_instance.fit = MagicMock(return_value=(np.array([3.0]), 0.0))
+        mock_driver_instance.stderr = MagicMock(return_value=np.array([0.1]))
+        mock_driver_instance.monitor_runner.history.step = [0]
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            'FitDriver',
+            MagicMock(return_value=mock_driver_instance),
+        )
+        mock_problem = MagicMock()
+        mock_problem._parameters = []
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            'FitProblem',
+            MagicMock(return_value=mock_problem),
+        )
+
+        minimizer._gen_fit_results = MagicMock(return_value='gen_fit_results')
+        minimizer._resolve_fitclass = MagicMock(return_value=MagicMock(id='amoeba'))
+        minimizer._set_parameter_fit_result = MagicMock()
+        minimizer._object = MagicMock()
+        minimizer._object.get_fit_parameters = MagicMock(return_value=[])
+
+        # Stale counter from an earlier fit
+        minimizer._eval_counter = MagicMock(count=999)
+
+        minimizer.fit(
+            x=np.array([1.0]),
+            y=np.array([2.0]),
+            weights=np.array([1.0]),
+            model=MagicMock(),
+        )
+
+        assert minimizer._eval_counter is None
 
     def test_fit_rejects_non_callable_progress_callback(
         self, minimizer: Bumps, monkeypatch
@@ -629,6 +740,217 @@ class TestBumpsFit:
 
 
 # ===================================================================
+# fit() — tolerance / budget defaults are reported, never forced
+# ===================================================================
+
+
+class TestFitToleranceAndBudgetDefaults:
+    """BUMPS pairs an independent ftol/xtol default per fitter. Resolving
+    them for reporting must not push a single collapsed value back into the
+    fitter, which would silently tighten its convergence criteria."""
+
+    @pytest.fixture
+    def minimizer(self) -> Bumps:
+        return Bumps(
+            obj='obj',
+            fit_function='fit_function',
+            minimizer_enum=MagicMock(package='bumps', method='newton'),
+        )
+
+    @staticmethod
+    def _patch_driver_and_problem(minimizer: Bumps, monkeypatch) -> MagicMock:
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+
+        mock_driver = MagicMock()
+        mock_driver.fit = MagicMock(return_value=(np.array([42.0]), 0.0))
+        mock_driver.stderr = MagicMock(return_value=np.array([0.1]))
+        mock_driver.monitor_runner.history.step = [0]
+        mock_FitDriver = MagicMock(return_value=mock_driver)
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps, 'FitDriver', mock_FitDriver
+        )
+
+        mock_problem = MagicMock()
+        mock_problem._parameters = []
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            'build_curve_problem',
+            MagicMock(return_value=(mock_problem, MagicMock(count=3), MagicMock())),
+        )
+
+        minimizer._gen_fit_results = MagicMock(return_value='result')
+        minimizer._set_parameter_fit_result = MagicMock()
+        minimizer._cached_pars = {}
+        minimizer._cached_pars_vals = {}
+        return mock_FitDriver
+
+    def test_tolerance_none_does_not_override_fitter_defaults(
+        self, minimizer: Bumps, monkeypatch
+    ) -> None:
+        mock_FitDriver = self._patch_driver_and_problem(minimizer, monkeypatch)
+
+        minimizer.fit(x=np.array([1.0]), y=np.array([2.0]), weights=np.array([1.0]))
+
+        # The real 'newton' settings are ftol=1e-6 / xtol=1e-12. Neither may be
+        # forwarded, or BUMPS would run against a tolerance the caller never asked for.
+        driver_kwargs = mock_FitDriver.call_args.kwargs
+        assert 'ftol' not in driver_kwargs
+        assert 'xtol' not in driver_kwargs
+        assert 'steps' not in driver_kwargs
+
+        # ...but the resolved defaults are still reported for the budget check.
+        gen_kwargs = minimizer._gen_fit_results.call_args.kwargs
+        assert gen_kwargs['tolerance'] == 1e-12  # min(ftol, xtol)
+        assert gen_kwargs['max_evaluations'] == 3000  # 'newton' default steps
+
+    def test_explicit_tolerance_is_forwarded(self, minimizer: Bumps, monkeypatch) -> None:
+        mock_FitDriver = self._patch_driver_and_problem(minimizer, monkeypatch)
+
+        minimizer.fit(
+            x=np.array([1.0]),
+            y=np.array([2.0]),
+            weights=np.array([1.0]),
+            tolerance=1e-3,
+            max_evaluations=11,
+        )
+
+        driver_kwargs = mock_FitDriver.call_args.kwargs
+        assert driver_kwargs['ftol'] == 1e-3
+        assert driver_kwargs['xtol'] == 1e-3
+        assert driver_kwargs['steps'] == 11
+
+    def test_minimizer_kwargs_is_not_mutated(self, minimizer: Bumps, monkeypatch) -> None:
+        self._patch_driver_and_problem(minimizer, monkeypatch)
+
+        minimizer_kwargs = {'existing': 'value'}
+        minimizer.fit(
+            x=np.array([1.0]),
+            y=np.array([2.0]),
+            weights=np.array([1.0]),
+            tolerance=1e-3,
+            max_evaluations=11,
+            minimizer_kwargs=minimizer_kwargs,
+            engine_kwargs={'engine': 'option'},
+        )
+
+        # The caller's mapping is untouched, so reusing it cannot leak settings
+        # from one fit into the next.
+        assert minimizer_kwargs == {'existing': 'value'}
+
+
+# ===================================================================
+# fit() — unsuccessful and aborted outcomes
+# ===================================================================
+
+
+class TestFitUnsuccessfulOutcomes:
+    @pytest.fixture
+    def minimizer(self) -> Bumps:
+        return Bumps(
+            obj='obj',
+            fit_function='fit_function',
+            minimizer_enum=MagicMock(package='bumps', method='amoeba'),
+        )
+
+    @staticmethod
+    def _patch(minimizer: Bumps, monkeypatch, driver_result, history_step=None) -> MagicMock:
+        from easyscience import global_object
+
+        global_object.stack.enabled = False
+
+        mock_driver = MagicMock()
+        mock_driver.fit = MagicMock(return_value=driver_result)
+        mock_driver.stderr = MagicMock(return_value=np.array([0.1]))
+        mock_driver.monitor_runner.history.step = [] if history_step is None else history_step
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            'FitDriver',
+            MagicMock(return_value=mock_driver),
+        )
+
+        mock_problem = MagicMock()
+        mock_problem._parameters = []
+        monkeypatch.setattr(
+            easyscience.fitting.minimizers.minimizer_bumps,
+            'build_curve_problem',
+            MagicMock(return_value=(mock_problem, MagicMock(count=3), MagicMock())),
+        )
+
+        minimizer._gen_fit_results = MagicMock(return_value='result')
+        minimizer._set_parameter_fit_result = MagicMock()
+        minimizer._resolve_fitclass = MagicMock(return_value=MagicMock(id='amoeba'))
+        minimizer._cached_pars = {}
+        minimizer._cached_pars_vals = {}
+        return mock_driver
+
+    def test_no_solution_is_reported_not_raised(self, minimizer: Bumps, monkeypatch) -> None:
+        """BUMPS returns x=None for a failed optimization (e.g. LM landing on
+        non-finite values). That is a non-converged fit, not an exception."""
+        self._patch(minimizer, monkeypatch, driver_result=(None, None), history_step=[4])
+        minimizer._restore_parameter_values = MagicMock()
+
+        result = minimizer.fit(x=np.array([1.0]), y=np.array([2.0]), weights=np.array([1.0]))
+
+        assert result == 'result'
+        passed = minimizer._gen_fit_results.call_args.args[0]
+        assert passed.success is False
+        assert passed.x is None
+        assert passed.dx is None  # stderr() needs a solution to expand around
+        assert 'did not converge' in passed.message
+        # Parameters are rolled back and never written from a missing solution
+        minimizer._restore_parameter_values.assert_called_once()
+        minimizer._set_parameter_fit_result.assert_not_called()
+
+    def test_abort_is_reported_as_unsuccessful(self, minimizer: Bumps, monkeypatch) -> None:
+        self._patch(
+            minimizer, monkeypatch, driver_result=(np.array([42.0]), 0.0), history_step=[2]
+        )
+
+        result = minimizer.fit(
+            x=np.array([1.0]),
+            y=np.array([2.0]),
+            weights=np.array([1.0]),
+            abort_test=lambda: True,
+        )
+
+        assert result == 'result'
+        passed = minimizer._gen_fit_results.call_args.args[0]
+        assert passed.success is False
+        assert passed.message == 'Fit aborted before convergence'
+        # The best point reached before the abort is still applied
+        minimizer._set_parameter_fit_result.assert_called_once()
+
+    def test_empty_step_history_does_not_raise(self, minimizer: Bumps, monkeypatch) -> None:
+        """An abort before the fitter reports its first step leaves the BUMPS
+        history trace empty; indexing it would raise IndexError."""
+        self._patch(minimizer, monkeypatch, driver_result=(np.array([42.0]), 0.0), history_step=[])
+
+        result = minimizer.fit(x=np.array([1.0]), y=np.array([2.0]), weights=np.array([1.0]))
+
+        assert result == 'result'
+        assert minimizer._gen_fit_results.call_args.args[0].nit is None
+
+    def test_successful_fit_reports_success(self, minimizer: Bumps, monkeypatch) -> None:
+        self._patch(
+            minimizer, monkeypatch, driver_result=(np.array([42.0]), 0.0), history_step=[7]
+        )
+
+        minimizer.fit(
+            x=np.array([1.0]),
+            y=np.array([2.0]),
+            weights=np.array([1.0]),
+            abort_test=lambda: False,
+        )
+
+        passed = minimizer._gen_fit_results.call_args.args[0]
+        assert passed.success is True
+        assert passed.message == 'successful termination'
+        assert passed.nit == 7
+
+
+# ===================================================================
 # Bumps.mcmc_sample() — deprecated delegate to DreamSampler
 # ===================================================================
 
@@ -719,13 +1041,7 @@ class TestSetParameterFitResultWithStack:
         mock_fit_result.x = np.array([1.0, 2.0])
         mock_fit_result.dx = np.array([0.1, 0.2])
 
-        mock_par_a = MagicMock()
-        mock_par_a.name = 'pa'
-        mock_par_b = MagicMock()
-        mock_par_b.name = 'pb'
-        par_list = [mock_par_a, mock_par_b]
-
-        minimizer._set_parameter_fit_result(mock_fit_result, True, par_list)
+        minimizer._set_parameter_fit_result(mock_fit_result, True, ['a', 'b'])
 
         assert minimizer._cached_pars['a'].value == 1.0
         assert minimizer._cached_pars['a'].error == 0.1

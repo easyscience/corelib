@@ -83,7 +83,7 @@ class DFO(MinimizerBase):
         method: str | None = None,
         tolerance: float | None = None,
         max_evaluations: int | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
+        progress_callback: Callable[[dict], None] | None = None,
         callback: Callable[[DFOCallbackState], None] | None = None,
         **kwargs,
     ) -> FitResults:
@@ -108,8 +108,9 @@ class DFO(MinimizerBase):
             Requested optimizer tolerance. By default, None.
         max_evaluations : int | None, default=None
             Maximum number of evaluations. By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            Optional callback receiving normalized progress payloads.
+        progress_callback : Callable[[dict], None] | None, default=None
+            Optional callback receiving normalized progress payloads. Its
+            return value is ignored.
         callback : Callable[[DFOCallbackState], None] | None, default=None
             Optional native DFO callback.
         **kwargs :
@@ -302,7 +303,7 @@ class DFO(MinimizerBase):
 
     @staticmethod
     def _make_progress_adapter(
-        progress_callback: Callable[[dict], bool | None],
+        progress_callback: Callable[[dict], None],
     ) -> Callable[['DFOCallbackState'], None]:
         """
         Create a DFO callback that translates DFOCallbackState into the
@@ -310,8 +311,8 @@ class DFO(MinimizerBase):
 
         Parameters
         ----------
-        progress_callback : Callable[[dict], bool | None]
-            Standard progress callback (dict -> bool|None).
+        progress_callback : Callable[[dict], None]
+            Standard progress callback (dict -> None).
 
         Returns
         -------

@@ -62,7 +62,7 @@ class MinimizerBase(EngineBase):
         method: str | None = None,
         tolerance: float | None = None,
         max_evaluations: int | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
+        progress_callback: Callable[[dict], None] | None = None,
         **kwargs,
     ) -> FitResults:
         """
@@ -86,8 +86,10 @@ class MinimizerBase(EngineBase):
             Requested convergence tolerance. By default, None.
         max_evaluations : int | None, default=None
             Maximum number of objective evaluations. By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            Optional progress callback. By default, None.
+        progress_callback : Callable[[dict], None] | None, default=None
+            Optional progress callback. Its return value is ignored by
+            every backend; use ``abort_test`` to stop a running fit. By
+            default, None.
         **kwargs :
             Additional arguments for the fitting function.
 
