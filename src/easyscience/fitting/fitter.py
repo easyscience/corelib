@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import functools
-import warnings
 from typing import Callable
 from typing import List
 from typing import Optional
@@ -419,96 +418,3 @@ class Fitter:
         fit_result.y_calc = np.reshape(fit_result.y_calc, y.shape)
         fit_result.y_err = np.reshape(fit_result.y_err, y.shape)
         return fit_result
-
-    def mcmc_sample(
-        self,
-        x: np.ndarray,
-        y: np.ndarray,
-        weights: np.ndarray,
-        samples: int = 10000,
-        burn: int = 2000,
-        thin: int = 10,
-        population: Optional[int] = None,
-        vectorized: bool = False,
-        sampler_kwargs: Optional[dict] = None,
-        progress_callback: Optional[Callable[[dict], Optional[bool]]] = None,
-        abort_test: Optional[Callable[[], bool]] = None,
-    ) -> dict:
-        """
-        Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
-
-        Works with both a plain ``Fitter`` (single dataset) and a
-        ``MultiFitter`` (multiple datasets) via polymorphic dispatch:
-        ``_precompute_reshaping`` and ``_fit_function_wrapper`` are
-        resolved on the concrete subclass at call time, so multi-dataset
-        flattening is handled automatically when called on a
-
-        Parameters
-        ----------
-        x : np.ndarray
-            Independent variable array (or list of arrays for
-            ``MultiFitter``).
-        y : np.ndarray
-            Dependent variable array (or list of arrays for
-            ``MultiFitter``).
-        weights : np.ndarray
-            Weight array (or list of arrays for ``MultiFitter``).
-        samples : int, default=10000
-            Number of retained DREAM samples requested from BUMPS.
-        burn : int, default=2000
-            Burn-in steps to discard before collecting samples.
-        thin : int, default=10
-            Thinning interval — only every ``thin``-th sample is kept,
-            which reduces autocorrelation between consecutive draws.
-        population : Optional[int], default=None
-            BUMPS DREAM population count (number of parallel chains).
-        vectorized : bool, default=False
-            When ``True``, each x array may be multi-dimensional (e.g.
-            an ``(N, M, 2)`` grid for a 2D model) and is left as-is.
-            When ``False`` (default), each x array is expected to be
-            1-D.
-        sampler_kwargs : Optional[dict], default=None
-            Additional keyword arguments forwarded to the BUMPS DREAM
-            sampler.
-        progress_callback : Optional[Callable[[dict], Optional[bool]]], default=None
-            Optional callback invoked at each DREAM generation.  The
-            payload dict includes ``iteration`` and ``sampling: True``.
-        abort_test : Optional[Callable[[], bool]], default=None
-            Optional callable that returns ``True`` to abort sampling
-            early.
-
-        Returns
-        -------
-        dict
-            Dictionary with keys ``'draws'``, ``'param_names'``,
-            ``'internal_bumps_object'``, and ``'logp'``.
-
-        Raises
-        ------
-        ValueError
-            If ``samples``, ``burn``, or ``thin`` are invalid.
-        RuntimeError
-            If the ``bumps`` package is not installed.
-        """  # noqa: DOC502 -- raised in the delegated Sampler.sample()
-        warnings.warn(
-            'Fitter.mcmc_sample() is deprecated. Use '
-            'Sampler(fitter, x, y, weights).sample(...) instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        from .sampler import Sampler
-
-        # ``sampler_kwargs`` is deliberately passed per-call rather than to
-        # the constructor: for the fresh single-use Sampler created here the
-        # two are equivalent (constructor kwargs are just per-call defaults),
-        # and per-call matches the legacy one-shot semantics exactly.
-        sampler = Sampler(self, x, y, weights=weights, vectorized=vectorized)
-        return sampler.sample(
-            samples=samples,
-            burn=burn,
-            thin=thin,
-            population=population,
-            sampler_kwargs=sampler_kwargs,
-            progress_callback=progress_callback,
-            abort_test=abort_test,
-        ).to_legacy_dict()

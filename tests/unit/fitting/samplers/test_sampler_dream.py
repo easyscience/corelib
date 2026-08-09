@@ -4,8 +4,10 @@
 ``src/easyscience/fitting/samplers/sampler_dream.py``.
 
 Ported from the former ``TestBumpsSample`` suite in
-``tests/unit/fitting/minimizers/test_minimizer_bumps.py`` when
+``tests/unit/fitting/minimizers/test_minimizer_bumps.py`` when the former
 ``Bumps.mcmc_sample`` moved here as ``DreamSampler.run`` (easyscience/core#280).
+That entry point, and ``Fitter.mcmc_sample``, have since been removed —
+``Sampler`` and ``DreamSampler.run`` are the supported APIs.
 """
 
 import logging

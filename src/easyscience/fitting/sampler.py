@@ -249,16 +249,6 @@ class SamplingResults:
     logp: np.ndarray
     state: MCMCDraw
 
-    def to_legacy_dict(self) -> dict:
-        """Return the legacy dict shape produced by the deprecated
-        ``mcmc_sample()`` APIs."""
-        return {
-            'draws': self.draws,
-            'param_names': self.param_names,
-            'internal_bumps_object': self.state,
-            'logp': self.logp,
-        }
-
 
 class Sampler:
     """Bayesian MCMC sampler for one dataset, backed by the BUMPS DREAM engine.

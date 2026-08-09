@@ -951,69 +951,6 @@ class TestFitUnsuccessfulOutcomes:
 
 
 # ===================================================================
-# Bumps.mcmc_sample() — deprecated delegate to DreamSampler
-# ===================================================================
-
-
-class TestBumpsMcmcSampleDeprecated:
-    """``Bumps.mcmc_sample`` is a thin deprecated delegate; the DREAM run
-    itself is unit-tested in ``tests/unit/fitting/samplers/test_sampler_dream.py``."""
-
-    @pytest.fixture
-    def minimizer(self) -> Bumps:
-        return Bumps(
-            obj='obj',
-            fit_function='fit_function',
-            minimizer_enum=MagicMock(package='bumps', method='amoeba'),
-        )
-
-    def test_warns_and_delegates_to_dream_sampler(self, minimizer: Bumps, monkeypatch) -> None:
-        import easyscience.fitting.samplers.sampler_dream as sampler_dream_module
-
-        canned = {
-            'draws': np.ones((2, 1)),
-            'param_names': ['a'],
-            'internal_bumps_object': object(),
-            'logp': np.zeros(2),
-        }
-        mock_engine = MagicMock()
-        mock_engine.run.return_value = canned
-        mock_engine_cls = MagicMock(return_value=mock_engine)
-        monkeypatch.setattr(sampler_dream_module, 'DreamSampler', mock_engine_cls)
-
-        x = np.array([1.0, 2.0])
-        y = np.array([0.1, 0.2])
-        weights = np.array([1.0, 1.0])
-        abort_test = MagicMock(return_value=False)
-
-        with pytest.warns(DeprecationWarning, match='Bumps.mcmc_sample'):
-            result = minimizer.mcmc_sample(
-                x=x,
-                y=y,
-                weights=weights,
-                samples=100,
-                burn=20,
-                thin=2,
-                population=5,
-                sampler_kwargs={'trim': False},
-                abort_test=abort_test,
-            )
-
-        # The engine is bound to the minimizer's object and original fit function
-        mock_engine_cls.assert_called_once_with('obj', 'fit_function')
-        run_kwargs = mock_engine.run.call_args.kwargs
-        assert run_kwargs['samples'] == 100
-        assert run_kwargs['burn'] == 20
-        assert run_kwargs['thin'] == 2
-        assert run_kwargs['population'] == 5
-        assert run_kwargs['resume_state'] is None
-        assert run_kwargs['sampler_kwargs'] == {'trim': False}
-        assert run_kwargs['abort_test'] is abort_test
-        # The legacy dict comes straight back from the engine
-        assert result is canned
-
-
-# ===================================================================
 # _set_parameter_fit_result with stack_status=True
 # ===================================================================
 

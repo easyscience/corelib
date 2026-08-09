@@ -401,19 +401,6 @@ class TestDataFingerprint:
         assert isinstance(sampler._fingerprint(), str)
 
 
-class TestSamplingResultsLegacyDict:
-    def test_to_legacy_dict_maps_fields(self):
-        state = object()
-        results = SamplingResults(
-            draws=np.ones((2, 1)), param_names=['p'], logp=np.zeros(2), state=state
-        )
-        legacy = results.to_legacy_dict()
-        assert legacy['internal_bumps_object'] is state
-        assert legacy['param_names'] == ['p']
-        np.testing.assert_array_equal(legacy['draws'], results.draws)
-        np.testing.assert_array_equal(legacy['logp'], results.logp)
-
-
 class TestSamplerRunEngine:
     """The ``_run`` tail: results construction, storage, and kwarg merging,
     with the ``DreamSampler`` engine stubbed out."""

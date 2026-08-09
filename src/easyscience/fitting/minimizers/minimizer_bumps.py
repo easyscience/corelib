@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
@@ -35,7 +34,6 @@ from .utils import FitError
 from .utils import FitResults
 
 if TYPE_CHECKING:
-    from bumps.dream.state import MCMCDraw
     from bumps.fitters import FitBase
 
 # 'pt' (parallel tempering) is considered experimental and is not exposed.
@@ -423,123 +421,6 @@ class Bumps(MinimizerBase):
             Bumps Parameter compatible object.
         """
         return to_bumps_parameter(obj)
-
-    def mcmc_sample(
-        self,
-        x: np.ndarray,
-        y: np.ndarray,
-        weights: np.ndarray,
-        samples: int = 10000,
-        burn: int = 2000,
-        thin: int = 10,
-        population: int | None = None,
-        resume_state: MCMCDraw | None = None,
-        sampler_kwargs: dict | None = None,
-        progress_callback: Callable[[dict], None] | None = None,
-        abort_test: Callable[[], bool] | None = None,
-    ) -> dict:
-        """
-        Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
-
-        Parameters
-        ----------
-        x : np.ndarray
-            Flattened independent variable array.
-        y : np.ndarray
-            Flattened dependent variable array.
-        weights : np.ndarray
-            Flattened weight array.
-        samples : int, default=10000
-            Number of raw samples to draw across all chains, before thinning.
-            A guaranteed minimum, not an exact count: DREAM advances in
-            blocks of 10 generations (one generation = one draw per chain)
-            and stops at the first block boundary at or past ``samples``.
-        burn : int, default=2000
-            Burn-in generations to discard. BUMPS counts ``burn`` in
-            generations while ``samples`` counts raw draws, so ``burn=500``
-            discards ``500 * n_chains`` raw samples.
-        thin : int, default=10
-            Thinning interval — only every ``thin``-th generation is stored.
-        population : int | None, default=None
-            BUMPS DREAM population count per parameter (number of parallel
-            chains): BUMPS creates ``ceil(population * n_parameters)`` chains.
-        resume_state : MCMCDraw | None, default=None
-            A BUMPS ``MCMCDraw`` state object from a previous
-            ``mcmc_sample()`` call (e.g. ``PosteriorResults.sampler_state``).
-            When provided, DREAM **continues** the saved chain instead of
-            starting cold.  The population, parameter count, and parameter
-            names must match the current model — a ``ValueError`` is raised
-            otherwise.
-
-            ``samples`` must be the **total** number of raw samples, not an
-            increment: to extend an existing chain of ``N`` raw samples by
-            ``M``, pass ``samples=N + M`` (DREAM keeps only the last
-            ``samples`` draws in its buffer). The `Sampler.extend` helper
-            computes this for you.
-
-            ``burn`` is forced to 0 on resume: a previously-converged chain is
-            never re-burned.
-
-            The ``population`` and ``initializer`` parameters
-            have **no effect** when ``resume_state`` is provided — they
-            are determined by the saved state.
-
-            Resuming against *different* data is undefined behaviour (the
-            chain's likelihood changes underneath it).
-        sampler_kwargs : dict | None, default=None
-            Additional keyword arguments forwarded to
-            ``bumps.fitters.fit``.
-        progress_callback : Callable[[dict], None] | None, default=None
-            Optional callback for progress updates during sampling.  The
-            payload dict includes ``iteration`` (DREAM generation
-            number) and ``sampling: True``.  The return value is ignored.
-        abort_test : Callable[[], bool] | None, default=None
-            Optional callback that returns ``True`` to signal that
-            sampling should be aborted. Called periodically during the
-            DREAM sampling loop.
-
-        Returns
-        -------
-        dict
-            Dictionary with keys ``'draws'``, ``'param_names'``,
-            ``'internal_bumps_object'``, and ``'logp'``.
-
-        Raises
-        ------
-        ValueError
-            If the input shapes or weights are invalid, if
-            ``progress_callback`` is not callable, or if ``resume_state``
-            is incompatible with the current model (parameter count,
-            names/order, or population mismatch).
-        FitError
-            If DREAM sampling was aborted by the user (via
-            ``abort_test``).
-        Exception
-            Re-raised from DREAM fitting if any unexpected error occurs
-            (parameter values are restored beforehand).
-        """  # noqa: DOC502 -- raised in the delegated DreamSampler.run()
-        warnings.warn(
-            'Bumps.mcmc_sample() is deprecated. Use easyscience.fitting.Sampler '
-            '(which no longer requires a BUMPS minimizer) instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        from ..samplers.sampler_dream import DreamSampler
-
-        engine = DreamSampler(self._object, self._original_fit_function)
-        return engine.run(
-            x=x,
-            y=y,
-            weights=weights,
-            samples=samples,
-            burn=burn,
-            thin=thin,
-            population=population,
-            resume_state=resume_state,
-            sampler_kwargs=sampler_kwargs,
-            progress_callback=progress_callback,
-            abort_test=abort_test,
-        )
 
     def _set_parameter_fit_result(
         self,

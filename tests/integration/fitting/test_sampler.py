@@ -85,7 +85,7 @@ class TestSampler:
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_sample_returns_results_object(self):
-        """sample() returns a populated SamplingResults; to_legacy_dict() has the legacy shape."""
+        """sample() returns a populated SamplingResults, cached on the sampler."""
         f, sp, x, y, weights = _fitter_and_data()
         sampler = Sampler(f, [x], [y], [weights])
 
@@ -106,11 +106,6 @@ class TestSampler:
         assert sampler.state is results.state
         assert sampler.draws is results.draws
         assert sampler.param_names == results.param_names
-
-        # legacy dict shape
-        legacy = results.to_legacy_dict()
-        assert set(legacy.keys()) == {'draws', 'param_names', 'internal_bumps_object', 'logp'}
-        assert legacy['internal_bumps_object'] is results.state
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_sample_multi_dataset(self):
@@ -414,26 +409,3 @@ class TestSampler:
         with caplog.at_level(logging.WARNING, logger='easyscience.fitting'):
             sampler2.load_state(prefix)
         assert 'does not match the data fingerprint' in caplog.text
-
-
-class TestDeprecatedMcmcSampleShim:
-    """The released ``Fitter.mcmc_sample`` entry point keeps working as a
-    deprecation shim delegating to ``Sampler`` (the ``Bumps.mcmc_sample``
-    delegate is unit-tested in ``test_minimizer_bumps.py``)."""
-
-    @pytest.mark.filterwarnings('ignore::UserWarning')
-    def test_fitter_mcmc_sample_warns_and_returns_legacy_dict(self):
-        f, sp, x, y, weights = _fitter_and_data()
-
-        with pytest.warns(DeprecationWarning, match='Fitter.mcmc_sample'):
-            legacy = f.mcmc_sample([x], [y], [weights], samples=100, burn=20, thin=2)
-
-        assert set(legacy.keys()) == {'draws', 'param_names', 'internal_bumps_object', 'logp'}
-        assert legacy['draws'].ndim == 2
-        assert legacy['draws'].shape[0] > 0
-        assert legacy['draws'].shape[1] == len(legacy['param_names'])
-        expected_pars = {p.unique_name for p in sp.get_fit_parameters()}
-        assert set(legacy['param_names']) == expected_pars
-        # The shim no longer requires the BUMPS minimizer — the default
-        # LMFit minimizer stays active throughout.
-        assert f.minimizer.package == 'lmfit'
