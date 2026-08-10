@@ -24,11 +24,14 @@ def validate_run_settings(samples: int, burn: int, thin: int) -> None:
     ValueError
         If any value is out of range or not an integer.
     """
-    if not isinstance(samples, int) or samples <= 0:
+    # bool is a subclass of int, so ``samples=True`` would otherwise pass as
+    # ``samples=1``; these checks are strict (``10.0`` is rejected), so
+    # booleans must be rejected too.
+    if not isinstance(samples, int) or isinstance(samples, bool) or samples <= 0:
         raise ValueError('samples must be a positive integer.')
-    if not isinstance(burn, int) or burn < 0:
+    if not isinstance(burn, int) or isinstance(burn, bool) or burn < 0:
         raise ValueError('burn must be a non-negative integer.')
-    if not isinstance(thin, int) or thin < 1:
+    if not isinstance(thin, int) or isinstance(thin, bool) or thin < 1:
         raise ValueError('thin must be a positive integer.')
 
 

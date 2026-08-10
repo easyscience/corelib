@@ -283,7 +283,7 @@ class Fitter:
             y: np.ndarray,
             weights: Optional[np.ndarray] = None,
             vectorized: bool = False,
-            progress_callback: Callable[[dict], bool | None] | None = None,
+            progress_callback: Callable[[dict], None] | None = None,
             **kwargs,
         ) -> FitResults:
             """

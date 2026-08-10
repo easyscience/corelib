@@ -56,11 +56,20 @@ class MultiFitter(Fitter):
         Callable
             Wrapped optimizer function.
         """
-        # Extract of a list of callable functions
+        # Extract of a list of callable functions.
+        # ``Fitter._fit_function_wrapper`` reads ``self._fit_function``, so it
+        # is repointed per dataset inside the loop; the original must be
+        # restored afterwards or every caller (``Fitter.fit`` aside, which
+        # snapshots it itself, e.g. sampling) is left with the *last*
+        # dataset's function on the user-visible ``fit_function`` surface.
         wrapped_fns = []
-        for this_x, this_fun in zip(real_x, self._fit_functions):
-            self._fit_function = this_fun
-            wrapped_fns.append(Fitter._fit_function_wrapper(self, this_x, flatten=flatten))
+        original_fit_function = self._fit_function
+        try:
+            for this_x, this_fun in zip(real_x, self._fit_functions):
+                self._fit_function = this_fun
+                wrapped_fns.append(Fitter._fit_function_wrapper(self, this_x, flatten=flatten))
+        finally:
+            self._fit_function = original_fit_function
 
         def wrapped_fun(x, **kwargs):
             # Generate an empty Y based on x

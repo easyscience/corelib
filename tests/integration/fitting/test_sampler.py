@@ -183,6 +183,34 @@ class TestSampler:
         assert f.fit_function is original_func
 
     @pytest.mark.filterwarnings('ignore::UserWarning')
+    def test_fit_function_untouched_multi_dataset(self):
+        """With 2+ datasets the per-dataset wrapping in MultiFitter must not
+        leave fit_function pointing at the LAST dataset's function after
+        sampling (regression: the single-dataset variant above is vacuous for
+        this bug because last == first == original)."""
+        ref_sin = AbsSin(0.2, np.pi)
+        sp_sin = AbsSin(0.354, 3.05)
+        sp_line = Line(0.43, 6.1)
+        sp_sin.offset.fixed = False
+        sp_line.c.fixed = False
+
+        x1 = np.linspace(0, 5, 50)
+        y1 = ref_sin(x1)
+        x2 = np.copy(x1)
+        y2 = Line(1, 4.6)(x2)
+        weights = np.ones_like(x1)
+
+        pytest.importorskip('bumps')
+        f = MultiFitter([sp_sin, sp_line], [sp_sin, sp_line])
+        original = f.fit_function
+        assert original is sp_sin  # two distinct per-dataset functions
+
+        sampler = Sampler(f, [x1, x2], [y1, y2], [weights, weights])
+        sampler.sample(samples=50, burn=5, thin=1)
+
+        assert f.fit_function is original
+
+    @pytest.mark.filterwarnings('ignore::UserWarning')
     def test_sampler_kwargs_forwarded(self):
         """Per-call sampler_kwargs dict is forwarded to the BUMPS DREAM sampler."""
         f, _, x, y, weights = _fitter_and_data()

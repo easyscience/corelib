@@ -77,7 +77,7 @@ class DreamSampler(EngineBase):
         population: int | None = None,
         resume_state: MCMCDraw | None = None,
         sampler_kwargs: dict | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
+        progress_callback: Callable[[dict], None] | None = None,
         abort_test: Callable[[], bool] | None = None,
     ) -> dict:
         """
@@ -137,10 +137,10 @@ class DreamSampler(EngineBase):
         sampler_kwargs : dict | None, default=None
             Additional keyword arguments forwarded to
             ``bumps.fitters.fit``.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
+        progress_callback : Callable[[dict], None] | None, default=None
             Optional callback for progress updates during sampling.  The
             payload dict includes ``iteration`` (DREAM generation
-            number) and ``sampling: True``.
+            number) and ``sampling: True``. Any return value is ignored.
         abort_test : Callable[[], bool] | None, default=None
             Optional callback that returns ``True`` to signal that
             sampling should be aborted. Called periodically during the

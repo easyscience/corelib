@@ -468,7 +468,7 @@ class Sampler:
         population: int | None,
         resume_state: MCMCDraw | None,
         sampler_kwargs: dict | None,
-        progress_callback: Callable[[dict], bool | None] | None,
+        progress_callback: Callable[[dict], None] | None,
         abort_test: Callable[[], bool] | None,
     ) -> SamplingResults:
         """Shared sampling engine for ``sample()`` and ``extend()``.
@@ -535,7 +535,7 @@ class Sampler:
         thin: int = 10,
         population: int | None = None,
         sampler_kwargs: dict | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
+        progress_callback: Callable[[dict], None] | None = None,
         abort_test: Callable[[], bool] | None = None,
     ) -> SamplingResults:
         """Run fresh Bayesian MCMC sampling on the bound data.
@@ -564,9 +564,10 @@ class Sampler:
         sampler_kwargs : dict | None, default=None
             Additional keyword arguments forwarded to the BUMPS DREAM
             sampler (merged over the instance defaults).
-        progress_callback : Callable[[dict], bool | None] | None, default=None
+        progress_callback : Callable[[dict], None] | None, default=None
             Optional callback invoked at each DREAM generation. The payload
-            dict includes ``iteration`` and ``sampling: True``.
+            dict includes ``iteration`` and ``sampling: True``. Any return
+            value is ignored.
         abort_test : Callable[[], bool] | None, default=None
             Optional callable that returns ``True`` to abort sampling early.
 
@@ -608,7 +609,7 @@ class Sampler:
         thin: int = 10,
         total_samples: int | None = None,
         sampler_kwargs: dict | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
+        progress_callback: Callable[[dict], None] | None = None,
         abort_test: Callable[[], bool] | None = None,
     ) -> SamplingResults:
         """Continue the existing chain with additional samples.
@@ -639,8 +640,9 @@ class Sampler:
         sampler_kwargs : dict | None, default=None
             Additional keyword arguments forwarded to the BUMPS DREAM
             sampler (merged over the instance defaults).
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            Optional callback invoked at each DREAM generation.
+        progress_callback : Callable[[dict], None] | None, default=None
+            Optional callback invoked at each DREAM generation. Any return
+            value is ignored.
         abort_test : Callable[[], bool] | None, default=None
             Optional callable that returns ``True`` to abort sampling early.
 

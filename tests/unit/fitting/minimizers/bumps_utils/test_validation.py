@@ -16,10 +16,15 @@ class TestValidateRunSettings:
             ({'samples': 0}, 'samples must be a positive integer'),
             ({'samples': -1}, 'samples must be a positive integer'),
             ({'samples': 10.0}, 'samples must be a positive integer'),
+            # bool is an int subclass; True must not sneak through as 1.
+            ({'samples': True}, 'samples must be a positive integer'),
             ({'burn': -1}, 'burn must be a non-negative integer'),
             ({'burn': 1.5}, 'burn must be a non-negative integer'),
+            ({'burn': True}, 'burn must be a non-negative integer'),
+            ({'burn': False}, 'burn must be a non-negative integer'),
             ({'thin': 0}, 'thin must be a positive integer'),
             ({'thin': 2.0}, 'thin must be a positive integer'),
+            ({'thin': True}, 'thin must be a positive integer'),
         ],
     )
     def test_invalid_settings_raise(self, kwargs, match):
