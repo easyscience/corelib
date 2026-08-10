@@ -11440,12 +11440,13 @@ sampler (merged over the instance defaults).</p>
                 <code>progress_callback</code>
             </td>
             <td>
-                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="bool">bool</span> | None] | None</code>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], None] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Optional callback invoked at each DREAM generation. The payload
-dict includes <code>iteration</code> and <code>sampling: True</code>.</p>
+dict includes <code>iteration</code> and <code>sampling: True</code>. Any return
+value is ignored.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -11653,11 +11654,12 @@ sampler (merged over the instance defaults).</p>
                 <code>progress_callback</code>
             </td>
             <td>
-                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="bool">bool</span> | None] | None</code>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], None] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional callback invoked at each DREAM generation.</p>
+                <p>Optional callback invoked at each DREAM generation. Any return
+value is ignored.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12811,13 +12813,13 @@ chain's likelihood changes underneath it).</p>
                 <code>progress_callback</code>
             </td>
             <td>
-                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="bool">bool</span> | None] | None</code>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], None] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Optional callback for progress updates during sampling.  The
 payload dict includes <code>iteration</code> (DREAM generation
-number) and <code>sampling: True</code>.</p>
+number) and <code>sampling: True</code>. Any return value is ignored.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13393,13 +13395,13 @@ chain's likelihood changes underneath it).</p>
                 <code>progress_callback</code>
             </td>
             <td>
-                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], <span title="bool">bool</span> | None] | None</code>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="dict">dict</span>], None] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Optional callback for progress updates during sampling.  The
 payload dict includes <code>iteration</code> (DREAM generation
-number) and <code>sampling: True</code>.</p>
+number) and <code>sampling: True</code>. Any return value is ignored.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
