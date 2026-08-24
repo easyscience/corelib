@@ -297,6 +297,12 @@ class Sampler:
         Per-instance default keyword arguments forwarded to the BUMPS DREAM
         sampler on every run, merged with (and overridden by) per-call
         ``sampler_kwargs``.
+    constraints_factory : Callable | None, default=None
+        Optional hook producing BUMPS inequality constraints for the sampled
+        problem; see
+        :func:`~easyscience.fitting.minimizers.bumps_utils.build_curve_problem`.
+        Bound at construction so ``extend()`` continues the same penalised
+        posterior.
 
     Raises
     ------
@@ -358,6 +364,7 @@ class Sampler:
         weights: np.ndarray | list[np.ndarray | None] | None = None,
         vectorized: bool = False,
         sampler_kwargs: dict | None = None,
+        constraints_factory: Callable | None = None,
     ):
         if not (hasattr(fitter, 'minimizer') and hasattr(fitter, 'fit_function')):
             raise TypeError(
@@ -400,6 +407,9 @@ class Sampler:
         self._weights = _copy_data(weights)
         self._vectorized = vectorized
         self._default_sampler_kwargs = dict(sampler_kwargs or {})
+        # Bound at construction (like the data) so that ``extend()`` samples
+        # the same penalised posterior as ``sample()`` did.
+        self._constraints_factory = constraints_factory
         self._state: MCMCDraw | None = None  # current chain state
         self._results: SamplingResults | None = None
 
@@ -516,6 +526,7 @@ class Sampler:
             sampler_kwargs=merged_kwargs or None,
             progress_callback=progress_callback,
             abort_test=abort_test,
+            constraints_factory=self._constraints_factory,
         )
 
         results = SamplingResults(

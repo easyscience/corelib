@@ -112,10 +112,17 @@ class Parameter(DescriptorNumber):
         ``value``, ``variance``, ``error``, ``min``, ``max``,
         ``bounds``, ``fixed``, ``unit``
         """
-        # Extract and ignore serialization-specific fields from kwargs
-        kwargs.pop('_dependency_string', None)
-        kwargs.pop('_dependency_map_serializer_ids', None)
-        kwargs.pop('_independent', None)
+        # Extract serialization-specific fields from kwargs. A nested
+        # parameter is rebuilt by the serializer straight through this
+        # constructor (not via ``from_dict``), so the dependency description
+        # must be parked here as *pending* and re-established later by
+        # ``resolve_pending_dependencies()`` once every parameter it refers
+        # to exists again.
+        dependency_string = kwargs.pop('_dependency_string', None)
+        dependency_map_serializer_ids = kwargs.pop('_dependency_map_serializer_ids', None)
+        dependency_map_descriptors = kwargs.pop('_dependency_map_descriptors', None)
+        is_independent = kwargs.pop('_independent', True)
+        desired_unit = kwargs.pop('_desired_unit', None)
 
         if not isinstance(min, numbers.Number):
             raise TypeError('`min` must be a number')
@@ -154,6 +161,13 @@ class Parameter(DescriptorNumber):
         self._callback = callback  # Callback is used by interface to link to model
         if self._callback.fdel is not None:
             weakref.finalize(self, self._callback.fdel)
+
+        if not is_independent and dependency_string is not None:
+            # Stay independent until ``resolve_pending_dependencies()`` runs.
+            self._pending_dependency_string = dependency_string
+            self._pending_dependency_map_serializer_ids = dependency_map_serializer_ids or {}
+            self._pending_dependency_map_descriptors = dependency_map_descriptors or {}
+            self._pending_desired_unit = desired_unit
 
         # Create additional fitting elements
         self._initial_scalar = copy.deepcopy(self._scalar)
@@ -922,10 +936,19 @@ class Parameter(DescriptorNumber):
 
             # Convert dependency_map to use serializer_ids
             raw_dict['_dependency_map_serializer_ids'] = {}
+            loose_descriptors = {}
             for key, obj in self._dependency_map.items():
                 raw_dict['_dependency_map_serializer_ids'][key] = (
                     obj._DescriptorNumber__serializer_id
                 )
+                if not isinstance(obj, Parameter):
+                    # A plain DescriptorNumber in a dependency map is usually a
+                    # constant created for the expression (``total - (a + b)``)
+                    # that belongs to no model object, so nothing else will
+                    # serialize it. Embed it so the dependency can be rebuilt.
+                    loose_descriptors[key] = obj.as_dict(skip=['unique_name'])
+            if loose_descriptors:
+                raw_dict['_dependency_map_descriptors'] = loose_descriptors
 
         return raw_dict
 
@@ -1002,6 +1025,7 @@ class Parameter(DescriptorNumber):
         raw_dict = obj_dict.copy()  # Don't modify the original dict
         dependency_string = raw_dict.pop('_dependency_string', None)
         dependency_map_serializer_ids = raw_dict.pop('_dependency_map_serializer_ids', None)
+        dependency_map_descriptors = raw_dict.pop('_dependency_map_descriptors', None)
         is_independent = raw_dict.pop('_independent', True)
         desired_unit = raw_dict.pop('_desired_unit', None)
         # Note: Keep _serializer_id in the dict so it gets passed to __init__
@@ -1013,6 +1037,7 @@ class Parameter(DescriptorNumber):
         if not is_independent:
             param._pending_dependency_string = dependency_string
             param._pending_dependency_map_serializer_ids = dependency_map_serializer_ids
+            param._pending_dependency_map_descriptors = dependency_map_descriptors or {}
             # Keep parameter as independent initially - will be made dependent after all objects are loaded
             param._independent = True
             param._pending_desired_unit = desired_unit
@@ -1435,9 +1460,13 @@ class Parameter(DescriptorNumber):
             if hasattr(self, '_pending_dependency_map_serializer_ids'):
                 dependency_map_serializer_ids = self._pending_dependency_map_serializer_ids
 
+                embedded = getattr(self, '_pending_dependency_map_descriptors', None) or {}
                 # Build dependency_map by looking up objects by serializer_id
                 for key, serializer_id in dependency_map_serializer_ids.items():
                     dep_obj = self._find_parameter_by_serializer_id(serializer_id)
+                    if dep_obj is None and key in embedded:
+                        # Object-less constant that was embedded at save time.
+                        dep_obj = DescriptorNumber.from_dict(dict(embedded[key]))
                     if dep_obj is not None:
                         dependency_map[key] = dep_obj
                     else:
@@ -1459,6 +1488,8 @@ class Parameter(DescriptorNumber):
             delattr(self, '_pending_dependency_string')
             delattr(self, '_pending_dependency_map_serializer_ids')
             delattr(self, '_pending_desired_unit')
+            if hasattr(self, '_pending_dependency_map_descriptors'):
+                delattr(self, '_pending_dependency_map_descriptors')
 
     def _find_parameter_by_serializer_id(self, serializer_id: str) -> Optional['DescriptorNumber']:
         """

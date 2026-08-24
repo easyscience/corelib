@@ -117,7 +117,7 @@ class TestBumpsFit:
         assert np.array_equal(build_args.args[1], np.asarray(1.0))
         assert np.array_equal(build_args.args[2], np.asarray(2.0))
         assert np.array_equal(build_args.args[3], np.asarray(1))
-        assert build_args.kwargs == {'parameters': None}
+        assert build_args.kwargs == {'parameters': None, 'constraints_factory': None}
         assert minimizer._eval_counter is mock_counter
         assert minimizer._cached_model is mock_model
         assert mock_FitDriver.call_args.kwargs['problem'] is mock_problem

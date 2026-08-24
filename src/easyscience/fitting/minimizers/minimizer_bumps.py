@@ -22,8 +22,10 @@ from easyscience.variable import Parameter
 
 from ..available_minimizers import AvailableMinimizers
 from .bumps_utils import BumpsProgressMonitor
+from .bumps_utils import ConstraintsFactory
 from .bumps_utils import EvalCounter
 from .bumps_utils import build_curve_problem
+from .bumps_utils import infeasible_constraints
 from .bumps_utils import parameter_names
 from .bumps_utils import parameter_snapshot
 from .bumps_utils import to_bumps_parameter
@@ -98,6 +100,7 @@ class Bumps(MinimizerBase):
         abort_test: Callable[[], bool] | None = None,
         minimizer_kwargs: dict | None = None,
         engine_kwargs: dict | None = None,
+        constraints_factory: ConstraintsFactory | None = None,
         **kwargs: Any,
     ) -> FitResults:
         """
@@ -147,6 +150,13 @@ class Bumps(MinimizerBase):
             default, None.
         engine_kwargs : dict | None, default=None
             Additional engine keyword arguments. By default, None.
+        constraints_factory : ConstraintsFactory | None, default=None
+            Optional hook producing BUMPS inequality constraints for the
+            problem; see
+            :func:`~easyscience.fitting.minimizers.bumps_utils.build_curve_problem`.
+            Only the BUMPS engine family honours it (the ``Fitter`` rejects
+            it for other engines). Not supported together with a
+            caller-supplied ``model``. By default, None.
         **kwargs : Any
             Additional keyword arguments passed to ``FitDriver``.
 
@@ -232,7 +242,13 @@ class Bumps(MinimizerBase):
             # The Curve comes back directly from the helper: do NOT read it
             # from ``problem.fitness``, which is deprecated in BUMPS and warns.
             problem, self._eval_counter, model = build_curve_problem(
-                self, x, y, weights, parameters=parameters
+                self, x, y, weights, parameters=parameters, constraints_factory=constraints_factory
+            )
+        elif constraints_factory is not None:
+            # The constraints must be built against the BUMPS parameters of the
+            # Curve, which only `build_curve_problem` assembles.
+            raise ValueError(
+                'constraints_factory is not supported together with a caller-supplied model'
             )
         else:
             # A caller-supplied model bypasses `build_curve_problem`, which is also
@@ -373,7 +389,7 @@ class Bumps(MinimizerBase):
 
         parameter_values = parameter_snapshot(problem, point)
 
-        return {
+        payload = {
             'iteration': iteration,
             'chi2': chi2,
             'reduced_chi2': reduced_chi2,
@@ -381,6 +397,19 @@ class Bumps(MinimizerBase):
             'refresh_plots': False,
             'finished': False,
         }
+        # While inequality constraints fail, BUMPS never evaluates the model
+        # and `nllf` is the 1e12 penalty plateau: the chi-squared above is
+        # meaningless. Flag it so callers can display "infeasible" instead.
+        # Only problems that carry constraints get the extra keys, so the
+        # payload stays key-compatible with the other engines otherwise.
+        if (
+            isinstance(getattr(problem, 'constraints', None), (list, tuple))
+            and problem.constraints
+        ):
+            failing = infeasible_constraints(problem, point)
+            payload['infeasible'] = bool(failing)
+            payload['failing_constraints'] = failing
+        return payload
 
     def convert_to_pars_obj(self, par_list: list[Parameter] | None = None) -> list[BumpsParameter]:
         """

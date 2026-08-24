@@ -12,6 +12,10 @@ from the minimizer.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Sequence
 
 import numpy as np
 from bumps.names import Curve
@@ -25,6 +29,11 @@ from .eval_counter import EvalCounter
 
 if TYPE_CHECKING:
     from ...engine_base import EngineBase
+
+#: Signature of the optional inequality-constraints hook: receives the
+#: ``{prefixed name: BumpsParameter}`` mapping of a freshly built problem
+#: and returns the constraint objects to attach to the ``FitProblem``.
+ConstraintsFactory = Callable[[Dict[str, BumpsParameter]], Sequence[Any]]
 
 
 def to_bumps_parameter(par: Parameter) -> BumpsParameter:
@@ -55,6 +64,7 @@ def build_curve_problem(
     y: np.ndarray,
     weights: np.ndarray,
     parameters: list[Parameter] | None = None,
+    constraints_factory: ConstraintsFactory | None = None,
 ) -> tuple[FitProblem, EvalCounter, Curve]:
     """Build a BUMPS ``FitProblem`` around an engine's wrapped fit function.
 
@@ -78,6 +88,21 @@ def build_curve_problem(
     parameters : list[Parameter] | None, default=None
         Optional explicit EasyScience parameters to bind into the model
         instead of the engine's cached parameters.
+    constraints_factory : ConstraintsFactory | None, default=None
+        Optional callable producing the BUMPS inequality constraints for
+        this problem. It receives the freshly built mapping
+        ``{PARAMETER_PREFIX + unique_name: BumpsParameter}`` of the *free*
+        parameters (fixed and dependent EasyScience parameters are not part
+        of the problem: treat them as constants, resp. expand them into
+        their free leaves) and must return a sequence of objects BUMPS can
+        evaluate through ``float()`` — typically ``bumps.parameter.Constraint``
+        instances or any object whose ``__float__`` returns ``0`` when
+        satisfied and the violation otherwise. The factory is invoked on
+        every call because BUMPS parameters are rebuilt per fit: constraint
+        operands *must* read these BUMPS parameters (the trial vector), not
+        the EasyScience parameters, which are only updated inside the model
+        evaluation and therefore lag — and freeze entirely while BUMPS skips
+        the model in the infeasible region.
 
     Returns
     -------
@@ -99,6 +124,13 @@ def build_curve_problem(
             bumps_pars[PARAMETER_PREFIX + par.unique_name] = to_bumps_parameter(par)
 
     curve = Curve(fit_func, x, y, dy=1 / weights, **bumps_pars)
+    constraints = None
+    if constraints_factory is not None:
+        if not callable(constraints_factory):
+            raise TypeError('constraints_factory must be callable')
+        constraints = list(constraints_factory(dict(bumps_pars)))
+    if constraints:
+        return FitProblem(curve, constraints=constraints), fit_func, curve
     return FitProblem(curve), fit_func, curve
 
 
@@ -140,3 +172,39 @@ def parameter_snapshot(problem: FitProblem, point: np.ndarray | None) -> dict:
     for label, value in zip(labels, values):
         snapshot[label[len(PARAMETER_PREFIX) :]] = float(value)
     return snapshot
+
+
+def infeasible_constraints(problem: FitProblem, point: np.ndarray | None = None) -> list[str]:
+    """Return the names of the problem's inequality constraints violated at ``point``.
+
+    Parameters
+    ----------
+    problem : FitProblem
+        A BUMPS problem built by :func:`build_curve_problem`.
+    point : np.ndarray | None
+        Parameter vector to test; when ``None`` the problem's current
+        values are used. The problem's parameters are restored afterwards.
+
+    Returns
+    -------
+    list[str]
+        ``str(constraint)`` of each failing constraint; empty when the point
+        is feasible or the problem carries no constraints. Used to flag
+        progress payloads while BUMPS is on the penalty plateau, where the
+        reported chi-squared is dominated by ``penalty_nllf`` and meaningless.
+    """
+    constraints = getattr(problem, 'constraints', None)
+    # BUMPS stores the constraints as a plain list; anything else (e.g. a test
+    # double) has no inequality constraints to evaluate.
+    if not isinstance(constraints, (list, tuple)) or not constraints:
+        return []
+    if point is None:
+        _, failing = problem.constraints_nllf()
+        return [str(item) for item in failing]
+    current = problem.getp()
+    try:
+        problem.setp(np.asarray(point, dtype=float))
+        _, failing = problem.constraints_nllf()
+    finally:
+        problem.setp(current)
+    return [str(item) for item in failing]

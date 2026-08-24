@@ -21,7 +21,9 @@ from bumps.fitters import FitDriver
 from ..engine_base import PARAMETER_PREFIX
 from ..engine_base import EngineBase
 from ..minimizers.bumps_utils import BumpsProgressMonitor
+from ..minimizers.bumps_utils import ConstraintsFactory
 from ..minimizers.bumps_utils import build_curve_problem
+from ..minimizers.bumps_utils import infeasible_constraints
 from ..minimizers.bumps_utils import parameter_names
 from ..minimizers.bumps_utils import parameter_snapshot
 from ..minimizers.bumps_utils import validate_arrays
@@ -79,6 +81,7 @@ class DreamSampler(EngineBase):
         sampler_kwargs: dict | None = None,
         progress_callback: Callable[[dict], None] | None = None,
         abort_test: Callable[[], bool] | None = None,
+        constraints_factory: ConstraintsFactory | None = None,
     ) -> dict:
         """
         Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
@@ -145,6 +148,12 @@ class DreamSampler(EngineBase):
             Optional callback that returns ``True`` to signal that
             sampling should be aborted. Called periodically during the
             DREAM sampling loop.
+        constraints_factory : ConstraintsFactory | None, default=None
+            Optional hook producing BUMPS inequality constraints for the
+            problem (see
+            :func:`~easyscience.fitting.minimizers.bumps_utils.build_curve_problem`).
+            The posterior is then penalised in the infeasible region
+            exactly as a classical BUMPS fit would be. By default, None.
 
         Returns
         -------
@@ -179,7 +188,9 @@ class DreamSampler(EngineBase):
         validate_arrays(x, y, weights, check_finite_xy=True)
 
         # Build the BUMPS Curve model around the engine's wrapped fit function
-        problem, _, _ = build_curve_problem(self, x, y, weights)
+        problem, _, _ = build_curve_problem(
+            self, x, y, weights, constraints_factory=constraints_factory
+        )
 
         pop = population
         if resume_state is not None:
@@ -369,8 +380,7 @@ class DreamSampler(EngineBase):
         # model re-evaluation, and let BUMPS apply its own chisq scaling.
         chi2 = float(problem.chisq(nllf=nllf, norm=False))
         reduced_chi2 = float(problem.chisq(nllf=nllf, norm=True))
-
-        return {
+        payload = {
             'iteration': iteration,
             'chi2': chi2,
             'reduced_chi2': reduced_chi2,
@@ -379,3 +389,13 @@ class DreamSampler(EngineBase):
             'finished': False,
             'sampling': True,
         }
+        # See `Bumps._build_progress_payload`: chi-squared is the penalty
+        # plateau while inequality constraints fail.
+        if (
+            isinstance(getattr(problem, 'constraints', None), (list, tuple))
+            and problem.constraints
+        ):
+            failing = infeasible_constraints(problem, point)
+            payload['infeasible'] = bool(failing)
+            payload['failing_constraints'] = failing
+        return payload

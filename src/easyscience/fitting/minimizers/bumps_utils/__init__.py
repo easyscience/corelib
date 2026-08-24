@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from .eval_counter import EvalCounter
+from .problem import ConstraintsFactory
 from .problem import build_curve_problem
+from .problem import infeasible_constraints
 from .problem import parameter_names
 from .problem import parameter_snapshot
 from .problem import to_bumps_parameter
@@ -12,8 +14,10 @@ from .validation import validate_run_settings
 
 __all__ = [
     'BumpsProgressMonitor',
+    'ConstraintsFactory',
     'EvalCounter',
     'build_curve_problem',
+    'infeasible_constraints',
     'parameter_names',
     'parameter_snapshot',
     'to_bumps_parameter',

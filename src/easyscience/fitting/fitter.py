@@ -301,6 +301,18 @@ class Fitter:
             )
             self._dependent_dims = dims
 
+            # Inequality constraints are a BUMPS-only feature: the penalty is part
+            # of the BUMPS `FitProblem` and is not passed to LMFit or DFO.
+            # Reject here, so LMFit/DFO don't silently ignore this constraint.
+            if kwargs.get('constraints_factory') is None:
+                # LMFit/DFO `fit` signatures do not know the keyword.
+                kwargs.pop('constraints_factory', None)
+            elif self._minimizer.package != 'bumps':
+                raise ValueError(
+                    'Inequality constraints (constraints_factory) require the BUMPS engine; '
+                    f"the selected minimizer uses '{self._minimizer.package}'."
+                )
+
             # Fit
             fit_fun_org = self._fit_function
             fit_fun_wrap = self._fit_function_wrapper(

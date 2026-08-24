@@ -6,10 +6,65 @@ from __future__ import annotations
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import MutableSequence
 
 from easyscience import global_object
 
 from .parameter import Parameter
+
+
+def _collect_parameters(obj: Any) -> List[Parameter]:
+    """
+    Recursively collect every ``Parameter`` reachable from ``obj``.
+
+    Walks dicts, lists/tuples and any ``MutableSequence`` (EasyScience
+    collections keep their items in a private ``_data`` attribute, so they
+    must be iterated rather than inspected attribute by attribute), public
+    instance attributes and public properties. Objects are visited once so
+    that parent/child back-references cannot recurse forever.
+    """
+    parameters: List[Parameter] = []
+    visited: set = set()
+
+    def _walk(item: Any) -> None:
+        if item is None or isinstance(item, (str, bytes, int, float, bool)):
+            return
+        key = id(item)
+        if key in visited:
+            return
+        visited.add(key)
+
+        if isinstance(item, Parameter):
+            parameters.append(item)
+        elif isinstance(item, dict):
+            for value in item.values():
+                _walk(value)
+        elif isinstance(item, (list, tuple, MutableSequence)):
+            for element in item:
+                _walk(element)
+        elif hasattr(item, '__dict__'):
+            # Check instance attributes
+            for attr_name, attr_value in item.__dict__.items():
+                if not attr_name.startswith('_'):  # Skip private attributes
+                    _walk(attr_value)
+
+            # Check class properties (descriptors like Parameter instances)
+            for attr_name in dir(type(item)):
+                if not attr_name.startswith('_'):  # Skip private attributes
+                    class_attr = getattr(type(item), attr_name, None)
+                    if isinstance(class_attr, property):
+                        try:
+                            attr_value = getattr(item, attr_name)
+                            _walk(attr_value)
+                        except (AttributeError, Exception):
+                            global_object.log.getLogger('variable.dependencies').debug(
+                                "Error accessing property '%s' of %s", attr_name, item
+                            )
+                            # Skip properties that can't be accessed
+                            continue
+
+    _walk(obj)
+    return parameters
 
 
 def resolve_all_parameter_dependencies(obj: Any) -> None:
@@ -32,41 +87,7 @@ def resolve_all_parameter_dependencies(obj: Any) -> None:
     ValueError
         If one or more pending dependencies cannot be resolved.
     """
-
-    def _collect_parameters(item: Any, parameters: List[Parameter]) -> None:
-        """Recursively collect all Parameter objects from an item."""
-        if isinstance(item, Parameter):
-            parameters.append(item)
-        elif isinstance(item, dict):
-            for value in item.values():
-                _collect_parameters(value, parameters)
-        elif isinstance(item, (list, tuple)):
-            for element in item:
-                _collect_parameters(element, parameters)
-        elif hasattr(item, '__dict__'):
-            # Check instance attributes
-            for attr_name, attr_value in item.__dict__.items():
-                if not attr_name.startswith('_'):  # Skip private attributes
-                    _collect_parameters(attr_value, parameters)
-
-            # Check class properties (descriptors like Parameter instances)
-            for attr_name in dir(type(item)):
-                if not attr_name.startswith('_'):  # Skip private attributes
-                    class_attr = getattr(type(item), attr_name, None)
-                    if isinstance(class_attr, property):
-                        try:
-                            attr_value = getattr(item, attr_name)
-                            _collect_parameters(attr_value, parameters)
-                        except (AttributeError, Exception):
-                            global_object.log.getLogger('variable.dependencies').debug(
-                                "Error accessing property '%s' of %s", attr_name, item
-                            )
-                            # Skip properties that can't be accessed
-                            continue
-
-    # Collect all parameters
-    all_parameters = []
-    _collect_parameters(obj, all_parameters)
+    all_parameters = _collect_parameters(obj)
 
     # Resolve dependencies for all parameters that have pending dependencies
     resolved_count = 0
@@ -114,45 +135,7 @@ def get_parameters_with_pending_dependencies(obj: Any) -> List[Parameter]:
     List[Parameter]
         List of Parameters with pending dependencies.
     """
-    parameters_with_pending = []
-
-    def _collect_pending_parameters(item: Any) -> None:
-        """
-        Recursively collect all Parameter objects with pending
-        dependencies.
-        """
-        if isinstance(item, Parameter):
-            if hasattr(item, '_pending_dependency_string'):
-                parameters_with_pending.append(item)
-        elif isinstance(item, dict):
-            for value in item.values():
-                _collect_pending_parameters(value)
-        elif isinstance(item, (list, tuple)):
-            for element in item:
-                _collect_pending_parameters(element)
-        elif hasattr(item, '__dict__'):
-            # Check instance attributes
-            for attr_name, attr_value in item.__dict__.items():
-                if not attr_name.startswith('_'):  # Skip private attributes
-                    _collect_pending_parameters(attr_value)
-
-            # Check class properties (descriptors like Parameter instances)
-            for attr_name in dir(type(item)):
-                if not attr_name.startswith('_'):  # Skip private attributes
-                    class_attr = getattr(type(item), attr_name, None)
-                    if isinstance(class_attr, property):
-                        try:
-                            attr_value = getattr(item, attr_name)
-                            _collect_pending_parameters(attr_value)
-                        except (AttributeError, Exception):
-                            global_object.log.getLogger('variable.dependencies').debug(
-                                "Error accessing property '%s' of %s", attr_name, item
-                            )
-                            # Skip properties that can't be accessed
-                            continue
-
-    _collect_pending_parameters(obj)
-    return parameters_with_pending
+    return [p for p in _collect_parameters(obj) if hasattr(p, '_pending_dependency_string')]
 
 
 def deserialize_and_resolve_parameters(

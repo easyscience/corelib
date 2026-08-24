@@ -444,6 +444,14 @@ class SerializerBase:
                 kk: self._recursive_encoder(vv, skip, encoder, full_encode, **kwargs)
                 for kk, vv in obj.items()
             }
+        if getattr(obj, '_encode_with_as_dict', False) and not full_encode:
+            # Objects that opt in (``DescriptorNumber`` and subclasses) carry
+            # state that only their own ``as_dict`` emits — e.g. a
+            # ``Parameter``'s dependency expression and the serializer ids
+            # used to rebuild it on load. Going straight to
+            # ``_convert_to_dict`` here would silently drop that state for
+            # every *nested* parameter.
+            return obj.as_dict(skip=list(skip))
         if (
             hasattr(obj, 'encode') and obj.__class__.__module__ != 'builtins'
         ):  # strings have encode

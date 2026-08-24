@@ -55,6 +55,12 @@ class DescriptorNumber(DescriptorBase):
     The internal representation is a scipp scalar.
     """
 
+    # Tell ``SerializerBase._recursive_encoder`` to serialize nested instances
+    # through ``as_dict`` so the serializer id (and, for ``Parameter``, the
+    # dependency expression) is not lost when this object is a child of
+    # another object.
+    _encode_with_as_dict = True
+
     def __init__(
         self,
         name: str,
