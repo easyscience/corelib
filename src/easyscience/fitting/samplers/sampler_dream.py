@@ -1,17 +1,12 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
-"""The BUMPS DREAM MCMC engine — ``DreamSampler``.
-
-One file per sampling backend, mirroring the one-file-per-minimizer
-layout under ``fitting/minimizers/``. When a second MCMC backend
-arrives, its ``run()`` signature is formalized as a ``SamplerBase`` ABC
-and dispatched via a factory (see discussion easyscience/core#280).
-"""
+"""The BUMPS DREAM MCMC engine — ``DreamSampler``."""
 
 from __future__ import annotations
 
 import copy
 import math
+from functools import partial
 from typing import TYPE_CHECKING
 from typing import Callable
 
@@ -38,12 +33,12 @@ class DreamSampler(EngineBase):
     BUMPS DREAM MCMC engine. Runs and resumes chains for one
     ``(obj, fit_function)`` binding.
 
-    This is the minimizer-independent home of Bayesian sampling: it
+    This is the minimizer-independent location of Bayesian sampling: it
     builds its own BUMPS ``FitProblem`` via the shared ``bumps_utils``
     helpers, so sampling no longer requires the ``Fitter``'s active
-    minimizer to be BUMPS — only an installed ``bumps`` package.
+    minimizer to be BUMPS, only an installed ``bumps`` package.
 
-    ``DreamSampler`` is internal machinery; the public entry point is
+    ``DreamSampler`` is internal. The public entry point is
     :class:`easyscience.fitting.Sampler`.
     """
 
@@ -96,7 +91,7 @@ class DreamSampler(EngineBase):
         y : np.ndarray
             Flattened dependent variable array.
         weights : np.ndarray | None
-            Flattened weight array. Must not be ``None`` — sampling has
+            Flattened weight array. Must not be ``None``: sampling has
             no default weighting; a clear ``ValueError`` is raised.
         samples : int, default=10000
             Number of raw samples to draw across all chains, before thinning.
@@ -108,7 +103,7 @@ class DreamSampler(EngineBase):
             generations while ``samples`` counts raw draws, so ``burn=500``
             discards ``500 * n_chains`` raw samples.
         thin : int, default=10
-            Thinning interval — only every ``thin``-th generation is stored.
+            Thinning interval: only every ``thin``-th generation is stored.
         population : int | None, default=None
             BUMPS DREAM population count per parameter (number of parallel
             chains): BUMPS creates ``ceil(population * n_parameters)`` chains.
@@ -116,8 +111,8 @@ class DreamSampler(EngineBase):
             A BUMPS ``MCMCDraw`` state object from a previous ``run()``
             call. When provided, DREAM **continues** the saved chain
             instead of starting cold.  The population, parameter count,
-            and parameter names must match the current model — a
-            ``ValueError`` is raised otherwise.
+            and parameter names must match the current model. Otherwise, a
+            ``ValueError`` is raised.
 
             ``samples`` must be the **total** number of raw samples, not an
             increment: to extend an existing chain of ``N`` raw samples by
@@ -129,7 +124,7 @@ class DreamSampler(EngineBase):
             never re-burned.
 
             The ``population`` and ``initializer`` parameters
-            have **no effect** when ``resume_state`` is provided — they
+            have **no effect** when ``resume_state`` is provided. They
             are determined by the saved state.
 
             Resuming against *different* data is undefined behaviour (the
@@ -186,7 +181,7 @@ class DreamSampler(EngineBase):
             pop, burn = self._validate_resume_state(problem, resume_state, population, burn)
 
         # Build DREAM kwargs. Use the resolved ``pop``, not the raw
-        # ``population`` argument — on resume ``pop`` is the negative
+        # ``population`` argument. On resume ``pop`` is the negative
         # absolute chain count that reproduces the saved state's
         # population, which BUMPS requires to match.
         dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
@@ -210,10 +205,7 @@ class DreamSampler(EngineBase):
                 BumpsProgressMonitor(
                     problem,
                     progress_callback,
-                    lambda problem, iteration, point, nllf: {
-                        **self._build_sample_progress_payload(problem, iteration, point, nllf),
-                        'total_steps': _total_steps,
-                    },
+                    partial(self._build_sample_progress_payload, total_steps=_total_steps),
                 )
             )
 
@@ -235,11 +227,10 @@ class DreamSampler(EngineBase):
             fit_kwargs = {}
             if resume_state is not None:
                 # Defensive copy: BUMPS mutates the state object in-place
-                # (via MCMCDraw.resize() — see bumps/dream/core.py allocate_state)
+                # (via MCMCDraw.resize(): see bumps/dream/core.py allocate_state)
                 # during resume.  Without a copy, the caller's original state
                 # object is silently altered, making it impossible to compare
-                # pre- and post-resume state (shape mismatch).  See
-                # https://github.com/easyscience/core/pull/257
+                # pre- and post-resume state (shape mismatch).
                 fit_kwargs['fit_state'] = copy.deepcopy(resume_state)
             x_opt, fx = driver.fit(**fit_kwargs)
             result_state = getattr(driver.fitter, 'state', None)
@@ -354,16 +345,17 @@ class DreamSampler(EngineBase):
         return -int(resume_state.Npop), 0
 
     def _build_sample_progress_payload(
-        self, problem, iteration: int, point: np.ndarray, nllf: float
+        self, problem, iteration: int, point: np.ndarray, nllf: float, total_steps: int
     ) -> dict:
         """
         Build a progress payload for Bayesian DREAM sampling steps.
 
         Called by :class:`BumpsProgressMonitor` at each DREAM
-        generation. The payload includes ``sampling: True`` so
-        downstream consumers can distinguish sampling progress from
-        classical fitting progress; the remaining keys match the
-        classical-fit payload built by the minimizers.
+        generation, with ``total_steps`` bound up front by the caller.
+        The payload includes ``sampling: True`` so downstream consumers
+        can distinguish sampling progress from classical fitting
+        progress; the remaining keys match the classical-fit payload
+        built by the minimizers.
         """
         # Use the nllf already computed by the sampler to avoid a costly
         # model re-evaluation, and let BUMPS apply its own chisq scaling.
@@ -378,4 +370,5 @@ class DreamSampler(EngineBase):
             'refresh_plots': False,
             'finished': False,
             'sampling': True,
+            'total_steps': total_steps,
         }

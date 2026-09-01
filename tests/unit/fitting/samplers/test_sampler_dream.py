@@ -447,9 +447,12 @@ class TestDreamSamplerProgressPayload:
         mock_problem.labels.return_value = ['palpha']
         mock_problem.getp.return_value = np.array([1.0])
 
-        payload = engine._build_sample_progress_payload(mock_problem, 7, np.array([1.0]), 12.5)
+        payload = engine._build_sample_progress_payload(
+            mock_problem, 7, np.array([1.0]), 12.5, 100
+        )
 
         assert payload['iteration'] == 7
+        assert payload['total_steps'] == 100
         assert payload['chi2'] == 25.0
         assert payload['reduced_chi2'] == 12.5
         assert payload['parameter_values'] == {'alpha': 1.0}
@@ -469,7 +472,9 @@ class TestDreamSamplerProgressPayload:
         mock_problem.labels.return_value = ['pa']
         mock_problem.getp.return_value = np.array([5.0])
 
-        payload = engine._build_sample_progress_payload(mock_problem, 1, np.array([5.0]), nllf=5.0)
+        payload = engine._build_sample_progress_payload(
+            mock_problem, 1, np.array([5.0]), nllf=5.0, total_steps=50
+        )
 
         expected_keys = {
             'iteration',
@@ -479,5 +484,6 @@ class TestDreamSamplerProgressPayload:
             'refresh_plots',
             'finished',
             'sampling',
+            'total_steps',
         }
         assert set(payload.keys()) == expected_keys

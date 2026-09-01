@@ -4,8 +4,8 @@
 ``DreamSampler``.
 
 These are free functions rather than ``Bumps`` methods so that any
-:class:`~easyscience.fitting.engine_base.EngineBase` — a minimizer or a
-sampler — can build a BUMPS ``Curve``/``FitProblem`` without inheriting
+:class:`~easyscience.fitting.engine_base.EngineBase`: a minimizer or a
+sampler, can build a BUMPS ``Curve``/``FitProblem`` without inheriting
 from the minimizer.
 """
 
@@ -83,10 +83,9 @@ def build_curve_problem(
     -------
     tuple[FitProblem, EvalCounter, Curve]
         The assembled problem, the evaluation counter wrapping the fit
-        function (exposes ``count`` for evaluation bookkeeping), and the
-        ``Curve`` model itself. The ``Curve`` is surfaced directly
-        because ``FitProblem.fitness`` is deprecated in BUMPS (>= 1.0.4
-        it emits a ``UserWarning``) — callers must not go through it.
+        function, and the ``Curve`` model itself.
+        The ``Curve`` is returned because ``FitProblem.fitness`` is
+        deprecated in current BUMPS.
     """
     fit_func = EvalCounter(engine._generate_fit_function())
 

@@ -11,8 +11,6 @@ from typing import Tuple
 
 import numpy as np
 
-# causes circular import when Parameter is imported
-# from easyscience.base_classes import ObjBase
 from easyscience.variable import Parameter
 
 PARAMETER_PREFIX = 'p'
@@ -20,14 +18,14 @@ PARAMETER_PREFIX = 'p'
 
 class EngineBase(metaclass=ABCMeta):
     """
-    Base for all evaluation engines — minimizers and samplers alike.
+    Base for all evaluation engines: minimizers and samplers.
 
     An engine binds an EasyScience object and a fit function, and
     repeatedly evaluates the function while writing values back into the
-    object's ``Parameter`` instances. ``EngineBase`` owns that shared
-    machinery: the parameter cache, the ``Parameter``-writing wrapped
+    object's ``Parameter`` instances. ``EngineBase`` owns this shared
+    system: the parameter cache, the ``Parameter``-writing wrapped
     fit function, and value restore on failure. It deliberately declares
-    no abstract methods: the run interfaces live on its subclasses
+    no abstract methods: the interfaces are defined on its subclasses
     (``MinimizerBase.fit``, ``DreamSampler.run``).
     """
 
@@ -35,9 +33,9 @@ class EngineBase(metaclass=ABCMeta):
 
     def __init__(
         self,
-        obj,  #: ObjBase,
+        obj,
         fit_function: Callable,
-    ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
+    ):
         self._object = obj
         self._original_fit_function = fit_function
         self._cached_pars: Dict[str, Parameter] = {}

@@ -45,9 +45,9 @@ def validate_arrays(
     """Validate the (x, y, weights) arrays for a BUMPS problem.
 
     Checks shape agreement between the three arrays, finiteness and
-    strict positivity of the weights, and — when ``check_finite_xy`` is
-    ``True`` — finiteness of x and y. Sampling passes ``True``; the
-    classical fit path passes ``False`` to keep its historically more
+    strict positivity of the weights, and (when ``check_finite_xy`` is
+    ``True``) finiteness of x and y. Sampling passes ``True``; the
+    standard fit path passes ``False`` to keep its historically more
     permissive behaviour.
 
     Parameters

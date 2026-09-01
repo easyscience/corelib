@@ -37,8 +37,6 @@ if TYPE_CHECKING:
     from bumps.fitters import FitBase
 
 # 'pt' (parallel tempering) is considered experimental and is not exposed.
-# Filtered with a comprehension rather than ``list.remove()`` so that importing
-# this module does not raise if a future BUMPS release drops the id.
 FIT_AVAILABLE_IDS_FILTERED = [fit_id for fit_id in FIT_AVAILABLE_IDS if fit_id != 'pt']
 
 
@@ -130,9 +128,9 @@ class Bumps(MinimizerBase):
             by the selected BUMPS fitter (``fitclass.settings``) is
             used. By default, None.
         progress_callback : Callable[[dict], None] | None, default=None
-            Optional callback for progress updates. The payload field
+            Optional callback for progress updates. The field
             ``iteration`` carries the BUMPS optimizer step index. The
-            return value is ignored — use ``abort_test`` to stop a
+            return value is ignored: use ``abort_test`` to stop a
             running fit. By default, None.
         abort_test : Callable[[], bool] | None, default=None
             Optional callback that returns ``True`` to signal that the
@@ -155,7 +153,7 @@ class Bumps(MinimizerBase):
         FitResults
             Fit results. ``FitResults.iterations`` is the number of BUMPS
             *optimizer steps* consumed (the last reported step index plus
-            one), which is what ``max_evaluations`` budgets against; it is
+            one), which is what ``max_evaluations`` tests against; it is
             not comparable to LMFit's ``nfev`` or DFO-LS' ``nf``. The
             objective-call count is reported separately as
             ``FitResults.n_evaluations``, which is the cross-backend
@@ -198,15 +196,10 @@ class Bumps(MinimizerBase):
         # the results would carry the previous fit's objective-call count.
         self._eval_counter = None
 
-        # Resolve BUMPS-native defaults so the budget reported back to the caller (and
-        # used by the budget-exhaustion check in `_gen_fit_results`) reflects the values
-        # actually consumed by the fitter, even when the caller passes None.
-        #
         # Only values the caller supplied explicitly are pushed back into
         # `minimizer_kwargs`. BUMPS pairs an independent `ftol`/`xtol` default per
         # fitter (`newton` combines ftol=1e-6 with xtol=1e-12, `amoeba` ftol=1e-8 with
-        # xtol=1e-6), so collapsing them onto a single resolved value would silently
-        # tighten the fitter's own convergence criteria on the default path.
+        # xtol=1e-6).
         fitter_settings = dict(fitclass.settings)
 
         if max_evaluations is not None:
@@ -229,8 +222,7 @@ class Bumps(MinimizerBase):
             tolerance = min(tols) if tols else None
 
         if model is None:
-            # The Curve comes back directly from the helper: do NOT read it
-            # from ``problem.fitness``, which is deprecated in BUMPS and warns.
+            # The Curve comes back directly from the helper.
             problem, self._eval_counter, model = build_curve_problem(
                 self, x, y, weights, parameters=parameters
             )
@@ -440,7 +432,7 @@ class Bumps(MinimizerBase):
             Whether the undo stack was enabled.
         par_names : list[str]
             Cached-parameter names in BUMPS problem order, already
-            stripped of ``MINIMIZER_PARAMETER_PREFIX`` — see
+            stripped of ``MINIMIZER_PARAMETER_PREFIX``. As seen in
             :func:`~easyscience.fitting.minimizers.bumps_utils.parameter_names`.
         """
         from easyscience import global_object
