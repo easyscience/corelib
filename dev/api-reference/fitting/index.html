@@ -2435,7 +2435,7 @@ hooks.</p>
             <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;EngineBase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fit_function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt; (&lt;code&gt;easyscience.fitting.engine_base.EngineBase&lt;/code&gt;)" href="#easyscience.fitting.engine_base.EngineBase">EngineBase</a></code></td>
             <td>
               <div class="doc-md-description">
-                <p>Base for all evaluation engines — minimizers and samplers alike.</p>
+                <p>Base for all evaluation engines: minimizers and samplers.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -2475,13 +2475,13 @@ hooks.</p>
 
 
 
-        <p>Base for all evaluation engines — minimizers and samplers alike.</p>
+        <p>Base for all evaluation engines: minimizers and samplers.</p>
 <p>An engine binds an EasyScience object and a fit function, and
 repeatedly evaluates the function while writing values back into the
-object's <code>Parameter</code> instances. <code>EngineBase</code> owns that shared
-machinery: the parameter cache, the <code>Parameter</code>-writing wrapped
+object's <code>Parameter</code> instances. <code>EngineBase</code> owns this shared
+system: the parameter cache, the <code>Parameter</code>-writing wrapped
 fit function, and value restore on failure. It deliberately declares
-no abstract methods: the run interfaces live on its subclasses
+no abstract methods: the interfaces are defined on its subclasses
 (<code>MinimizerBase.fit</code>, <code>DreamSampler.run</code>).</p>
 <!-- prettier-ignore-start -->
 
@@ -4103,10 +4103,9 @@ instead of the engine's cached parameters.</p>
             <td>
               <div class="doc-md-description">
                 <p>The assembled problem, the evaluation counter wrapping the fit
-function (exposes <code>count</code> for evaluation bookkeeping), and the
-<code>Curve</code> model itself. The <code>Curve</code> is surfaced directly
-because <code>FitProblem.fitness</code> is deprecated in BUMPS (&gt;= 1.0.4
-it emits a <code>UserWarning</code>) — callers must not go through it.</p>
+function, and the <code>Curve</code> model itself.
+The <code>Curve</code> is returned because <code>FitProblem.fitness</code> is
+deprecated in current BUMPS.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -4398,9 +4397,9 @@ values (<code>problem.getp()</code>) are used.</p>
 
         <p>Validate the (x, y, weights) arrays for a BUMPS problem.</p>
 <p>Checks shape agreement between the three arrays, finiteness and
-strict positivity of the weights, and — when <code>check_finite_xy</code> is
-<code>True</code> — finiteness of x and y. Sampling passes <code>True</code>; the
-classical fit path passes <code>False</code> to keep its historically more
+strict positivity of the weights, and (when <code>check_finite_xy</code> is
+<code>True</code>) finiteness of x and y. Sampling passes <code>True</code>; the
+standard fit path passes <code>False</code> to keep its historically more
 permissive behaviour.</p>
 <!-- prettier-ignore-start -->
 
@@ -4790,8 +4789,8 @@ for cross-backend consistency with LMFit (<code>nfev</code>) and DFO-LS
         <p>BUMPS problem construction shared by the <code>Bumps</code> minimizer and
 <code>DreamSampler</code>.</p>
 <p>These are free functions rather than <code>Bumps</code> methods so that any
-:class:<code>~easyscience.fitting.engine_base.EngineBase</code> — a minimizer or a
-sampler — can build a BUMPS <code>Curve</code>/<code>FitProblem</code> without inheriting
+:class:<code>~easyscience.fitting.engine_base.EngineBase</code>: a minimizer or a
+sampler, can build a BUMPS <code>Curve</code>/<code>FitProblem</code> without inheriting
 from the minimizer.</p>
 <!-- prettier-ignore-start -->
 
@@ -5111,10 +5110,9 @@ instead of the engine's cached parameters.</p>
             <td>
               <div class="doc-md-description">
                 <p>The assembled problem, the evaluation counter wrapping the fit
-function (exposes <code>count</code> for evaluation bookkeeping), and the
-<code>Curve</code> model itself. The <code>Curve</code> is surfaced directly
-because <code>FitProblem.fitness</code> is deprecated in BUMPS (&gt;= 1.0.4
-it emits a <code>UserWarning</code>) — callers must not go through it.</p>
+function, and the <code>Curve</code> model itself.
+The <code>Curve</code> is returned because <code>FitProblem.fitness</code> is
+deprecated in current BUMPS.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -5654,9 +5652,9 @@ in one place.</p>
 
         <p>Validate the (x, y, weights) arrays for a BUMPS problem.</p>
 <p>Checks shape agreement between the three arrays, finiteness and
-strict positivity of the weights, and — when <code>check_finite_xy</code> is
-<code>True</code> — finiteness of x and y. Sampling passes <code>True</code>; the
-classical fit path passes <code>False</code> to keep its historically more
+strict positivity of the weights, and (when <code>check_finite_xy</code> is
+<code>True</code>) finiteness of x and y. Sampling passes <code>True</code>; the
+standard fit path passes <code>False</code> to keep its historically more
 permissive behaviour.</p>
 <!-- prettier-ignore-start -->
 
@@ -7087,9 +7085,9 @@ used. By default, None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional callback for progress updates. The payload field
+                <p>Optional callback for progress updates. The field
 <code>iteration</code> carries the BUMPS optimizer step index. The
-return value is ignored — use <code>abort_test</code> to stop a
+return value is ignored: use <code>abort_test</code> to stop a
 running fit. By default, None.</p>
 <!-- prettier-ignore-start -->
 
@@ -7204,7 +7202,7 @@ default, None.</p>
               <div class="doc-md-description">
                 <p>Fit results. <code>FitResults.iterations</code> is the number of BUMPS
 <em>optimizer steps</em> consumed (the last reported step index plus
-one), which is what <code>max_evaluations</code> budgets against; it is
+one), which is what <code>max_evaluations</code> tests against; it is
 not comparable to LMFit's <code>nfev</code> or DFO-LS' <code>nf</code>. The
 objective-call count is reported separately as
 <code>FitResults.n_evaluations</code>, which is the cross-backend
@@ -12306,11 +12304,11 @@ neither sidecar nor labels yielded them), and the raw sidecar dict
 
         <p>BUMPS DREAM MCMC engine. Runs and resumes chains for one
 <code>(obj, fit_function)</code> binding.</p>
-<p>This is the minimizer-independent home of Bayesian sampling: it
+<p>This is the minimizer-independent location of Bayesian sampling: it
 builds its own BUMPS <code>FitProblem</code> via the shared <code>bumps_utils</code>
 helpers, so sampling no longer requires the <code>Fitter</code>'s active
-minimizer to be BUMPS — only an installed <code>bumps</code> package.</p>
-<p><code>DreamSampler</code> is internal machinery; the public entry point is
+minimizer to be BUMPS, only an installed <code>bumps</code> package.</p>
+<p><code>DreamSampler</code> is internal. The public entry point is
 :class:<code>easyscience.fitting.Sampler</code>.</p>
 <!-- prettier-ignore-start -->
 
@@ -12660,7 +12658,7 @@ after flattening its bound data.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Flattened weight array. Must not be <code>None</code> — sampling has
+                <p>Flattened weight array. Must not be <code>None</code>: sampling has
 no default weighting; a clear <code>ValueError</code> is raised.</p>
 <!-- prettier-ignore-start -->
 
@@ -12723,7 +12721,7 @@ discards <code>500 * n_chains</code> raw samples.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Thinning interval — only every <code>thin</code>-th generation is stored.</p>
+                <p>Thinning interval: only every <code>thin</code>-th generation is stored.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -12765,8 +12763,8 @@ chains): BUMPS creates <code>ceil(population * n_parameters)</code> chains.</p>
                 <p>A BUMPS <code>MCMCDraw</code> state object from a previous <code>run()</code>
 call. When provided, DREAM <strong>continues</strong> the saved chain
 instead of starting cold.  The population, parameter count,
-and parameter names must match the current model — a
-<code>ValueError</code> is raised otherwise.</p>
+and parameter names must match the current model. Otherwise, a
+<code>ValueError</code> is raised.</p>
 <p><code>samples</code> must be the <strong>total</strong> number of raw samples, not an
 increment: to extend an existing chain of <code>N</code> raw samples by
 <code>M</code>, pass <code>samples=N + M</code> (DREAM keeps only the last
@@ -12775,7 +12773,7 @@ computes this for you.</p>
 <p><code>burn</code> is forced to 0 on resume: a previously-converged chain is
 never re-burned.</p>
 <p>The <code>population</code> and <code>initializer</code> parameters
-have <strong>no effect</strong> when <code>resume_state</code> is provided — they
+have <strong>no effect</strong> when <code>resume_state</code> is provided. They
 are determined by the saved state.</p>
 <p>Resuming against <em>different</em> data is undefined behaviour (the
 chain's likelihood changes underneath it).</p>
@@ -12965,10 +12963,6 @@ names/order, or population mismatch).</p>
     <div class="doc doc-contents ">
 
         <p>The BUMPS DREAM MCMC engine — <code>DreamSampler</code>.</p>
-<p>One file per sampling backend, mirroring the one-file-per-minimizer
-layout under <code>fitting/minimizers/</code>. When a second MCMC backend
-arrives, its <code>run()</code> signature is formalized as a <code>SamplerBase</code> ABC
-and dispatched via a factory (see discussion easyscience/core#280).</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13037,11 +13031,11 @@ and dispatched via a factory (see discussion easyscience/core#280).</p>
 
         <p>BUMPS DREAM MCMC engine. Runs and resumes chains for one
 <code>(obj, fit_function)</code> binding.</p>
-<p>This is the minimizer-independent home of Bayesian sampling: it
+<p>This is the minimizer-independent location of Bayesian sampling: it
 builds its own BUMPS <code>FitProblem</code> via the shared <code>bumps_utils</code>
 helpers, so sampling no longer requires the <code>Fitter</code>'s active
-minimizer to be BUMPS — only an installed <code>bumps</code> package.</p>
-<p><code>DreamSampler</code> is internal machinery; the public entry point is
+minimizer to be BUMPS, only an installed <code>bumps</code> package.</p>
+<p><code>DreamSampler</code> is internal. The public entry point is
 :class:<code>easyscience.fitting.Sampler</code>.</p>
 <!-- prettier-ignore-start -->
 
@@ -13242,7 +13236,7 @@ after flattening its bound data.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Flattened weight array. Must not be <code>None</code> — sampling has
+                <p>Flattened weight array. Must not be <code>None</code>: sampling has
 no default weighting; a clear <code>ValueError</code> is raised.</p>
 <!-- prettier-ignore-start -->
 
@@ -13305,7 +13299,7 @@ discards <code>500 * n_chains</code> raw samples.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Thinning interval — only every <code>thin</code>-th generation is stored.</p>
+                <p>Thinning interval: only every <code>thin</code>-th generation is stored.</p>
 <!-- prettier-ignore-start -->
 
 <!-- prettier-ignore-end -->
@@ -13347,8 +13341,8 @@ chains): BUMPS creates <code>ceil(population * n_parameters)</code> chains.</p>
                 <p>A BUMPS <code>MCMCDraw</code> state object from a previous <code>run()</code>
 call. When provided, DREAM <strong>continues</strong> the saved chain
 instead of starting cold.  The population, parameter count,
-and parameter names must match the current model — a
-<code>ValueError</code> is raised otherwise.</p>
+and parameter names must match the current model. Otherwise, a
+<code>ValueError</code> is raised.</p>
 <p><code>samples</code> must be the <strong>total</strong> number of raw samples, not an
 increment: to extend an existing chain of <code>N</code> raw samples by
 <code>M</code>, pass <code>samples=N + M</code> (DREAM keeps only the last
@@ -13357,7 +13351,7 @@ computes this for you.</p>
 <p><code>burn</code> is forced to 0 on resume: a previously-converged chain is
 never re-burned.</p>
 <p>The <code>population</code> and <code>initializer</code> parameters
-have <strong>no effect</strong> when <code>resume_state</code> is provided — they
+have <strong>no effect</strong> when <code>resume_state</code> is provided. They
 are determined by the saved state.</p>
 <p>Resuming against <em>different</em> data is undefined behaviour (the
 chain's likelihood changes underneath it).</p>
