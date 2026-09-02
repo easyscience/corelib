@@ -78,7 +78,7 @@ class StraightLine(ModelBase):
         return self.slope.value * x + self.intercept.value
 
 
-def check_fit_results(result, sp_sin, ref_sin, x, **kwargs):
+def check_fit_results(result, sp_sin, ref_sin, x, expect_error=True, **kwargs):
     assert result.n_pars == len(sp_sin.get_fit_parameters())
     assert result.chi2 == pytest.approx(0, abs=1.5e-3 * (len(result.x) - result.n_pars))
     assert result.reduced_chi2 == pytest.approx(0, abs=1.5e-3)
@@ -91,9 +91,13 @@ def check_fit_results(result, sp_sin, ref_sin, x, **kwargs):
             assert result.p0[key] == pytest.approx(value)  # Bumps does something strange here
     assert np.all(result.x == x)
     for item1, item2 in zip(sp_sin._kwargs.values(), ref_sin._kwargs.values()):
-        # Methods without error bars (e.g. lmfit's gradient-free powell/cobyla)
-        # report error as None rather than a fake 0.0.
-        assert item1.error is None or item1.error == pytest.approx(0, abs=2.1e-1)
+        # Gradient-free methods (e.g. lmfit's powell/cobyla) have no covariance
+        # matrix, so they report error as None rather than a fake 0.0. Every
+        # other method must still produce a real uncertainty.
+        if expect_error:
+            assert item1.error == pytest.approx(0, abs=2.1e-1)
+        else:
+            assert item1.error is None
         assert item1.value == pytest.approx(item2.value, abs=5e-3)
     y_calc_ref = ref_sin(x)
     assert result.y_calc == pytest.approx(y_calc_ref, abs=1e-2)
@@ -331,7 +335,9 @@ def test_lmfit_methods(fit_method):
     f = Fitter(sp_sin, sp_sin)
     assert fit_method in f._minimizer.supported_methods()
     result = f.fit(x, y, weights=weights, method=fit_method)
-    check_fit_results(result, sp_sin, ref_sin, x)
+    check_fit_results(
+        result, sp_sin, ref_sin, x, expect_error=fit_method not in ('powell', 'cobyla')
+    )
 
 
 # @pytest.mark.xfail(reason="known bumps issue")
@@ -410,7 +416,12 @@ def test_dependent_parameter(fit_engine):
             pytest.skip(reason=f'{fit_engine} is not installed')
 
     result = f.fit(x, y, weights=weights)
-    check_fit_results(result, sp_sin, ref_sin, x)
+    # With `offset` dependent on `phase` only one parameter varies against
+    # noiseless data, so lmfit's covariance is exactly [[0.]] and it reports
+    # `errorbars=False` -> no uncertainties.
+    check_fit_results(
+        result, sp_sin, ref_sin, x, expect_error=fit_engine is not AvailableMinimizers.LMFit
+    )
 
 
 @pytest.mark.fast

@@ -247,7 +247,7 @@ class LMFit(MinimizerBase):  # noqa: S101
         # so it decides which tolerance keyword the backend accepts.
         effective_method = method if method is not None else self._method
         if tolerance is not None:
-            if effective_method in [None, 'least_squares', 'leastsq']:
+            if effective_method in ['least_squares', 'leastsq']:
                 minimizer_kwargs['ftol'] = tolerance
             if effective_method in ['differential_evolution', 'powell', 'cobyla']:
                 minimizer_kwargs['tol'] = tolerance
