@@ -242,10 +242,14 @@ class LMFit(MinimizerBase):  # noqa: S101
     ) -> dict[str:str]:
         if minimizer_kwargs is None:
             minimizer_kwargs = {}
+        # `method` is usually None, because `Fitter.fit`
+        # does not pass one; the minimizer's own method is what actually runs,
+        # so it decides which tolerance keyword the backend accepts.
+        effective_method = method if method is not None else self._method
         if tolerance is not None:
-            if method in [None, 'least_squares', 'leastsq']:
+            if effective_method in [None, 'least_squares', 'leastsq']:
                 minimizer_kwargs['ftol'] = tolerance
-            if method in ['differential_evolution', 'powell', 'cobyla']:
+            if effective_method in ['differential_evolution', 'powell', 'cobyla']:
                 minimizer_kwargs['tol'] = tolerance
         return minimizer_kwargs
 
@@ -371,7 +375,11 @@ class LMFit(MinimizerBase):  # noqa: S101
             if fit_result.errorbars:
                 pars[name].error = fit_result.params[MINIMIZER_PARAMETER_PREFIX + str(name)].stderr
             else:
-                pars[name].error = 0.0
+                # No covariance available (gradient-free method, aborted fit, or a
+                # parameter at a bound). None keeps that distinguishable from a
+                # genuine zero uncertainty and clears any stale error from a
+                # previous fit.
+                pars[name].error = None
         if stack_status:
             global_object.stack.endMacro()
 

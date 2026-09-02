@@ -91,8 +91,9 @@ def check_fit_results(result, sp_sin, ref_sin, x, **kwargs):
             assert result.p0[key] == pytest.approx(value)  # Bumps does something strange here
     assert np.all(result.x == x)
     for item1, item2 in zip(sp_sin._kwargs.values(), ref_sin._kwargs.values()):
-        # assert item.error > 0 % This does not work as some methods don't calculate error
-        assert item1.error == pytest.approx(0, abs=2.1e-1)
+        # Methods without error bars (e.g. lmfit's gradient-free powell/cobyla)
+        # report error as None rather than a fake 0.0.
+        assert item1.error is None or item1.error == pytest.approx(0, abs=2.1e-1)
         assert item1.value == pytest.approx(item2.value, abs=5e-3)
     y_calc_ref = ref_sin(x)
     assert result.y_calc == pytest.approx(y_calc_ref, abs=1e-2)

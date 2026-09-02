@@ -517,9 +517,9 @@ class TestLMFit:
 
         # Expect
         assert minimizer._cached_pars['a'].value == 1.0
-        assert minimizer._cached_pars['a'].error == 0.0
+        assert minimizer._cached_pars['a'].error is None
         assert minimizer._cached_pars['b'].value == 2.0
-        assert minimizer._cached_pars['b'].error == 0.0
+        assert minimizer._cached_pars['b'].error is None
 
     def test_gen_fit_results(self, minimizer: LMFit, monkeypatch) -> None:
         # When
