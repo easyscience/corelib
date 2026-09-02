@@ -212,6 +212,48 @@ class TestLMFit:
         )
         assert callable(mock_model.fit.call_args.kwargs['iter_cb'])
 
+    @pytest.mark.parametrize(
+        'minimizer_method, passed_method, expected',
+        [
+            ('leastsq', None, {'ftol': 0.1}),
+            ('least_squares', None, {'ftol': 0.1}),
+            ('powell', None, {'tol': 0.1}),
+            ('differential_evolution', None, {'tol': 0.1}),
+            ('cobyla', None, {'tol': 0.1}),
+            ('leastsq', 'powell', {'tol': 0.1}),
+            ('powell', 'leastsq', {'ftol': 0.1}),
+            ('nelder', None, {}),
+        ],
+        ids=[
+            'leastsq',
+            'least_squares',
+            'powell',
+            'differential_evolution',
+            'cobyla',
+            'explicit_method_overrides',
+            'explicit_leastsq_overrides',
+            'unmapped_method',
+        ],
+    )
+    def test_get_fit_kws_tolerance(
+        self, minimizer: LMFit, minimizer_method, passed_method, expected
+    ) -> None:
+        # When
+        minimizer._method = minimizer_method
+
+        # Then
+        fit_kws = minimizer._get_fit_kws(passed_method, 0.1, None)
+
+        # Expect
+        assert fit_kws == expected
+
+    def test_get_fit_kws_no_tolerance(self, minimizer: LMFit) -> None:
+        # When Then
+        fit_kws = minimizer._get_fit_kws(None, None, {'existing': 'kwarg'})
+
+        # Expect
+        assert fit_kws == {'existing': 'kwarg'}
+
     def test_fit_progress_callback(self, minimizer: LMFit) -> None:
         # When
         progress_callback = MagicMock(return_value=True)
