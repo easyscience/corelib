@@ -3,19 +3,18 @@
 
 from __future__ import annotations
 
-import copy
-import math
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import cast
 
 import numpy as np
 from bumps.fitters import FIT_AVAILABLE_IDS
 from bumps.fitters import FITTERS
 from bumps.fitters import FitDriver
-from bumps.names import Curve
 from bumps.names import FitProblem
 from bumps.parameter import Parameter as BumpsParameter
+from scipy.optimize import OptimizeResult
 
 # causes circular import when Parameter is imported
 # from easyscience.base_classes import ObjBase
@@ -24,17 +23,21 @@ from easyscience.variable import Parameter
 from ..available_minimizers import AvailableMinimizers
 from .bumps_utils import BumpsProgressMonitor
 from .bumps_utils import EvalCounter
+from .bumps_utils import build_curve_problem
+from .bumps_utils import parameter_names
+from .bumps_utils import parameter_snapshot
+from .bumps_utils import to_bumps_parameter
+from .bumps_utils import validate_arrays
 from .minimizer_base import MINIMIZER_PARAMETER_PREFIX
 from .minimizer_base import MinimizerBase
 from .utils import FitError
 from .utils import FitResults
 
 if TYPE_CHECKING:
-    from bumps.dream.state import MCMCDraw
+    from bumps.fitters import FitBase
 
-FIT_AVAILABLE_IDS_FILTERED = copy.copy(FIT_AVAILABLE_IDS)
-# Considered experimental
-FIT_AVAILABLE_IDS_FILTERED.remove('pt')
+# 'pt' (parallel tempering) is considered experimental and is not exposed.
+FIT_AVAILABLE_IDS_FILTERED = [fit_id for fit_id in FIT_AVAILABLE_IDS if fit_id != 'pt']
 
 
 class Bumps(MinimizerBase):
@@ -48,10 +51,10 @@ class Bumps(MinimizerBase):
 
     def __init__(
         self,
-        obj: object,  #: ObjBase,
+        obj: object,
         fit_function: Callable,
         minimizer_enum: AvailableMinimizers | None = None,
-    ):  # todo after constraint changes, add type hint: obj: ObjBase  # noqa: E501
+    ):
         """
         Initialize the fitting engine.
 
@@ -70,7 +73,8 @@ class Bumps(MinimizerBase):
 
     @staticmethod
     def all_methods() -> list[str]:
-        return FIT_AVAILABLE_IDS_FILTERED
+        # Copy so callers cannot mutate the module-level list in place.
+        return list(FIT_AVAILABLE_IDS_FILTERED)
 
     @staticmethod
     def supported_methods() -> list[str]:
@@ -88,7 +92,7 @@ class Bumps(MinimizerBase):
         method: str | None = None,
         tolerance: float | None = None,
         max_evaluations: int | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
+        progress_callback: Callable[[dict], None] | None = None,
         abort_test: Callable[[], bool] | None = None,
         minimizer_kwargs: dict | None = None,
         engine_kwargs: dict | None = None,
@@ -106,9 +110,14 @@ class Bumps(MinimizerBase):
         weights : np.ndarray
             Weights for supplied measured points.
         model : Callable | None, default=None
-            Optional Model which is being fitted to. By default, None.
+            Optional BUMPS ``Curve`` which is being fitted to. When
+            omitted, one is built from ``fit_function`` and the object's
+            fit parameters. A supplied ``Curve`` must expose ``pars``,
+            ``x``, ``y`` and ``dy``, since the results are assembled from
+            them. By default, None.
         parameters : list[Parameter] | None, default=None
-            Optional parameters for the fit. By default, None.
+            Optional parameters for the fit. Ignored when ``model`` is
+            supplied. By default, None.
         method : str | None, default=None
             Method for minimization. By default, None.
         tolerance : float | None, default=None
@@ -118,17 +127,22 @@ class Bumps(MinimizerBase):
             ``steps`` parameter. If ``None``, the default value defined
             by the selected BUMPS fitter (``fitclass.settings``) is
             used. By default, None.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            Optional callback for progress updates. The payload field
-            ``iteration`` carries the BUMPS optimizer step index. By
-            default, None.
+        progress_callback : Callable[[dict], None] | None, default=None
+            Optional callback for progress updates. The field
+            ``iteration`` carries the BUMPS optimizer step index. The
+            return value is ignored: use ``abort_test`` to stop a
+            running fit. By default, None.
         abort_test : Callable[[], bool] | None, default=None
             Optional callback that returns ``True`` to signal that the
             fit should be aborted.  Called periodically during the BUMPS
-            optimizer iteration loop.
+            optimizer iteration loop, and once more after the optimizer
+            returns in order to distinguish an aborted fit from a
+            converged one, so it must be side-effect free. An aborted fit
+            returns ``FitResults(success=False)`` rather than raising.
         minimizer_kwargs : dict | None, default=None
             Additional keyword arguments passed to the BUMPS minimizer.
-            By default, None.
+            The mapping is copied before use, so it is never mutated. By
+            default, None.
         engine_kwargs : dict | None, default=None
             Additional engine keyword arguments. By default, None.
         **kwargs : Any
@@ -137,74 +151,96 @@ class Bumps(MinimizerBase):
         Returns
         -------
         FitResults
-            Fit results.
+            Fit results. ``FitResults.iterations`` is the number of BUMPS
+            *optimizer steps* consumed (the last reported step index plus
+            one), which is what ``max_evaluations`` tests against; it is
+            not comparable to LMFit's ``nfev`` or DFO-LS' ``nf``. The
+            objective-call count is reported separately as
+            ``FitResults.n_evaluations``, which is the cross-backend
+            consistent figure. Note that BUMPS derives the step index from
+            whatever the selected fitter reports to its monitors, so the
+            granularity of a "step" varies between fitters.
 
         Raises
         ------
         FitError
-            If the BUMPS fit fails.
+            If the BUMPS fit raises. A fit that merely fails to converge
+            is reported as ``FitResults(success=False)`` instead.
         ValueError
-            If the input shapes or weights are invalid.
+            If the input shapes or weights are invalid, or if
+            ``progress_callback`` is not callable.
         """
         method_dict = self._get_method_kwargs(method)
 
         x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
 
-        if y.shape != x.shape:
-            raise ValueError('x and y must have the same shape.')
+        validate_arrays(x, y, weights, check_finite_xy=False)
 
-        if weights.shape != x.shape:
-            raise ValueError('Weights must have the same shape as x and y.')
-
-        if not np.isfinite(weights).all():
-            raise ValueError('Weights cannot be NaN or infinite.')
-
-        if (weights <= 0).any():
-            raise ValueError('Weights must be strictly positive and non-zero.')
+        if progress_callback is not None and not callable(progress_callback):
+            raise ValueError('progress_callback must be callable')
 
         if engine_kwargs is None:
             engine_kwargs = {}
 
-        if minimizer_kwargs is None:
-            minimizer_kwargs = {}
+        # Copy rather than mutate: `ftol`/`xtol`/`steps` are injected below, and a
+        # caller reusing the same mapping for a second fit would otherwise silently
+        # inherit the settings resolved for the first one.
+        minimizer_kwargs = {} if minimizer_kwargs is None else dict(minimizer_kwargs)
         minimizer_kwargs.update(engine_kwargs)
 
         method_str = method_dict.get('method', self._method)
         fitclass = self._resolve_fitclass(method_str)
 
-        # Resolve BUMPS-native defaults so the budget reported back to the caller (and
-        # used by the budget-exhaustion check in `_gen_fit_results`) reflects the values
-        # actually consumed by the fitter, even when the caller passes None.
+        # Reset the per-fit evaluation counter. A caller-supplied `model` bypasses
+        # `build_curve_problem`, which is what installs the counter, so without this
+        # the results would carry the previous fit's objective-call count.
+        self._eval_counter = None
+
+        # Only values the caller supplied explicitly are pushed back into
+        # `minimizer_kwargs`. BUMPS pairs an independent `ftol`/`xtol` default per
+        # fitter (`newton` combines ftol=1e-6 with xtol=1e-12, `amoeba` ftol=1e-8 with
+        # xtol=1e-6).
         fitter_settings = dict(fitclass.settings)
-        if max_evaluations is None:
+
+        if max_evaluations is not None:
+            minimizer_kwargs['steps'] = max_evaluations
+        else:
             max_evaluations = fitter_settings.get('steps')
-        if tolerance is None:
-            ftol = fitter_settings.get('ftol')
-            xtol = fitter_settings.get('xtol')
-            tols = [t for t in (ftol, xtol) if t is not None]
-            tolerance = min(tols) if tols else None
 
         if tolerance is not None:
             minimizer_kwargs['ftol'] = tolerance  # tolerance for change in function value
             minimizer_kwargs['xtol'] = (
                 tolerance  # tolerance for change in parameter value, could be an independent value
             )
-        if max_evaluations is not None:
-            minimizer_kwargs['steps'] = max_evaluations
+        else:
+            # Report the stricter of the two BUMPS defaults; nothing is written back.
+            tols = [
+                t
+                for t in (fitter_settings.get('ftol'), fitter_settings.get('xtol'))
+                if t is not None
+            ]
+            tolerance = min(tols) if tols else None
 
         if model is None:
-            model_function = self._make_model(parameters=parameters)
-            model = model_function(x, y, weights)
+            # The Curve comes back directly from the helper.
+            problem, self._eval_counter, model = build_curve_problem(
+                self, x, y, weights, parameters=parameters
+            )
+        else:
+            # A caller-supplied model bypasses `build_curve_problem`, which is also
+            # what populates the parameter cache that `_p_0`,
+            # `_set_parameter_fit_result` and `_gen_fit_results` all read. Build the
+            # wrapped fit function here purely for that side effect, so the cache
+            # describes the current object rather than being empty or left over from
+            # an earlier fit.
+            self._fit_function = self._generate_fit_function()
+            problem = FitProblem(model)
         self._cached_model = model
 
         self._p_0 = {f'p{key}': self._cached_pars[key].value for key in self._cached_pars.keys()}
 
-        problem = FitProblem(model)
-
         monitors = []
         if progress_callback is not None:
-            if not callable(progress_callback):
-                raise ValueError('progress_callback must be callable')
             monitors.append(
                 BumpsProgressMonitor(problem, progress_callback, self._build_progress_payload)
             )
@@ -229,25 +265,55 @@ class Bumps(MinimizerBase):
             # Drive the fit through the local FitDriver instance so the supplied
             # `monitors` (including the optional progress callback monitor) are
             # invoked. `bumps.fitters.fit` constructs its own driver.
-            x, fx = driver.fit()
-            from scipy.optimize import OptimizeResult
+            #
+            # Named `best_x` rather than `x` so the caller's independent-variable
+            # array stays intact for the rest of the method.
+            best_x, fx = driver.fit()
+
+            # BUMPS signals a failed optimization by returning `None` in place of a
+            # parameter vector (e.g. Levenberg-Marquardt landing on non-finite
+            # values); `FitDriver.fit` skips `problem.setp` in that case. Poll
+            # `abort_test` once more to tell a user-cancelled run apart from a
+            # converged one, since BUMPS stops quietly either way.
+            if best_x is None:
+                success = False
+                message = 'BUMPS returned no solution; the fit did not converge'
+            elif abort_test is not None and abort_test():
+                success = False
+                message = 'Fit aborted before convergence'
+            else:
+                success = True
+                message = 'successful termination'
 
             # BUMPS' `MonitorRunner.history.step` is populated by the driver itself
             # (independently of any user-supplied monitors) and exposes the canonical
-            # last-step index reached by the fitter, so we use it as `nit`.
-            history_step = getattr(getattr(driver, 'monitor_runner', None), 'history', None)
-            nit_value = int(history_step.step[0]) if history_step is not None else None
+            # last-step index reached by the fitter, so we use it as `nit`. `Trace`
+            # indexes into an internal list, so an empty trace raises `IndexError`
+            # rather than returning a default — that happens when the fit is aborted
+            # before the fitter reports its first step.
+            history = getattr(getattr(driver, 'monitor_runner', None), 'history', None)
+            step_trace = getattr(history, 'step', None)
+            nit_value = int(step_trace[0]) if step_trace is not None and len(step_trace) else None
+
             model_results = OptimizeResult(
-                x=x,
-                dx=driver.stderr(),
+                # `driver.stderr()` derives the errors from the covariance at the
+                # solution, so it cannot be evaluated without one.
+                x=best_x,
+                dx=driver.stderr() if best_x is not None else None,
                 fun=fx,
-                success=True,
-                status=0,
-                message='successful termination',
+                success=success,
+                status=0 if success else 1,
+                message=message,
                 nit=nit_value,
             )
             model_results.state = driver.fitter.state
-            self._set_parameter_fit_result(model_results, stack_status, problem._parameters)
+
+            if best_x is None:
+                self._restore_parameter_values()
+            else:
+                self._set_parameter_fit_result(
+                    model_results, stack_status, parameter_names(problem)
+                )
             results = self._gen_fit_results(
                 model_results,
                 max_evaluations=max_evaluations,
@@ -255,27 +321,49 @@ class Bumps(MinimizerBase):
             )
         except Exception as e:
             self._restore_parameter_values()
-            raise FitError(e)
+            raise FitError(e) from e
         finally:
             global_object.stack.enabled = stack_status
         return results
 
     @staticmethod
-    def _resolve_fitclass(method: str):
-        for fitclass in FITTERS:
-            if fitclass.id == method:
-                return fitclass
-        raise FitError(f'Unknown BUMPS fitting method: {method}')
+    def _resolve_fitclass(method: str) -> type[FitBase]:
+        """
+        Look up the BUMPS fitter class registered under ``method``.
+
+        Parameters
+        ----------
+        method : str
+            A BUMPS fitter id, e.g. ``'amoeba'``.
+
+        Returns
+        -------
+        type[FitBase]
+            The matching BUMPS fitter class.
+
+        Raises
+        ------
+        FitError
+            If no registered fitter carries that id.
+        """
+        # Built per call rather than cached at import time so that fitters
+        # registered into `FITTERS` after import are still resolvable.
+        fitclass = {fitclass.id: fitclass for fitclass in FITTERS}.get(method)
+        if fitclass is None:
+            raise FitError(f'Unknown BUMPS fitting method: {method}')
+        # BUMPS annotates `FITTERS` as `List[FitBase]`, but it holds the fitter
+        # *classes* — `FitDriver` instantiates them as `self.fitclass(problem)`.
+        return cast('type[FitBase]', fitclass)
 
     def _build_progress_payload(
-        self, problem, iteration: int, point: np.ndarray, nllf: float
+        self, problem: FitProblem, iteration: int, point: np.ndarray, nllf: float
     ) -> dict:
         # Use the nllf already computed by the fitter to avoid a costly
         # model re-evaluation, and let BUMPS apply its own chisq scaling.
         chi2 = float(problem.chisq(nllf=nllf, norm=False))
         reduced_chi2 = float(problem.chisq(nllf=nllf, norm=True))
 
-        parameter_values = self._current_parameter_snapshot(problem, point)
+        parameter_values = parameter_snapshot(problem, point)
 
         return {
             'iteration': iteration,
@@ -285,15 +373,6 @@ class Bumps(MinimizerBase):
             'refresh_plots': False,
             'finished': False,
         }
-
-    def _current_parameter_snapshot(self, problem, point: np.ndarray) -> dict:
-        labels = problem.labels()
-        values = problem.getp() if point is None else point
-        snapshot = {}
-        for label, value in zip(labels, values):
-            dict_name = label[len(MINIMIZER_PARAMETER_PREFIX) :]
-            snapshot[dict_name] = float(value)
-        return snapshot
 
     def convert_to_pars_obj(self, par_list: list[Parameter] | None = None) -> list[BumpsParameter]:
         """
@@ -314,10 +393,9 @@ class Bumps(MinimizerBase):
         if par_list is None:
             # Assume that we have a ObjBase for which we can obtain a list
             par_list = self._object.get_fit_parameters()
-        pars_obj = [self.__class__.convert_to_par_object(obj) for obj in par_list]
+        pars_obj = [self.convert_to_par_object(obj) for obj in par_list]
         return pars_obj
 
-    # For some reason I have to double staticmethod :-/
     @staticmethod
     def convert_to_par_object(obj: Parameter) -> BumpsParameter:
         """
@@ -334,386 +412,13 @@ class Bumps(MinimizerBase):
         BumpsParameter
             Bumps Parameter compatible object.
         """
-
-        value = obj.value
-
-        return BumpsParameter(
-            name=MINIMIZER_PARAMETER_PREFIX + obj.unique_name,
-            value=value,
-            bounds=[obj.min, obj.max],
-            fixed=obj.fixed,
-        )
-
-    def _make_model(self, parameters: list[BumpsParameter] | None = None) -> Callable:
-        """
-        Generate a bumps model from the supplied ``fit_function`` and
-        parameters in the base object. Note that this makes a callable
-        as it needs to be initialized with *x*, *y*, *weights*
-
-        Weights are converted to dy (standard deviation of y).
-
-        Parameters
-        ----------
-        parameters : list[BumpsParameter] | None, default=None
-            Optional BUMPS parameters to bind into the model.
-
-        Returns
-        -------
-        Callable
-            Callable to make a bumps Curve model.
-        """
-        fit_func = EvalCounter(self._generate_fit_function())
-        self._eval_counter = fit_func
-
-        def _outer(obj):
-
-            def _make_func(x, y, weights):
-                bumps_pars = {}
-                if not parameters:
-                    for name, par in obj._cached_pars.items():
-                        bumps_pars[MINIMIZER_PARAMETER_PREFIX + str(name)] = (
-                            obj.convert_to_par_object(par)
-                        )
-                else:
-                    for par in parameters:
-                        bumps_pars[MINIMIZER_PARAMETER_PREFIX + par.unique_name] = (
-                            obj.convert_to_par_object(par)
-                        )
-                return Curve(fit_func, x, y, dy=1 / weights, **bumps_pars)
-
-            return _make_func
-
-        return _outer(self)
-
-    def mcmc_sample(
-        self,
-        x: np.ndarray,
-        y: np.ndarray,
-        weights: np.ndarray,
-        samples: int = 10000,
-        burn: int = 2000,
-        thin: int = 10,
-        population: int | None = None,
-        resume_state: MCMCDraw | None = None,
-        sampler_kwargs: dict | None = None,
-        progress_callback: Callable[[dict], bool | None] | None = None,
-        abort_test: Callable[[], bool] | None = None,
-    ) -> dict:
-        """
-        Run Bayesian MCMC sampling using the BUMPS DREAM sampler.
-
-        Builds a BUMPS ``FitProblem`` from the current model and runs
-        the DREAM sampler.  This is the public minimizer-level entry
-        point for Bayesian sampling; the higher-level
-        ``MultiFitter.mcmc_sample`` delegates to this method after
-        flattening multi-dataset arrays.
-
-        Parameters
-        ----------
-        x : np.ndarray
-            Flattened independent variable array.
-        y : np.ndarray
-            Flattened dependent variable array.
-        weights : np.ndarray
-            Flattened weight array.
-        samples : int, default=10000
-            Number of raw samples to draw across all chains, before thinning.
-            A guaranteed minimum, not an exact count: DREAM advances in
-            blocks of 10 generations (one generation = one draw per chain)
-            and stops at the first block boundary at or past ``samples``.
-        burn : int, default=2000
-            Burn-in generations to discard. BUMPS counts ``burn`` in
-            generations while ``samples`` counts raw draws, so ``burn=500``
-            discards ``500 * n_chains`` raw samples.
-        thin : int, default=10
-            Thinning interval — only every ``thin``-th generation is stored.
-        population : int | None, default=None
-            BUMPS DREAM population count per parameter (number of parallel
-            chains): BUMPS creates ``ceil(population * n_parameters)`` chains.
-        resume_state : MCMCDraw | None, default=None
-            A BUMPS ``MCMCDraw`` state object from a previous
-            ``mcmc_sample()`` call (e.g. ``PosteriorResults.sampler_state``).
-            When provided, DREAM **continues** the saved chain instead of
-            starting cold.  The population, parameter count, and parameter
-            names must match the current model — a ``ValueError`` is raised
-            otherwise.
-
-            ``samples`` must be the **total** number of raw samples, not an
-            increment: to extend an existing chain of ``N`` raw samples by
-            ``M``, pass ``samples=N + M`` (DREAM keeps only the last
-            ``samples`` draws in its buffer). The `Sampler.extend` helper
-            computes this for you.
-
-            ``burn`` is forced to 0 on resume: a previously-converged chain is
-            never re-burned.
-
-            The ``population`` and ``initializer`` parameters
-            have **no effect** when ``resume_state`` is provided — they
-            are determined by the saved state.
-
-            Resuming against *different* data is undefined behaviour (the
-            chain's likelihood changes underneath it).
-        sampler_kwargs : dict | None, default=None
-            Additional keyword arguments forwarded to
-            ``bumps.fitters.fit``.
-        progress_callback : Callable[[dict], bool | None] | None, default=None
-            Optional callback for progress updates during sampling.  The
-            payload dict includes ``iteration`` (DREAM generation
-            number) and ``sampling: True``.
-        abort_test : Callable[[], bool] | None, default=None
-            Optional callback that returns ``True`` to signal that
-            sampling should be aborted. Called periodically during the
-            DREAM sampling loop.
-
-        Returns
-        -------
-        dict
-            Dictionary with keys ``'draws'``, ``'param_names'``,
-            ``'internal_bumps_object'``, and ``'logp'``.
-
-        Raises
-        ------
-        ValueError
-            If the input shapes or weights are invalid, if
-            ``progress_callback`` is not callable, or if ``resume_state``
-            is incompatible with the current model (parameter count,
-            names/order, or population mismatch).
-        FitError
-            If DREAM sampling was aborted by the user (via
-            ``abort_test``).
-        Exception
-            Re-raised from DREAM fitting if any unexpected error occurs
-            (parameter values are restored beforehand).
-        """
-        from bumps.fitters import DreamFit
-        from bumps.names import FitProblem
-
-        x, y, weights = np.asarray(x), np.asarray(y), np.asarray(weights)
-
-        if not isinstance(samples, int) or samples <= 0:
-            raise ValueError('samples must be a positive integer.')
-        if not isinstance(burn, int) or burn < 0:
-            raise ValueError('burn must be a non-negative integer.')
-        if not isinstance(thin, int) or thin < 1:
-            raise ValueError('thin must be a positive integer.')
-
-        if y.shape != x.shape:
-            raise ValueError('x and y must have the same shape.')
-
-        if not np.isfinite(x).all():
-            raise ValueError('x cannot contain NaN or infinite values.')
-        if not np.isfinite(y).all():
-            raise ValueError('y cannot contain NaN or infinite values.')
-
-        if weights.shape != x.shape:
-            raise ValueError('Weights must have the same shape as x and y.')
-
-        if not np.isfinite(weights).all():
-            raise ValueError('Weights cannot be NaN or infinite.')
-
-        if (weights <= 0).any():
-            raise ValueError('Weights must be strictly positive and non-zero.')
-
-        # Build the BUMPS Curve model using the minimizer's existing machinery
-        model_func = self._make_model()
-        curve = model_func(x, y, weights)
-        problem = FitProblem(curve)
-
-        pop = population
-        if resume_state is not None:
-            pop, burn = self._validate_resume_state(problem, resume_state, population, burn)
-
-        # Build DREAM kwargs. Use the resolved ``pop``, not the raw
-        # ``population`` argument — on resume ``pop`` is the negative
-        # absolute chain count that reproduces the saved state's
-        # population, which BUMPS requires to match.
-        dream_kwargs: dict = {'samples': samples, 'burn': burn, 'thin': thin}
-        if pop is not None:
-            dream_kwargs['pop'] = pop
-        if sampler_kwargs:
-            dream_kwargs.update(sampler_kwargs)
-
-        # Build monitors (same pattern as classical Bumps.fit())
-        monitors = []
-        if progress_callback is not None:
-            if not callable(progress_callback):
-                raise ValueError('progress_callback must be callable')
-            # Compute total DREAM steps for progress display (burn + sampling generations).
-            # BUMPS DREAM default population count is 10 when not specified by the user.
-            # A negative ``pop`` (resume) is an absolute chain count.
-            _dream_default_pop = 10
-            pop_val = abs(pop) if pop is not None else _dream_default_pop
-            _total_steps = burn + (samples + pop_val - 1) // pop_val
-            monitors.append(
-                BumpsProgressMonitor(
-                    problem,
-                    progress_callback,
-                    lambda problem, iteration, point, nllf: {
-                        **self._build_sample_progress_payload(problem, iteration, point, nllf),
-                        'total_steps': _total_steps,
-                    },
-                )
-            )
-
-        driver = FitDriver(
-            fitclass=DreamFit,
-            problem=problem,
-            monitors=monitors,
-            abort_test=abort_test if abort_test is not None else (lambda: False),
-            **dream_kwargs,
-        )
-        driver.clip()
-
-        from easyscience import global_object
-
-        stack_status = global_object.stack.enabled
-        global_object.stack.enabled = False
-
-        try:
-            fit_kwargs = {}
-            if resume_state is not None:
-                # Defensive copy: BUMPS mutates the state object in-place
-                # (via MCMCDraw.resize() — see bumps/dream/core.py allocate_state)
-                # during resume.  Without a copy, the caller's original state
-                # object is silently altered, making it impossible to compare
-                # pre- and post-resume state (shape mismatch).  See
-                # https://github.com/easyscience/core/pull/257
-                fit_kwargs['fit_state'] = copy.deepcopy(resume_state)
-            x_opt, fx = driver.fit(**fit_kwargs)
-            result_state = getattr(driver.fitter, 'state', None)
-            if result_state is None:
-                raise FitError('Sampling aborted by user')
-        except Exception:
-            self._restore_parameter_values()
-            raise
-        finally:
-            global_object.stack.enabled = stack_status
-
-        _draw = result_state.draw()
-        draws = _draw.points
-        param_names = [p.name[len(MINIMIZER_PARAMETER_PREFIX) :] for p in problem._parameters]
-        logp = _draw.logp
-
-        return {
-            'draws': draws,
-            'param_names': param_names,
-            'internal_bumps_object': result_state,
-            'logp': logp,
-        }
-
-    def _validate_resume_state(
-        self,
-        problem: FitProblem,
-        resume_state: MCMCDraw,
-        population: int | None,
-        burn: int,
-    ) -> tuple[int, int]:
-        """Check that ``resume_state`` is compatible with ``problem`` and
-        resolve the population and burn values to use when resuming.
-
-        Parameters
-        ----------
-        problem : FitProblem
-            The freshly built BUMPS ``FitProblem`` for the current model.
-        resume_state : MCMCDraw
-            The saved chain state to resume from.
-        population : int | None
-            The caller-supplied population scale factor, or ``None``.
-        burn : int
-            The caller-supplied burn-in, ignored (with a warning) on resume.
-
-        Returns
-        -------
-        tuple[int, int]
-            ``(population, burn)`` to pass to DREAM. The population is
-            returned as a **negative** number, which BUMPS'
-            ``initpop.generate`` reads as an absolute chain count, exactly
-            reproducing the saved state's population. ``burn`` is always 0:
-            a previously converged chain is never re-burned.
-
-        Raises
-        ------
-        ValueError
-            If ``resume_state`` is incompatible with the current model
-            (parameter count, names/order, or population mismatch).
-        """
-        from easyscience import global_object
-
-        logger = global_object.log.getLogger('fitting.bumps')
-
-        # Parameter count
-        n_params = len(problem._parameters)
-        if n_params != resume_state.Nvar:
-            raise ValueError(
-                f'resume_state has {resume_state.Nvar} parameters but the current '
-                f'model has {n_params}. The model must have the same '
-                f'number of fitted parameters as when the saved chain was created.'
-            )
-
-        prefix = MINIMIZER_PARAMETER_PREFIX
-        fresh_names = [(p.name or '')[len(prefix) :] for p in problem._parameters]
-        state_labels = list(resume_state.labels)
-        if state_labels and all(lbl.startswith(prefix) for lbl in state_labels):
-            state_names = [lbl[len(prefix) :] for lbl in state_labels]
-            if fresh_names != state_names:
-                raise ValueError(
-                    f'Parameter names/order mismatch between the current model '
-                    f'and resume_state.\n'
-                    f'  Current model : {fresh_names}\n'
-                    f'  resume_state  : {state_names}'
-                )
-        else:
-            logger.warning(
-                'resume_state does not carry parameter names (it was most '
-                'likely reloaded from disk, where BUMPS does not preserve '
-                'labels). Parameter-name validation is skipped; the saved '
-                'chain is matched to the current model by parameter order. '
-                'Ensure this is the same model, with parameters in the same '
-                'order, used to create the chain.'
-            )
-
-        # Population. BUMPS creates ``ceil(population * n_params)`` chains
-        # and requires the resumed state's chain count to match.
-        if population is not None:
-            expected_npop = math.ceil(population * n_params)
-            if expected_npop != resume_state.Npop:
-                raise ValueError(
-                    f'Requested population ({population}) would produce '
-                    f'{expected_npop} chains but the saved state has '
-                    f'{resume_state.Npop} chains. The population cannot '
-                    f'be changed on resume.'
-                )
-        if burn > 0:
-            logger.warning(
-                f'burn={burn} ignored on resume: a previously converged '
-                f'chain is not re-burned. Forcing burn=0.'
-            )
-
-        # A negative ``pop`` is read by ``bumps.initpop.generate`` as an
-        # absolute chain count, exactly reproducing the saved population
-        # without having to recover the original scale factor.
-        return -int(resume_state.Npop), 0
-
-    def _build_sample_progress_payload(
-        self, problem, iteration: int, point: np.ndarray, nllf: float
-    ) -> dict:
-        """
-        Build a progress payload for Bayesian DREAM sampling steps.
-
-        Called by :class:`BumpsProgressMonitor` at each DREAM
-        generation. The payload includes ``sampling: True`` so
-        downstream consumers can distinguish sampling progress from
-        classical fitting progress.
-        """
-        payload = self._build_progress_payload(problem, iteration, point, nllf)
-        payload['sampling'] = True
-        return payload
+        return to_bumps_parameter(obj)
 
     def _set_parameter_fit_result(
         self,
         fit_result: Any,
         stack_status: bool,
-        par_list: list[BumpsParameter],
+        par_names: list[str],
     ) -> None:
         """
         Update parameters to their final values and assign a std error
@@ -725,24 +430,28 @@ class Bumps(MinimizerBase):
             BUMPS OptimizeResult containing best-fit values and errors.
         stack_status : bool
             Whether the undo stack was enabled.
-        par_list : list[BumpsParameter]
-            List of BUMPS parameter objects.
+        par_names : list[str]
+            Cached-parameter names in BUMPS problem order, already
+            stripped of ``MINIMIZER_PARAMETER_PREFIX``. As seen in
+            :func:`~easyscience.fitting.minimizers.bumps_utils.parameter_names`.
         """
         from easyscience import global_object
 
         pars = self._cached_pars
         x_result = np.asarray(fit_result.x)
-        stderr = np.asarray(fit_result.dx)
+        # Some BUMPS fitters cannot produce a covariance and hand back no errors;
+        # report those parameters as having no uncertainty rather than failing,
+        # matching what the LMFit minimizer does when `errorbars` is False.
+        stderr = None if fit_result.dx is None else np.asarray(fit_result.dx)
 
         if stack_status:
             self._restore_parameter_values()
             global_object.stack.enabled = True
             global_object.stack.beginMacro('Fitting routine')
 
-        for index, name in enumerate([par.name for par in par_list]):
-            dict_name = name[len(MINIMIZER_PARAMETER_PREFIX) :]
-            pars[dict_name].value = x_result[index]
-            pars[dict_name].error = stderr[index]
+        for index, name in enumerate(par_names):
+            pars[name].value = x_result[index]
+            pars[name].error = 0.0 if stderr is None else stderr[index]
         if stack_status:
             global_object.stack.endMacro()
 
@@ -774,8 +483,10 @@ class Bumps(MinimizerBase):
         """
         results = FitResults()
 
+        # `hasattr`, not a truthiness test: every `FitResults` field starts out
+        # falsy, so testing the current value would silently discard every kwarg.
         for name, value in kwargs.items():
-            if getattr(results, name, False):
+            if hasattr(results, name):
                 setattr(results, name, value)
         n_evaluations = None if self._eval_counter is None else self._eval_counter.count
         # BUMPS exposes `nit` as the last reported optimizer step index rather than the
@@ -808,34 +519,35 @@ class Bumps(MinimizerBase):
         results.p = item
         results.x = self._cached_model.x
         results.y_obs = self._cached_model.y
+        # Costs one extra model evaluation beyond those the optimizer consumed, and
+        # deliberately so: it runs through the uncounted `self._fit_function`, keeping
+        # `n_evaluations` a faithful count of optimizer-driven objective calls.
         results.y_calc = self.evaluate(results.x, minimizer_parameters=results.p)
         results.y_err = self._cached_model.dy
         results.n_evaluations = n_evaluations
         results.iterations = n_steps_used
-        results.message = ''
+        # A successful fit carries no message; anything else reports why it stopped.
+        results.message = (
+            '' if fit_results.success else (getattr(fit_results, 'message', '') or '')
+        )
+
         if stopped_on_budget:
+            from easyscience import global_object
+
             results.message = (
                 f'Fit stopped: reached maximum optimizer steps ({max_evaluations}); '
                 f'objective evaluated {n_evaluations} times'
             )
-        if stopped_on_budget:
-            from easyscience import global_object
-
             if tolerance is None:
-                global_object.log.getLogger('fitting.bumps').warning(
-                    f'Fit did not converge within the maximum optimizer steps of {max_evaluations} '
-                    f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
-                )
+                reason = 'Fit did not converge within'
             else:
-                global_object.log.getLogger('fitting.bumps').warning(
-                    f'Fit did not reach the desired tolerance of {tolerance} within the maximum optimizer steps of {max_evaluations} '
-                    f'({n_evaluations} objective evaluations). '
-                    'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
-                )
+                reason = f'Fit did not reach the desired tolerance of {tolerance} within'
+            global_object.log.getLogger('fitting.bumps').warning(
+                f'{reason} the maximum optimizer steps of {max_evaluations} '
+                f'({n_evaluations} objective evaluations). '
+                'Consider increasing the maximum number of evaluations or adjusting the tolerance.'
+            )
 
-        # results.residual = results.y_obs - results.y_calc
-        # results.goodness_of_fit = np.sum(results.residual**2)
         results.minimizer_engine = self.__class__
         results.fit_args = None
         results.engine_result = fit_results

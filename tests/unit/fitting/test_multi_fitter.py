@@ -143,6 +143,33 @@ class TestPostComputeReshaping:
 
 
 # ===================================================================
+# MultiFitter._fit_function_wrapper
+# ===================================================================
+
+
+class TestFitFunctionWrapper:
+    def test_fit_function_restored_with_multiple_datasets(self):
+        """Wrapping must not leave ``fit_function`` pointing at the last
+        dataset's function (regression: sampling on a 2+ dataset MultiFitter
+        silently swapped the user-visible fit function)."""
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+        mf = MultiFitter(fit_objects, fit_objects)
+        original = mf.fit_function
+        assert original is fit_objects[0]
+
+        x = [np.array([0.0, 1.0, 2.0]), np.array([0.0, 1.0])]
+        mf._dependent_dims = [(3,), (2,)]
+        wrapped = mf._fit_function_wrapper(x, flatten=True)
+
+        assert mf.fit_function is original
+
+        # Each wrapped section still evaluates its own dataset's function.
+        y = wrapped(np.zeros(5))
+        expected = np.hstack([fit_objects[0](x[0]), fit_objects[1](x[1])])
+        assert np.allclose(y, expected)
+
+
+# ===================================================================
 # MultiFitter._precompute_reshaping with weights=None
 # ===================================================================
 
