@@ -12,7 +12,6 @@ from typing import Optional
 from easyscience import global_object
 from easyscience.base_classes.new_base import NewBase
 from easyscience.global_object.undo_redo import property_stack
-from easyscience.io.serializer_base import SerializerBase
 
 
 class DescriptorBase(NewBase, metaclass=abc.ABCMeta):
@@ -249,34 +248,9 @@ class DescriptorBase(NewBase, metaclass=abc.ABCMeta):
     def __repr__(self) -> str:
         """Return printable representation of the object."""
 
-    def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        """
-        Convert a descriptor into a full dictionary using
-        ``SerializerBase``s generic ``convert_to_dict`` method.
-
-        Unlike ``NewBase.to_dict`` neither ``unique_name`` nor
-        ``display_name`` is dropped when it was not supplied
-        explicitly.
-
-        Parameters
-        ----------
-        skip : Optional[List[str]], default=None
-            List of field names as strings to skip when forming the
-            dictionary. By default, None.
-
-        Returns
-        -------
-        Dict[str, Any]
-            Encoded object containing all information to
-            get back the descriptor.
-        """
-        if skip is None:
-            skip = []
-        return SerializerBase()._convert_to_dict(self, skip=skip, full_encode=False)
-
     def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
         """
-        Alias of ``to_dict``, kept for backwards compatibility.
+        Alias of ``NewBase.to_dict``, kept for backwards compatibility.
 
         Parameters
         ----------
