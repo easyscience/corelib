@@ -211,6 +211,9 @@ class Fitter:
         """
         Get the EasyScience object used as a model.
 
+        For a ``MultiFitter`` this is not one of the supplied fit
+        objects but a read-only, indexable and iterable aggregate.
+
         Returns
         -------
         object

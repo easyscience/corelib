@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 EasyScience contributors <https://github.com/easyscience>
 # SPDX-License-Identifier: BSD-3-Clause
 
+import logging
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -8,18 +9,47 @@ import pytest
 
 from easyscience import ObjBase
 from easyscience import Parameter
+from easyscience import global_object
+from easyscience.base_classes import EasyList
+from easyscience.base_classes import ModelBase
 from easyscience.fitting.fitter import Fitter
 from easyscience.fitting.multi_fitter import MultiFitter
 
 
-class Line(ObjBase):
+class Line(ModelBase):
+    def __init__(self, m_val: float, c_val: float):
+        super().__init__()
+        self._m = Parameter('m', m_val)
+        self._c = Parameter('c', c_val)
+
+    @property
+    def m(self) -> Parameter:
+        return self._m
+
+    @m.setter
+    def m(self, value: float) -> None:
+        self._m.value = value
+
+    @property
+    def c(self) -> Parameter:
+        return self._c
+
+    @c.setter
+    def c(self, value: float) -> None:
+        self._c.value = value
+
+    def __call__(self, x):
+        return self.m.value * x + self.c.value
+
+
+class LegacyLine(ObjBase):
+    """Deprecated-hierarchy model; no longer accepted by MultiFitter."""
+
     m: Parameter
     c: Parameter
 
     def __init__(self, m_val: float, c_val: float):
-        m = Parameter('m', m_val)
-        c = Parameter('c', c_val)
-        super().__init__('line', m=m, c=c)
+        super().__init__('line', m=Parameter('m', m_val), c=Parameter('c', c_val))
 
     def __call__(self, x):
         return self.m.value * x + self.c.value
@@ -192,3 +222,102 @@ class TestPrecomputeReshaping:
 
         assert w_new is None
         assert len(dims) == 2
+
+
+# ===================================================================
+# The EasyList container replacing the deprecated CollectionBase
+# ===================================================================
+
+
+class TestFitObjectContainer:
+    def test_no_collection_base_deprecation_warning(self, caplog):
+        """Building a MultiFitter must not warn about CollectionBase.
+
+        The assertion is on message content rather than on the logger,
+        because other deprecated classes warn on the very same logger.
+        """
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+
+        with caplog.at_level(logging.WARNING, logger='easyscience'):
+            MultiFitter(fit_objects, fit_objects)
+
+        assert not [r for r in caplog.records if 'CollectionBase is deprecated' in r.message]
+
+    def test_container_is_an_easy_list(self):
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+
+        assert isinstance(MultiFitter(fit_objects, fit_objects).fit_object, EasyList)
+
+    def test_fit_objects_are_not_retyped(self):
+        """The container must not reclassify the caller's fit objects.
+
+        The old CollectionBase dummy re-typed every fit object as
+        'created_internal', hiding the caller's own objects from the
+        map's 'created' set.
+        """
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+        types_before = [global_object.map.find_type(obj) for obj in fit_objects]
+
+        MultiFitter(fit_objects, fit_objects)
+
+        assert [global_object.map.find_type(obj) for obj in fit_objects] == types_before
+        assert all('created_internal' not in types for types in types_before)
+
+    def test_sequence_contract(self):
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+        container = MultiFitter(fit_objects, fit_objects).fit_object
+
+        assert container[0] is fit_objects[0]
+        assert container[1] is fit_objects[1]
+        assert container[-1] is fit_objects[1]
+        assert list(container[0:1]) == [fit_objects[0]]
+        assert len(container) == 2
+        assert list(container) == fit_objects
+        assert fit_objects[0] in container
+        assert container[fit_objects[0].unique_name] is fit_objects[0]
+
+    def test_get_fit_parameters_concatenates_in_order(self):
+        fit_objects = [Line(1.0, 0.5), Line(2.0, 1.5)]
+        container = MultiFitter(fit_objects, fit_objects).fit_object
+
+        assert container.get_fit_parameters() == [
+            *fit_objects[0].get_fit_parameters(),
+            *fit_objects[1].get_fit_parameters(),
+        ]
+
+    def test_rejects_foreign_object(self):
+        with pytest.raises(TypeError, match='Items must be one of'):
+            MultiFitter([Line(1.0, 0.5), 'not a model'], [None, None])
+
+    def test_rejects_bare_parameter(self):
+        """CollectionBase accepted bare parameters; EasyList does not."""
+        model = Line(1.0, 0.5)
+        with pytest.raises(TypeError, match='Items must be one of'):
+            MultiFitter([model, Parameter('p', 1.0)], [model, None])
+
+    def test_flattens_nested_list(self):
+        """Nested lists are flattened, as CollectionBase did."""
+        models = [Line(1.0, 0.5), Line(2.0, 1.5)]
+
+        container = MultiFitter([models[0], [models[1]]], models).fit_object
+
+        assert list(container) == models
+
+    def test_accepts_fit_objects_as_a_tuple(self):
+        """Any sequence works, not just a list.
+
+        easyreflectometry passes its models as a tuple; a container that
+        only flattened lists wrapped the whole tuple as a single item.
+        """
+        models = (Line(1.0, 0.5), Line(2.0, 1.5))
+
+        container = MultiFitter(models, list(models)).fit_object
+
+        assert list(container) == list(models)
+
+    def test_rejects_legacy_obj_base_fit_objects(self):
+        """Support for the deprecated ObjBase hierarchy was dropped."""
+        legacy = [LegacyLine(1.0, 0.5), LegacyLine(2.0, 1.5)]
+
+        with pytest.raises(TypeError, match='Items must be one of'):
+            MultiFitter(legacy, legacy)
