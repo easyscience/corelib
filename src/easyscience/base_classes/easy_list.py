@@ -45,7 +45,10 @@ class EasyList(ModelBase, MutableSequence[ProtectedType_]):
             Initial items to add to the list.
         protected_types : list[Type[NewBase]] | Type[NewBase] | None, default=None
             Types that are allowed in the list. Can be a single NewBase
-            subclass or a list of them. If None,. By default, None.
+            subclass or a list of them. If None, any ``NewBase`` object
+            is accepted, including descriptors and parameters. Note that
+            only ``ModelBase`` items contribute to ``get_all_variables``
+            and hence to fitting. By default, None.
         unique_name : Optional[str], default=None
             Optional unique name for the list. By default, None.
         display_name : Optional[str], default=None

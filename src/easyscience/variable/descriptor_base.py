@@ -27,6 +27,22 @@ class DescriptorBase(NewBase, metaclass=abc.ABCMeta):
     A ``Descriptor`` is typically something which describes part of a
     model and is non-fittable and generally changes the state of an
     object.
+
+    ``DescriptorBase`` is a ``NewBase`` object. As such every descriptor
+    is registered in the global object map under its ``unique_name``,
+    has an optional ``display_name`` and is serialized with
+    ``to_dict``/``from_dict``. Descriptors and parameters can
+    therefore be held directly by an ``EasyList``.
+
+    Following the ``NewBase`` design, a ``unique_name`` that was
+    generated automatically is *not* written by ``to_dict``; a
+    deserialized descriptor is simply assigned a fresh one. Only a
+    ``unique_name`` passed explicitly to the constructor is serialized.
+
+    Descriptors no longer provide the ``SerializerComponent`` methods
+    ``encode``, ``decode`` and ``encode_data``. Use a serializer
+    directly instead, e.g. ``SerializerDict().encode(descriptor)`` and
+    ``SerializerDict.decode(data)``.
     """
 
     _global_object = global_object

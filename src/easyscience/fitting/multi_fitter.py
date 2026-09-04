@@ -29,6 +29,21 @@ class MultiFitter(Fitter):
         fit_objects: list | None = None,
         fit_functions: list[Callable] | None = None,
     ):
+        """
+        Set up a fitter for several models and datasets at once.
+
+        Parameters
+        ----------
+        fit_objects : list | None, default=None
+            ``ModelBase`` objects to fit, one per dataset. Any sequence
+            is accepted; each element must be a ``ModelBase`` instance.
+            By default, None.
+        fit_functions : list[Callable] | None, default=None
+            Fit functions, one per fit object and in the same order. The
+            first one is used to initialise the underlying ``Fitter``.
+            By default, None.
+
+        """
         # Aggregate the fit objects so a single object can be sent to Fitter.
         # *-unpacking keeps any sequence (list, tuple, etc) working, as the
         # old CollectionBase container did.
