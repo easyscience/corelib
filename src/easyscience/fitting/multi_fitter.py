@@ -6,6 +6,7 @@ from typing import Callable
 import numpy as np
 
 from ..base_classes import EasyList
+from ..base_classes import ModelBase
 from .fitter import Fitter
 from .minimizers import FitResults
 
@@ -31,7 +32,10 @@ class MultiFitter(Fitter):
         # Aggregate the fit objects so a single object can be sent to Fitter.
         # *-unpacking keeps any sequence (list, tuple, etc) working, as the
         # old CollectionBase container did.
-        self._fit_objects = EasyList(*fit_objects)
+        # Only ModelBase members are accepted: EasyList harvests parameters
+        # from ModelBase items alone, so any other NewBase (a bare Parameter,
+        # say) would be accepted and then silently sit out the fit.
+        self._fit_objects = EasyList(*fit_objects, protected_types=ModelBase)
         self._fit_functions = fit_functions
         # Initialize with the first of the fit_functions, without this it is
         # not possible to change the fitting engine.

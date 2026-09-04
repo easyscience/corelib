@@ -444,8 +444,8 @@ class DescriptorNumber(DescriptorBase):
         return string
         # return f"<{class_name} '{obj_name}': {obj_value:0.04f}{obj_unit}>"
 
-    def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        raw_dict = super().as_dict(skip=skip)
+    def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+        raw_dict = super().to_dict(skip=skip)
         raw_dict['value'] = self._scalar.value
         raw_dict['unit'] = str(self._scalar.unit)
         raw_dict['variance'] = self._scalar.variance

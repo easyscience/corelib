@@ -99,7 +99,7 @@ class DescriptorAnyType(DescriptorBase):
 
         return f"<{self.__class__.__name__} '{self._name}': {value_repr}>"
 
-    def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
-        raw_dict = super().as_dict(skip=skip)
+    def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+        raw_dict = super().to_dict(skip=skip)
         raw_dict['value'] = self._value
         return raw_dict

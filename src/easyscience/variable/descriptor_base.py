@@ -5,14 +5,17 @@ from __future__ import annotations
 
 import abc
 from typing import Any
+from typing import Dict
+from typing import List
 from typing import Optional
 
 from easyscience import global_object
+from easyscience.base_classes.new_base import NewBase
 from easyscience.global_object.undo_redo import property_stack
-from easyscience.io import SerializerComponent
+from easyscience.io.serializer_base import SerializerBase
 
 
-class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
+class DescriptorBase(NewBase, metaclass=abc.ABCMeta):
     """
     This is the base of all variable descriptions for models.
 
@@ -74,17 +77,14 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
             has an invalid type.
         """
 
-        if unique_name is None:
-            unique_name = global_object.generate_unique_name(self.__class__.__name__)
-        self._unique_name = unique_name
-
         if not isinstance(name, str):
             raise TypeError('Name must be a string')
-        self._name: str = name
 
-        if display_name is not None and not isinstance(display_name, str):
-            raise TypeError('Display name must be a string or None')
-        self._display_name: str = display_name
+        # Registers the descriptor with the global object map and takes
+        # care of `unique_name` and `display_name`.
+        super().__init__(unique_name=unique_name, display_name=display_name)
+
+        self._name: str = name
 
         if description is not None and not isinstance(description, str):
             raise TypeError('Description must be a string or None')
@@ -98,9 +98,7 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
             url = ''
         self._url: str = url
 
-        # Let the collective know we've been assimilated
         self._parent = parent
-        global_object.map.add_vertex(self, obj_type='created')
         # Make the connection between self and parent
         if parent is not None:
             global_object.map.add_edge(parent, self)
@@ -141,6 +139,9 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
     def display_name(self) -> str:
         """
         Get a pretty display name.
+
+        Unlike ``NewBase`` the fallback is the ``name`` of the
+        descriptor rather than its ``unique_name``.
 
         Returns
         -------
@@ -235,40 +236,6 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
         self._url = url
 
     @property
-    def unique_name(self) -> str:
-        """
-        Get the unique name of this object.
-
-        Returns
-        -------
-        str
-            Unique name of this object.
-        """
-        return self._unique_name
-
-    @unique_name.setter
-    def unique_name(self, new_unique_name: str):
-        """
-        Set a new unique name for the object.
-
-        The old name is still kept in the map.
-
-        Parameters
-        ----------
-        new_unique_name : str
-            New unique name for the object.
-
-        Raises
-        ------
-        TypeError
-            If ``new_unique_name`` is not a string.
-        """
-        if not isinstance(new_unique_name, str):
-            raise TypeError('Unique name has to be a string.')
-        self._unique_name = new_unique_name
-        global_object.map.add_vertex(self)
-
-    @property
     @abc.abstractmethod
     def value(self) -> Any:
         """Get the value of the object."""
@@ -282,8 +249,45 @@ class DescriptorBase(SerializerComponent, metaclass=abc.ABCMeta):
     def __repr__(self) -> str:
         """Return printable representation of the object."""
 
-    def __copy__(self) -> DescriptorBase:
-        """Return a copy of the object."""
-        temp = self.as_dict(skip=['unique_name'])
-        new_obj = self.__class__.from_dict(temp)
-        return new_obj
+    def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Convert a descriptor into a full dictionary using
+        ``SerializerBase``s generic ``convert_to_dict`` method.
+
+        Unlike ``NewBase.to_dict`` neither ``unique_name`` nor
+        ``display_name`` is dropped when it was not supplied
+        explicitly.
+
+        Parameters
+        ----------
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            dictionary. By default, None.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Encoded object containing all information to
+            get back the descriptor.
+        """
+        if skip is None:
+            skip = []
+        return SerializerBase()._convert_to_dict(self, skip=skip, full_encode=False)
+
+    def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Alias of ``to_dict``, kept for backwards compatibility.
+
+        Parameters
+        ----------
+        skip : Optional[List[str]], default=None
+            List of field names as strings to skip when forming the
+            dictionary. By default, None.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Encoded object containing all information to reform the
+            descriptor.
+        """
+        return self.to_dict(skip=skip)

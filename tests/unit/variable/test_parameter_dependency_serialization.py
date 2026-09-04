@@ -397,7 +397,7 @@ class TestParameterDependencySerialization:
         )
 
         # Use base serializer path (SerializerDict.decode)
-        serialized = b.encode(encoder=SerializerDict)
+        serialized = SerializerDict().encode(b)
         global_object.map._clear()
 
         # This should not raise the "_independent" error anymore
