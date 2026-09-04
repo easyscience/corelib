@@ -13,8 +13,8 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from easyscience import ObjBase
 from easyscience import Parameter
+from easyscience.base_classes import ModelBase
 from easyscience.fitting import Sampler
 from easyscience.fitting import SamplingResults
 from easyscience.fitting.minimizers.minimizer_base import MINIMIZER_PARAMETER_PREFIX
@@ -23,14 +23,27 @@ from easyscience.fitting.sampler import _data_fingerprint
 from easyscience.fitting.sampler import load_chain
 
 
-class AbsSin(ObjBase):
-    phase: Parameter
-    offset: Parameter
-
+class AbsSin(ModelBase):
     def __init__(self, offset_val: float, phase_val: float):
-        offset = Parameter('offset', offset_val)
-        phase = Parameter('phase', phase_val)
-        super().__init__('sin', offset=offset, phase=phase)
+        super().__init__()
+        self._offset = Parameter('offset', offset_val)
+        self._phase = Parameter('phase', phase_val)
+
+    @property
+    def offset(self) -> Parameter:
+        return self._offset
+
+    @offset.setter
+    def offset(self, value: float) -> None:
+        self._offset.value = value
+
+    @property
+    def phase(self) -> Parameter:
+        return self._phase
+
+    @phase.setter
+    def phase(self, value: float) -> None:
+        self._phase.value = value
 
     def __call__(self, x):
         return np.abs(np.sin(self.phase.value * x + self.offset.value))
