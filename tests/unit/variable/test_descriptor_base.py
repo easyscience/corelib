@@ -4,6 +4,10 @@
 import pytest
 
 from easyscience import global_object
+from easyscience.base_classes import EasyList
+from easyscience.base_classes import NewBase
+from easyscience.io import SerializerComponent
+from easyscience.variable import DescriptorNumber
 from easyscience.variable.descriptor_base import DescriptorBase
 
 
@@ -223,3 +227,43 @@ class TestDesciptorBase:
         # When Then Expect
         with pytest.raises(TypeError):
             descriptor.unique_name = input
+
+    def test_is_a_new_base(self, descriptor: DescriptorBase):
+        # When Then Expect
+        assert isinstance(descriptor, NewBase)
+        assert not isinstance(descriptor, SerializerComponent)
+
+    def test_as_dict_is_an_alias_of_to_dict(self, descriptor: DescriptorBase):
+        # When Then Expect
+        assert descriptor.as_dict() == descriptor.to_dict()
+        assert descriptor.as_dict(skip=['url']) == descriptor.to_dict(skip=['url'])
+
+    def test_to_dict_drops_generated_unique_name(self, clear):
+        """Descriptors follow the ``NewBase`` design: an auto-generated
+        unique_name is not serialized, so a decoded descriptor is given
+        a fresh one instead of colliding with the original."""
+        # When
+        descriptor = DescriptorNumber(name='name', value=1.0)
+
+        # Then Expect
+        assert descriptor._default_unique_name
+        assert 'unique_name' not in descriptor.to_dict()
+
+    def test_to_dict_keeps_explicit_unique_name(self, clear):
+        """An explicitly supplied unique_name is still serialized."""
+        # When
+        descriptor = DescriptorNumber(name='name', value=1.0, unique_name='explicit_name')
+
+        # Then Expect
+        assert not descriptor._default_unique_name
+        assert descriptor.to_dict()['unique_name'] == 'explicit_name'
+
+    def test_can_be_held_by_an_easy_list(self, clear):
+        """Descriptors are NewBase objects, so EasyList accepts them."""
+        # When
+        descriptor = DescriptorNumber(name='name', value=1.0)
+        easy_list = EasyList(descriptor)
+
+        # Then Expect
+        assert list(easy_list) == [descriptor]
+        assert easy_list[descriptor.unique_name] is descriptor

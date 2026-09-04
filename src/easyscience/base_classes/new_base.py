@@ -137,6 +137,14 @@ class NewBase:
         Dict[str, Any]
             Encoded object containing all information to reform an
             EasyScience object.
+
+        Notes
+        -----
+        A ``unique_name`` that was generated automatically is not
+        written; only an explicitly supplied one is, so that a
+        deserialized object gets a fresh name instead of clashing with
+        the original. Likewise ``display_name`` is omitted when it is
+        ``None``. Pass ``skip`` to drop further fields.
         """
         serializer = SerializerBase()
         if skip is None:

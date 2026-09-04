@@ -472,14 +472,14 @@ class DescriptorArray(DescriptorBase):
         string = string.replace('\n', ',')
         return string
 
-    def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+    def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Dict representation of the current DescriptorArray.
 
         The dict contains the value, unit and variances, in addition to
         the properties of DescriptorBase.
         """
-        raw_dict = super().as_dict(skip=skip)
+        raw_dict = super().to_dict(skip=skip)
         raw_dict['value'] = self._array.values
         raw_dict['unit'] = str(self._array.unit)
         raw_dict['variance'] = self._array.variances

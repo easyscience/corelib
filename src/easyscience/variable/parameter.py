@@ -903,11 +903,11 @@ class Parameter(DescriptorNumber):
     def free(self, value: bool) -> None:
         self.fixed = not value
 
-    def as_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
+    def to_dict(self, skip: Optional[List[str]] = None) -> Dict[str, Any]:
         """
-        Overwrite the as_dict method to handle dependency information.
+        Overwrite the to_dict method to handle dependency information.
         """
-        raw_dict = super().as_dict(skip=skip)
+        raw_dict = super().to_dict(skip=skip)
 
         # Add dependency information for dependent parameters
         if not self._independent:

@@ -290,7 +290,9 @@ class TestFitObjectContainer:
             MultiFitter([Line(1.0, 0.5), 'not a model'], [None, None])
 
     def test_rejects_bare_parameter(self):
-        """CollectionBase accepted bare parameters; EasyList does not."""
+        """CollectionBase accepted bare parameters; the ModelBase-gated
+        EasyList does not (a Parameter is a NewBase, but EasyList only
+        harvests parameters from ModelBase members)."""
         model = Line(1.0, 0.5)
         with pytest.raises(TypeError, match='Items must be one of'):
             MultiFitter([model, Parameter('p', 1.0)], [model, None])

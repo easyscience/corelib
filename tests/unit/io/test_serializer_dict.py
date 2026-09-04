@@ -50,7 +50,7 @@ def test_variable_SerializerDict(dp_kwargs: dict, dp_cls: Type[DescriptorNumber]
     if not isinstance(skip, list):
         skip = [skip]
 
-    enc = obj.encode(skip=skip, encoder=SerializerDict)
+    enc = SerializerDict().encode(obj, skip=skip)
 
     expected_keys = set(dp_kwargs.keys())
     obtained_keys = set(enc.keys())
@@ -71,9 +71,9 @@ def test_variable_SerializerDict_decode(dp_kwargs: dict, dp_cls: Type[Descriptor
 
     obj = dp_cls(**data_dict)
 
-    enc = obj.encode(encoder=SerializerDict)
+    enc = SerializerDict().encode(obj)
     global_object.map._clear()
-    dec = dp_cls.decode(enc, decoder=SerializerDict)
+    dec = SerializerDict.decode(enc)
 
     for k in data_dict.keys():
         if hasattr(obj, k) and hasattr(dec, k):
@@ -88,7 +88,7 @@ def test_variable_SerializerDict_from_dict(dp_kwargs: dict, dp_cls: Type[Descrip
 
     obj = dp_cls(**data_dict)
 
-    enc = obj.encode(encoder=SerializerDict)
+    enc = SerializerDict().encode(obj)
     global_object.map._clear()
     dec = dp_cls.from_dict(enc)
 
